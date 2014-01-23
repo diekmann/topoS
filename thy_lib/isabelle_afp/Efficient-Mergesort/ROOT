@@ -1,0 +1,7 @@
+session "Efficient-Mergesort" (AFP) = "HOL-Library" +
+  options [timeout = 120]
+  theories
+    Efficient_Sort
+  files
+    "document/root.bib"
+    "document/root.tex"
