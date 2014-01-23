@@ -1,0 +1,7 @@
+tool generated with the *.thy files
+Status:
+  Compiles and runs
+
+Status for developers:
+  Broken. *.thy files were largely refactored, this scala tool is not adaped at the moment
+  Will fix in future

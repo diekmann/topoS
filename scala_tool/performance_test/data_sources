@@ -1,0 +1,6 @@
+http://wiki.gephi.org/index.php/Datasets
+
+Internet[1]: a symmetrized snapshot of the structure of the Internet at the level of autonomous systems, reconstructed from BGP tables posted by the University of Oregon Route Views Project[2]. This snapshot was created by Mark Newman from data for July 22, 2006 and is not previously published.
+
+[1] https://gephi.org/datasets/internet_routers-22july06.gml.zip
+[2] http://routeviews.org/

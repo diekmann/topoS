@@ -1,0 +1,12 @@
+{"model_type": "SubnetsInGW",
+ "model_description": "test", 
+ "model_breach_severity": 5,
+ "model_params":{
+    "node_properties": [
+	  {"node":"FireSensor1", "member_type":"Member"},
+	  {"node":"LockingSys1", "member_type":"Member"},
+	  {"node":"SupervisorSecurity", "member_type":"InboundGateway"}
+	  ], 
+    "global_properties":null
+    }
+}

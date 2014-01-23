@@ -1,0 +1,14 @@
+{"model_type": "SecurityGatewayExtended",
+ "model_description": "Sensors for working atmosphere automation", 
+ "model_breach_severity": 5,
+ "model_params":{
+    "node_properties": [
+	  {"node":"ClimateAutomation", "member_type":"SecurityGatewayIN", "_comment":"dsads"},
+	  {"node":"Heating1", "member_type":"DomainMember"},
+	  {"node":"Ventilation1", "member_type":"DomainMember"},
+	  {"node":"Aircon1", "member_type":"DomainMember"},
+	  {"node":"PresenceSensor1", "member_type":"AccessibleMember"}
+	  ], 
+    "global_properties":null
+    }
+}

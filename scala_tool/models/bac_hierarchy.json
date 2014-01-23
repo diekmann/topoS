@@ -1,0 +1,26 @@
+{"model_type": "DomainHierarchy",
+ "model_description": "BAC hierarchy",
+ "model_breach_severity": 10,
+ "model_params":{
+    "node_properties": [
+	  {"node":"SupervisorWorkingAtmosphere", "position":["BACnet", "SupervisoryUncritical"]},
+	  {"node":"SupervisorSecurity", "position":["BACnet", "SupervisoryCritical"]},
+	  {"node":"ClimateAutomation", "position":["BACnet", "SupervisoryUncritical", "Automation"]},
+	  {"node":"LightAutomation", "position":["BACnet", "SupervisoryUncritical", "Automation"]},
+	  {"node":"FireSensor1", "position":["BACnet", "SupervisoryCritical", "Automation", "FireField"]},
+	  {"node":"LockingSys1", "position":["BACnet", "SupervisoryCritical", "Automation", "BurglaryField"]},
+	  ], 
+    "global_properties":
+	  {"division": "BACnet", "sub_divisions":[
+	  	{"division": "SupervisoryUncritical", "sub_divisions":[
+	  		{"division": "Automation", "sub_divisions":[]}
+	  		]},
+	  	{"division": "SupervisoryCritical", "sub_divisions":[
+	  		{"division": "Automation", "sub_divisions":[
+	  			{"division": "FireField", "sub_divisions":[]},
+	  			{"division": "BurglaryField", "sub_divisions":[]}
+	  			]},
+	  		]}
+	  ]}
+    }
+}

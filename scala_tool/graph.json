@@ -1,0 +1,25 @@
+{
+"nodes": [
+ "SupervisorWorkingAtmosphere",
+ "SupervisorSecurity",
+ "ClimateAutomation",
+ "LightAutomation",
+ "Heating1",
+ "Ventilation1",
+ "Aircon1",
+ "Light1",
+ "PresenceSensor1",
+ "FireSensor1",
+ "LockingSys1"], 
+"edges": [
+ {"e1": "SupervisorWorkingAtmosphere", "e2": "ClimateAutomation"},
+ {"e1": "SupervisorWorkingAtmosphere", "e2": "LightAutomation"},
+ {"e1": "ClimateAutomation", "e2": "Heating1"},
+ {"e1": "ClimateAutomation", "e2": "Ventilation1"},
+ {"e1": "ClimateAutomation", "e2": "Aircon1"},
+ {"e1": "ClimateAutomation", "e2": "PresenceSensor1"},
+ {"e1": "LightAutomation", "e2": "Light1"},
+ {"e1": "LightAutomation", "e2": "PresenceSensor1"},
+ 
+ ]
+}

@@ -1,0 +1,1 @@
+"C:\Program Files (x86)\Adobe\Reader 10.0\Reader\AcroRd32.exe" %1

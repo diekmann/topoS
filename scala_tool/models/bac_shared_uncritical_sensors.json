@@ -1,0 +1,12 @@
+{"model_type": "SubnetsInGW",
+ "model_description": "Shared uncritical sensors and their controllers.",
+ "model_breach_severity": 2,
+ "model_params":{
+    "node_properties": [
+	  {"node":"LightAutomation", "member_type":"InboundGateway"},
+	  {"node":"ClimateAutomation", "member_type":"InboundGateway"},
+	  {"node":"PresenceSensor1", "member_type":"Member"}
+	  ], 
+    "global_properties":null
+    }
+}

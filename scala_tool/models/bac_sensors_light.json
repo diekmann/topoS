@@ -1,0 +1,12 @@
+{"model_type": "SecurityGatewayExtended",
+ "model_description": "Sensors for light automation and energy saving.", 
+ "model_breach_severity": 5,
+ "model_params":{
+    "node_properties": [
+	  {"node":"LightAutomation", "member_type":"SecurityGatewayIN"},
+	  {"node":"Light1", "member_type":"DomainMember"},
+	  {"node":"PresenceSensor1", "member_type":"AccessibleMember"}
+	  ], 
+    "global_properties":null
+    }
+}
