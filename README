@@ -10,6 +10,7 @@ http://isabelle.in.tum.de/
 
 access_control_abstraction
   Theory for reasoning about logical access control abstraction (security policy, who can communicate with whom?)
+  All the the formal theory files for Isabelle/HOL
 
 scala_tool
-  The tool, cool and usable. At the moment: only supports access_control_abstraction
+  The tool, cool and usable. 
