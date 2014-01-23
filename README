@@ -1,0 +1,11 @@
+In theory files, identifiers are written with underscores.
+Example: offending-flows-union-mono can be found with
+find access_control_abstraction/thy/ -iname '*.thy' | xargs grep 'offending_flows_union_mono'
+
+
+
+access_control_abstraction
+  Theory for reasoning about logical access control abstraction (security policy, who can communicate with whom?)
+
+scala_tool
+  The tool, cool and usable. At the moment: only supports access_control_abstraction
