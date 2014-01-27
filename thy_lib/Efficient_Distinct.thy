@@ -24,15 +24,15 @@ text {*efficient distinct code*}
     thus "distinct xs" by (metis card_distinct distinct_card)
   qed
     
-  lemma distinct_by_mergesort: "(length (mergesort xs) = length xs) \<longleftrightarrow> distinct xs"
+  lemma distinct_by_mergesort: "(length (mergesort_remdups xs) = length xs) \<longleftrightarrow> distinct xs"
    proof -
-   from mergesort_correct have 1: "set xs = set (mergesort xs)" by fastforce
-   from list_length_iff_distinct[OF 1] mergesort_correct have 
-    "length xs = length (mergesort xs) \<longleftrightarrow> distinct xs" by fastforce
+   from mergesort_remdups_correct have 1: "set xs = set (mergesort_remdups xs)" by fastforce
+   from list_length_iff_distinct[OF 1] mergesort_remdups_correct have 
+    "length xs = length (mergesort_remdups xs) \<longleftrightarrow> distinct xs" by fastforce
    from this show ?thesis by fastforce
   qed
 
-  lemma [code]: "distinct xs = (length (mergesort xs) = length xs)"
+  lemma [code]: "distinct xs = (length (mergesort_remdups xs) = length xs)"
   by(simp add:distinct_by_mergesort)
 
   
@@ -74,8 +74,8 @@ text {*efficient distinct code*}
       apply(simp)
       done
 
-    lemma merge_as_tailrec_inefficient: "ListAdd.merge as bs = merge_tailrec_inefficient as bs []"
-      apply(induction as bs rule: ListAdd.merge.induct)
+    lemma merge_as_tailrec_inefficient: "merge as bs = merge_tailrec_inefficient as bs []"
+      apply(induction as bs rule: merge.induct)
       apply(simp_all add:merge_tailrec_inefficient_prepend)
     done
 
@@ -120,7 +120,7 @@ text {*efficient distinct code*}
      done
 
 
-    lemma[code]: "ListAdd.merge as bs = merge_tailrec as bs []"
+    lemma[code]: "merge as bs = merge_tailrec as bs []"
       apply(simp add: merge_as_tailrec_inefficient)
       apply(simp add: merge_inefficient_as_efficient[of "as" "bs" "[]", simplified])
     done

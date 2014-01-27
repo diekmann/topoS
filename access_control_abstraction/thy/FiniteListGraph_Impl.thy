@@ -26,14 +26,14 @@ text {* A graph's validity can be tested with an executable function. *}
   (*making the \<in> more efficient*)
   fun valid_list_graph_impl_rs::"('v::linorder) rs \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> bool" where
     "valid_list_graph_impl_rs V [] = True" |
-    "valid_list_graph_impl_rs V ((v1,v2)#Es) = (rs_memb v1 V \<and> rs_memb v2 V \<and> valid_list_graph_impl_rs V Es)"
+    "valid_list_graph_impl_rs V ((v1,v2)#Es) = (rs.memb v1 V \<and> rs.memb v2 V \<and> valid_list_graph_impl_rs V Es)"
 
-  lemma[code]: "valid_list_graph_impl V E = valid_list_graph_impl_rs (list_to_rs V) E"
+  lemma[code]: "valid_list_graph_impl V E = valid_list_graph_impl_rs (rs.from_list V) E"
    apply(induction E)
-    apply(simp)
+    apply(simp add: rs.correct)
    apply(rename_tac e Es)
    apply(case_tac e)
-   by(simp add: rs_correct)
+   by(simp add: rs.correct)
 
   lemma[code]: "FiniteListGraph.valid_list_graph_axioms G = valid_list_graph_impl (nodesL G) (edgesL G)"
     by(simp add: FiniteListGraph.valid_list_graph_axioms_def valid_list_graph_impl_axioms_locale_props)
