@@ -1,0 +1,5 @@
+#!/bin/bash
+cd ~/git/topoS
+#isabelle jedit -d isabelle_afp -l "Dijkstra_Shortest_Path" &
+
+isabelle jedit -d ./thy_lib/isabelle_afp -l "Collections" &
