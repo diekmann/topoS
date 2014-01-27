@@ -44,10 +44,13 @@ section{*A network consisting of entities*}
         finally show ?thesis using link_from_def by simp
       qed
 
-      definition "add_iface i = N\<lparr> interfaces := interfaces N \<union> {i} \<rparr>"
+      definition add_iface :: "'v interface \<Rightarrow> 'v network" where
+        "add_iface i = \<lparr> interfaces = insert i (interfaces N), forwarding = forwarding N, links = links N \<rparr>"
     
       lemma add_wf: "wellformed_network (add_iface i)"
-        sorry
+        apply(unfold_locales)
+        apply(simp_all add: finite_interfaces add_iface_def)
+        using fst_links snd_links by auto
     end
 
     text{*the same link_from but conveniently executable*}
@@ -81,12 +84,10 @@ section{*A network consisting of entities*}
       by(unfold_locales, auto simp add: example_network_def)
 
     value[code] "example.link_from \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 3 \<rparr>"
-      
-  
-    lemma "wellformed_network example_network"
-      by(unfold_locales, auto simp add: example_network_def)
 
     lemma "link_from example_network \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 3 \<rparr> = {\<lparr>entity = Host ''Bob'', port = Port (Suc 0)\<rparr>, \<lparr>entity = Host ''Carl'', port = Port (Suc 0)\<rparr>}" by eval
+
+    value[code] "example.add_iface \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 4 \<rparr>"
 
 section{*TEST of UNIO*}
   lemma "UNION {1::nat,2,3} (\<lambda>n. {n+1}) = {2,3,4}" by eval
