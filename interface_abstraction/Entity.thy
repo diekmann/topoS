@@ -36,6 +36,8 @@ section{*Basic Definitions*}
                       links      :: "(('v interface) \<times> ('v interface)) set"
 
 
+  definition wellformed_network
+
   value "\<lparr> interfaces = {\<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 1 \<rparr>,
                          \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 2 \<rparr>,
                          \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 3 \<rparr>,
