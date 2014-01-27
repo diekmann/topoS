@@ -1,7 +1,10 @@
+chapter AFP
+
 session Matrix (AFP) = HOL +
-  options [timeout = 300]
+  options [timeout = 600]
   theories [document = false]
     "../Abstract-Rewriting/SN_Orders"
+    "~~/src/HOL/Algebra/Ring"
   theories
     Matrix
   files
