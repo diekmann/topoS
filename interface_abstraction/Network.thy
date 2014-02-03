@@ -148,6 +148,7 @@ section{*A network consisting of entities*}
 
 
     subsection {*Reachable interfaces*}
+      text{*Assumption: no spoofing*}
       inductive_set reachable :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> ('v interface) set"
       for N::"'v network" and "pkt_hdr"::"'v hdr"
       where
