@@ -140,14 +140,41 @@ section{*A network consisting of entities*}
 
       text{*Example*}
         text{*Example: alice sends out packet, it arrives at switch*}
-        lemma "traverse_code example_network (Host ''Alice'', Host ''Bob'') \<lparr> entity = Host ''Alice'', port = Port 1 \<rparr>  = {\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>}" by eval
+        lemma example_network_ex1:"traverse_code example_network (Host ''Alice'', Host ''Bob'') \<lparr> entity = Host ''Alice'', port = Port 1 \<rparr>  = {\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>}" by eval
         text{*Example cont.: Switch forwards packet to Bob and Carl*}
-        lemma "traverse_code example_network (Host ''Alice'', Host ''Bob'')  \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr> = {\<lparr>entity = Host ''Carl'', port = Port 1\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>}" by eval
+        lemma example_network_ex2: "traverse_code example_network (Host ''Alice'', Host ''Bob'')  \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr> = {\<lparr>entity = Host ''Carl'', port = Port 1\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>}" by eval
         text{*Example cont.: Carl accepts packet (or drops it, he does not forward it)*}
         lemma "traverse_code example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Bob'', port = Port 1\<rparr> = {}" by eval
 
 
+    subsection {*Reachable interfaces*}
+      inductive_set reachable :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> ('v interface) set"
+      for N::"'v network" and "pkt_hdr"::"'v hdr"
+      where
+        "\<lparr> entity=fst pkt_hdr, port=p \<rparr> \<in> (interfaces N) \<Longrightarrow> \<lparr> entity=fst pkt_hdr, port=p \<rparr> \<in> reachable N pkt_hdr" |
+        "hop \<in> reachable N pkt_hdr \<Longrightarrow> next_hop \<in> (traverse_code N pkt_hdr hop) \<Longrightarrow> next_hop\<in> reachable N pkt_hdr"
 
+      text{*Example*}
+        lemma "\<lparr> entity = Host ''Carl'', port = Port 1 \<rparr> \<in> reachable example_network (Host ''Alice'', Host ''Bob'')"
+          apply(rule reachable.intros(2))
+          apply(rule reachable.intros(2))
+          apply(rule reachable.intros(1))
+          apply(simp add: example_network_def)
+          apply(simp, subst example_network_ex1[simplified])
+          apply(simp, subst example_network_ex2[simplified])
+          apply(simp)
+          done
+
+      (*
+      inductive reachable_pred :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> bool"
+      where
+        "e \<in> (interfaces N) \<Longrightarrow> entity e = fst pkt_hdr \<Longrightarrow> reachable_pred N pkt_hdr e" |
+        "reachable_pred N pkt_hdr hop \<Longrightarrow> next_hop \<in> (traverse_code N pkt_hdr hop) \<Longrightarrow> reachable_pred N pkt_hdr next_hop"
+
+      code_pred reachable_pred .
+      thm reachable_pred.equation
+
+      values "{S. reachable_pred example_network (Host ''Alice'', Host ''Bob'') S}" *)
 
 section{*TEST of UNIO*}
   lemma "UNION {1::nat,2,3} (\<lambda>n. {n+1}) = {2,3,4}" by eval
@@ -171,19 +198,11 @@ section{*TEST of UNIO*}
       thm n1.link_from_def
     end
 
-  locale added_wellformed_network = wellformed_network
-  sublocale added_wellformed_network \<subseteq> added!: wellformed_network "add_iface a"
-    by (fact add_wf)
-
-  context added_wellformed_network
-  begin
-    thm finite_links
-    thm added.finite_links
-  end
 
   
 
 
   hide_const "example_network"
+  hide_fact example_network_ex1 example_network_ex2
 
 end
