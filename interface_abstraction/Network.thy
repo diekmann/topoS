@@ -3,9 +3,13 @@ imports Entity
 begin
 
 section{*A network consisting of entities*}
+  text{*packet header*}
+  type_synonym 'v hdr="('v entity \<times> 'v entity)" -- "packet header: (src address, dst address)"
+
+
   text{*fwd is an entity's packet forward function: 
       A packet arriving at port with a header (src, dst) is outputted to a set of ports*}
-  type_synonym 'v fwd_fun="port \<Rightarrow> ('v \<times> 'v) \<Rightarrow> port set"
+  type_synonym 'v fwd_fun="port \<Rightarrow> 'v hdr \<Rightarrow> port set"
 
   
   text{* A network consists of
@@ -87,7 +91,7 @@ section{*A network consisting of entities*}
                 if e = NetworkBox ''threePortSwitch'' then 
                   (\<lambda> p (src,dst). if p = Port 1 then Port ` {2,3} else if p = Port 2 then Port ` {1,3} else if p = Port 3 then Port ` {1,2} else {})
                 else
-                  (\<lambda> p (src,dst). if e = Host src then {Port 1} else {})), (*Hosts send out their own packets and drop the rest*)
+                  (\<lambda> p (src,dst). if e = src then {Port 1} else {})), (*Hosts (not necessarily) send out their own packets and drop the rest*)
              links = {
               (\<lparr> entity = Host ''Alice'', port = Port 1 \<rparr>, \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 1 \<rparr>),
               (\<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 1 \<rparr>, \<lparr> entity = Host ''Alice'', port = Port 1 \<rparr>),
@@ -122,7 +126,6 @@ section{*A network consisting of entities*}
       text{*Example*}
         lemma "succ_code example_network \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 3 \<rparr> = {\<lparr>entity = Host ''Bob'', port = Port 1\<rparr>, \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>}" by eval
 
-      type_synonym 'v hdr="('v \<times> 'v)" -- "packet header: (src address, dst address)"
       text{*A packet in network N with header hdr traverses hop hop. The output is the set of input interface at the nex hops*}
       definition traverse :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
         "traverse N hdr hop \<equiv> UNION (((forwarding N) (entity hop)) (port hop) hdr) (\<lambda>p. succ N \<lparr>entity = entity hop, port = p\<rparr>)"
@@ -137,11 +140,12 @@ section{*A network consisting of entities*}
 
       text{*Example*}
         text{*Example: alice sends out packet, it arrives at switch*}
-        lemma "traverse_code example_network (''Alice'', ''Bob'') \<lparr> entity = Host ''Alice'', port = Port 1 \<rparr>  = {\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>}" by eval
+        lemma "traverse_code example_network (Host ''Alice'', Host ''Bob'') \<lparr> entity = Host ''Alice'', port = Port 1 \<rparr>  = {\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>}" by eval
         text{*Example cont.: Switch forwards packet to Bob and Carl*}
-        lemma "traverse_code example_network (''Alice'', ''Bob'')  \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr> = {\<lparr>entity = Host ''Carl'', port = Port 1\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>}" by eval
+        lemma "traverse_code example_network (Host ''Alice'', Host ''Bob'')  \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr> = {\<lparr>entity = Host ''Carl'', port = Port 1\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>}" by eval
         text{*Example cont.: Carl accepts packet (or drops it, he does not forward it)*}
-        lemma "traverse_code example_network (''Alice'', ''Bob'') \<lparr>entity = Host ''Bob'', port = Port 1\<rparr> = {}" by eval
+        lemma "traverse_code example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Bob'', port = Port 1\<rparr> = {}" by eval
+
 
 
 
