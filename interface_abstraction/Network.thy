@@ -114,27 +114,34 @@ section{*A network consisting of entities*}
         
       definition succ_code :: "'v network \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
         "succ_code N out_iface \<equiv> {in_iface \<in> interfaces N. (out_iface, in_iface) \<in> links N}"
-      lemma "wellformed_network N \<Longrightarrow> succ N = succ_code N"
+      lemma traverse_code_correct: "wellformed_network N \<Longrightarrow> succ N = succ_code N"
         apply(simp add: fun_eq_iff succ_def succ_code_def)
         apply(drule wellformed_network.snd_links)
         by force
 
-      lemma "succ_code example_network \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 3 \<rparr> = {\<lparr>entity = Host ''Bob'', port = Port 1\<rparr>, \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>}" by eval
+      text{*Example*}
+        lemma "succ_code example_network \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 3 \<rparr> = {\<lparr>entity = Host ''Bob'', port = Port 1\<rparr>, \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>}" by eval
 
       type_synonym 'v hdr="('v \<times> 'v)" -- "packet header: (src address, dst address)"
       text{*A packet in network N with header hdr traverses hop hop. The output is the set of input interface at the nex hops*}
       definition traverse :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
         "traverse N hdr hop \<equiv> UNION (((forwarding N) (entity hop)) (port hop) hdr) (\<lambda>p. succ N \<lparr>entity = entity hop, port = p\<rparr>)"
 
-      text{*Example: alice sends out packet, it arrives at switch*}
-      lemma "let N = example_network in let hdr = (''Alice'', ''Bob'') in let hop = \<lparr> entity = Host ''Alice'', port = Port 1 \<rparr> in 
-        (UNION (((forwarding N) (entity hop)) (port hop) hdr) (\<lambda>p. succ_code N \<lparr>entity = entity hop, port = p\<rparr>))  = {\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>}" by eval
-      text{*Example cont.: Switch forwards packet to Bob and Carl*}
-      lemma "let N = example_network in let hdr = (''Alice'', ''Bob'') in let hop = \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr> in 
-        (UNION (((forwarding N) (entity hop)) (port hop) hdr) (\<lambda>p. succ_code N \<lparr>entity = entity hop, port = p\<rparr>)) = {\<lparr>entity = Host ''Carl'', port = Port 1\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>}" by eval
-      text{*Example cont.: Carl accepts packet (or drops it, he does not forward it)*}
-      lemma "let N = example_network in let hdr = (''Alice'', ''Bob'') in let hop = \<lparr>entity = Host ''Bob'', port = Port 1\<rparr> in 
-        (UNION (((forwarding N) (entity hop)) (port hop) hdr) (\<lambda>p. succ_code N \<lparr>entity = entity hop, port = p\<rparr>)) = {}" by eval
+
+      definition traverse_code :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
+        "traverse_code N hdr hop \<equiv> UNION (((forwarding N) (entity hop)) (port hop) hdr) (\<lambda>p. succ_code N \<lparr>entity = entity hop, port = p\<rparr>)"
+      lemma "wellformed_network N \<Longrightarrow> traverse N = traverse_code N"
+        apply(simp add: fun_eq_iff traverse_code_def traverse_def)
+        by(drule traverse_code_correct, simp)
+
+
+      text{*Example*}
+        text{*Example: alice sends out packet, it arrives at switch*}
+        lemma "traverse_code example_network (''Alice'', ''Bob'') \<lparr> entity = Host ''Alice'', port = Port 1 \<rparr>  = {\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>}" by eval
+        text{*Example cont.: Switch forwards packet to Bob and Carl*}
+        lemma "traverse_code example_network (''Alice'', ''Bob'')  \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr> = {\<lparr>entity = Host ''Carl'', port = Port 1\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>}" by eval
+        text{*Example cont.: Carl accepts packet (or drops it, he does not forward it)*}
+        lemma "traverse_code example_network (''Alice'', ''Bob'') \<lparr>entity = Host ''Bob'', port = Port 1\<rparr> = {}" by eval
 
 
 
