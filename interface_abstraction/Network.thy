@@ -166,28 +166,6 @@ section{*A network consisting of entities*}
 
 
     subsection {*Reachable interfaces*}
-      text{*Assumption: no spoofing*}
-      (* the start is bork. we move from input ports to input ports, here we start at an output port. add succ/traverse? wild packet appears? *)
-      inductive_set reachable_old :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> ('v interface) set"
-      for N::"'v network" and "pkt_hdr"::"'v hdr"
-      where
-        "\<lparr> entity=fst pkt_hdr, port=p \<rparr> \<in> (interfaces N) \<Longrightarrow> \<lparr> entity=fst pkt_hdr, port=p \<rparr> \<in> reachable_old N pkt_hdr" |
-        "hop \<in> reachable_old N pkt_hdr \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr hop) \<Longrightarrow> next_hop \<in> reachable_old N pkt_hdr"
-
-      text{*Example*}
-        lemma "\<lparr> entity = Host ''Carl'', port = Port 1 \<rparr> \<in> reachable_old example_network (Host ''Alice'', Host ''Bob'')"
-          apply(rule reachable_old.intros(2))
-          apply(rule reachable_old.intros(2))
-          apply(rule reachable_old.intros(1))
-          apply(simp add: example_network_def)
-          apply(subst traverse_code_correct[symmetric, OF wellformed_network_example_network])
-          apply(simp, subst example_network_ex1[simplified], simp)
-          apply(subst traverse_code_correct[symmetric, OF wellformed_network_example_network])
-          apply(simp, subst example_network_ex2[simplified])
-          apply(simp)
-          done
-
-
       text{*
         sending out a packet:
           the source address in the header must match
@@ -195,7 +173,8 @@ section{*A network consisting of entities*}
         transmitting a packet:
           traverse it through the net
       *}
-      (*TODO TODO need to define reachable_from, from a specific interface (entity + port)!*)
+      (*TODO TODO need to define reachable_from, from a specific interface (entity + port)! This uniquely defines start. 
+        hmm, we can still allow spoofing by allowing an arbitrary packet header. UNION over all start points should give reachable_spoofing?*)
       inductive_set reachable :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> ('v interface) set"
       for N::"'v network" and "pkt_hdr"::"'v hdr"
       where
