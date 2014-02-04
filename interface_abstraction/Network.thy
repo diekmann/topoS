@@ -218,8 +218,9 @@ section{*A network consisting of entities*}
          |     \/        |          |           \/
          |      1 ------\<acute>          2 ----------> 1 Bob
          |      |  ThreePortSwitch  |       
-         `------|--------- 3        |    
-                 `-----------------> `----------> 1 Carl
+         `------|--------- 3        |
+                |                    `-------->  
+                 `----------------------------> 1 Carl
     *)
         lemma "view_code example_network (Host ''Alice'', Host ''Bob'') = {
           (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>),
@@ -230,6 +231,7 @@ section{*A network consisting of entities*}
           (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 3\<rparr>, \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>),
           (\<lparr>entity = Host ''Alice'', port = Port 1\<rparr>, \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>)}" by eval
 
+    (*the view transforms the graph into a new graph without the traverse function! *)
 
     lemma assumes wf_N: "wellformed_network N"
       shows "x \<in> reachable_spoofing N hdr \<Longrightarrow> x \<in> snd ` view N hdr"
