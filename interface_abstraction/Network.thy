@@ -105,6 +105,7 @@ section{*A network consisting of entities*}
 
     interpretation example!: wellformed_network example_network
       by(unfold_locales, auto simp add: example_network_def)
+    lemma wellformed_network_example_network: "wellformed_network example_network" by(unfold_locales)
 
     value[code] "example.link_from \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 3 \<rparr>"
 
@@ -118,7 +119,7 @@ section{*A network consisting of entities*}
         
       definition succ_code :: "'v network \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
         "succ_code N out_iface \<equiv> {in_iface \<in> interfaces N. (out_iface, in_iface) \<in> links N}"
-      lemma traverse_code_correct: "wellformed_network N \<Longrightarrow> succ N = succ_code N"
+      lemma succ_code_correct: "wellformed_network N \<Longrightarrow> succ_code N = succ N"
         apply(simp add: fun_eq_iff succ_def succ_code_def)
         apply(drule wellformed_network.snd_links)
         by force
@@ -133,9 +134,9 @@ section{*A network consisting of entities*}
 
       definition traverse_code :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
         "traverse_code N hdr hop \<equiv> UNION (((forwarding N) (entity hop)) (port hop) hdr) (\<lambda>p. succ_code N \<lparr>entity = entity hop, port = p\<rparr>)"
-      lemma "wellformed_network N \<Longrightarrow> traverse N = traverse_code N"
+      lemma traverse_code_correct: "wellformed_network N \<Longrightarrow> traverse_code N = traverse N"
         apply(simp add: fun_eq_iff traverse_code_def traverse_def)
-        by(drule traverse_code_correct, simp)
+        by(drule succ_code_correct, simp)
 
 
       text{*Example*}
@@ -153,7 +154,7 @@ section{*A network consisting of entities*}
       for N::"'v network" and "pkt_hdr"::"'v hdr"
       where
         "\<lparr> entity=fst pkt_hdr, port=p \<rparr> \<in> (interfaces N) \<Longrightarrow> \<lparr> entity=fst pkt_hdr, port=p \<rparr> \<in> reachable N pkt_hdr" |
-        "hop \<in> reachable N pkt_hdr \<Longrightarrow> next_hop \<in> (traverse_code N pkt_hdr hop) \<Longrightarrow> next_hop\<in> reachable N pkt_hdr"
+        "hop \<in> reachable N pkt_hdr \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr hop) \<Longrightarrow> next_hop\<in> reachable N pkt_hdr"
 
       text{*Example*}
         lemma "\<lparr> entity = Host ''Carl'', port = Port 1 \<rparr> \<in> reachable example_network (Host ''Alice'', Host ''Bob'')"
@@ -161,10 +162,26 @@ section{*A network consisting of entities*}
           apply(rule reachable.intros(2))
           apply(rule reachable.intros(1))
           apply(simp add: example_network_def)
-          apply(simp, subst example_network_ex1[simplified])
+          apply(subst traverse_code_correct[symmetric, OF wellformed_network_example_network])
+          apply(simp, subst example_network_ex1[simplified], simp)
+          apply(subst traverse_code_correct[symmetric, OF wellformed_network_example_network])
           apply(simp, subst example_network_ex2[simplified])
           apply(simp)
           done
+
+    subsection{*The view of a packet*}
+      definition view :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> (('v interface) \<times> ('v interface)) set" where
+        "view N hdr = { (src, dst) \<in> links N. dst \<in> traverse N hdr src}"
+
+
+      definition view_code :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> (('v interface) \<times> ('v interface)) set" where
+        "view_code N hdr = { src_dst \<in> links N. case src_dst of (src, dst) \<Rightarrow> dst \<in> traverse_code N hdr src}"
+      lemma view_code_correct: "wellformed_network N \<Longrightarrow> view_code N = view N"
+        apply(simp add: view_code_def view_def fun_eq_iff traverse_code_correct)
+        by fast
+
+
+        value "view_code example_network (Host ''Alice'', Host ''Bob'')"
 
       (*
       inductive reachable_pred :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> bool"
@@ -204,6 +221,6 @@ section{*TEST of UNIO*}
 
 
   hide_const "example_network"
-  hide_fact example_network_ex1 example_network_ex2
+  hide_fact example_network_ex1 example_network_ex2 wellformed_network_example_network
 
 end
