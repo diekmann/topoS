@@ -327,10 +327,25 @@ section{*A network consisting of entities*}
 
     (*TODO*)
     theorem assumes wf_N: "wellformed_network N"
-            shows "reachable N (a,b) start = {dst. (start, dst) \<in> (view N hdr)\<^sup>*}"
+            shows "reachable N hdr start = {dst. (start, dst) \<in> (view N hdr)\<^sup>*}"
+      apply(rule equalityI)
       apply(rule)
-      thm reachable_subseteq_reachable_spoofing[OF wf_N] 
-      thm reachable_spoofing_eq_view[OF wf_N, symmetric] 
+      apply(simp)
+      apply(erule reachable.induct)
+      apply(simp add: view_def)
+      apply fast
+      apply(simp add: view_def)
+      apply (metis (lifting, no_types) mem_Collect_eq reachable_spoofing_subseteq_interfaces reachable_subseteq_reachable_spoofing rtrancl.rtrancl_into_rtrancl split_conv subsetD wf_N)
+      (*next*)
+      apply(rule)
+      apply(simp)
+      apply(erule rtrancl_induct)
+      apply(simp add: reachable.intros)  (**Interesting: simplified start rule for reachable (rest is done in step rule): start \<in> reachable N hdr start**)
+      defer
+      apply(simp)
+      apply(simp add: view_def)
+      apply (metis (full_types) reachable.intros(2))
+       thm reachable_subseteq_reachable_spoofing[OF wf_N] reachable_spoofing_eq_view[OF wf_N, symmetric]
       oops
 
 section{*TEST of UNIO*}
