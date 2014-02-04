@@ -177,11 +177,12 @@ section{*A network consisting of entities*}
       inductive_set reachable :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set"
       for N::"'v network" and "pkt_hdr"::"'v hdr" and "start"::"'v interface"
       where
-        "start \<in> (interfaces N) \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr start) \<Longrightarrow> next_hop \<in> reachable N pkt_hdr start" |
+        "start \<in> (interfaces N) \<Longrightarrow> start \<in> reachable N pkt_hdr start" |
         "hop \<in> reachable N pkt_hdr start \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr hop) \<Longrightarrow> next_hop \<in> reachable N pkt_hdr start"
 
       text{*Example*}
         lemma "\<lparr> entity = Host ''Carl'', port = Port 1 \<rparr> \<in> reachable example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>"
+          apply(rule reachable.intros(2))
           apply(rule reachable.intros(2))
           apply(rule reachable.intros(1))
           (*apply(rule HOL.sym[of _ "entity \<lparr>entity = Host ''Alice'', port = Port (Suc 0)\<rparr>"]) (*need to select manually*)*)
@@ -194,17 +195,18 @@ section{*A network consisting of entities*}
           apply(simp)
           done
         lemma "\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr> \<in> reachable example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>"
+          apply(rule reachable.intros(2))
           apply(rule reachable.intros(1))
           apply(simp add: example_network_def)
           apply(subst traverse_code_correct[symmetric, OF wellformed_network_example_network])
           apply(simp, subst example_network_ex1[simplified], simp)
           done
         lemma "x \<in> reachable example_network (Host ''Alice'', Host ''Bob'')  \<lparr>entity = Host ''Alice'', port = Port 1\<rparr> \<Longrightarrow> 
-          x \<in> {\<lparr> entity = Host ''Carl'', port = Port 1 \<rparr>, \<lparr> entity = Host ''Bob'', port = Port 1 \<rparr>, \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>}"
+          x \<in> {\<lparr> entity = Host ''Alice'', port = Port 1 \<rparr>,
+               \<lparr> entity = Host ''Carl'', port = Port 1 \<rparr>,
+               \<lparr> entity = Host ''Bob'', port = Port 1 \<rparr>,
+               \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>}"
           apply(induction rule: reachable.induct)
-          apply(simp)
-          apply(subst(asm) traverse_code_correct[symmetric, OF wellformed_network_example_network])
-          apply(subst(asm) example_network_ex1[simplified])
           apply(simp)
           (*step*)
           apply(case_tac "hop = \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>", simp)
@@ -219,6 +221,9 @@ section{*A network consisting of entities*}
           apply(subst(asm) traverse_code_correct[symmetric, OF wellformed_network_example_network])
           apply(subst(asm) example_network_ex4[simplified])
           apply(fast)
+          apply(simp)
+          apply(subst(asm) traverse_code_correct[symmetric, OF wellformed_network_example_network])
+          apply(subst(asm) example_network_ex1[simplified])
           by simp
       
       inductive_set reachable_spoofing :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> ('v interface) set"
