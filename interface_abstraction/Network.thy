@@ -166,11 +166,12 @@ section{*A network consisting of entities*}
 
     subsection {*Reachable interfaces*}
       text{*Assumption: no spoofing*}
+      (* the start is bork. we move from input ports to input ports, here we start at an output port. add succ/traverse? wild packet appears? *)
       inductive_set reachable :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> ('v interface) set"
       for N::"'v network" and "pkt_hdr"::"'v hdr"
       where
         "\<lparr> entity=fst pkt_hdr, port=p \<rparr> \<in> (interfaces N) \<Longrightarrow> \<lparr> entity=fst pkt_hdr, port=p \<rparr> \<in> reachable N pkt_hdr" |
-        "hop \<in> reachable N pkt_hdr \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr hop) \<Longrightarrow> next_hop\<in> reachable N pkt_hdr"
+        "hop \<in> reachable N pkt_hdr \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr hop) \<Longrightarrow> next_hop \<in> reachable N pkt_hdr"
 
       text{*Example*}
         lemma "\<lparr> entity = Host ''Carl'', port = Port 1 \<rparr> \<in> reachable example_network (Host ''Alice'', Host ''Bob'')"
@@ -184,6 +185,13 @@ section{*A network consisting of entities*}
           apply(simp, subst example_network_ex2[simplified])
           apply(simp)
           done
+
+      
+      inductive_set reachable_spoofing :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> ('v interface) set"
+      for N::"'v network" and "pkt_hdr"::"'v hdr"
+      where
+        "start \<in> (interfaces N) \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr start) \<Longrightarrow> next_hop \<in> reachable_spoofing N pkt_hdr" |
+        "hop \<in> reachable_spoofing N pkt_hdr \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr hop) \<Longrightarrow> next_hop\<in> reachable_spoofing N pkt_hdr"
 
     subsection{*The view of a packet*}
       definition view :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> (('v interface) \<times> ('v interface)) set" where
@@ -223,16 +231,18 @@ section{*A network consisting of entities*}
           (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 3\<rparr>, \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>),
           (\<lparr>entity = Host ''Alice'', port = Port 1\<rparr>, \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>)}" by eval
 
-      (*
-      inductive reachable_pred :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> bool"
-      where
-        "e \<in> (interfaces N) \<Longrightarrow> entity e = fst pkt_hdr \<Longrightarrow> reachable_pred N pkt_hdr e" |
-        "reachable_pred N pkt_hdr hop \<Longrightarrow> next_hop \<in> (traverse_code N pkt_hdr hop) \<Longrightarrow> reachable_pred N pkt_hdr next_hop"
 
-      code_pred reachable_pred .
-      thm reachable_pred.equation
+    lemma assumes wf_N: "wellformed_network N"
+      shows "x \<in> reachable_spoofing N hdr \<Longrightarrow> x \<in> snd ` view N hdr"
+      apply(induction x rule: reachable_spoofing.induct)
+      apply(simp add: view_def)
+      apply force
+      apply(simp add: view_def)
+      apply(subgoal_tac "hop \<in> interfaces N")
+      apply force
+      using traverse_subseteq_interfaces[OF wf_N] by fastforce
 
-      values "{S. reachable_pred example_network (Host ''Alice'', Host ''Bob'') S}" *)
+
 
 section{*TEST of UNIO*}
   lemma "UNION {1::nat,2,3} (\<lambda>n. {n+1}) = {2,3,4}" by eval
