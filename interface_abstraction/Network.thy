@@ -180,8 +180,8 @@ section{*A network consisting of entities*}
         apply(simp add: view_code_def view_def fun_eq_iff traverse_code_correct)
         by fast
 
-
-        value "view_code example_network (Host ''Alice'', Host ''Bob'')"
+        value "links example_network"
+        value[code] "view_code example_network (Host ''Alice'', Host ''Bob'')"
 
       (*
       inductive reachable_pred :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> bool"
