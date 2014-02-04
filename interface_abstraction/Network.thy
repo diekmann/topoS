@@ -315,20 +315,40 @@ section{*A network consisting of entities*}
 
     (*the view transforms the graph into a new graph without the traverse function! *)
 
-    lemma assumes wf_N: "wellformed_network N"
-      shows "x \<in> reachable_spoofing N hdr \<Longrightarrow> x \<in> snd ` view N hdr"
-      proof(induction x rule: reachable_spoofing.induct)
-        fix start next_hop
-        assume a1: "start \<in> interfaces N"
-        and    a2: "next_hop \<in> traverse N hdr start"
-        show "next_hop \<in> snd ` view N hdr"
-          unfolding view_def using a1 a2 by force
+    lemma reachable_spoofing_eq_view:
+      assumes wf_N: "wellformed_network N"
+      shows "reachable_spoofing N hdr = snd ` view N hdr"
+    proof 
+      show "reachable_spoofing N hdr \<subseteq> snd ` view N hdr"
+      proof
+        fix x
+        show "x \<in> reachable_spoofing N hdr \<Longrightarrow> x \<in> snd ` view N hdr"
+        proof(induction x rule: reachable_spoofing.induct)
+          fix start next_hop
+          assume a1: "start \<in> interfaces N"
+          and    a2: "next_hop \<in> traverse N hdr start"
+          show "next_hop \<in> snd ` view N hdr"
+            unfolding view_def using a1 a2 by force
+        qed
       qed
-    lemma assumes wf_N: "wellformed_network N"
-      shows "x \<in> snd ` view N hdr \<Longrightarrow> x \<in> reachable_spoofing N hdr"
-      apply(simp add: view_def)
-      by(auto intro: reachable_spoofing.intros)
+    next
+      show "snd ` view N hdr \<subseteq> reachable_spoofing N hdr"
+      proof
+        fix x
+        show "x \<in> snd ` view N hdr \<Longrightarrow> x \<in> reachable_spoofing N hdr"
+        apply(simp add: view_def)
+        by(auto intro: reachable_spoofing.intros)
+      qed
+    qed
 
+    (*TODO*)
+    theorem assumes wf_N: "wellformed_network N"
+            shows "reachable N hdr = snd ` ((view N hdr)\<^sup>*)"
+      apply(rule)
+      apply force (*todo, long*)
+      thm reachable_subseteq_reachable_spoofing[OF wf_N] 
+      thm reachable_spoofing_eq_view[OF wf_N, symmetric] (*why u work without this??*)
+      (*WTF!!*)
 
 section{*TEST of UNIO*}
   lemma "UNION {1::nat,2,3} (\<lambda>n. {n+1}) = {2,3,4}" by eval
