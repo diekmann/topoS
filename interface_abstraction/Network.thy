@@ -81,6 +81,15 @@ section{*A network consisting of entities*}
       by(simp add: wellformed_network.link_from_bounded link_from_code_def)
 
   text{*Example*}
+    (*
+      Alice 1
+              \
+               \
+                  1                   2      --  1 Bob
+                    ThreePortSwitch         /
+                           3--------------/
+                                          \___ 1 Carl
+    *)
     definition "example_network = \<lparr> interfaces = {\<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 1 \<rparr>,
                            \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 2 \<rparr>,
                            \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 3 \<rparr>,
@@ -131,6 +140,11 @@ section{*A network consisting of entities*}
       definition traverse :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
         "traverse N hdr hop \<equiv> UNION (((forwarding N) (entity hop)) (port hop) hdr) (\<lambda>p. succ N \<lparr>entity = entity hop, port = p\<rparr>)"
 
+      (*traverse jumps over routers, it is not in the links*)
+      lemma traverse_subseteq_interfaces: "wellformed_network N \<Longrightarrow> traverse N hdr hop \<subseteq> interfaces N"
+        apply(simp add: traverse_def succ_def)
+        apply(drule wellformed_network.snd_links)
+        by force
 
       definition traverse_code :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
         "traverse_code N hdr hop \<equiv> UNION (((forwarding N) (entity hop)) (port hop) hdr) (\<lambda>p. succ_code N \<lparr>entity = entity hop, port = p\<rparr>)"
@@ -171,17 +185,22 @@ section{*A network consisting of entities*}
 
     subsection{*The view of a packet*}
       definition view :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> (('v interface) \<times> ('v interface)) set" where
-        "view N hdr = { (src, dst) \<in> links N. dst \<in> traverse N hdr src}"
+        "view N hdr = { (src, dst). src \<in> interfaces N \<and> dst \<in> traverse N hdr src}"
 
 
       definition view_code :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> (('v interface) \<times> ('v interface)) set" where
-        "view_code N hdr = { src_dst \<in> links N. case src_dst of (src, dst) \<Rightarrow> dst \<in> traverse_code N hdr src}"
+        "view_code N hdr = { src_dst \<in> interfaces N \<times> interfaces N. case src_dst of (src, dst) \<Rightarrow> dst \<in> traverse_code N hdr src}"
       lemma view_code_correct: "wellformed_network N \<Longrightarrow> view_code N = view N"
         apply(simp add: view_code_def view_def fun_eq_iff traverse_code_correct)
-        by fast
+        apply(clarify)
+        apply(rule equalityI)
+        apply blast
+        using traverse_subseteq_interfaces by fast
 
-        value "links example_network"
-        value[code] "view_code example_network (Host ''Alice'', Host ''Bob'')"
+        lemma "view_code example_network (Host ''Alice'', Host ''Bob'') = {(\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>), (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>, \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>),
+  (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 2\<rparr>, \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>), (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 2\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>),
+  (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 2\<rparr>, \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>), (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 3\<rparr>, \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>),
+  (\<lparr>entity = Host ''Alice'', port = Port 1\<rparr>, \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port (Suc 0)\<rparr>)}" by eval
 
       (*
       inductive reachable_pred :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> bool"
