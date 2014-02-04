@@ -82,13 +82,15 @@ section{*A network consisting of entities*}
 
   text{*Example*}
     (*
-      Alice 1
-              \
-               \
-                  1                   2      --  1 Bob
-                    ThreePortSwitch         /
-                           3--------------/
-                                          \___ 1 Carl
+      Alice   1
+              /\
+               |
+               |
+               \/
+                1                   2         -->  1 Bob
+                   ThreePortSwitch           /
+                           3  <-------------/
+                                             `---> 1 Carl
     *)
     definition "example_network = \<lparr> interfaces = {\<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 1 \<rparr>,
                            \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 2 \<rparr>,
@@ -197,10 +199,29 @@ section{*A network consisting of entities*}
         apply blast
         using traverse_subseteq_interfaces by fast
 
-        lemma "view_code example_network (Host ''Alice'', Host ''Bob'') = {(\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>), (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>, \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>),
-  (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 2\<rparr>, \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>), (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 2\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>),
-  (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 2\<rparr>, \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>), (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 3\<rparr>, \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>),
-  (\<lparr>entity = Host ''Alice'', port = Port 1\<rparr>, \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port (Suc 0)\<rparr>)}" by eval
+
+        
+    (*
+      the view jumps over routers. It essentially removes the traverse function. For example, if a packet arrives at switch port 1, it can continue to Bob and Carl directly. The fact that this happens via port 3 is hidden
+
+      Alice   1 <-------------------.
+        /\     |                    |
+         |     |                    |
+         |     |          ----------------------.
+         |     \/        |          |           \/
+         |      1 ------\<acute>          2 ----------> 1 Bob
+         |      |  ThreePortSwitch  |       
+         `------|--------- 3        |    
+                 `-----------------> `----------> 1 Carl
+    *)
+        lemma "view_code example_network (Host ''Alice'', Host ''Bob'') = {
+          (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>),
+          (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>, \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>),
+          (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 2\<rparr>, \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>),
+          (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 2\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>),
+          (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 2\<rparr>, \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>),
+          (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 3\<rparr>, \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>),
+          (\<lparr>entity = Host ''Alice'', port = Port 1\<rparr>, \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>)}" by eval
 
       (*
       inductive reachable_pred :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> bool"
