@@ -268,6 +268,17 @@ section{*A network consisting of entities*}
         apply blast
         using traverse_subseteq_interfaces by fast
 
+      lemma traverse_code_subseteq_interfaces: "src \<in> interfaces N \<Longrightarrow> dst \<in> traverse_code N hdr src \<Longrightarrow> dst \<in> interfaces N"
+        by(simp add: traverse_code_def succ_code_def)
+      (*more efficient, I guess. Only iterate over the interfaces*)
+      lemma[code_unfold]: "view_code N hdr = UNION (interfaces N) (\<lambda> src. {src} \<times> traverse_code N hdr src)"
+        apply(simp add: view_code_def)
+        apply(rule)
+        apply blast
+        apply(rule)
+        apply(clarify)
+        apply(fact traverse_code_subseteq_interfaces)
+        done
 
         
     (*
