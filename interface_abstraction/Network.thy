@@ -167,20 +167,48 @@ section{*A network consisting of entities*}
     subsection {*Reachable interfaces*}
       text{*Assumption: no spoofing*}
       (* the start is bork. we move from input ports to input ports, here we start at an output port. add succ/traverse? wild packet appears? *)
+      inductive_set reachable_old :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> ('v interface) set"
+      for N::"'v network" and "pkt_hdr"::"'v hdr"
+      where
+        "\<lparr> entity=fst pkt_hdr, port=p \<rparr> \<in> (interfaces N) \<Longrightarrow> \<lparr> entity=fst pkt_hdr, port=p \<rparr> \<in> reachable_old N pkt_hdr" |
+        "hop \<in> reachable_old N pkt_hdr \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr hop) \<Longrightarrow> next_hop \<in> reachable_old N pkt_hdr"
+
+      text{*Example*}
+        lemma "\<lparr> entity = Host ''Carl'', port = Port 1 \<rparr> \<in> reachable_old example_network (Host ''Alice'', Host ''Bob'')"
+          apply(rule reachable_old.intros(2))
+          apply(rule reachable_old.intros(2))
+          apply(rule reachable_old.intros(1))
+          apply(simp add: example_network_def)
+          apply(subst traverse_code_correct[symmetric, OF wellformed_network_example_network])
+          apply(simp, subst example_network_ex1[simplified], simp)
+          apply(subst traverse_code_correct[symmetric, OF wellformed_network_example_network])
+          apply(simp, subst example_network_ex2[simplified])
+          apply(simp)
+          done
+
+
+      text{*
+        sending out a packet:
+          the source address in the header must match
+          the packet is send out according to the traverse function
+        transmitting a packet:
+          traverse it through the net
+      *}
       inductive_set reachable :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> ('v interface) set"
       for N::"'v network" and "pkt_hdr"::"'v hdr"
       where
-        "\<lparr> entity=fst pkt_hdr, port=p \<rparr> \<in> (interfaces N) \<Longrightarrow> \<lparr> entity=fst pkt_hdr, port=p \<rparr> \<in> reachable N pkt_hdr" |
+        "entity start = fst pkt_hdr \<Longrightarrow> start \<in> (interfaces N) \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr start) \<Longrightarrow> next_hop \<in> reachable N pkt_hdr" |
         "hop \<in> reachable N pkt_hdr \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr hop) \<Longrightarrow> next_hop \<in> reachable N pkt_hdr"
 
       text{*Example*}
         lemma "\<lparr> entity = Host ''Carl'', port = Port 1 \<rparr> \<in> reachable example_network (Host ''Alice'', Host ''Bob'')"
           apply(rule reachable.intros(2))
-          apply(rule reachable.intros(2))
           apply(rule reachable.intros(1))
-          apply(simp add: example_network_def)
+          apply(rule HOL.sym[of _ "entity \<lparr>entity = Host ''Alice'', port = Port (Suc 0)\<rparr>"]) (*need to select manually*)
+          apply(simp_all add: example_network_def)[2]
           apply(subst traverse_code_correct[symmetric, OF wellformed_network_example_network])
-          apply(simp, subst example_network_ex1[simplified], simp)
+          apply(subst example_network_ex1[simplified])
+          apply(simp)
           apply(subst traverse_code_correct[symmetric, OF wellformed_network_example_network])
           apply(simp, subst example_network_ex2[simplified])
           apply(simp)
@@ -191,6 +219,27 @@ section{*A network consisting of entities*}
       for N::"'v network" and "pkt_hdr"::"'v hdr"
       where
         "start \<in> (interfaces N) \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr start) \<Longrightarrow> next_hop \<in> reachable_spoofing N pkt_hdr" 
+
+      lemma reachable_spoofing_subseteq_interfaces: assumes wf_N: "wellformed_network N"
+      shows "reachable_spoofing N hdr \<subseteq> interfaces N"
+      proof
+        fix x
+        show "x \<in> reachable_spoofing N hdr \<Longrightarrow> x \<in> interfaces N"
+        apply(induction x rule: reachable_spoofing.induct)
+        using traverse_subseteq_interfaces[OF wf_N] by blast
+      qed
+        
+      lemma reachable_subseteq_reachable_spoofing: assumes wf_N: "wellformed_network N"
+      shows  "reachable N hdr \<subseteq> reachable_spoofing N hdr"
+      proof
+        fix x
+        show  "x \<in> reachable N hdr \<Longrightarrow> x \<in> reachable_spoofing N hdr"
+        apply(induction x rule: reachable.induct)
+        apply(auto intro: reachable_spoofing.intros)[1]
+        apply(subgoal_tac "hop \<in> interfaces N")
+        apply(auto intro: reachable_spoofing.intros)[1]
+        using reachable_spoofing_subseteq_interfaces[OF wf_N] by blast
+      qed
 
     subsection{*The view of a packet*}
       definition view :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> (('v interface) \<times> ('v interface)) set" where
