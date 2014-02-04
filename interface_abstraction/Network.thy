@@ -229,17 +229,21 @@ section{*A network consisting of entities*}
       inductive_set reachable_spoofing :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> ('v interface) set"
       for N::"'v network" and "pkt_hdr"::"'v hdr"
       where (*arbitrary start*)
-        "start \<in> (interfaces N) \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr start) \<Longrightarrow> next_hop \<in> reachable_spoofing N pkt_hdr" 
-
-      lemma reachable_spoofing_subseteq_interfaces: assumes wf_N: "wellformed_network N"
+        "start \<in> (interfaces N) \<Longrightarrow> start \<in> reachable_spoofing N pkt_hdr" |
+        "hop \<in> reachable_spoofing N pkt_hdr \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr hop) \<Longrightarrow> next_hop \<in> reachable_spoofing N pkt_hdr"
+      (*here wo show that reachable_spoofing is useless:*)
+      lemma assumes wf_N: "wellformed_network N"
       shows "reachable_spoofing N hdr \<subseteq> interfaces N"
       proof
         fix x
         show "x \<in> reachable_spoofing N hdr \<Longrightarrow> x \<in> interfaces N"
         apply(induction x rule: reachable_spoofing.induct)
+        apply(simp)
         using traverse_subseteq_interfaces[OF wf_N] by blast
       qed
-        
+      lemma "interfaces N \<subseteq> reachable_spoofing N hdr "
+      by(auto intro: reachable_spoofing.intros)
+      
       lemma reachable_subseteq_reachable_spoofing: assumes wf_N: "wellformed_network N"
       shows  "reachable N hdr start \<subseteq> reachable_spoofing N hdr"
       proof
@@ -249,12 +253,13 @@ section{*A network consisting of entities*}
         apply(auto intro: reachable_spoofing.intros)[1]
         apply(subgoal_tac "hop \<in> interfaces N")
         apply(auto intro: reachable_spoofing.intros)[1]
-        using reachable_spoofing_subseteq_interfaces[OF wf_N] by blast
-      oops
+        using reachable_spoofing_subseteq_interfaces[OF wf_N]
+        by blast
+      qed
 
     subsection{*The view of a packet*}
       definition view :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> (('v interface) \<times> ('v interface)) set" where
-        "view N hdr = { (src, dst). src \<in> interfaces N \<and> dst \<in> traverse N hdr src}"
+        "view N hdr = {(src, dst). src \<in> interfaces N \<and> dst \<in> traverse N hdr src}"
 
 
       definition view_code :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> (('v interface) \<times> ('v interface)) set" where
@@ -313,6 +318,12 @@ section{*A network consisting of entities*}
         fix x
         show "x \<in> reachable_spoofing N hdr \<Longrightarrow> x \<in> snd ` view N hdr"
         proof(induction x rule: reachable_spoofing.induct)
+          fix start
+          assume "start \<in> interfaces N"
+          thus "start \<in> snd ` view N hdr"
+            apply(simp add: view_def)
+            sorry
+        next
           fix start next_hop
           assume a1: "start \<in> interfaces N"
           and    a2: "next_hop \<in> traverse N hdr start"
@@ -328,7 +339,7 @@ section{*A network consisting of entities*}
         apply(simp add: view_def)
         by(auto intro: reachable_spoofing.intros)
       qed
-    qed
+    oops
 
 
     theorem assumes wf_N: "wellformed_network N"
@@ -349,7 +360,7 @@ section{*A network consisting of entities*}
       apply(simp add: start_iface reachable.intros(1))
       apply(simp)
       apply(simp add: view_def)
-      apply (metis (full_types) reachable.intros(2)XX
+      apply (metis (full_types) reachable.intros(2))
       done
 
 section{*TEST of UNIO*}
