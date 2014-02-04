@@ -250,7 +250,7 @@ section{*A network consisting of entities*}
         apply(subgoal_tac "hop \<in> interfaces N")
         apply(auto intro: reachable_spoofing.intros)[1]
         using reachable_spoofing_subseteq_interfaces[OF wf_N] by blast
-      qed
+      oops
 
     subsection{*The view of a packet*}
       definition view :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> (('v interface) \<times> ('v interface)) set" where
@@ -330,28 +330,27 @@ section{*A network consisting of entities*}
       qed
     qed
 
-    (*TODO*)
+
     theorem assumes wf_N: "wellformed_network N"
+            and     start_iface: "start \<in> interfaces N"
             shows "reachable N hdr start = {dst. (start, dst) \<in> (view N hdr)\<^sup>*}"
       apply(rule equalityI)
       apply(rule)
       apply(simp)
       apply(erule reachable.induct)
       apply(simp add: view_def)
-      apply fast
       apply(simp add: view_def)
       apply (metis (lifting, no_types) mem_Collect_eq reachable_spoofing_subseteq_interfaces reachable_subseteq_reachable_spoofing rtrancl.rtrancl_into_rtrancl split_conv subsetD wf_N)
-      (*next*)
+      (*next, right to left subset*)
       apply(rule)
       apply(simp)
       apply(erule rtrancl_induct)
-      apply(simp add: reachable.intros)  (**Interesting: simplified start rule for reachable (rest is done in step rule): start \<in> reachable N hdr start**)
-      defer
+      apply(simp)
+      apply(simp add: start_iface reachable.intros(1))
       apply(simp)
       apply(simp add: view_def)
-      apply (metis (full_types) reachable.intros(2))
-       thm reachable_subseteq_reachable_spoofing[OF wf_N] reachable_spoofing_eq_view[OF wf_N, symmetric]
-      oops
+      apply (metis (full_types) reachable.intros(2)XX
+      done
 
 section{*TEST of UNIO*}
   lemma "UNION {1::nat,2,3} (\<lambda>n. {n+1}) = {2,3,4}" by eval
