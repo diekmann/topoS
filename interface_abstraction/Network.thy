@@ -234,13 +234,22 @@ section{*A network consisting of entities*}
 
     lemma assumes wf_N: "wellformed_network N"
       shows "x \<in> reachable_spoofing N hdr \<Longrightarrow> x \<in> snd ` view N hdr"
-      apply(induction x rule: reachable_spoofing.induct)
-      apply(simp add: view_def)
-      apply force
-      apply(simp add: view_def)
-      apply(subgoal_tac "hop \<in> interfaces N")
-      apply force
-      using traverse_subseteq_interfaces[OF wf_N] by fastforce
+      proof(induction x rule: reachable_spoofing.induct)
+        fix start next_hop
+        assume a1: "start \<in> interfaces N"
+        and    a2: "next_hop \<in> traverse N hdr start"
+        show "next_hop \<in> snd ` view N hdr"
+          unfolding view_def using a1 a2 by force
+      next
+        fix hop next_hop
+        assume     "hop \<in> reachable_spoofing N hdr"
+        and    a2: "hop \<in> snd ` view N hdr"
+        and    a3: "next_hop \<in> traverse N hdr hop"
+        from a2 have "hop \<in> interfaces N"
+          unfolding view_def using traverse_subseteq_interfaces[OF wf_N] by fastforce
+        from this a3 show "next_hop \<in> snd ` view N hdr" 
+          unfolding view_def by force
+      qed
     lemma assumes wf_N: "wellformed_network N"
       shows "x \<in> snd ` view N hdr \<Longrightarrow> x \<in> reachable_spoofing N hdr"
       apply(simp add: view_def)
