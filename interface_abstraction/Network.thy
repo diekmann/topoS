@@ -190,8 +190,7 @@ section{*A network consisting of entities*}
       inductive_set reachable_spoofing :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> ('v interface) set"
       for N::"'v network" and "pkt_hdr"::"'v hdr"
       where
-        "start \<in> (interfaces N) \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr start) \<Longrightarrow> next_hop \<in> reachable_spoofing N pkt_hdr" |
-        "hop \<in> reachable_spoofing N pkt_hdr \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr hop) \<Longrightarrow> next_hop\<in> reachable_spoofing N pkt_hdr"
+        "start \<in> (interfaces N) \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr start) \<Longrightarrow> next_hop \<in> reachable_spoofing N pkt_hdr" 
 
     subsection{*The view of a packet*}
       definition view :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> (('v interface) \<times> ('v interface)) set" where
@@ -240,15 +239,6 @@ section{*A network consisting of entities*}
         and    a2: "next_hop \<in> traverse N hdr start"
         show "next_hop \<in> snd ` view N hdr"
           unfolding view_def using a1 a2 by force
-      next
-        fix hop next_hop
-        assume     "hop \<in> reachable_spoofing N hdr"
-        and    a2: "hop \<in> snd ` view N hdr"
-        and    a3: "next_hop \<in> traverse N hdr hop"
-        from a2 have "hop \<in> interfaces N"
-          unfolding view_def using traverse_subseteq_interfaces[OF wf_N] by fastforce
-        from this a3 show "next_hop \<in> snd ` view N hdr" 
-          unfolding view_def by force
       qed
     lemma assumes wf_N: "wellformed_network N"
       shows "x \<in> snd ` view N hdr \<Longrightarrow> x \<in> reachable_spoofing N hdr"
