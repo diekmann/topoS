@@ -161,7 +161,8 @@ section{*A network consisting of entities*}
         text{*Example cont.: Switch forwards packet to Bob and Carl*}
         lemma example_network_ex2: "traverse_code example_network (Host ''Alice'', Host ''Bob'')  \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr> = {\<lparr>entity = Host ''Carl'', port = Port 1\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>}" by eval
         text{*Example cont.: Carl accepts packet (or drops it, he does not forward it)*}
-        lemma "traverse_code example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Bob'', port = Port 1\<rparr> = {}" by eval
+        lemma example_network_ex3: "traverse_code example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Bob'', port = Port 1\<rparr> = {}" by eval
+        lemma example_network_ex4: "traverse_code example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Carl'', port = Port 1\<rparr> = {}" by eval
 
 
     subsection {*Reachable interfaces*}
@@ -213,7 +214,39 @@ section{*A network consisting of entities*}
           apply(simp, subst example_network_ex2[simplified])
           apply(simp)
           done
-
+        lemma "\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr> \<in> reachable example_network (Host ''Alice'', Host ''Bob'')"
+          apply(rule reachable.intros(1))
+          apply(rule HOL.sym[of _ "entity \<lparr>entity = Host ''Alice'', port = Port (Suc 0)\<rparr>"]) (*need to select manually*)
+          apply(simp_all add: example_network_def)[2]
+          apply(subst traverse_code_correct[symmetric, OF wellformed_network_example_network])
+          apply(subst example_network_ex1[simplified])
+          apply(simp)
+          done
+        lemma "x \<in> reachable example_network (Host ''Alice'', Host ''Bob'') \<Longrightarrow> 
+          x \<in> {\<lparr> entity = Host ''Carl'', port = Port 1 \<rparr>, \<lparr> entity = Host ''Bob'', port = Port 1 \<rparr>, \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>}"
+          apply(induction rule: reachable.induct)
+          apply(simp)
+          apply(subgoal_tac "start = \<lparr>entity = Host ''Alice'', port = Port (Suc 0)\<rparr>")
+          prefer 2
+          apply(simp add: example_network_def) apply fastforce
+          apply(simp)
+          apply(subst(asm) traverse_code_correct[symmetric, OF wellformed_network_example_network])
+          apply(subst(asm) example_network_ex1[simplified])
+          apply(simp)
+          (*step*)
+          apply(case_tac "hop = \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>", simp)
+          apply(subst(asm) traverse_code_correct[symmetric, OF wellformed_network_example_network])
+          apply(subst(asm) example_network_ex2[simplified])
+          apply(fast)
+          apply(case_tac "hop = \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>", simp)
+          apply(subst(asm) traverse_code_correct[symmetric, OF wellformed_network_example_network])
+          apply(subst(asm) example_network_ex3[simplified])
+          apply(fast)
+          apply(case_tac "hop = \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>", simp)
+          apply(subst(asm) traverse_code_correct[symmetric, OF wellformed_network_example_network])
+          apply(subst(asm) example_network_ex4[simplified])
+          apply(fast)
+          by simp
       
       inductive_set reachable_spoofing :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> ('v interface) set"
       for N::"'v network" and "pkt_hdr"::"'v hdr"
@@ -324,6 +357,6 @@ section{*TEST of UNIO*}
 
 
   hide_const "example_network"
-  hide_fact example_network_ex1 example_network_ex2 wellformed_network_example_network
+  hide_fact example_network_ex1 example_network_ex2 example_network_ex3 example_network_ex4 wellformed_network_example_network 
 
 end
