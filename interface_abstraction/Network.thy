@@ -253,7 +253,7 @@ section{*A network consisting of entities*}
     lemma assumes wf_N: "wellformed_network N"
       shows "x \<in> snd ` view N hdr \<Longrightarrow> x \<in> reachable_spoofing N hdr"
       apply(simp add: view_def)
-      by (smt imageE mem_Collect_eq prod_case_unfold reachable_spoofing.simps)
+      by (smt imageE mem_Collect_eq prod_case_unfold reachable_spoofing.simps(1))
 
 
 section{*TEST of UNIO*}
