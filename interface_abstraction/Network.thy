@@ -180,6 +180,13 @@ section{*A network consisting of entities*}
         "start \<in> (interfaces N) \<Longrightarrow> start \<in> reachable N pkt_hdr start" |
         "hop \<in> reachable N pkt_hdr start \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr hop) \<Longrightarrow> next_hop \<in> reachable N pkt_hdr start"
 
+      lemma reachable_subseteq_interfaces:
+        assumes wf_N: "wellformed_network N"
+        shows "x \<in> reachable N pkt_hdr start \<Longrightarrow> x \<in> interfaces N"
+        apply(induction x rule: reachable.induct)
+        apply(simp)
+        using traverse_subseteq_interfaces[OF wf_N] by fast
+
       text{*Example*}
         lemma "\<lparr> entity = Host ''Carl'', port = Port 1 \<rparr> \<in> reachable example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>"
           apply(rule reachable.intros(2))
@@ -225,37 +232,6 @@ section{*A network consisting of entities*}
           apply(subst(asm) traverse_code_correct[symmetric, OF wellformed_network_example_network])
           apply(subst(asm) example_network_ex1[simplified])
           by simp
-      
-      inductive_set reachable_spoofing :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> ('v interface) set"
-      for N::"'v network" and "pkt_hdr"::"'v hdr"
-      where (*arbitrary start*)
-        "start \<in> (interfaces N) \<Longrightarrow> start \<in> reachable_spoofing N pkt_hdr" |
-        "hop \<in> reachable_spoofing N pkt_hdr \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr hop) \<Longrightarrow> next_hop \<in> reachable_spoofing N pkt_hdr"
-      (*here wo show that reachable_spoofing is useless:*)
-      lemma assumes wf_N: "wellformed_network N"
-      shows "reachable_spoofing N hdr \<subseteq> interfaces N"
-      proof
-        fix x
-        show "x \<in> reachable_spoofing N hdr \<Longrightarrow> x \<in> interfaces N"
-        apply(induction x rule: reachable_spoofing.induct)
-        apply(simp)
-        using traverse_subseteq_interfaces[OF wf_N] by blast
-      qed
-      lemma "interfaces N \<subseteq> reachable_spoofing N hdr "
-      by(auto intro: reachable_spoofing.intros)
-      
-      lemma reachable_subseteq_reachable_spoofing: assumes wf_N: "wellformed_network N"
-      shows  "reachable N hdr start \<subseteq> reachable_spoofing N hdr"
-      proof
-        fix x
-        show  "x \<in> reachable N hdr start \<Longrightarrow> x \<in> reachable_spoofing N hdr"
-        apply(induction x rule: reachable.induct)
-        apply(auto intro: reachable_spoofing.intros)[1]
-        apply(subgoal_tac "hop \<in> interfaces N")
-        apply(auto intro: reachable_spoofing.intros)[1]
-        using reachable_spoofing_subseteq_interfaces[OF wf_N]
-        by blast
-      qed
 
     subsection{*The view of a packet*}
       definition view :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> (('v interface) \<times> ('v interface)) set" where
@@ -309,49 +285,21 @@ section{*A network consisting of entities*}
 
     (*the view transforms the graph into a new graph without the traverse function! *)
 
-    lemma reachable_spoofing_eq_view:
-      assumes wf_N: "wellformed_network N"
-      shows "reachable_spoofing N hdr = snd ` view N hdr"
-    proof 
-      show "reachable_spoofing N hdr \<subseteq> snd ` view N hdr"
-      proof
-        fix x
-        show "x \<in> reachable_spoofing N hdr \<Longrightarrow> x \<in> snd ` view N hdr"
-        proof(induction x rule: reachable_spoofing.induct)
-          fix start
-          assume "start \<in> interfaces N"
-          thus "start \<in> snd ` view N hdr"
-            apply(simp add: view_def)
-            sorry
-        next
-          fix start next_hop
-          assume a1: "start \<in> interfaces N"
-          and    a2: "next_hop \<in> traverse N hdr start"
-          show "next_hop \<in> snd ` view N hdr"
-            unfolding view_def using a1 a2 by force
-        qed
-      qed
-    next
-      show "snd ` view N hdr \<subseteq> reachable_spoofing N hdr"
-      proof
-        fix x
-        show "x \<in> snd ` view N hdr \<Longrightarrow> x \<in> reachable_spoofing N hdr"
-        apply(simp add: view_def)
-        by(auto intro: reachable_spoofing.intros)
-      qed
-    oops
-
-
-    theorem assumes wf_N: "wellformed_network N"
-            and     start_iface: "start \<in> interfaces N"
-            shows "reachable N hdr start = {dst. (start, dst) \<in> (view N hdr)\<^sup>*}"
+  
+    theorem reachable_eq_rtrancl_view:
+        assumes wf_N: "wellformed_network N"
+        and     start_iface: "start \<in> interfaces N"
+        shows "reachable N hdr start = {dst. (start, dst) \<in> (view N hdr)\<^sup>*}"
       apply(rule equalityI)
       apply(rule)
       apply(simp)
       apply(erule reachable.induct)
       apply(simp add: view_def)
       apply(simp add: view_def)
-      apply (metis (lifting, no_types) mem_Collect_eq reachable_spoofing_subseteq_interfaces reachable_subseteq_reachable_spoofing rtrancl.rtrancl_into_rtrancl split_conv subsetD wf_N)
+      apply(subgoal_tac "(hop, next_hop) \<in> {(src, dst). src \<in> interfaces N \<and> dst \<in> traverse N hdr src}")
+      apply (metis (lifting, no_types) rtrancl.rtrancl_into_rtrancl)
+      apply(simp)
+      using reachable_subseteq_interfaces[OF wf_N] apply fast
       (*next, right to left subset*)
       apply(rule)
       apply(simp)
