@@ -173,42 +173,35 @@ section{*A network consisting of entities*}
         transmitting a packet:
           traverse it through the net
       *}
-      (*TODO TODO need to define reachable_from, from a specific interface (entity + port)! This uniquely defines start. 
-        hmm, we can still allow spoofing by allowing an arbitrary packet header. UNION over all start points should give reachable_spoofing?*)
-      inductive_set reachable :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> ('v interface) set"
-      for N::"'v network" and "pkt_hdr"::"'v hdr"
+      (* we can allow spoofing by allowing an arbitrary packet header. UNION over all start points should give reachable_spoofing? *)
+      inductive_set reachable :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set"
+      for N::"'v network" and "pkt_hdr"::"'v hdr" and "start"::"'v interface"
       where
-        "entity start = fst pkt_hdr \<Longrightarrow> start \<in> (interfaces N) \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr start) \<Longrightarrow> next_hop \<in> reachable N pkt_hdr" |
-        "hop \<in> reachable N pkt_hdr \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr hop) \<Longrightarrow> next_hop \<in> reachable N pkt_hdr"
+        "start \<in> (interfaces N) \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr start) \<Longrightarrow> next_hop \<in> reachable N pkt_hdr start" |
+        "hop \<in> reachable N pkt_hdr start \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr hop) \<Longrightarrow> next_hop \<in> reachable N pkt_hdr start"
 
       text{*Example*}
-        lemma "\<lparr> entity = Host ''Carl'', port = Port 1 \<rparr> \<in> reachable example_network (Host ''Alice'', Host ''Bob'')"
+        lemma "\<lparr> entity = Host ''Carl'', port = Port 1 \<rparr> \<in> reachable example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>"
           apply(rule reachable.intros(2))
           apply(rule reachable.intros(1))
-          apply(rule HOL.sym[of _ "entity \<lparr>entity = Host ''Alice'', port = Port (Suc 0)\<rparr>"]) (*need to select manually*)
-          apply(simp_all add: example_network_def)[2]
+          (*apply(rule HOL.sym[of _ "entity \<lparr>entity = Host ''Alice'', port = Port (Suc 0)\<rparr>"]) (*need to select manually*)*)
+          apply(simp add: example_network_def)
           apply(subst traverse_code_correct[symmetric, OF wellformed_network_example_network])
-          apply(subst example_network_ex1[simplified])
+          apply(simp, subst example_network_ex1[simplified])
           apply(simp)
           apply(subst traverse_code_correct[symmetric, OF wellformed_network_example_network])
           apply(simp, subst example_network_ex2[simplified])
           apply(simp)
           done
-        lemma "\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr> \<in> reachable example_network (Host ''Alice'', Host ''Bob'')"
+        lemma "\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr> \<in> reachable example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>"
           apply(rule reachable.intros(1))
-          apply(rule HOL.sym[of _ "entity \<lparr>entity = Host ''Alice'', port = Port (Suc 0)\<rparr>"]) (*need to select manually*)
-          apply(simp_all add: example_network_def)[2]
+          apply(simp add: example_network_def)
           apply(subst traverse_code_correct[symmetric, OF wellformed_network_example_network])
-          apply(subst example_network_ex1[simplified])
-          apply(simp)
+          apply(simp, subst example_network_ex1[simplified], simp)
           done
-        lemma "x \<in> reachable example_network (Host ''Alice'', Host ''Bob'') \<Longrightarrow> 
+        lemma "x \<in> reachable example_network (Host ''Alice'', Host ''Bob'')  \<lparr>entity = Host ''Alice'', port = Port 1\<rparr> \<Longrightarrow> 
           x \<in> {\<lparr> entity = Host ''Carl'', port = Port 1 \<rparr>, \<lparr> entity = Host ''Bob'', port = Port 1 \<rparr>, \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>}"
           apply(induction rule: reachable.induct)
-          apply(simp)
-          apply(subgoal_tac "start = \<lparr>entity = Host ''Alice'', port = Port (Suc 0)\<rparr>")
-          prefer 2
-          apply(simp add: example_network_def) apply fastforce
           apply(simp)
           apply(subst(asm) traverse_code_correct[symmetric, OF wellformed_network_example_network])
           apply(subst(asm) example_network_ex1[simplified])
@@ -230,7 +223,7 @@ section{*A network consisting of entities*}
       
       inductive_set reachable_spoofing :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> ('v interface) set"
       for N::"'v network" and "pkt_hdr"::"'v hdr"
-      where
+      where (*arbitrary start*)
         "start \<in> (interfaces N) \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr start) \<Longrightarrow> next_hop \<in> reachable_spoofing N pkt_hdr" 
 
       lemma reachable_spoofing_subseteq_interfaces: assumes wf_N: "wellformed_network N"
@@ -243,10 +236,10 @@ section{*A network consisting of entities*}
       qed
         
       lemma reachable_subseteq_reachable_spoofing: assumes wf_N: "wellformed_network N"
-      shows  "reachable N hdr \<subseteq> reachable_spoofing N hdr"
+      shows  "reachable N hdr start \<subseteq> reachable_spoofing N hdr"
       proof
         fix x
-        show  "x \<in> reachable N hdr \<Longrightarrow> x \<in> reachable_spoofing N hdr"
+        show  "x \<in> reachable N hdr start \<Longrightarrow> x \<in> reachable_spoofing N hdr"
         apply(induction x rule: reachable.induct)
         apply(auto intro: reachable_spoofing.intros)[1]
         apply(subgoal_tac "hop \<in> interfaces N")
@@ -334,11 +327,11 @@ section{*A network consisting of entities*}
 
     (*TODO*)
     theorem assumes wf_N: "wellformed_network N"
-            shows "reachable N (a,b) = {dst. (a, dst) \<in> (view N hdr)\<^sup>*}"
+            shows "reachable N (a,b) start = {dst. (start, dst) \<in> (view N hdr)\<^sup>*}"
       apply(rule)
       thm reachable_subseteq_reachable_spoofing[OF wf_N] 
       thm reachable_spoofing_eq_view[OF wf_N, symmetric] 
-      (*WTF!!*)
+      oops
 
 section{*TEST of UNIO*}
   lemma "UNION {1::nat,2,3} (\<lambda>n. {n+1}) = {2,3,4}" by eval
