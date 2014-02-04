@@ -195,6 +195,7 @@ section{*A network consisting of entities*}
         transmitting a packet:
           traverse it through the net
       *}
+      (*TODO TODO need to define reachable_from, from a specific interface (entity + port)!*)
       inductive_set reachable :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> ('v interface) set"
       for N::"'v network" and "pkt_hdr"::"'v hdr"
       where
@@ -343,11 +344,10 @@ section{*A network consisting of entities*}
 
     (*TODO*)
     theorem assumes wf_N: "wellformed_network N"
-            shows "reachable N hdr = snd ` ((view N hdr)\<^sup>*)"
+            shows "reachable N (a,b) = {dst. (a, dst) \<in> (view N hdr)\<^sup>*}"
       apply(rule)
-      apply force (*todo, long*)
       thm reachable_subseteq_reachable_spoofing[OF wf_N] 
-      thm reachable_spoofing_eq_view[OF wf_N, symmetric] (*why u work without this??*)
+      thm reachable_spoofing_eq_view[OF wf_N, symmetric] 
       (*WTF!!*)
 
 section{*TEST of UNIO*}
