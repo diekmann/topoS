@@ -241,7 +241,10 @@ section{*A network consisting of entities*}
       apply(subgoal_tac "hop \<in> interfaces N")
       apply force
       using traverse_subseteq_interfaces[OF wf_N] by fastforce
-
+    lemma assumes wf_N: "wellformed_network N"
+      shows "x \<in> snd ` view N hdr \<Longrightarrow> x \<in> reachable_spoofing N hdr"
+      apply(simp add: view_def)
+      by (smt imageE mem_Collect_eq prod_case_unfold reachable_spoofing.simps)
 
 
 section{*TEST of UNIO*}
