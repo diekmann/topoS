@@ -23,6 +23,10 @@ section{*A network consisting of entities*}
                       forwarding :: "'v entity \<Rightarrow> 'v fwd_fun"
                       links      :: "(('v interface) \<times> ('v interface)) set"
 
+  text{*here is an abbreviatin for forwarding in network N the packet with hdr at input interface hop:
+          get forwarding function for hop, apply input port and hdr to it, get result*}
+  abbreviation forward :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> port set" where
+    "forward N hdr hop \<equiv> ((forwarding N) (entity hop)) (port hop) hdr"
 
   text{*wellformed network.
         Links must be subset of interfaces, think of it as a graph. 
@@ -79,8 +83,9 @@ section{*A network consisting of entities*}
         "succ N out_iface \<equiv> {in_iface. (out_iface, in_iface) \<in> links N}"
   
       text{*A packet traverses a hop. It performs steps 1 and 2.*}
+      (*recall: (forward N hdr hop) return the ports where the packet leaves the entity*)
       definition traverse :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
-        "traverse N hdr hop \<equiv> UNION (((forwarding N) (entity hop)) (port hop) hdr) (\<lambda>p. succ N \<lparr>entity = entity hop, port = p\<rparr>)"
+        "traverse N hdr hop \<equiv> \<Union> p \<in> (forward N hdr hop). succ N \<lparr>entity = entity hop, port = p\<rparr>"
 
       (*traverse jumps over routers, it is not in the links. the forwarding function moves packets in routeres, there is no corresponding link IN an entity for it. *)
       lemma traverse_subseteq_interfaces: "wellformed_network N \<Longrightarrow> traverse N hdr hop \<subseteq> interfaces N"
