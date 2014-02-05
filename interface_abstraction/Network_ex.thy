@@ -152,25 +152,11 @@ subsection{*view*}
 
     (*the view transforms the graph into a new graph without the traverse function! *)
 
+  thm reachable_eq_rtrancl_view2
+  definition reachable_code :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
+    "reachable_code N hdr start \<equiv> {dst. (start, dst) \<in> (view N hdr)\<^sup>+} \<union> {start}"
+  value[code] "reachable_code example_network (Host ''Alice'', Host ''Bob'')"
 
-  definition view_rtrancl_code :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> (('v interface) \<times> ('v interface)) set" where
-    "view_rtrancl_code N hdr \<equiv> (\<Union>n\<in>{n. n \<le> card (view_code N hdr)}. view_code N hdr ^^ n)"
-  lemma view_rtrancl_code_correct: 
-    assumes wf_N: "wellformed_network N"
-    shows "view_rtrancl_code N hdr = (view N hdr)\<^sup>*"
-  apply(unfold view_rtrancl_code_def)
-  apply(subst view_code_correct[OF wf_N])+
-  using rtrancl_finite_eq_relpow[OF view_finite[OF wf_N],symmetric] by assumption
-  lemma[code_unfold]: "{n. n \<le> card (view_code N hdr)} = {0 .. card (view_code N hdr)}" by fastforce
-  (*okay, rtrancl contains ALL reflexive pairs of the infinite type 'v interface. *)  
-  lemma assumes wf_N: "wellformed_network N" shows "(view N hdr) ^^ 0 \<subseteq> (view N hdr)\<^sup>*"
-   using rtrancl_finite_eq_relpow[OF view_finite[OF wf_N]] by blast
-  lemma "(view N hdr) ^^ 0 = {(a,a) | a:: 'v interface. True}"
-  by(simp add: Id_def)
-
-  value "Transitive_Closure.relpow 2 (view_code example_network (Host ''Alice'', Host ''Bob''))"
-
-  value "view_rtrancl_code example_network (Host ''Alice'', Host ''Bob'')"
 
   hide_const "example_network"
   hide_fact example_network_ex1 example_network_ex2 example_network_ex3 example_network_ex4 wellformed_network_example_network 
