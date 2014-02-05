@@ -3,5 +3,8 @@ Status:
   Compiles and runs
 
 Status for developers:
-  Broken. *.thy files were largely refactored, this scala tool is not adaped at the moment
-  Will fix in future
+  The generated code is at src/main/scala/tum/in/net/psn/log_topo/NetworkModels/GENERATED
+  Recently, the *.thy files were largely refactored. The interface of the generated code changed. The scala tool is not adaped at the moment (it still runs with the old version). 
+  When you create a new version of the generated code from git HEAD, the tool will not compile.
+  Will update the tool in the future.
+  At the moment, everything works in the theorem prover. For example, look at topoS/access_control_abstraction/thy/i8_ssh_landscape.thy. It even draws nice graphs for you ;)
