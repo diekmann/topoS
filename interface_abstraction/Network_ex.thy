@@ -157,6 +157,9 @@ subsection{*view*}
     "reachable_code N hdr start \<equiv> {dst. (start, dst) \<in> (view_code N hdr)\<^sup>+} \<union> {start}"
 
   value "(view_code example_network (Host ''Alice'', Host ''Bob''))\<^sup>+" (*works*)
+  
+  value "{(start, dst) \<in> (view_code example_network (Host ''Alice'', Host ''Bob''))\<^sup>+. True}" (*NOT*)
+
   value "reachable_code example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>" (*NOT*)
 
 
