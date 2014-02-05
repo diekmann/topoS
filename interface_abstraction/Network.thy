@@ -153,6 +153,11 @@ section{*A network consisting of entities*}
         apply(rule)
         by(clarify)
 
+     lemma view_subseteq_interfaces_x_interfaces: assumes wf_N: "wellformed_network N"
+        shows "view N hdr \<subseteq> interfaces N \<times> interfaces N"
+        apply(simp add: view_alt)
+        using traverse_subseteq_interfaces[OF wf_N] by blast
+
       lemma view_finite: assumes wf_N: "wellformed_network N"
         shows "finite (view N hdr)"
         apply(simp add: view_alt)
@@ -170,7 +175,28 @@ section{*A network consisting of entities*}
           have "{(src,dst). src \<in> interfaces N \<and> dst \<in> interfaces N \<and> (src, dst) \<in> (view N hdr)\<^sup>*} \<subseteq> interfaces N \<times> interfaces N" by blast
           thus ?thesis using wellformed_network.finite_interfaces[OF wf_N] by (metis (lifting, no_types) finite_SigmaI rev_finite_subset)
         qed
+
+
       (*todo, write the rtrancl as combination of ^+ (finite) and explicite reflecive of interfaces in N*)
+      lemma assumes wf_N: "wellformed_network N" shows "{(src,dst). src \<in> interfaces N \<and> dst \<in> interfaces N \<and> (src, dst) \<in> (view N hdr)\<^sup>*} = 
+          (view N hdr)\<^sup>+ \<union> {(a,a) | a . a \<in> interfaces N}"
+      apply(rule equalityI)
+      apply(clarify)
+      apply (metis rtranclD)
+      (* r to l*)
+      apply(clarify)
+      apply(rule)
+      apply(erule Set.UnE)
+      using view_subseteq_interfaces_x_interfaces[OF wf_N] apply (metis SigmaE2 converse_tranclE trancl_mono)
+      apply fastforce
+      apply(rule)
+      apply(erule Set.UnE)
+      using view_subseteq_interfaces_x_interfaces[OF wf_N] apply (metis mem_Sigma_iff r_into_trancl' subsetI subset_antisym trancl_mono trancl_subset_Sigma)
+      apply fastforce
+      apply(erule Set.UnE)
+      apply(simp)
+      apply(simp)
+      done
   
   section{*Reachable and view*}
     text{*intuitive reachable definition and defining reachability by the rtrancl over the view relation is equal. *}
