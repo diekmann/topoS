@@ -10,7 +10,8 @@ section{*A network consisting of entities*}
 
 
   text{*fwd is an entity's packet forward function: 
-      A packet arriving at port with a header (src, dst) is outputted to a set of ports*}
+      A packet arriving at port with a header (src, dst) is outputted to a set of ports.
+      Example: flooding switch with 3 ports. If packet arrives at port 1, output at ports {2,3}.*}
   type_synonym 'v fwd_fun="port \<Rightarrow> 'v hdr \<Rightarrow> port set"
 
   
@@ -23,7 +24,9 @@ section{*A network consisting of entities*}
                       links      :: "(('v interface) \<times> ('v interface)) set"
 
 
-  text{*wellformed network. links must be subset of interfaces, think of it as a graph.*}
+  text{*wellformed network.
+        Links must be subset of interfaces, think of it as a graph. 
+        names_disjunct verifies that no confusion arises if there is a switch ''x'' and a host ''x''.*}
   locale wellformed_network =
     fixes N :: "'v network"
     assumes fst_links: "fst ` links N \<subseteq> interfaces N"
@@ -65,37 +68,38 @@ section{*A network consisting of entities*}
     end
 
 
-    subsection{*A packet traverses a hop*}
+    subsection{*Moving packets*}
+      text{*The following simple model is used. A packet is moved from input interface to input interface.
+            Therefore, two steps are necessary. 
+            1) the entity forwarding function outputs the packet at output interfaces. 
+            2) the packet traverses the link and thus arrives at the next input interface. *}
 
-      text{*transmitting a packet. A packet is ready to be send at output port out. It is send to all ports that are connected. *}
-
-
-      text{*A packet leaving an interface (outgoing) and traversing a link and arriving at an incoming interface. *}
-      text{*succ moves packet along links. *}
+      text{*succ moves packet along links. It is step 2*}
       definition succ :: "'v network \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
         "succ N out_iface \<equiv> {in_iface. (out_iface, in_iface) \<in> links N}"
   
-      text{*A packet in network N with header hdr traverses hop hop. The output is the set of input interface at the nex hops*}
+      text{*A packet traverses a hop. It performs steps 1 and 2.*}
       definition traverse :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
         "traverse N hdr hop \<equiv> UNION (((forwarding N) (entity hop)) (port hop) hdr) (\<lambda>p. succ N \<lparr>entity = entity hop, port = p\<rparr>)"
 
-      (*traverse jumps over routers, it is not in the links*)
+      (*traverse jumps over routers, it is not in the links. the forwarding function moves packets in routeres, there is no corresponding link IN an entity for it. *)
       lemma traverse_subseteq_interfaces: "wellformed_network N \<Longrightarrow> traverse N hdr hop \<subseteq> interfaces N"
         apply(simp add: traverse_def succ_def)
         apply(drule wellformed_network.snd_links)
         by force
+      corollary traverse_finite: assumes wf_N: "wellformed_network N"
+        shows "finite (traverse N hdr hop)"
+        using traverse_subseteq_interfaces[OF wf_N] wellformed_network.finite_interfaces[OF wf_N] by (metis rev_finite_subset)
 
  
 
     subsection {*Reachable interfaces*}
-      text{*
-        sending out a packet:
-          the source address in the header must match
-          the packet is send out according to the traverse function
-        transmitting a packet:
-          traverse it through the net
-      *}
-      (* we can allow spoofing by allowing an arbitrary packet header. UNION over all start points should give reachable_spoofing? *)
+      text{* Traverese performs one step to move a packet. The reachable set defines all reachable entities for a given start node of a packet. *}
+      (* we can allow spoofing by allowing an arbitrary packet header.*)
+      (* TODO: UNION over all start points should give reachable_spoofing? *)
+
+      text{*reachable(1): a packet starts at a start node. This start node is reachable.
+            reachable(2): if a hop is reachables, then the next hop is also reachable. *}
       inductive_set reachable :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set"
       for N::"'v network" and "pkt_hdr"::"'v hdr" and "start"::"'v interface"
       where
@@ -110,11 +114,33 @@ section{*A network consisting of entities*}
         using traverse_subseteq_interfaces[OF wf_N] by fast
 
     subsection{*The view of a packet*}
+      text{*For a fixed packet with a fixed header, its global network view is defined. 
+            For any start interface the packet is set out, the interfaces the packet can go next is recoreded.
+            
+            Essentially, view is a relation or the edges of a graph. This graph describes how the packet can move. 
+              The forwarding (and transfer) function is removed, the packet can directly move along the edges!
+
+            It is the view a packet has from the network.
+            *}
       definition view :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> (('v interface) \<times> ('v interface)) set" where
         "view N hdr = {(src, dst). src \<in> interfaces N \<and> dst \<in> traverse N hdr src}"
 
+      text{*Alternative definition of view: For all interfaces in the network, collect the next hops. *}
+      lemma view_alt: "view N hdr = (\<Union>src \<in> interfaces N. {src} \<times> traverse N hdr src)"
+        apply(simp add: view_def)
+        apply(rule)
+        apply blast
+        apply(rule)
+        by(clarify)
 
-    (*the view transforms the graph into a new graph without the traverse function! *)
+      lemma view_finite: assumes wf_N: "wellformed_network N"
+        shows "finite (view N hdr)"
+        apply(simp add: view_alt)
+        apply(subst finite_UN[OF wellformed_network.finite_interfaces[OF wf_N]])
+        apply(clarify)
+        apply(rule finite_cartesian_product)
+        apply simp
+        using traverse_finite[OF wf_N] by simp
 
   
     theorem reachable_eq_rtrancl_view:
@@ -146,6 +172,7 @@ section{*A network consisting of entities*}
 
 section{*TEST TEST TES TEST of UNIO*}
   lemma "UNION {1::nat,2,3} (\<lambda>n. {n+1}) = {2,3,4}" by eval
+  lemma "(\<Union>n\<in>{1::nat, 2, 3}. {n + 1}) = {2, 3, 4}" by eval
   lemma "UNION {1::nat,2,3} (\<lambda>n. {n+1}) = set (map (\<lambda>n. n+1) [1,2,3])" by eval
 
 
