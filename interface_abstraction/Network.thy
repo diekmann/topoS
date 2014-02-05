@@ -169,52 +169,59 @@ section{*A network consisting of entities*}
       lemma finite_view_trancl: assumes wf_N: "wellformed_network N" shows "finite ((view N hdr)\<^sup>+)"
         using view_finite[OF wf_N] finite_trancl by simp
 
-      (*is rtrancl finite??? it starts with the Id function that contains ALL*)
-      lemma assumes wf_N: "wellformed_network N" shows "finite {(src,dst). src \<in> interfaces N \<and> dst \<in> interfaces N \<and> (src, dst) \<in> (view N hdr)\<^sup>*}"
+      text{*The (bounded) reflexive transitive closure*}
+      (*In isabelle, saying only ^* would be transitive closure plus all reflexive elementes of type 'v interface. We only want all (interface N). 
+        For infinite types, ^* is infinite as it contains ALL {(a,a) | a of tpye}*)
+      definition view_rtrancl :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> (('v interface) \<times> ('v interface)) set" where
+        "view_rtrancl N hdr \<equiv> {(src,dst). src \<in> interfaces N \<and> dst \<in> interfaces N \<and> (src, dst) \<in> (view N hdr)\<^sup>*}"
+
+      lemma assumes wf_N: "wellformed_network N" shows "finite (view_rtrancl N hdr)"
         proof -
           have "{(src,dst). src \<in> interfaces N \<and> dst \<in> interfaces N \<and> (src, dst) \<in> (view N hdr)\<^sup>*} \<subseteq> interfaces N \<times> interfaces N" by blast
-          thus ?thesis using wellformed_network.finite_interfaces[OF wf_N] by (metis (lifting, no_types) finite_SigmaI rev_finite_subset)
+          thus ?thesis using wellformed_network.finite_interfaces[OF wf_N] unfolding view_rtrancl_def by (metis (lifting, no_types) finite_SigmaI rev_finite_subset)
         qed
 
+      lemma view_rtrancl_alt: 
+        assumes wf_N: "wellformed_network N" shows "view_rtrancl N hdr = (view N hdr)\<^sup>+ \<union> {(a,a) | a . a \<in> interfaces N}"
+        unfolding view_rtrancl_def
+        apply(rule equalityI)
+        apply(clarify)
+        apply (metis rtranclD)
+        (* r to l*)
+        apply(clarify)
+        apply(rule)
+        apply(erule Set.UnE)
+        using view_subseteq_interfaces_x_interfaces[OF wf_N] apply (metis SigmaE2 converse_tranclE trancl_mono)
+        apply fastforce
+        apply(rule)
+        apply(erule Set.UnE)
+        using view_subseteq_interfaces_x_interfaces[OF wf_N] apply (metis mem_Sigma_iff r_into_trancl' subsetI subset_antisym trancl_mono trancl_subset_Sigma)
+        apply fastforce
+        apply(erule Set.UnE)
+        apply(simp)
+        apply(simp)
+        done
 
-      (*todo, write the rtrancl as combination of ^+ (finite) and explicite reflecive of interfaces in N*)
-      lemma rtrancl_view_on_interfaces: 
-        assumes wf_N: "wellformed_network N" shows "{(src,dst). src \<in> interfaces N \<and> dst \<in> interfaces N \<and> (src, dst) \<in> (view N hdr)\<^sup>*} = 
-          (view N hdr)\<^sup>+ \<union> {(a,a) | a . a \<in> interfaces N}"
-      apply(rule equalityI)
-      apply(clarify)
-      apply (metis rtranclD)
-      (* r to l*)
-      apply(clarify)
-      apply(rule)
-      apply(erule Set.UnE)
-      using view_subseteq_interfaces_x_interfaces[OF wf_N] apply (metis SigmaE2 converse_tranclE trancl_mono)
-      apply fastforce
-      apply(rule)
-      apply(erule Set.UnE)
-      using view_subseteq_interfaces_x_interfaces[OF wf_N] apply (metis mem_Sigma_iff r_into_trancl' subsetI subset_antisym trancl_mono trancl_subset_Sigma)
-      apply fastforce
-      apply(erule Set.UnE)
-      apply(simp)
-      apply(simp)
-      done
-    lemma start_rtrancl_view_on_interfaces: assumes wf_N: "wellformed_network N"
-        and     start_iface: "start \<in> interfaces N"
-        shows "{dst. (start, dst) \<in> (view N hdr)\<^sup>*} = {dst. (start, dst) \<in> {(src,dst). src \<in> interfaces N \<and> dst \<in> interfaces N \<and> (src, dst) \<in> (view N hdr)\<^sup>*}}"
-      apply(simp)
-      apply(auto simp add: start_iface)
-      using view_subseteq_interfaces_x_interfaces[OF wf_N] by (metis Image_closed_trancl Image_subset rev_ImageI start_iface)
-    lemma start_rtrancl_view_on_interfaces_simplified: assumes wf_N: "wellformed_network N"
+    lemma
+      assumes wf_N: "wellformed_network N"
       and     start_iface: "start \<in> interfaces N"
-      shows "{dst. (start, dst) \<in> {(src,dst). src \<in> interfaces N \<and> dst \<in> interfaces N \<and> (src, dst) \<in> (view N hdr)\<^sup>*}} = 
-        {dst. (start, dst) \<in> (view N hdr)\<^sup>+} \<union> {start}"
-     apply(subst rtrancl_view_on_interfaces[OF wf_N])
-     apply(rule)
-     apply fastforce
-     apply(rule)
-     apply(simp)
-     using start_iface apply fastforce
-     done
+      shows "{dst. (start, dst) \<in> (view N hdr)\<^sup>*} = {dst. (start, dst) \<in> (view N hdr)\<^sup>+} \<union> {start}" (is "?LHS = ?RHS")
+      proof -
+        have "?LHS = {dst. (start, dst) \<in> view_rtrancl N hdr}"
+          unfolding view_rtrancl_def
+          apply(simp)
+          apply(auto simp add: start_iface)
+          using view_subseteq_interfaces_x_interfaces[OF wf_N] by (metis Image_closed_trancl Image_subset rev_ImageI start_iface)
+        also have "{dst. (start, dst) \<in> view_rtrancl N hdr} = ?RHS"
+         apply(subst view_rtrancl_alt[OF wf_N])
+         apply(rule)
+         apply fastforce
+         apply(rule)
+         apply(simp)
+         using start_iface apply fastforce
+         done
+       finally show "?LHS = ?RHS" .
+     qed
      
 
   section{*Reachable and view*}
