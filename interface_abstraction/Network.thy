@@ -202,7 +202,7 @@ section{*A network consisting of entities*}
         apply(simp)
         done
 
-    lemma
+    lemma star_view_rtrancl:
       assumes wf_N: "wellformed_network N"
       and     start_iface: "start \<in> interfaces N"
       shows "{dst. (start, dst) \<in> (view N hdr)\<^sup>*} = {dst. (start, dst) \<in> (view N hdr)\<^sup>+} \<union> {start}" (is "?LHS = ?RHS")
@@ -259,6 +259,9 @@ section{*A network consisting of entities*}
               qed
             qed
      qed
+    corollary reachable_eq_rtrancl_view2:
+     "\<lbrakk> wellformed_network N; start \<in> interfaces N \<rbrakk> \<Longrightarrow> reachable N hdr start = {dst. (start, dst) \<in> (view N hdr)\<^sup>+} \<union> {start}"
+     by(simp add: reachable_eq_rtrancl_view star_view_rtrancl)
 
 
 
