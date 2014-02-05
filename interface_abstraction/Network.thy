@@ -101,8 +101,6 @@ section{*A network consisting of entities*}
     subsection {*Reachable interfaces*}
       text{* Traverese performs one step to move a packet. The reachable set defines all reachable entities for a given start node of a packet. *}
       (* we can allow spoofing by allowing an arbitrary packet header.*)
-      (* TODO: UNION over all start points should give reachable_spoofing? *)
-
       text{*reachable(1): a packet starts at a start node. This start node is reachable.
             reachable(2): if a hop is reachables, then the next hop is also reachable. *}
       inductive_set reachable :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set"
@@ -113,10 +111,23 @@ section{*A network consisting of entities*}
 
       lemma reachable_subseteq_interfaces:
         assumes wf_N: "wellformed_network N"
-        shows "x \<in> reachable N pkt_hdr start \<Longrightarrow> x \<in> interfaces N"
-        apply(induction x rule: reachable.induct)
-        apply(simp)
-        using traverse_subseteq_interfaces[OF wf_N] by fast
+        shows "reachable N pkt_hdr start \<subseteq> interfaces N"
+        proof
+          fix x
+          show "x \<in> reachable N pkt_hdr start \<Longrightarrow> x \<in> interfaces N"
+            apply(induction x rule: reachable.induct)
+            apply(simp)
+            using traverse_subseteq_interfaces[OF wf_N] by fast
+        qed
+
+      text{*For all starts, we reach all possible interfaces*}
+      lemma reachable_completeness:
+        assumes wf_N: "wellformed_network N"
+        shows "(\<Union> start \<in> interfaces N. reachable N hdr start) = interfaces N"
+        apply(rule equalityI)
+        using reachable_subseteq_interfaces[OF wf_N] UN_least apply fast
+        apply(clarify)
+        by(auto intro: reachable.intros(1))
 
     subsection{*The view of a packet*}
       text{*For a fixed packet with a fixed header, its global network view is defined. 

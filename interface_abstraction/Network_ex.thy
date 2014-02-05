@@ -120,26 +120,12 @@ subsection{*reachable*}
 
 subsection{*view*}
   definition view_code :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> (('v interface) \<times> ('v interface)) set" where
-    "view_code N hdr = { src_dst \<in> interfaces N \<times> interfaces N. case src_dst of (src, dst) \<Rightarrow> dst \<in> traverse_code N hdr src}"
+    "view_code N hdr = UNION (interfaces N) (\<lambda> src. {src} \<times> traverse_code N hdr src)"
   lemma view_code_correct: "wellformed_network N \<Longrightarrow> view_code N = view N"
-    apply(simp add: view_code_def view_def fun_eq_iff traverse_code_correct)
-    apply(clarify)
-    apply(rule equalityI)
-    apply blast
-    using traverse_subseteq_interfaces by fast
-
+    by(simp add: view_code_def view_alt fun_eq_iff traverse_code_correct)
+  
   lemma traverse_code_subseteq_interfaces: "src \<in> interfaces N \<Longrightarrow> dst \<in> traverse_code N hdr src \<Longrightarrow> dst \<in> interfaces N"
     by(simp add: traverse_code_def succ_code_def)
-  (*more efficient, I guess. Only iterate over the interfaces*)
-  lemma[code_unfold]: "view_code N hdr = UNION (interfaces N) (\<lambda> src. {src} \<times> traverse_code N hdr src)"
-    apply(simp add: view_code_def)
-    apply(rule)
-    apply blast
-    apply(rule)
-    apply(clarify)
-    apply(fact traverse_code_subseteq_interfaces)
-    done
-
         
   (*
     the view jumps over routers. It essentially removes the traverse function. For example, if a packet arrives at switch port 1, it can continue to Bob and Carl directly. The fact that this happens via port 3 is hidden
