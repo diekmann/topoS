@@ -109,13 +109,17 @@ section{*A network consisting of entities*}
         "start \<in> (interfaces N) \<Longrightarrow> start \<in> reachable N pkt_hdr start" |
         "hop \<in> reachable N pkt_hdr start \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr hop) \<Longrightarrow> next_hop \<in> reachable N pkt_hdr start"
 
+      (*tuned induction rule*)
+      lemmas reachable_induct = reachable.induct[case_names Start Step]
+      thm reachable_induct
+
       lemma reachable_subseteq_interfaces:
         assumes wf_N: "wellformed_network N"
         shows "reachable N pkt_hdr start \<subseteq> interfaces N"
         proof
           fix x
           show "x \<in> reachable N pkt_hdr start \<Longrightarrow> x \<in> interfaces N"
-            apply(induction x rule: reachable.induct)
+            apply(induction x rule: reachable_induct)
             apply(simp)
             using traverse_subseteq_interfaces[OF wf_N] by fast
         qed
@@ -163,26 +167,35 @@ section{*A network consisting of entities*}
         assumes wf_N: "wellformed_network N"
         and     start_iface: "start \<in> interfaces N"
         shows "reachable N hdr start = {dst. (start, dst) \<in> (view N hdr)\<^sup>*}"
-      apply(rule equalityI)
-      apply(rule)
-      apply(simp)
-      apply(erule reachable.induct)
-      apply(simp add: view_def)
-      apply(simp add: view_def)
-      apply(subgoal_tac "(hop, next_hop) \<in> {(src, dst). src \<in> interfaces N \<and> dst \<in> traverse N hdr src}")
-      apply (metis (lifting, no_types) rtrancl.rtrancl_into_rtrancl)
-      apply(simp)
-      using reachable_subseteq_interfaces[OF wf_N] apply fast
-      (*next, right to left subset*)
-      apply(rule)
-      apply(simp)
-      apply(erule rtrancl_induct)
-      apply(simp)
-      apply(simp add: start_iface reachable.intros(1))
-      apply(simp)
-      apply(simp add: view_def)
-      apply (metis (full_types) reachable.intros(2))
-      done
+      proof(rule equalityI)
+        show "reachable N hdr start \<subseteq> {dst. (start, dst) \<in> (view N hdr)\<^sup>*}"
+          proof(rule, simp)
+            fix x show "x \<in> reachable N hdr start \<Longrightarrow> (start, x) \<in> (view N hdr)\<^sup>*"
+              proof(induction x rule:reachable_induct)
+                case Start thus ?case by(simp add: view_def)
+              next
+                case(Step hop next_hop)
+                  from reachable_subseteq_interfaces[OF wf_N] Step(1) have "hop \<in> interfaces N" by blast
+                  hence  "(hop, next_hop) \<in> {(src, dst). src \<in> interfaces N \<and> dst \<in> traverse N hdr src}"
+                    by(simp add: Step(2))
+                  hence  "(hop, next_hop) \<in> view N hdr"
+                    by(simp add: view_def)
+                  from this Step(3) rtrancl.rtrancl_into_rtrancl
+                  show ?case by simp
+              qed
+         qed
+      next
+      show "{dst. (start, dst) \<in> (view N hdr)\<^sup>*} \<subseteq> reachable N hdr start"
+        proof(rule, simp)
+          fix x show "(start, x) \<in> (view N hdr)\<^sup>* \<Longrightarrow> x \<in> reachable N hdr start"
+            proof(induction rule: rtrancl_induct)
+              case base
+                thus ?case using start_iface by(simp add: reachable.intros(1))
+              case(step y z)
+                thus ?case by(auto intro: reachable.intros(2) simp add: view_def)
+              qed
+            qed
+     qed
 
 
 
