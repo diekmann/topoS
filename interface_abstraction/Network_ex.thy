@@ -154,8 +154,10 @@ subsection{*view*}
 
   thm reachable_eq_rtrancl_view2
   definition reachable_code :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
-    "reachable_code N hdr start \<equiv> {dst. (start, dst) \<in> (view N hdr)\<^sup>+} \<union> {start}"
-  value[code] "reachable_code example_network (Host ''Alice'', Host ''Bob'')"
+    "reachable_code N hdr start \<equiv> {dst. (start, dst) \<in> (view_code N hdr)\<^sup>+} \<union> {start}"
+
+  value "(view_code example_network (Host ''Alice'', Host ''Bob''))\<^sup>+" (*works*)
+  value "reachable_code example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>" (*NOT*)
 
 
   hide_const "example_network"
