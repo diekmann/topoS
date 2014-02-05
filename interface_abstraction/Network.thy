@@ -178,7 +178,8 @@ section{*A network consisting of entities*}
 
 
       (*todo, write the rtrancl as combination of ^+ (finite) and explicite reflecive of interfaces in N*)
-      lemma assumes wf_N: "wellformed_network N" shows "{(src,dst). src \<in> interfaces N \<and> dst \<in> interfaces N \<and> (src, dst) \<in> (view N hdr)\<^sup>*} = 
+      lemma rtrancl_view_on_interfaces: 
+        assumes wf_N: "wellformed_network N" shows "{(src,dst). src \<in> interfaces N \<and> dst \<in> interfaces N \<and> (src, dst) \<in> (view N hdr)\<^sup>*} = 
           (view N hdr)\<^sup>+ \<union> {(a,a) | a . a \<in> interfaces N}"
       apply(rule equalityI)
       apply(clarify)
@@ -197,7 +198,25 @@ section{*A network consisting of entities*}
       apply(simp)
       apply(simp)
       done
-  
+    lemma start_rtrancl_view_on_interfaces: assumes wf_N: "wellformed_network N"
+        and     start_iface: "start \<in> interfaces N"
+        shows "{dst. (start, dst) \<in> (view N hdr)\<^sup>*} = {dst. (start, dst) \<in> {(src,dst). src \<in> interfaces N \<and> dst \<in> interfaces N \<and> (src, dst) \<in> (view N hdr)\<^sup>*}}"
+      apply(simp)
+      apply(auto simp add: start_iface)
+      using view_subseteq_interfaces_x_interfaces[OF wf_N] by (metis Image_closed_trancl Image_subset rev_ImageI start_iface)
+    lemma start_rtrancl_view_on_interfaces_simplified: assumes wf_N: "wellformed_network N"
+      and     start_iface: "start \<in> interfaces N"
+      shows "{dst. (start, dst) \<in> {(src,dst). src \<in> interfaces N \<and> dst \<in> interfaces N \<and> (src, dst) \<in> (view N hdr)\<^sup>*}} = 
+        {dst. (start, dst) \<in> (view N hdr)\<^sup>+} \<union> {start}"
+     apply(subst rtrancl_view_on_interfaces[OF wf_N])
+     apply(rule)
+     apply fastforce
+     apply(rule)
+     apply(simp)
+     using start_iface apply fastforce
+     done
+     
+
   section{*Reachable and view*}
     text{*intuitive reachable definition and defining reachability by the rtrancl over the view relation is equal. *}
     theorem reachable_eq_rtrancl_view:
