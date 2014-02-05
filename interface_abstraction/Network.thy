@@ -60,25 +60,7 @@ section{*A network consisting of entities*}
         apply(simp add: bij_betw_def inj_on_def)
         apply(fact names_disjunct_2)
         done
-
-      text{*transmitting a packet. A packet is ready to be send at output port out. It is send to all ports that are connected. *}
-      definition link_from :: "'v interface \<Rightarrow> ('v interface) set" where
-        "link_from out \<equiv> {inI. (out, inI) \<in> links N}"
-    
-      lemma link_from_bounded[code_unfold]: "link_from out = {inI \<in> interfaces N. (out, inI) \<in> links N}"
-      proof -
-        have "{inI. (out, inI) \<in> links N} = {inI \<in> snd ` links N. (out, inI) \<in> links N}" by force
-        also have "{inI \<in> snd ` links N. (out, inI) \<in> links N} = {inI \<in> interfaces N. (out, inI) \<in> links N}" using snd_links by force
-        finally show ?thesis using link_from_def by simp
-      qed
     end
-
-    text{*the same link_from but conveniently executable*}
-    definition link_from_code :: "'v network \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
-      "link_from_code N out \<equiv> {inI \<in> interfaces N. (out, inI) \<in> links N}"
-
-    lemma "wellformed_network N \<Longrightarrow> wellformed_network.link_from N out = link_from_code N out"
-      by(simp add: wellformed_network.link_from_bounded link_from_code_def)
 
   text{*Example*}
     (*
@@ -118,13 +100,14 @@ section{*A network consisting of entities*}
       by(unfold_locales, auto simp add: example_network_def)
     lemma wellformed_network_example_network: "wellformed_network example_network" by(unfold_locales)
 
-    value[code] "example.link_from \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 3 \<rparr>"
-
-    lemma "link_from_code example_network \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 3 \<rparr> = {\<lparr>entity = Host ''Bob'', port = Port 1\<rparr>, \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>}" by eval
-
 
     subsection{*A packet traverses a hop*}
+
+      text{*transmitting a packet. A packet is ready to be send at output port out. It is send to all ports that are connected. *}
+
+
       text{*A packet leaving an interface (outgoing) and traversing a link and arriving at an incoming interface. *}
+      text{*succ moves packet along links. *}
       definition succ :: "'v network \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
         "succ N out_iface \<equiv> {in_iface. (out_iface, in_iface) \<in> links N}"
         
@@ -136,7 +119,8 @@ section{*A network consisting of entities*}
         by force
 
       text{*Example*}
-        lemma "succ_code example_network \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 3 \<rparr> = {\<lparr>entity = Host ''Bob'', port = Port 1\<rparr>, \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>}" by eval
+        lemma "succ_code example_network \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 3 \<rparr> = 
+          {\<lparr>entity = Host ''Bob'', port = Port 1\<rparr>, \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>}" by eval
 
       text{*A packet in network N with header hdr traverses hop hop. The output is the set of input interface at the nex hops*}
       definition traverse :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
@@ -330,7 +314,7 @@ section{*TEST of UNIO*}
   
     context X
     begin
-      thm n1.link_from_def
+      
     end
 
 
