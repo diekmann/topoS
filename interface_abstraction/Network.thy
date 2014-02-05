@@ -161,7 +161,16 @@ section{*A network consisting of entities*}
         apply(rule finite_cartesian_product)
         apply simp
         using traverse_finite[OF wf_N] by simp
+      lemma finite_view_trancl: assumes wf_N: "wellformed_network N" shows "finite ((view N hdr)\<^sup>+)"
+        using view_finite[OF wf_N] finite_trancl by simp
 
+      (*is rtrancl finite??? it starts with the Id function that contains ALL*)
+      lemma assumes wf_N: "wellformed_network N" shows "finite {(src,dst). src \<in> interfaces N \<and> dst \<in> interfaces N \<and> (src, dst) \<in> (view N hdr)\<^sup>*}"
+        proof -
+          have "{(src,dst). src \<in> interfaces N \<and> dst \<in> interfaces N \<and> (src, dst) \<in> (view N hdr)\<^sup>*} \<subseteq> interfaces N \<times> interfaces N" by blast
+          thus ?thesis using wellformed_network.finite_interfaces[OF wf_N] by (metis (lifting, no_types) finite_SigmaI rev_finite_subset)
+        qed
+      (*todo, write the rtrancl as combination of ^+ (finite) and explicite reflecive of interfaces in N*)
   
   section{*Reachable and view*}
     text{*intuitive reachable definition and defining reachability by the rtrancl over the view relation is equal. *}
