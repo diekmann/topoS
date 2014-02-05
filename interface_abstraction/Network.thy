@@ -162,7 +162,10 @@ section{*A network consisting of entities*}
         apply simp
         using traverse_finite[OF wf_N] by simp
 
+    thm rtrancl_finite_eq_relpow[OF view_finite]
   
+  section{*Reachable and view*}
+    text{*intuitive reachable definition and defining reachability by the rtrancl over the view relation is equal. *}
     theorem reachable_eq_rtrancl_view:
         assumes wf_N: "wellformed_network N"
         and     start_iface: "start \<in> interfaces N"
