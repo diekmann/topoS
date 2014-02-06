@@ -191,6 +191,9 @@ subsection{*view*}
             (example_network\<lparr>forwarding:= (\<lambda> e. if e = Host ''Alice'' then \<lambda>p (src, dst). {Port 1} else (forwarding example_network) e)\<rparr>)
             (Host ''Bob'', Host ''Carl'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>"
             (*hmm, bob now forwards this packet, .... he just received it, ....*)
+
+            (*This reveals: packets need to be removed or handled seperately when they received their destination. we need to distinguish whether a host created the packet itself or just received it. *)
+
     value "reachable_code
             (example_network\<lparr>forwarding:= (\<lambda> e. if e = Host ''Alice'' then \<lambda>p (src, dst). {Port 1} else (forwarding example_network) e)\<rparr>)
             (Host ''Bob'', Host ''Alice'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>"

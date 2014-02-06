@@ -106,7 +106,7 @@ section{*A network consisting of entities*}
       inductive_set reachable :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set"
       for N::"'v network" and "pkt_hdr"::"'v hdr" and "start"::"'v interface"
       where
-        "start \<in> (interfaces N) \<Longrightarrow> start \<in> reachable N pkt_hdr start" |
+        "start \<in> (interfaces N) \<Longrightarrow> start \<in> reachable N pkt_hdr start" | (*TODO: new model: a packet is created and put on a link. it ist the directly send to all succ on that port! This is the semantics that we move packets from input ports to input ports*)
         "hop \<in> reachable N pkt_hdr start \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr hop) \<Longrightarrow> next_hop \<in> reachable N pkt_hdr start"
 
       (*tuned induction rule*)
