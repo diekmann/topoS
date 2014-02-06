@@ -197,12 +197,11 @@ section{*A network consisting of entities*}
         apply(simp)
         done
     
-    lemma "{dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>+} = (\<Union> first_hop \<in> succ N start. {dst. (first_hop, dst) \<in> (view N hdr)\<^sup>+})"
-      by(fact Complete_Lattices.Collect_bex_eq)
+
     lemma start_view_rtrancl:
       assumes wf_N: "wellformed_network N"
       and     start_iface: "start \<in> interfaces N"
-      shows "{dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>*} = {dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>+} \<union> (succ N start)" (is "?LHS = ?RHS")
+      shows "{dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>*} = (\<Union> first_hop \<in> succ N start. {dst. (first_hop, dst) \<in> (view N hdr)\<^sup>+}) \<union> (succ N start)" (is "?LHS = ?RHS")
       proof -
         have view_interfaces: "(view N hdr) `` (interfaces N) \<subseteq> (interfaces N)"
           using view_subseteq_interfaces_x_interfaces[OF wf_N] by blast
@@ -223,7 +222,7 @@ section{*A network consisting of entities*}
           apply(erule bexE)
           apply(rule_tac x="first_hop" in bexI)
           by(simp_all)
-        also have "{dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> view_rtrancl N hdr} = ?RHS"
+        also have "{dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> view_rtrancl N hdr} = {dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>+} \<union> (succ N start)"
           apply(subst view_rtrancl_alt[OF wf_N])
           apply(rule)
           apply fastforce
@@ -236,6 +235,8 @@ section{*A network consisting of entities*}
           apply(rule_tac x="x" in bexI)
           apply(simp_all)
           using succ_subseteq_interfaces[OF wf_N] by blast
+        also have "{dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>+} \<union> (succ N start) = (\<Union> first_hop \<in> succ N start. {dst. (first_hop, dst) \<in> (view N hdr)\<^sup>+}) \<union> (succ N start)"
+          by(simp add: Complete_Lattices.Collect_bex_eq)
        finally show "?LHS = ?RHS" .
      qed
     (*lemma star_view_rtrancl:
@@ -301,7 +302,7 @@ section{*A network consisting of entities*}
             qed
      qed
     corollary reachable_eq_rtrancl_view2:
-     "\<lbrakk> wellformed_network N; start \<in> interfaces N \<rbrakk> \<Longrightarrow> reachable N hdr start = {dst. (start, dst) \<in> (view N hdr)\<^sup>+} \<union> {start}"
+     "\<lbrakk> wellformed_network N; start \<in> interfaces N \<rbrakk> \<Longrightarrow> reachable N hdr start = (\<Union> first_hop \<in> succ N start. {dst. (first_hop, dst) \<in> (view N hdr)\<^sup>+}) \<union> (succ N start)"
      by(simp add: reachable_eq_rtrancl_view start_view_rtrancl)
 
 
