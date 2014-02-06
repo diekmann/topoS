@@ -171,6 +171,19 @@ subsection{*view*}
   lemma "reachable_code example_network (NetworkBox ''threePortSwitch'', Host ''Bob'') \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 3\<rparr> =
     {\<lparr>entity = Host ''Alice'', port = Port 1\<rparr>, \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 3\<rparr>}" by eval
 
+  subsection{*Modelling Spoofing*}
+    text{*The example_network was defined such that Hosts only send out their own packets. Thus, if a hosts forges its source address, she will not reach anyone as 
+          her host does not send out the packet. *}
+    lemma "reachable_code example_network (Host ''Alice_Spoofing'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr> = {\<lparr>entity = Host ''Alice'', port = Port 1\<rparr>}" by eval
+    lemma "reachable_code example_network (Host ''Bob'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr> = {\<lparr>entity = Host ''Alice'', port = Port 1\<rparr>}" by eval
+    
+    text{*However, we can adapt the forwarding function that Alice emits arbitrary packets.*}
+    lemma "reachable_code
+            (example_network\<lparr>forwarding:= (\<lambda> e. if e = Host ''Alice'' then \<lambda>p (src, dst). {Port 1} else (forwarding example_network) e)\<rparr>)
+            (Host ''Alice_spoofing'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>
+            =
+            {\<lparr>entity = Host ''Carl'', port = Port 1\<rparr>,\<lparr>entity = Host ''Bob'', port = Port 1\<rparr>,
+            \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>,  \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>}" by eval
 
   hide_const "example_network"
   hide_fact example_network_ex1 example_network_ex2 example_network_ex3 example_network_ex4 wellformed_network_example_network 
