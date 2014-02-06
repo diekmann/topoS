@@ -301,6 +301,8 @@ section{*A network consisting of entities*}
               qed
             qed
      qed
+    text{*reachability is exactly:
+      the first hop plus everything that can be transitively reached via the first hop. *}
     corollary reachable_eq_rtrancl_view2:
      "\<lbrakk> wellformed_network N; start \<in> interfaces N \<rbrakk> \<Longrightarrow> reachable N hdr start = (\<Union> first_hop \<in> succ N start. {dst. (first_hop, dst) \<in> (view N hdr)\<^sup>+}) \<union> (succ N start)"
      by(simp add: reachable_eq_rtrancl_view start_view_rtrancl)

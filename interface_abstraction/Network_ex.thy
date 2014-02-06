@@ -24,9 +24,7 @@ definition "example_network = \<lparr> interfaces = {\<lparr> entity = NetworkBo
             if e = NetworkBox ''threePortSwitch'' then 
               (\<lambda> p (src,dst). if p = Port 1 then Port ` {2,3} else if p = Port 2 then Port ` {1,3} else if p = Port 3 then Port ` {1,2} else {})
             else
-              (\<lambda> p (src,dst). if e = dst then {} else (*packet reached destination*)
-                              if e = src then {Port 1} (*send out their own packets*)
-                              else {})), (*drop the rest*)
+              (\<lambda> p (src,dst). {})), (*do not forward*)
          links = {
           (\<lparr> entity = Host ''Alice'', port = Port 1 \<rparr>, \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 1 \<rparr>),
           (\<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 1 \<rparr>, \<lparr> entity = Host ''Alice'', port = Port 1 \<rparr>),
@@ -65,7 +63,7 @@ subsection{*traverse*}
 
   text{*Example*}
     text{*Example: alice sends out packet, it arrives at switch*}
-    lemma example_network_ex1:"traverse_code example_network (Host ''Alice'', Host ''Bob'') \<lparr> entity = Host ''Alice'', port = Port 1 \<rparr>  = {\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>}" by eval
+    lemma "succ_code example_network \<lparr> entity = Host ''Alice'', port = Port 1 \<rparr> = {\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>}" by eval
     text{*Example cont.: Switch forwards packet to Bob and Carl*}
     lemma example_network_ex2: "traverse_code example_network (Host ''Alice'', Host ''Bob'')  \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr> = {\<lparr>entity = Host ''Carl'', port = Port 1\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>}" by eval
     text{*Example cont.: Carl accepts packet (or drops it, he does not forward it)*}
@@ -123,30 +121,34 @@ subsection{*view*}
     the view jumps over routers. It essentially removes the traverse function. For example, if a packet arrives at switch port 1, it can continue to Bob and Carl directly. The fact that this happens via port 3 is hidden
 
     Alice   1 <-------------------.
-      /\     |                    |
-       |     |                    |
-       |     |          ----------------------.
-       |     \/        |          |           \/
+      /\                          |
+       |                          |
+       |                ----------------------.
+       |               |          |           \/
        |      1 ------\<acute>          2 ----------> 1 Bob
        |      |  ThreePortSwitch  |       
        `------|--------- 3        |
               |                    `-------->  
                `----------------------------> 1 Carl
   *)
+  value "view_code example_network (Host ''Alice'', Host ''Bob'')"
   lemma "view_code example_network (Host ''Alice'', Host ''Bob'') = {
-    (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>),
-    (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>, \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>),
+    (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 3\<rparr>, \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>),
     (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 2\<rparr>, \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>),
     (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 2\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>),
     (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 2\<rparr>, \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>),
-    (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 3\<rparr>, \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>),
-    (\<lparr>entity = Host ''Alice'', port = Port 1\<rparr>, \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>)}" by eval
+    (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>),
+    (\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>, \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>)}" by eval
 
     (*the view transforms the graph into a new graph without the traverse function! *)
 
   thm reachable_eq_rtrancl_view2
   definition reachable_code :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
-    "reachable_code N hdr start \<equiv> {dst. (start, dst) \<in> (view_code N hdr)\<^sup>+} \<union> {start}"
+    "reachable_code N hdr start \<equiv> (\<Union> first_hop \<in> succ N start. {dst. (first_hop, dst) \<in> (view_code N hdr)\<^sup>+}) \<union> (succ_code N start)"
+  lemma reachable_code_correct: "wellformed_network N \<Longrightarrow> start \<in> interfaces N \<Longrightarrow> 
+    reachable_code N hdr start = reachable N hdr start"
+    by(simp add: reachable_code_def succ_code_correct view_code_correct reachable_eq_rtrancl_view2)
+
 
   value[code] "(view_code example_network (Host ''Alice'', Host ''Bob''))\<^sup>+"
 
@@ -156,39 +158,19 @@ subsection{*view*}
   lemma "reachable_code example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr> = {
     \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>,
     \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>,
-    \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>,
-    \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>}" by eval
+    \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>}" by eval
 
-  text{*A packet at switch port 3 is send to Alice (port 1, nobody is at port 2), regardless of its header! *}
-  lemma "reachable_code example_network (NetworkBox ''threePortSwitch'', Host ''Bob'') \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 3\<rparr> =
-    {\<lparr>entity = Host ''Alice'', port = Port 1\<rparr>, \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 3\<rparr>}" by eval
+  text{*A packet emitted at switch port 3 is send directly to Bob and Carl, the switching function is not called.*}
+  lemma "reachable_code example_network (NetworkBox ''threePortSwitch'', Host ''Bob'') \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 3\<rparr> = 
+    {\<lparr>entity = Host ''Bob'', port = Port 1\<rparr>, \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>}" by eval
 
   subsection{*Modelling Spoofing*}
-    text{*The example_network was defined such that Hosts only send out their own packets. Thus, if a hosts forges its source address, she will not reach anyone as 
-          her host does not send out the packet. *}
-    lemma "reachable_code example_network (Host ''Alice_Spoofing'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr> = {\<lparr>entity = Host ''Alice'', port = Port 1\<rparr>}" by eval
-    lemma "reachable_code example_network (Host ''Bob'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr> = {\<lparr>entity = Host ''Alice'', port = Port 1\<rparr>}" by eval
+    text{*the switch does not care about packet headers. We can send out arbitrary spoofed packets.*}
+    lemma "reachable_code example_network (Host ''Alice_Spoofing'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr> = reachable_code example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>" by eval
+    lemma "reachable_code example_network (Host ''Bob'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr> = reachable_code example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>" by eval
     
-    text{*However, we can adapt the forwarding function that Alice emits arbitrary packets.*}
-    lemma "reachable_code
-            (example_network\<lparr>forwarding:= (\<lambda> e. if e = Host ''Alice'' then \<lambda>p (src, dst). {Port 1} else (forwarding example_network) e)\<rparr>)
-            (Host ''Alice_spoofing'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>
-            =
-            {\<lparr>entity = Host ''Carl'', port = Port 1\<rparr>,\<lparr>entity = Host ''Bob'', port = Port 1\<rparr>,
-            \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>,  \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>}" by eval
-
-    value "reachable_code
-            (example_network\<lparr>forwarding:= (\<lambda> e. if e = Host ''Alice'' then \<lambda>p (src, dst). {Port 1} else (forwarding example_network) e)\<rparr>)
-            (Host ''Bob'', Host ''Carl'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>"
-            (*hmm, bob now forwards this packet, .... he just received it, ....*)
-
-            (*This reveals: packets need to be removed or handled seperately when they received their destination. we need to distinguish whether a host created the packet itself or just received it. *)
-
-    value "reachable_code
-            (example_network\<lparr>forwarding:= (\<lambda> e. if e = Host ''Alice'' then \<lambda>p (src, dst). {Port 1} else (forwarding example_network) e)\<rparr>)
-            (Host ''Bob'', Host ''Alice'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>"
 
   hide_const "example_network"
-  hide_fact example_network_ex1 example_network_ex2 example_network_ex3 example_network_ex4 wellformed_network_example_network 
+  hide_fact example_network_ex2 example_network_ex3 example_network_ex4 wellformed_network_example_network 
 
 end
