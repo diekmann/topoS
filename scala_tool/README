@@ -11,6 +11,9 @@ Status:
   Files:
     graph.json  the directed security policy
     models/*.json  the security invariants
+    
+A pre-compiled version with the cabin scenario is available at
+  www.net.in.tum.de/pub/diekmann/topos_cabinscenario.tar.gz
 
 Status for developers:
   The generated code is at src/main/scala/tum/in/net/psn/log_topo/NetworkModels/GENERATED
