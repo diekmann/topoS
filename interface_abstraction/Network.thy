@@ -81,6 +81,10 @@ section{*A network consisting of entities*}
       text{*succ moves packet along links. It is step 2*}
       definition succ :: "'v network \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
         "succ N out_iface \<equiv> {in_iface. (out_iface, in_iface) \<in> links N}"
+
+      lemma succ_subseteq_interfaces: assumes wf_N: "wellformed_network N" shows "succ N x \<subseteq> interfaces N"
+        apply(simp add: succ_def)
+        using wellformed_network.snd_links[OF wf_N] by force
   
       text{*A packet traverses a hop. It performs steps 1 and 2.*}
       (*recall: (forward N hdr hop) return the ports where the packet leaves the entity*)
@@ -101,12 +105,12 @@ section{*A network consisting of entities*}
     subsection {*Reachable interfaces*}
       text{* Traverese performs one step to move a packet. The reachable set defines all reachable entities for a given start node of a packet. *}
       (* we can allow spoofing by allowing an arbitrary packet header.*)
-      text{*reachable(1): a packet starts at a start node. This start node is reachable.
+      text{*reachable(1): a packet starts at a start node. All directly reachable nodes are reachable.
             reachable(2): if a hop is reachables, then the next hop is also reachable. *}
       inductive_set reachable :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set"
       for N::"'v network" and "pkt_hdr"::"'v hdr" and "start"::"'v interface"
       where
-        "start \<in> (interfaces N) \<Longrightarrow> start \<in> reachable N pkt_hdr start" | (*TODO: new model: a packet is created and put on a link. it ist the directly send to all succ on that port! This is the semantics that we move packets from input ports to input ports*)
+        "start \<in> (interfaces N) \<Longrightarrow> first_hop \<in> succ N start \<Longrightarrow> first_hop \<in> reachable N pkt_hdr start" |
         "hop \<in> reachable N pkt_hdr start \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr hop) \<Longrightarrow> next_hop \<in> reachable N pkt_hdr start"
 
       (*tuned induction rule*)
@@ -120,18 +124,9 @@ section{*A network consisting of entities*}
           fix x
           show "x \<in> reachable N pkt_hdr start \<Longrightarrow> x \<in> interfaces N"
             apply(induction x rule: reachable_induct)
-            apply(simp)
+            using succ_subseteq_interfaces[OF wf_N] apply blast
             using traverse_subseteq_interfaces[OF wf_N] by fast
         qed
-
-      text{*For all starts, we reach all possible interfaces*}
-      lemma reachable_completeness:
-        assumes wf_N: "wellformed_network N"
-        shows "(\<Union> start \<in> interfaces N. reachable N hdr start) = interfaces N"
-        apply(rule equalityI)
-        using reachable_subseteq_interfaces[OF wf_N] UN_least apply fast
-        apply(clarify)
-        by(auto intro: reachable.intros(1))
 
     subsection{*The view of a packet*}
       text{*For a fixed packet with a fixed header, its global network view is defined. 
@@ -169,7 +164,7 @@ section{*A network consisting of entities*}
       lemma finite_view_trancl: assumes wf_N: "wellformed_network N" shows "finite ((view N hdr)\<^sup>+)"
         using view_finite[OF wf_N] finite_trancl by simp
 
-      text{*The (bounded) reflexive transitive closure*}
+      (*text{*The (bounded) reflexive transitive closure*}
       (*In isabelle, saying only ^* would be transitive closure plus all reflexive elementes of type 'v interface. We only want all (interface N). 
         For infinite types, ^* is infinite as it contains ALL {(a,a) | a of tpye}*)
       definition view_rtrancl :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> (('v interface) \<times> ('v interface)) set" where
@@ -221,7 +216,7 @@ section{*A network consisting of entities*}
          using start_iface apply fastforce
          done
        finally show "?LHS = ?RHS" .
-     qed
+     qed*)
      
 
   section{*Reachable and view*}
@@ -229,39 +224,44 @@ section{*A network consisting of entities*}
     theorem reachable_eq_rtrancl_view:
         assumes wf_N: "wellformed_network N"
         and     start_iface: "start \<in> interfaces N"
-        shows "reachable N hdr start = {dst. (start, dst) \<in> (view N hdr)\<^sup>*}"
+        shows "reachable N hdr start = {dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>*}"
       proof(rule equalityI)
-        show "reachable N hdr start \<subseteq> {dst. (start, dst) \<in> (view N hdr)\<^sup>*}"
+        show "reachable N hdr start \<subseteq> {dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>*}"
           proof(rule, simp)
-            fix x show "x \<in> reachable N hdr start \<Longrightarrow> (start, x) \<in> (view N hdr)\<^sup>*"
+            fix x show "x \<in> reachable N hdr start \<Longrightarrow> \<exists>first_hop\<in>succ N start. (first_hop, x) \<in> (view N hdr)\<^sup>*"
               proof(induction x rule:reachable_induct)
-                case Start thus ?case by(simp add: view_def)
+                case(Start first_hop)
+                  hence "first_hop\<in>succ N start \<and> (first_hop, first_hop) \<in> (view N hdr)\<^sup>*" by(simp add: view_def)
+                  thus ?case by blast
               next
                 case(Step hop next_hop)
                   from reachable_subseteq_interfaces[OF wf_N] Step(1) have "hop \<in> interfaces N" by blast
                   hence  "(hop, next_hop) \<in> {(src, dst). src \<in> interfaces N \<and> dst \<in> traverse N hdr src}"
                     by(simp add: Step(2))
-                  hence  "(hop, next_hop) \<in> view N hdr"
+                  hence  next_rtran: "(hop, next_hop) \<in> view N hdr"
                     by(simp add: view_def)
-                  from this Step(3) rtrancl.rtrancl_into_rtrancl
-                  show ?case by simp
+                  from Step(3) obtain first_hop where "first_hop\<in>succ N start" and first_rtran: "(first_hop, hop) \<in> (view N hdr)\<^sup>*" by blast
+                  from `first_hop\<in>succ N start` rtrancl.rtrancl_into_rtrancl[OF first_rtran next_rtran]
+                  show ?case by blast
               qed
          qed
       next
-      show "{dst. (start, dst) \<in> (view N hdr)\<^sup>*} \<subseteq> reachable N hdr start"
-        proof(rule, simp)
-          fix x show "(start, x) \<in> (view N hdr)\<^sup>* \<Longrightarrow> x \<in> reachable N hdr start"
+      show "{dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>*} \<subseteq> reachable N hdr start"   
+        proof(rule, clarify)
+          fix x first_hop
+          assume "first_hop \<in> succ N start"
+          show "(first_hop, x) \<in> (view N hdr)\<^sup>* \<Longrightarrow> x \<in> reachable N hdr start"
             proof(induction rule: rtrancl_induct)
               case base
-                thus ?case using start_iface by(simp add: reachable.intros(1))
+                thus ?case using start_iface apply(rule reachable.intros(1)) using `first_hop \<in> succ N start` .
               case(step y z)
                 thus ?case by(auto intro: reachable.intros(2) simp add: view_def)
               qed
             qed
      qed
-    corollary reachable_eq_rtrancl_view2:
+    (*corollary reachable_eq_rtrancl_view2:
      "\<lbrakk> wellformed_network N; start \<in> interfaces N \<rbrakk> \<Longrightarrow> reachable N hdr start = {dst. (start, dst) \<in> (view N hdr)\<^sup>+} \<union> {start}"
-     by(simp add: reachable_eq_rtrancl_view star_view_rtrancl)
+     by(simp add: reachable_eq_rtrancl_view star_view_rtrancl)*)
 
 
 
