@@ -164,7 +164,7 @@ section{*A network consisting of entities*}
       lemma finite_view_trancl: assumes wf_N: "wellformed_network N" shows "finite ((view N hdr)\<^sup>+)"
         using view_finite[OF wf_N] finite_trancl by simp
 
-      (*text{*The (bounded) reflexive transitive closure*}
+      text{*The (bounded) reflexive transitive closure*}
       (*In isabelle, saying only ^* would be transitive closure plus all reflexive elementes of type 'v interface. We only want all (interface N). 
         For infinite types, ^* is infinite as it contains ALL {(a,a) | a of tpye}*)
       definition view_rtrancl :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> (('v interface) \<times> ('v interface)) set" where
@@ -196,8 +196,47 @@ section{*A network consisting of entities*}
         apply(simp)
         apply(simp)
         done
-
-    lemma star_view_rtrancl:
+    
+    lemma start_view_rtrancl:
+      assumes wf_N: "wellformed_network N"
+      and     start_iface: "start \<in> interfaces N"
+      shows "{dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>*} = {dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>+} \<union> (succ N start)" (is "?LHS = ?RHS")
+      proof -
+        have view_interfaces: "(view N hdr) `` (interfaces N) \<subseteq> (interfaces N)"
+          using view_subseteq_interfaces_x_interfaces[OF wf_N] by blast
+        have "?LHS \<subseteq> interfaces N"
+          apply(auto)
+          using succ_subseteq_interfaces[OF wf_N] Image_closed_trancl[OF view_interfaces] by auto
+        have "?LHS = {dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> view_rtrancl N hdr}"
+          apply(simp add: view_rtrancl_def)
+          apply(rule Set.Collect_cong)
+          apply(rule iffI)
+          apply(erule bexE)
+          apply(rule_tac x="first_hop" in bexI)
+          apply(rule)
+          using succ_subseteq_interfaces[OF wf_N] apply blast
+          apply(rule)
+          using `?LHS \<subseteq> interfaces N` apply blast
+          apply(simp_all)
+          apply(erule bexE)
+          apply(rule_tac x="first_hop" in bexI)
+          by(simp_all)
+        also have "{dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> view_rtrancl N hdr} = ?RHS"
+          apply(subst view_rtrancl_alt[OF wf_N])
+          apply(rule)
+          apply fastforce
+          apply(rule)
+          apply(simp)
+          apply(erule disjE)
+          apply(erule bexE)
+          apply(rule_tac x="first_hop" in bexI)
+          apply(simp_all)
+          apply(rule_tac x="x" in bexI)
+          apply(simp_all)
+          using succ_subseteq_interfaces[OF wf_N] by blast
+       finally show "?LHS = ?RHS" .
+     qed
+    (*lemma star_view_rtrancl:
       assumes wf_N: "wellformed_network N"
       and     start_iface: "start \<in> interfaces N"
       shows "{dst. (start, dst) \<in> (view N hdr)\<^sup>*} = {dst. (start, dst) \<in> (view N hdr)\<^sup>+} \<union> {start}" (is "?LHS = ?RHS")
@@ -259,9 +298,9 @@ section{*A network consisting of entities*}
               qed
             qed
      qed
-    (*corollary reachable_eq_rtrancl_view2:
+    corollary reachable_eq_rtrancl_view2:
      "\<lbrakk> wellformed_network N; start \<in> interfaces N \<rbrakk> \<Longrightarrow> reachable N hdr start = {dst. (start, dst) \<in> (view N hdr)\<^sup>+} \<union> {start}"
-     by(simp add: reachable_eq_rtrancl_view star_view_rtrancl)*)
+     by(simp add: reachable_eq_rtrancl_view start_view_rtrancl)
 
 
 
