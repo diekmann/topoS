@@ -156,13 +156,20 @@ subsection{*view*}
   definition reachable_code :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
     "reachable_code N hdr start \<equiv> {dst. (start, dst) \<in> (view_code N hdr)\<^sup>+} \<union> {start}"
 
-  value "(view_code example_network (Host ''Alice'', Host ''Bob''))\<^sup>+" (*works*)
+  value[code] "(view_code example_network (Host ''Alice'', Host ''Bob''))\<^sup>+"
 
-  value "Set.filter (\<lambda>(src,dst). src = \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>) ((view_code example_network (Host ''Alice'', Host ''Bob''))\<^sup>+)" (*works*)
-  
-  value "{(start, dst) \<in> (view_code example_network (Host ''Alice'', Host ''Bob''))\<^sup>+. True}" (*NOT*)
+  lemma[code_unfold]: "{dst. (start, dst) \<in> X} = snd ` (Set.filter (\<lambda>(src,dst). src = start) X)" by force
 
-  value "reachable_code example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>" (*NOT*)
+
+  lemma "reachable_code example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr> = {
+    \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>,
+    \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>,
+    \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>,
+    \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>}" by eval
+
+  text{*A packet at switch port 3 is send to Alice (port 1, nobody is at port 2), regardless of its header! *}
+  lemma "reachable_code example_network (NetworkBox ''threePortSwitch'', Host ''Bob'') \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 3\<rparr> =
+    {\<lparr>entity = Host ''Alice'', port = Port 1\<rparr>, \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 3\<rparr>}" by eval
 
 
   hide_const "example_network"
