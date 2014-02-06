@@ -197,6 +197,8 @@ section{*A network consisting of entities*}
         apply(simp)
         done
     
+    lemma "{dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>+} = (\<Union> first_hop \<in> succ N start. {dst. (first_hop, dst) \<in> (view N hdr)\<^sup>+})"
+      by(fact Complete_Lattices.Collect_bex_eq)
     lemma start_view_rtrancl:
       assumes wf_N: "wellformed_network N"
       and     start_iface: "start \<in> interfaces N"
