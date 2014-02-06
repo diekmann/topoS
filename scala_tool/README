@@ -1,6 +1,12 @@
 tool generated with the *.thy files
 Status:
   Compiles and runs
+  compile with: sbt launcher version 0.13.0
+  only 5 compiler warnings
+  $ sbt one-jar
+  $ sbt run
+  >>> visualize-diff-max
+    gives you fancy diff-graph (requires graphviz and pdf viewer in $PATH, works flawlessly on ubuntu 12.04, known to work on OSX)
 
 Status for developers:
   The generated code is at src/main/scala/tum/in/net/psn/log_topo/NetworkModels/GENERATED
