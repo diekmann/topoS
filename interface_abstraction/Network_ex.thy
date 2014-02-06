@@ -76,31 +76,24 @@ subsection{*reachable*}
   text{*Example*}
     lemma "\<lparr> entity = Host ''Carl'', port = Port 1 \<rparr> \<in> reachable example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>"
       apply(rule reachable.intros(2))
-      apply(rule reachable.intros(2))
       apply(rule reachable.intros(1))
       (*apply(rule HOL.sym[of _ "entity \<lparr>entity = Host ''Alice'', port = Port (Suc 0)\<rparr>"]) (*need to select manually*)*)
       apply(simp add: example_network_def)
+      apply(simp add: example_network_def succ_def)
       apply(subst traverse_code_correct[symmetric, OF wellformed_network_example_network])
-      apply(simp, subst example_network_ex1[simplified])
-      apply(simp)
-      apply(subst traverse_code_correct[symmetric, OF wellformed_network_example_network])
-      apply(simp, subst example_network_ex2[simplified])
-      apply(simp)
-      done
+      apply(subst example_network_ex2[simplified])
+      by(simp)
     lemma "\<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr> \<in> reachable example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>"
-      apply(rule reachable.intros(2))
       apply(rule reachable.intros(1))
       apply(simp add: example_network_def)
-      apply(subst traverse_code_correct[symmetric, OF wellformed_network_example_network])
-      apply(simp, subst example_network_ex1[simplified], simp)
-      done
+      by(simp add: example_network_def succ_def)
     lemma "x \<in> reachable example_network (Host ''Alice'', Host ''Bob'')  \<lparr>entity = Host ''Alice'', port = Port 1\<rparr> \<Longrightarrow> 
-      x \<in> {\<lparr> entity = Host ''Alice'', port = Port 1 \<rparr>,
-           \<lparr> entity = Host ''Carl'', port = Port 1 \<rparr>,
+      x \<in> {\<lparr> entity = Host ''Carl'', port = Port 1 \<rparr>,
            \<lparr> entity = Host ''Bob'', port = Port 1 \<rparr>,
            \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>}"
       apply(induction rule: reachable.induct)
       apply(simp)
+      apply(simp add: example_network_def succ_def)
       (*step*)
       apply(case_tac "hop = \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>", simp)
       apply(subst(asm) traverse_code_correct[symmetric, OF wellformed_network_example_network])
@@ -114,10 +107,7 @@ subsection{*reachable*}
       apply(subst(asm) traverse_code_correct[symmetric, OF wellformed_network_example_network])
       apply(subst(asm) example_network_ex4[simplified])
       apply(fast)
-      apply(simp)
-      apply(subst(asm) traverse_code_correct[symmetric, OF wellformed_network_example_network])
-      apply(subst(asm) example_network_ex1[simplified])
-      by simp
+      by(simp)
 
 
 subsection{*view*}
