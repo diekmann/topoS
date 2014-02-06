@@ -168,9 +168,63 @@ subsection{*view*}
     text{*the switch does not care about packet headers. We can send out arbitrary spoofed packets.*}
     lemma "reachable_code example_network (Host ''Alice_Spoofing'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr> = reachable_code example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>" by eval
     lemma "reachable_code example_network (Host ''Bob'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr> = reachable_code example_network (Host ''Alice'', Host ''Bob'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>" by eval
-    
+  
+section{*Another example*}
+  text{*forwarding by name*}
+  definition "example_network2 = \<lparr> interfaces = {
+                       \<lparr> entity = NetworkBox ''sw1'', port = Port 1 \<rparr>,
+                       \<lparr> entity = NetworkBox ''sw1'', port = Port 2 \<rparr>,
+                       \<lparr> entity = NetworkBox ''sw1'', port = Port 3 \<rparr>,
+                       \<lparr> entity = NetworkBox ''sw2'', port = Port 1 \<rparr>,
+                       \<lparr> entity = NetworkBox ''sw2'', port = Port 2 \<rparr>,
+                       \<lparr> entity = NetworkBox ''sw2'', port = Port 3 \<rparr>,
+                       \<lparr> entity = Host ''Alice'', port = Port 1 \<rparr>,
+                       \<lparr> entity = Host ''Bob'', port = Port 1 \<rparr>,
+                       \<lparr> entity = Host ''Carl'', port = Port 1 \<rparr>,
+                       \<lparr> entity = Host ''Dan'', port = Port 1 \<rparr>},
+         forwarding = (\<lambda> e. 
+            if e = NetworkBox ''sw1'' then 
+              (\<lambda> p (src,dst). if dst = Host ''Alice'' then {Port 1} else if dst = Host ''Bob'' then {Port 3} else if dst = Host ''Carl'' then {Port 3} else {})
+            else if e = NetworkBox ''sw2'' then 
+              (\<lambda> p (src,dst). if dst = Host ''Alice'' then {Port 3} else if dst = Host ''Bob'' then {Port 1}  else if dst = Host ''Carl'' then {Port 2}  else {})
+            else
+              (\<lambda> p (src,dst). {})), (*do not forward*)
+         links = {
+          (\<lparr> entity = Host ''Alice'', port = Port 1 \<rparr>, \<lparr> entity = NetworkBox ''sw1'', port = Port 1 \<rparr>),
+          (\<lparr> entity = NetworkBox ''sw1'', port = Port 1 \<rparr>, \<lparr> entity = Host ''Alice'', port = Port 1 \<rparr>),
 
-  hide_const "example_network"
-  hide_fact example_network_ex2 example_network_ex3 example_network_ex4 wellformed_network_example_network 
+
+          (\<lparr> entity = NetworkBox ''sw1'', port = Port 3 \<rparr>, \<lparr> entity = NetworkBox ''sw2'', port = Port 3 \<rparr>),
+          (\<lparr> entity = NetworkBox ''sw2'', port = Port 3 \<rparr>, \<lparr> entity = NetworkBox ''sw1'', port = Port 3 \<rparr>),
+
+          (\<lparr> entity = Host ''Bob'', port = Port 1 \<rparr>, \<lparr> entity = NetworkBox ''sw2'', port = Port 1 \<rparr>),
+          (\<lparr> entity = NetworkBox ''sw2'', port = Port 1 \<rparr>, \<lparr> entity = Host ''Bob'', port = Port 1 \<rparr>),
+
+          (\<lparr> entity = Host ''Carl'', port = Port 1 \<rparr>, \<lparr> entity = NetworkBox ''sw2'', port = Port 2 \<rparr>),
+          (\<lparr> entity = NetworkBox ''sw2'', port = Port 2 \<rparr>, \<lparr> entity = Host ''Carl'', port = Port 1 \<rparr>)
+          }\<rparr>"
+
+  interpretation example2!: wellformed_network example_network2
+  by(unfold_locales, auto simp add: example_network2_def)
+  lemma "wellformed_network example_network2" by(unfold_locales)
+
+  text{*Alice sends spoofed packet to carl*}
+  value "reachable_code example_network2 (Host ''Alice_Spoofing'', Host ''Carl'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>"
+
+  text{*unknown desination is not forwarded*}
+  value "reachable_code example_network2 (Host ''Alice_Spoofing'', Host ''nobody'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>"
+
+  text{*packet comes back*}
+  value "reachable_code example_network2 (Host ''Carl'', Host ''Alice'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>"
+
+  text{*Carl to Alice*}
+  value "reachable_code example_network2 (Host ''Carl'', Host ''Alice'') \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>"
+
+
+
+
+section{*cleanup namespace*}
+  hide_const "example_network" "example_network2"
+  hide_fact example_network_ex2 example_network_ex3 example_network_ex4 wellformed_network_example_network
 
 end
