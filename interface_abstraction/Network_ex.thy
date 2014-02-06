@@ -187,6 +187,13 @@ subsection{*view*}
             {\<lparr>entity = Host ''Carl'', port = Port 1\<rparr>,\<lparr>entity = Host ''Bob'', port = Port 1\<rparr>,
             \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>,  \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>}" by eval
 
+    value "reachable_code
+            (example_network\<lparr>forwarding:= (\<lambda> e. if e = Host ''Alice'' then \<lambda>p (src, dst). {Port 1} else (forwarding example_network) e)\<rparr>)
+            (Host ''Bob'', Host ''Carl'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>"
+            (*hmm, bob now forwards this packet, .... he just received it, ....*)
+    value "reachable_code
+            (example_network\<lparr>forwarding:= (\<lambda> e. if e = Host ''Alice'' then \<lambda>p (src, dst). {Port 1} else (forwarding example_network) e)\<rparr>)
+            (Host ''Bob'', Host ''Alice'') \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>"
 
   hide_const "example_network"
   hide_fact example_network_ex1 example_network_ex2 example_network_ex3 example_network_ex4 wellformed_network_example_network 
