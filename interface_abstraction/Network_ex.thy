@@ -24,7 +24,9 @@ definition "example_network = \<lparr> interfaces = {\<lparr> entity = NetworkBo
             if e = NetworkBox ''threePortSwitch'' then 
               (\<lambda> p (src,dst). if p = Port 1 then Port ` {2,3} else if p = Port 2 then Port ` {1,3} else if p = Port 3 then Port ` {1,2} else {})
             else
-              (\<lambda> p (src,dst). if e = src then {Port 1} else {})), (*Hosts (not necessarily) send out their own packets and drop the rest*)
+              (\<lambda> p (src,dst). if e = dst then {} else (*packet reached destination*)
+                              if e = src then {Port 1} (*send out their own packets*)
+                              else {})), (*drop the rest*)
          links = {
           (\<lparr> entity = Host ''Alice'', port = Port 1 \<rparr>, \<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 1 \<rparr>),
           (\<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 1 \<rparr>, \<lparr> entity = Host ''Alice'', port = Port 1 \<rparr>),
@@ -184,6 +186,7 @@ subsection{*view*}
             =
             {\<lparr>entity = Host ''Carl'', port = Port 1\<rparr>,\<lparr>entity = Host ''Bob'', port = Port 1\<rparr>,
             \<lparr>entity = NetworkBox ''threePortSwitch'', port = Port 1\<rparr>,  \<lparr>entity = Host ''Alice'', port = Port 1\<rparr>}" by eval
+
 
   hide_const "example_network"
   hide_fact example_network_ex1 example_network_ex2 example_network_ex3 example_network_ex4 wellformed_network_example_network 
