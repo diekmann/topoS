@@ -307,6 +307,10 @@ section{*A network consisting of entities*}
      "\<lbrakk> wellformed_network N; start \<in> interfaces N \<rbrakk> \<Longrightarrow> reachable N hdr start = (\<Union> first_hop \<in> succ N start. {dst. (first_hop, dst) \<in> (view N hdr)\<^sup>+}) \<union> (succ N start)"
      by(simp add: reachable_eq_rtrancl_view start_view_rtrancl)
 
+  section{*Sending packets to hosts*}
+    text{*a packet from start is sent to dst. Which hosts gets the packet?*}
+    definition send_to :: "'v network \<Rightarrow> 'v interface \<Rightarrow> 'v entity \<Rightarrow> 'v interface set" where
+      "send_to N start dst \<equiv> {e \<in> reachable N (entity start, dst) start. \<exists> x. entity e = Host x}"
 
 
 section{*TEST TEST TES TEST of UNIO*}

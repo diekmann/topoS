@@ -220,7 +220,26 @@ section{*Another example*}
   text{*Carl to Alice*}
   value "reachable_code example_network2 (Host ''Carl'', Host ''Alice'') \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>"
 
+  section{*send_to*}
+    definition send_to_code :: "'v network \<Rightarrow> 'v interface \<Rightarrow> 'v entity \<Rightarrow> 'v interface set" where
+      "send_to_code N start dst \<equiv> Set.filter (\<lambda>e. case entity e of Host _ \<Rightarrow> True | _ \<Rightarrow> False) (reachable_code N (entity start, dst) start)"
+  lemma send_to_code_correct: "wellformed_network N \<Longrightarrow> start \<in> interfaces N \<Longrightarrow> 
+    send_to_code N start dst = send_to N start dst"
+    apply(simp add: send_to_code_def send_to_def reachable_code_correct Set.filter_def)
+    apply(rule Set.Collect_cong)
+    apply(rule)
+    apply(simp)
+    apply(case_tac "entity a")
+    apply(simp)
+    apply(simp)
+    apply(simp)
+    apply(clarify)
+    by auto
 
+    text{*in network one, carl and bob are at the same port, our packet arrives at both*}
+    lemma "send_to_code example_network \<lparr>entity = Host ''Alice'', port = Port 1\<rparr> (Host ''Carl'') = {\<lparr>entity = Host ''Carl'', port = Port 1\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>}" by eval
+    text{*network two makes sure that the packet only arrives at carl*}
+    lemma "send_to_code example_network2 \<lparr>entity = Host ''Alice'', port = Port 1\<rparr> (Host ''Carl'') = {\<lparr>entity = Host ''Carl'', port = Port 1\<rparr>}" by eval
 
 
 section{*cleanup namespace*}
