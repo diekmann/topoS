@@ -100,7 +100,7 @@ section{*A network consisting of entities*}
         using wellformed_network.snd_links[OF wf_N] by force
       lemma succ_subset_networkboxes: "succ N start \<subseteq> networkboxes (succ N start) \<Longrightarrow> succ N start = networkboxes (succ N start)"
         by(simp add: networkboxes_def, blast)
-      lemma [simp]: assumes wf_N: "wellformed_network N" shows "start \<notin> interfaces N \<Longrightarrow> succ N start = {}"
+      lemma start_notininterfaces_succ_empty: assumes wf_N: "wellformed_network N" shows "start \<notin> interfaces N \<Longrightarrow> succ N start = {}"
         apply(simp add: succ_def)
         using wellformed_network.fst_links[OF wf_N] by fastforce
 
@@ -146,6 +146,11 @@ section{*A network consisting of entities*}
             using traverse_subseteq_interfaces[OF wf_N] by fast
         qed
 
+    lemma start_notininterfaces_reachableempty: assumes wf_N: "wellformed_network N" shows "start \<notin> interfaces N \<Longrightarrow> reachable N hdr start = {}"
+      apply(drule start_notininterfaces_succ_empty[OF wf_N])
+      apply(rule, rule)
+      apply(erule reachable_induct)
+      by(auto)
     lemma succ_subseteq_reachable: "succ N start \<subseteq> reachable N hdr start"
       by(auto intro: reachable.intros)
 
