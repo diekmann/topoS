@@ -145,8 +145,7 @@ subsection{*view*}
   thm reachable_eq_rtrancl_view2
   definition reachable_code :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
     "reachable_code N hdr start \<equiv> (\<Union> first_hop \<in> succ N start. {dst. (first_hop, dst) \<in> (view_code N hdr)\<^sup>+}) \<union> (succ_code N start)"
-  lemma reachable_code_correct: "wellformed_network N \<Longrightarrow> start \<in> interfaces N \<Longrightarrow> 
-    reachable_code N hdr start = reachable N hdr start"
+  lemma reachable_code_correct: "wellformed_network N \<Longrightarrow> reachable_code N hdr start = reachable N hdr start"
     by(simp add: reachable_code_def succ_code_correct view_code_correct reachable_eq_rtrancl_view2)
 
 
