@@ -98,6 +98,8 @@ section{*A network consisting of entities*}
       lemma succ_subseteq_interfaces: assumes wf_N: "wellformed_network N" shows "succ N x \<subseteq> interfaces N"
         apply(simp add: succ_def)
         using wellformed_network.snd_links[OF wf_N] by force
+      lemma succ_subset_networkboxes: "succ N start \<subseteq> networkboxes (succ N start) \<Longrightarrow> succ N start = networkboxes (succ N start)"
+        by(simp add: networkboxes_def, blast)
   
       text{*A packet traverses a hop. It performs steps 1 and 2.*}
       (*recall: (forward N hdr hop) return the ports where the packet leaves the entity*)
@@ -140,6 +142,10 @@ section{*A network consisting of entities*}
             using succ_subseteq_interfaces[OF wf_N] apply blast
             using traverse_subseteq_interfaces[OF wf_N] by fast
         qed
+
+    lemma "succ N start \<subseteq> reachable N hdr start"
+      apply(auto intro: reachable.intros)
+      oops
 
     subsection{*The view of a packet*}
       text{*For a fixed packet with a fixed header, its global network view is defined. 
@@ -334,7 +340,8 @@ section{*A network consisting of entities*}
 
 
     (*if spoofed adresses exist ...*)
-    lemma "\<lbrakk> wellformed_network N; start \<in> interfaces N \<rbrakk> \<Longrightarrow> \<exists> spoofed. spoofed \<noteq> entity start \<Longrightarrow> host_cannot_spoof N start \<Longrightarrow> succ N start \<subseteq> networkboxes (succ N start)"
+    lemma "\<lbrakk> wellformed_network N; start \<in> interfaces N \<rbrakk> \<Longrightarrow> \<exists> spoofed. spoofed \<noteq> entity start \<Longrightarrow> host_cannot_spoof N start \<Longrightarrow> succ N start = networkboxes (succ N start)"
+      apply(rule succ_subset_networkboxes)
       apply(simp add: host_cannot_spoof_def reachable_eq_rtrancl_view2)
       apply(erule exE)
       by presburger
