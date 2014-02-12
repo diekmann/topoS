@@ -146,7 +146,7 @@ section{*A network consisting of entities*}
             using traverse_subseteq_interfaces[OF wf_N] by fast
         qed
 
-    lemma "succ N start \<subseteq> reachable N hdr start"
+    lemma succ_subseteq_reachable: "succ N start \<subseteq> reachable N hdr start"
       by(auto intro: reachable.intros)
 
     subsection{*The view of a packet*}
@@ -340,11 +340,11 @@ section{*A network consisting of entities*}
 
 
     (*if spoofed adresses exist ...*)
-    lemma "\<lbrakk> wellformed_network N \<rbrakk> \<Longrightarrow> \<exists> spoofed. spoofed \<noteq> entity start \<Longrightarrow> host_cannot_spoof N start \<Longrightarrow> succ N start = networkboxes (succ N start)"
+    lemma "\<exists> spoofed. spoofed \<noteq> entity start \<Longrightarrow> host_cannot_spoof N start \<Longrightarrow> succ N start = networkboxes (succ N start)"
       apply(rule succ_subset_networkboxes)
-      apply(simp add: host_cannot_spoof_def reachable_eq_rtrancl_view2)
+      apply(simp add: host_cannot_spoof_def)
       apply(erule exE)
-      by presburger
+      using succ_subseteq_reachable by fast
 
     (*if the adress space is so small that there is only one adress, a host cannot spoof (oviously)*)
     lemma "\<not> (\<exists> spoofed. spoofed \<noteq> entity start) \<Longrightarrow> host_cannot_spoof N start"
