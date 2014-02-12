@@ -125,7 +125,7 @@ section{*A network consisting of entities*}
       inductive_set reachable :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set"
       for N::"'v network" and "pkt_hdr"::"'v hdr" and "start"::"'v interface"
       where
-        "start \<in> (interfaces N) \<Longrightarrow> first_hop \<in> succ N start \<Longrightarrow> first_hop \<in> reachable N pkt_hdr start" |
+        "first_hop \<in> succ N start \<Longrightarrow> first_hop \<in> reachable N pkt_hdr start" |
         "hop \<in> reachable N pkt_hdr start \<Longrightarrow> next_hop \<in> (traverse N pkt_hdr hop) \<Longrightarrow> next_hop \<in> reachable N pkt_hdr start"
 
       (*tuned induction rule*)
@@ -144,8 +144,7 @@ section{*A network consisting of entities*}
         qed
 
     lemma "succ N start \<subseteq> reachable N hdr start"
-      apply(auto intro: reachable.intros)
-      oops
+      by(auto intro: reachable.intros)
 
     subsection{*The view of a packet*}
       text{*For a fixed packet with a fixed header, its global network view is defined. 
@@ -219,7 +218,6 @@ section{*A network consisting of entities*}
 
     lemma start_view_rtrancl:
       assumes wf_N: "wellformed_network N"
-      and     start_iface: "start \<in> interfaces N"
       shows "{dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>*} = (\<Union> first_hop \<in> succ N start. {dst. (first_hop, dst) \<in> (view N hdr)\<^sup>+}) \<union> (succ N start)" (is "?LHS = ?RHS")
       proof -
         have view_interfaces: "(view N hdr) `` (interfaces N) \<subseteq> (interfaces N)"
@@ -284,7 +282,6 @@ section{*A network consisting of entities*}
     text{*intuitive reachable definition and defining reachability by the rtrancl over the view relation is equal. *}
     theorem reachable_eq_rtrancl_view:
         assumes wf_N: "wellformed_network N"
-        and     start_iface: "start \<in> interfaces N"
         shows "reachable N hdr start = {dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>*}"
       proof(rule equalityI)
         show "reachable N hdr start \<subseteq> {dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>*}"
@@ -314,7 +311,7 @@ section{*A network consisting of entities*}
           show "(first_hop, x) \<in> (view N hdr)\<^sup>* \<Longrightarrow> x \<in> reachable N hdr start"
             proof(induction rule: rtrancl_induct)
               case base
-                thus ?case using start_iface apply(rule reachable.intros(1)) using `first_hop \<in> succ N start` .
+                thus ?case using reachable.intros(1) `first_hop \<in> succ N start` .
               case(step y z)
                 thus ?case by(auto intro: reachable.intros(2) simp add: view_def)
               qed
@@ -323,7 +320,7 @@ section{*A network consisting of entities*}
     text{*reachability is exactly:
       the first hop plus everything that can be transitively reached via the first hop. *}
     corollary reachable_eq_rtrancl_view2:
-     "\<lbrakk> wellformed_network N; start \<in> interfaces N \<rbrakk> \<Longrightarrow> reachable N hdr start = (\<Union> first_hop \<in> succ N start. {dst. (first_hop, dst) \<in> (view N hdr)\<^sup>+}) \<union> (succ N start)"
+     "\<lbrakk> wellformed_network N \<rbrakk> \<Longrightarrow> reachable N hdr start = (\<Union> first_hop \<in> succ N start. {dst. (first_hop, dst) \<in> (view N hdr)\<^sup>+}) \<union> (succ N start)"
      by(simp add: reachable_eq_rtrancl_view start_view_rtrancl)
 
 
@@ -340,7 +337,7 @@ section{*A network consisting of entities*}
 
 
     (*if spoofed adresses exist ...*)
-    lemma "\<lbrakk> wellformed_network N; start \<in> interfaces N \<rbrakk> \<Longrightarrow> \<exists> spoofed. spoofed \<noteq> entity start \<Longrightarrow> host_cannot_spoof N start \<Longrightarrow> succ N start = networkboxes (succ N start)"
+    lemma "\<lbrakk> wellformed_network N \<rbrakk> \<Longrightarrow> \<exists> spoofed. spoofed \<noteq> entity start \<Longrightarrow> host_cannot_spoof N start \<Longrightarrow> succ N start = networkboxes (succ N start)"
       apply(rule succ_subset_networkboxes)
       apply(simp add: host_cannot_spoof_def reachable_eq_rtrancl_view2)
       apply(erule exE)
