@@ -82,6 +82,9 @@ section{*A network consisting of entities*}
       apply(simp add: entity_name_def)
       by fastforce
 
+    definition networkboxes :: "'v interface set \<Rightarrow> 'v interface set" where
+      "networkboxes ifaces \<equiv> {e \<in> ifaces. \<exists> x. entity e = NetworkBox x}"
+
     subsection{*Moving packets*}
       text{*The following simple model is used. A packet is moved from input interface to input interface.
             Therefore, two steps are necessary. 
@@ -323,6 +326,48 @@ section{*A network consisting of entities*}
     text{*a packet from start is sent to dst. Which hosts gets the packet?*}
     definition send_to :: "'v network \<Rightarrow> 'v interface \<Rightarrow> 'v entity \<Rightarrow> 'v interface set" where
       "send_to N start dst \<equiv> hosts (reachable N (entity start, dst) start)"
+
+
+  section{*Can hosts spoof?*}
+    definition host_cannot_spoof :: "'v network \<Rightarrow> 'v interface \<Rightarrow> bool" where
+      "host_cannot_spoof N start \<equiv> \<forall> spoofed dst. spoofed \<noteq> entity start \<longrightarrow> reachable N (spoofed, dst) start \<subseteq> networkboxes (succ N start)"
+
+
+    (*if spoofed adresses exist ...*)
+    lemma "\<lbrakk> wellformed_network N; start \<in> interfaces N \<rbrakk> \<Longrightarrow> \<exists> spoofed. spoofed \<noteq> entity start \<Longrightarrow> host_cannot_spoof N start \<Longrightarrow> succ N start \<subseteq> networkboxes (succ N start)"
+      apply(simp add: host_cannot_spoof_def reachable_eq_rtrancl_view2)
+      apply(erule exE)
+      by presburger
+
+    (*if the adress space is so small that there is only one adress, a host cannot spoof (oviously)*)
+    lemma "\<not> (\<exists> spoofed. spoofed \<noteq> entity start) \<Longrightarrow> host_cannot_spoof N start"
+      by(simp add: host_cannot_spoof_def)
+      
+
+    text{*if all networkboxes connected to start block spoofing, start cannot spoof*}
+    lemma 
+      assumes connected_to_networkboxes: "succ N start = networkboxes (succ N start)" 
+        and   no_fwd_spoofed: "\<forall> spoofed dst. spoofed \<noteq> entity start \<longrightarrow> (\<forall> first_hop \<in> succ N start. (forward N (spoofed, dst) first_hop) = {})"
+      shows "host_cannot_spoof N start"
+      proof -
+        {
+        have "\<forall> spoofed dst. spoofed \<noteq> entity start \<longrightarrow> (\<forall> first_hop \<in> succ N start. (forward N (spoofed, dst) first_hop) = {}) \<Longrightarrow>
+                  host_cannot_spoof N start"
+        apply(simp add: host_cannot_spoof_def)
+        apply(clarify)
+        apply(erule reachable_induct)
+        apply(simp)
+        using connected_to_networkboxes apply fast
+        apply(simp add: traverse_def)
+        using connected_to_networkboxes apply blast
+        done
+        }
+        from this no_fwd_spoofed show ?thesis by simp
+      qed
+
+
+
+
 
 
 section{*TEST TEST TES TEST of UNIO*}

@@ -236,6 +236,18 @@ section{*Another example*}
     {\<lparr>entity = Host ''Alice'', port = Port 1\<rparr>, \<lparr>entity = Host ''Bob'', port = Port 1\<rparr>, \<lparr>entity = Host ''Carl'', port = Port 1\<rparr>, \<lparr>entity = Host ''Dan'', port = Port 1\<rparr>}" by eval
 
 
+    lemma [code_unfold]: "networkboxes ifaces = {e \<in> ifaces. (case entity e of NetworkBox _ \<Rightarrow> True | _ \<Rightarrow> False)}"
+      apply(simp add: networkboxes_def)
+      apply(rule Set.Collect_cong)
+      apply(rule)
+      apply(simp)
+      apply(case_tac "entity e")
+      apply(simp)
+      apply(simp)
+      apply(simp)
+      apply(case_tac "entity e")
+      by auto
+
   section{*send_to*}
     definition send_to_code :: "'v network \<Rightarrow> 'v interface \<Rightarrow> 'v entity \<Rightarrow> 'v interface set" where
       "send_to_code N start dst \<equiv> hosts (reachable_code N (entity start, dst) start)"
