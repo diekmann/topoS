@@ -100,7 +100,10 @@ section{*A network consisting of entities*}
         using wellformed_network.snd_links[OF wf_N] by force
       lemma succ_subset_networkboxes: "succ N start \<subseteq> networkboxes (succ N start) \<Longrightarrow> succ N start = networkboxes (succ N start)"
         by(simp add: networkboxes_def, blast)
-  
+      lemma [simp]: assumes wf_N: "wellformed_network N" shows "start \<notin> interfaces N \<Longrightarrow> succ N start = {}"
+        apply(simp add: succ_def)
+        using wellformed_network.fst_links[OF wf_N] by fastforce
+
       text{*A packet traverses a hop. It performs steps 1 and 2.*}
       (*recall: (forward N hdr hop) return the ports where the packet leaves the entity*)
       definition traverse :: "'v network \<Rightarrow> 'v hdr \<Rightarrow> 'v interface \<Rightarrow> ('v interface) set" where
