@@ -1,5 +1,5 @@
 theory Network_ex
-imports Network
+imports Network Network_View
 begin
 
 text{*Example*}

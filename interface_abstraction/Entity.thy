@@ -29,4 +29,21 @@ section{*Basic Definitions*}
   text{*Example: Port two in a three-port switch*}
   value "\<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 2 \<rparr>"
 
+
+
+subsection{*Selecting hosts and NetworkBoxes*}
+  text{*select all hosts in an interface set*}
+  definition hosts :: "'v interface set \<Rightarrow> 'v interface set" where
+    "hosts ifaces \<equiv> {e \<in> ifaces. \<exists> x. entity e = Host x}"
+  (*hosts only contains hosts*)
+  lemma "entity ` hosts ifaces = Host ` entity_name ` entity ` hosts ifaces"
+    apply(simp add: hosts_def image_def)
+    apply(rule Set.Collect_cong)
+    apply(simp add: entity_name_def)
+    by fastforce
+  
+  definition networkboxes :: "'v interface set \<Rightarrow> 'v interface set" where
+    "networkboxes ifaces \<equiv> {e \<in> ifaces. \<exists> x. entity e = NetworkBox x}"
+  lemma networkboxes_subset: "networkboxes x \<subseteq> x"
+    by(auto simp add: networkboxes_def)
 end
