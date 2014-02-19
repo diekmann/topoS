@@ -2,6 +2,12 @@ theory Network
 imports Entity
 begin
 
+(*TODO split into view and props
+  spoofing
+  treepath
+  policycompliance
+  *)
+
 (*examples and code equations are in Network_ex*)
 
 section{*A network consisting of entities*}
@@ -84,6 +90,8 @@ section{*A network consisting of entities*}
 
     definition networkboxes :: "'v interface set \<Rightarrow> 'v interface set" where
       "networkboxes ifaces \<equiv> {e \<in> ifaces. \<exists> x. entity e = NetworkBox x}"
+    lemma networkboxes_subset: "networkboxes x \<subseteq> x"
+      by(auto simp add: networkboxes_def)
 
     subsection{*Moving packets*}
       text{*The following simple model is used. A packet is moved from input interface to input interface.
@@ -153,6 +161,7 @@ section{*A network consisting of entities*}
       by(auto)
     lemma succ_subseteq_reachable: "succ N start \<subseteq> reachable N hdr start"
       by(auto intro: reachable.intros)
+
 
     subsection{*The view of a packet*}
       text{*For a fixed packet with a fixed header, its global network view is defined. 
@@ -247,7 +256,7 @@ section{*A network consisting of entities*}
           apply(erule bexE)
           apply(rule_tac x="first_hop" in bexI)
           by(simp_all)
-        also have "{dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> view_rtrancl N hdr} = {dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>+} \<union> (succ N start)"
+        also have "\<dots> = {dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>+} \<union> (succ N start)"
           apply(subst view_rtrancl_alt[OF wf_N])
           apply(rule)
           apply fastforce
@@ -260,7 +269,7 @@ section{*A network consisting of entities*}
           apply(rule_tac x="x" in bexI)
           apply(simp_all)
           using succ_subseteq_interfaces[OF wf_N] by blast
-        also have "{dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>+} \<union> (succ N start) = (\<Union> first_hop \<in> succ N start. {dst. (first_hop, dst) \<in> (view N hdr)\<^sup>+}) \<union> (succ N start)"
+        also have "\<dots> = (\<Union> first_hop \<in> succ N start. {dst. (first_hop, dst) \<in> (view N hdr)\<^sup>+}) \<union> (succ N start)"
           by(simp add: Complete_Lattices.Collect_bex_eq)
        finally show "?LHS = ?RHS" .
      qed
@@ -333,6 +342,54 @@ section{*A network consisting of entities*}
 
 
 
+    lemma reachable_subset_start_iff:
+      assumes wf_N: "wellformed_network N"
+      shows only_reach_succ: "reachable N hdr start \<subseteq> succ N start \<longleftrightarrow> (\<forall>first_hop \<in> succ N start. traverse N hdr first_hop \<subseteq> succ N start)"
+      proof
+        assume only_reach_succ: "reachable N hdr start \<subseteq> succ N start"
+        show "\<forall>first_hop\<in>succ N start. traverse N hdr first_hop \<subseteq> succ N start"
+          proof 
+          fix first_hop
+          assume f: "first_hop \<in> succ N start"
+          from only_reach_succ have reach_eq_succ: "reachable N hdr start = succ N start" 
+            using Network.succ_subseteq_reachable by fast
+  
+          have view_dst_simp: "\<And> first_hop. {dst. first_hop \<in> interfaces N \<and> dst \<in> traverse N hdr first_hop} = 
+            {dst \<in> (\<Union>p\<in>forward N hdr first_hop. succ N \<lparr>entity = entity first_hop, port = p\<rparr>). first_hop \<in> interfaces N}"
+            by(simp only: traverse_def, blast)
+          
+          have "{dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>*} = 
+              (\<Union> first_hop \<in> succ N start. {dst. (first_hop, dst) \<in> (view N hdr)\<^sup>*})" by blast
+  
+          from this reach_eq_succ f have "{dst. (first_hop, dst) \<in> (view N hdr)\<^sup>*} \<subseteq> succ N start"
+            using reachable_eq_rtrancl_view[OF wf_N] by auto
+          
+          hence "{dst. (first_hop, dst) \<in> (view N hdr)} \<subseteq> succ N start" using f  by blast
+          hence "(\<Union>p\<in>forward N hdr first_hop. succ N \<lparr>entity = entity first_hop, port = p\<rparr>) \<subseteq> succ N start" using f
+            apply(simp add: view_def)                                          
+            apply(simp only: view_dst_simp)
+            by (metis reach_eq_succ reachable.simps subsetI traverse_def)
+          thus "traverse N hdr first_hop \<subseteq> succ N start"
+            by(simp add: traverse_def)
+          qed
+        next
+        assume only_traverse_succ: "\<forall>first_hop \<in> succ N start. traverse N hdr first_hop \<subseteq> succ N start"
+        {
+          fix x
+          have "x \<in> reachable N hdr start \<Longrightarrow> x \<in> succ N start"
+          proof(induction rule: reachable_induct)
+            case Start thus ?case by simp
+            next
+            case Step thus ?case using only_traverse_succ by fast
+          qed
+        }
+        thus "reachable N hdr start \<subseteq> succ N start" by blast
+      qed
+
+
+
+
+
   section{*Sending packets to hosts*}
     text{*a packet from start is sent to dst. Which hosts gets the packet?*}
     definition send_to :: "'v network \<Rightarrow> 'v interface \<Rightarrow> 'v entity \<Rightarrow> 'v interface set" where
@@ -351,7 +408,7 @@ section{*A network consisting of entities*}
       apply(erule exE)
       using succ_subseteq_reachable by fast
 
-    (*if the adress space is so small that there is only one adress, a host cannot spoof (oviously)*)
+    (*if the adress space is so small that there is only one adress, a host cannot spoof (obviously)*)
     lemma "\<not> (\<exists> spoofed. spoofed \<noteq> entity start) \<Longrightarrow> host_cannot_spoof N start"
       by(simp add: host_cannot_spoof_def)
       
@@ -378,6 +435,18 @@ section{*A network consisting of entities*}
       qed
 
 
+(*
+    lemma assumes wf_N: "wellformed_network N"
+      shows "host_cannot_spoof N start \<Longrightarrow> \<forall> spoofed dst. spoofed \<noteq> entity start \<longrightarrow> (\<forall> first_hop \<in> succ N start. (forward N (spoofed, dst) first_hop) = {})"
+      apply(simp add: host_cannot_spoof_def reachable_eq_rtrancl_view2[OF wf_N] view_def)
+      apply(clarsimp)
+      apply(erule allE)
+      apply(auto)
+      (*does not hold?  reachable start \<subseteq> succ start \<Longrightarrow> no forwarding to connected ports*)
+      oops
+*)
+  section{*Compliance with a Security Policy*}
+    (*policy is a graph ... cannot spoof .... *)
 
 
 
