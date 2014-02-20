@@ -16,6 +16,17 @@ lemma "\<lbrakk> valid_graph G \<rbrakk> \<Longrightarrow> pair_fin_digraph (gra
   apply(unfold_locales)
   by(auto simp add: valid_graph_def graph_to_afp_graph_def)
 
+lemma "with_proj (graph_to_afp_graph G) =  \<lparr> verts = nodes G, arcs = edges G, tail = fst, head = snd \<rparr>"
+  by(simp add: graph_to_afp_graph_def)
+
+definition "has_cycle" :: "'v graph \<Rightarrow> ('v \<times> 'v) awalk \<Rightarrow> bool" where
+  "has_cycle G p \<equiv> pre_digraph.cycle (with_proj (graph_to_afp_graph G)) p"
+
+lemma fixes G::"'v graph" and Gafp::"('v, 'v \<times> 'v) pre_digraph"
+  assumes transl: "Gafp = with_proj (graph_to_afp_graph G)"
+  shows "has_cycle G p = (\<exists>u. pre_digraph.awalk Gafp u p u \<and> distinct (tl (pre_digraph.awalk_verts Gafp u p)) \<and> p \<noteq> [])"
+  by(simp add: has_cycle_def pre_digraph.cycle_def transl)
+
 
 
 section{*TEST TEST TES TEST of UNIO*}
