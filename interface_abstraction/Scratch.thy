@@ -1,6 +1,21 @@
 theory Scratch
 imports Main
+"../access_control_abstraction/thy/FiniteGraph"
+"../thy_lib/isabelle_afp/Graph_Theory/Pair_Digraph"
 begin
+
+
+definition graph_to_afp_graph :: "'v graph \<Rightarrow> 'v pair_pre_digraph" where
+  "graph_to_afp_graph G \<equiv> \<lparr> pverts = nodes G, parcs = edges G \<rparr>"
+
+lemma "\<lbrakk> valid_graph G \<rbrakk> \<Longrightarrow> pair_wf_digraph (graph_to_afp_graph G)"
+  apply(unfold_locales)
+  by(auto simp add: valid_graph_def graph_to_afp_graph_def)
+
+lemma "\<lbrakk> valid_graph G \<rbrakk> \<Longrightarrow> pair_fin_digraph (graph_to_afp_graph G)"
+  apply(unfold_locales)
+  by(auto simp add: valid_graph_def graph_to_afp_graph_def)
+
 
 
 section{*TEST TEST TES TEST of UNIO*}
