@@ -190,7 +190,7 @@ subsection{*About reachability*}
   text{*With the view, a property of reachability can be shown*}
   lemma reachable_subset_start_iff:
     assumes wf_N: "wellformed_network N"
-    shows only_reach_succ: "reachable N hdr start \<subseteq> succ N start \<longleftrightarrow> (\<forall>first_hop \<in> succ N start. traverse N hdr first_hop \<subseteq> succ N start)"
+    shows "reachable N hdr start \<subseteq> succ N start \<longleftrightarrow> (\<forall>first_hop \<in> succ N start. traverse N hdr first_hop \<subseteq> succ N start)"
     proof
       assume only_reach_succ: "reachable N hdr start \<subseteq> succ N start"
       show "\<forall>first_hop\<in>succ N start. traverse N hdr first_hop \<subseteq> succ N start"
