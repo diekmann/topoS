@@ -1,5 +1,5 @@
 theory NM_BLPtrusted_impl
-imports NM_BLPtrusted NetworkModel_Lists_Impl_Interface FiniteListGraph_Impl
+imports NM_BLPtrusted NetworkModel_Lists_Impl_Interface
 begin
 
 code_identifier code_module NM_BLPtrusted_impl => (Scala) NM_BLPtrusted

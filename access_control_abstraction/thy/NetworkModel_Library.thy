@@ -1,5 +1,7 @@
 theory NetworkModel_Library
-imports String NM_BLPbasic_impl NM_Dependability_impl NM_Subnets_impl 
+imports String 
+  "../../thy_lib/FiniteListGraph_Impl"
+  NM_BLPbasic_impl NM_Dependability_impl NM_Subnets_impl 
   (*NM_DomainHierarchy_impl*) NM_DomainHierarchyNG_impl
   NM_BLPtrusted_impl
   NM_SecurityGateway_impl NM_SecGwExt_impl NM_Sink_impl

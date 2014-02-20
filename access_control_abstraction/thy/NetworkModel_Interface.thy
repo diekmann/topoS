@@ -1,5 +1,5 @@
 theory NetworkModel_Interface
-imports Main FiniteGraph NetworkModel_Vertices NetworkModel_Util
+imports Main "../../thy_lib/FiniteGraph" NetworkModel_Vertices NetworkModel_Util
 begin
 
 

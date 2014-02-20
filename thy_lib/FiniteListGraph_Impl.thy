@@ -2,9 +2,9 @@ theory FiniteListGraph_Impl
 imports 
   FiniteListGraph
   (*"Transitive-Closure/Transitive_Closure_List_Impl"*)
-  "../../thy_lib/isabelle_afp/Collections/Collections" (*red black trees*)
+  "isabelle_afp/Collections/Collections" (*red black trees*)
   (*maybe import the following only at the end*)
-  "../../thy_lib/Efficient_Distinct"
+  "Efficient_Distinct"
   (* - 2013-2 "~~/src/HOL/Library/Code_Char_chr"*)
   "~~/src/HOL/Library/Code_Char" (*+ 2013-2*)
   (*"~~/src/HOL/Library/Efficient_Nat" 2013-2*)

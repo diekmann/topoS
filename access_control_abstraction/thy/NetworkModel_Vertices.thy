@@ -1,5 +1,5 @@
 theory NetworkModel_Vertices
-imports Main FiniteGraph
+imports Main 
 "~~/src/HOL/Library/Char_ord" (*order on char*)
 "~~/src/HOL/Library/List_lexord" (*order on strings*)
 begin

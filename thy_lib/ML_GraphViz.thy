@@ -3,9 +3,6 @@ imports Main
 begin
 
 
-definition "test_list = [(3::nat, ''asdf''), (4, ''foo'')]"
-thm test_list_def
-
 ML_val {*
 Context.theory_name @{theory}
 *}
