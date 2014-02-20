@@ -198,7 +198,7 @@ subsection{*About reachability*}
         fix first_hop
         assume f: "first_hop \<in> succ N start"
         from only_reach_succ have reach_eq_succ: "reachable N hdr start = succ N start" 
-          using Network.succ_subseteq_reachable by fast
+          using succ_subseteq_reachable by fast
 
         have view_dst_simp: "\<And> first_hop. {dst. first_hop \<in> interfaces N \<and> dst \<in> traverse N hdr first_hop} = 
           {dst \<in> (\<Union>p\<in>forward N hdr first_hop. succ N \<lparr>entity = entity first_hop, port = p\<rparr>). first_hop \<in> interfaces N}"
@@ -232,6 +232,35 @@ subsection{*About reachability*}
       thus "reachable N hdr start \<subseteq> succ N start" by blast
     qed
 
+
+  lemma reachable_subseteq_X_imp:
+    assumes wf_N: "wellformed_network N"
+    and only_reach_succ: "reachable N hdr start \<subseteq> X"
+    shows "\<forall>first_hop \<in> succ N start. traverse N hdr first_hop \<subseteq> X"
+      proof (*TODO*)
+      fix first_hop
+      assume f: "first_hop \<in> succ N start"
+      from only_reach_succ have reach_eq_succ: "succ N start \<subseteq> X" 
+        using Network.succ_subseteq_reachable by fast
+  
+      have view_dst_simp: "\<And> first_hop. {dst. first_hop \<in> interfaces N \<and> dst \<in> traverse N hdr first_hop} = 
+        {dst \<in> (\<Union>p\<in>forward N hdr first_hop. succ N \<lparr>entity = entity first_hop, port = p\<rparr>). first_hop \<in> interfaces N}"
+        by(simp only: traverse_def, blast)
+      
+      have "{dst. \<exists>first_hop \<in> succ N start. (first_hop, dst) \<in> (view N hdr)\<^sup>*} = 
+          (\<Union> first_hop \<in> succ N start. {dst. (first_hop, dst) \<in> (view N hdr)\<^sup>*})" by blast
+  
+      from this f only_reach_succ have "{dst. (first_hop, dst) \<in> (view N hdr)\<^sup>*} \<subseteq> X"
+        using reachable_eq_rtrancl_view[OF wf_N] by auto
+      
+      hence "{dst. (first_hop, dst) \<in> (view N hdr)} \<subseteq> X" using f  by blast
+      hence "(\<Union>p\<in>forward N hdr first_hop. succ N \<lparr>entity = entity first_hop, port = p\<rparr>) \<subseteq> X" using f
+        apply(simp add: view_def)                                          
+        apply(simp only: view_dst_simp)
+        by (smt in_mono mem_Collect_eq subsetI succ_subseteq_interfaces wf_N)
+      thus "traverse N hdr first_hop \<subseteq> X"
+        by(simp add: traverse_def)
+    qed
 
 
 
