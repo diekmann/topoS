@@ -2,6 +2,7 @@ theory Scratch
 imports Main
 "../thy_lib/FiniteGraph"
 "../thy_lib/isabelle_afp/Graph_Theory/Pair_Digraph"
+"../thy_lib/Collections/Refine_Dflt"
 begin
 
 
@@ -68,6 +69,52 @@ lemma "acyclic \<lparr> pverts = {1::nat,2,3}, parcs = {(1,2),(2,3),(1,3)} \<rpa
   apply(thin_tac "wf_digraph ?x")
   apply(auto)
   oops (*need a methot to calculate awalks*)
+
+hide_const(open) succ (*my succ in my graph*)
+
+definition cycles_dfs_rec :: "('a \<Rightarrow>'a set) \<Rightarrow> 'a \<Rightarrow> bool nres" 
+  where
+  "cycles_dfs_rec succ v0 \<equiv> REC (\<lambda>D (V,v). 
+    if v \<in> V then RETURN True 
+    else do {
+      let V=insert v V;
+      FOREACH (succ v) (\<lambda>v' _. D (V,v')) False }
+  ) ({},v0)"
+
+(*TODO only acyclic in reachable from v0*)
+
+lemma cycles_dfs_rec_sound:
+  fixes succ and G
+  defines "E \<equiv> {(v,v'). v'\<in>succ v}"
+  assumes F: "finite {v. (v0,v)\<in>E\<^sup>*}"
+  and wf_G: "wf_digraph G" and "arcs G = E"
+  shows "cycles_dfs_rec succ v0 \<le> SPEC (\<lambda>r. r \<longrightarrow> acyclic G)"
+proof -
+  have S: "\<And>v. succ v = E``{v}"
+    by (auto simp: E_def)
+  
+  from F show ?thesis
+    unfolding cycles_dfs_rec_def S acyclic_alt[OF wf_G]
+    apply(refine_rcg refine_vcg impI REC_rule[where 
+        \<Phi>="\<lambda>(V,v). V \<subseteq> verts G \<and> (\<forall>x\<in>V. \<forall>y\<in>V. \<forall>p. pre_digraph.awalk G x p y \<longrightarrow> \<not> pre_digraph.cycle G p)"]
+        FOREACH_rule[where I="\<lambda>_ r. r \<longrightarrow> acyclic G"])
+    apply(auto)
+    apply(auto simp add: acyclic_alt[OF wf_G])
+    (*apply (refine_rcg refine_vcg impI
+      RECT_rule[where 
+        \<Phi>="\<lambda>(V,v). (v0,v)\<in>E\<^sup>* \<and> V\<subseteq>{v. (v0,v)\<in>E\<^sup>*}" and
+        V="finite_psupset ({v. (v0,v)\<in>E\<^sup>*}) <*lex*> {}"]
+      FOREACHc_rule[where I="\<lambda>_ r. r \<longrightarrow> (v0, vd) \<in> E\<^sup>*"]
+    )*)
+    apply(auto)
+    oops
+
+
+
+
+section{*cycles*}
+(*An undirected graph has a cycle if and only if a depth-first search (DFS) 
+  finds an edge that points to an already-visited vertex (a back edge) [wikipedia] *)
 
 
 section{*TEST TEST TES TEST of UNIO*}
