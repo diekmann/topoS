@@ -184,6 +184,17 @@ section{*Reachable and view*}
    "\<lbrakk> wellformed_network N \<rbrakk> \<Longrightarrow> reachable N hdr start = (\<Union> first_hop \<in> succ N start. {dst. (first_hop, dst) \<in> (view N hdr)\<^sup>+}) \<union> (succ N start)"
    by(simp add: reachable_eq_rtrancl_view start_view_rtrancl)
 
+   
+  text{*Different versions to express reachability using (succ N start) under the packet view relation*}
+  corollary reachable_eq_rtrancl_view3:
+   "\<lbrakk> wellformed_network N \<rbrakk> \<Longrightarrow> reachable N hdr start = ((view N hdr)\<^sup>+``(succ N start)) \<union> (succ N start)"
+   using reachable_eq_rtrancl_view2 by blast
+  corollary reachable_eq_rtrancl_view4:
+   "\<lbrakk> wellformed_network N \<rbrakk> \<Longrightarrow> reachable N hdr start = (view N hdr)\<^sup>*``(succ N start)"
+   using reachable_eq_rtrancl_view by blast
+
+
+
 
 
 subsection{*About reachability*}
