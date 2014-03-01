@@ -52,7 +52,7 @@ definition cycles_dfs_imp :: "('a \<times>'a) set \<Rightarrow> 'a \<Rightarrow>
   "cycles_dfs_imp E v0 \<equiv>  do {
       (_,_,cycle) \<leftarrow> WHILE (\<lambda> (W,Discovered,cycle). W \<noteq> {} \<and> \<not> cycle) (\<lambda> (W,Discovered,cycle). do {
         (vparent,v) \<leftarrow> SPEC (\<lambda>v. v\<in>W);
-        if v \<in> snd ` Discovered
+        if v \<in> snd ` Discovered (* \<or> v \<in> fst ` Discovered evtl auch fst`?? test in python first!*)
         then
           RETURN (W,Discovered,True)
         else do {
@@ -66,15 +66,59 @@ definition cycles_dfs_imp :: "('a \<times>'a) set \<Rightarrow> 'a \<Rightarrow>
       RETURN cycle
   }"
 
-lemma "\<lbrakk> x\<in>snd`D; y\<in>snd`D; x \<noteq> y\<rbrakk> \<Longrightarrow> (\<exists> p. set p \<subseteq> D \<and> pcas x p y)
-  \<longleftrightarrow>
-  (x,y) \<in> D\<^sup>+"
-apply(rule iffI)
-defer
-nitpick
-find_theorems intro
-oops
 
+
+lemma pcas_append: "pcas a p b \<Longrightarrow> pcas a (p @ [(b, c)]) c"
+  by(induction a p b rule: pcas.induct, simp_all)
+
+lemma assumes "x \<noteq> y" shows "(\<exists> p. set p \<subseteq> D \<and> pcas x p y) \<longleftrightarrow> (x,y) \<in> D\<^sup>+"
+proof
+  assume "\<exists>p. set p \<subseteq> D \<and> pcas x p y"
+  from this obtain p where pset: "set p \<subseteq> D" and pcas: "pcas x p y" by auto
+  have "x \<noteq> y \<longrightarrow> set p \<subseteq> D \<longrightarrow> pcas x p y \<longrightarrow> (x, y) \<in> D\<^sup>+"
+    apply(induction p arbitrary: x y)
+    apply(simp)
+    apply(clarify)
+    apply(simp)
+    using trancl_into_trancl2 by (metis r_into_trancl')
+  from this assms pset pcas
+  show "(x, y) \<in> D\<^sup>+" by simp
+next
+  show "(x,y) \<in> D\<^sup>+ \<Longrightarrow> (\<exists> p. set p \<subseteq> D \<and> pcas x p y)"
+  apply(induction rule: trancl_induct)
+  apply(rule_tac x="[(x,y)]" in exI)
+  apply(simp)
+  apply(erule exE)
+  apply(rule_tac x="p@[(y,z)]" in exI)
+  apply(simp add: pcas_append)
+  done
+qed
+
+lemma pcas_start_in_pawalkvert: "pcas a p b \<Longrightarrow> a \<in> set (pawalk_verts a p)"
+  by(induction p, simp_all)
+
+value "dropWhile (\<lambda>x. x \<noteq> (1::nat)) [2,3,4,1,2,3]"
+
+lemma "pcas x p y \<Longrightarrow> \<exists>p'. pcas x p' y \<and> set (pawalk_verts x p') \<subseteq> set (pawalk_verts x p) \<and> distinct (tl (pawalk_verts x p'))"
+  apply(induction x p y rule: pcas.induct)
+  apply(simp)
+  apply(rule_tac x="[]" in exI)
+  apply(simp)
+  apply(simp)
+  apply(erule_tac exE)
+  apply(clarsimp)
+  apply(case_tac "a = b")
+  apply(rule_tac x="p'" in exI)
+  apply(simp)
+  using pcas_start_in_pawalkvert apply fast
+  apply(case_tac "b \<notin> (set (pawalk_verts b p'))")
+  apply(rule_tac x="(a,b)#p'" in exI)
+  apply(simp)
+  apply (metis pcas_start_in_pawalkvert)
+  apply(rule_tac x="dropWhile (\<lambda>(x1,x2). x1 \<noteq> b) p'" in exI) (*TODO need to cut out circle ....*)
+  apply(simp)
+  nitpick
+oops
 
 (*everything reachable from V'*)
 lemma "{y. \<exists>x \<in> V'. (x,y) \<in> E\<^sup>*} = E\<^sup>*``V'" by blast
@@ -105,6 +149,7 @@ definition cycles_dfs_imp_WHILE_invar :: "('v \<times> 'v) set \<Rightarrow> 'v 
   "cycles_dfs_imp_WHILE_invar E v0 \<sigma> \<equiv> let (W,D,cycle) = \<sigma> in
         W \<subseteq> bi E \<and> D \<subseteq> bi E
         \<and> (\<forall> (a,_) \<in> W. \<exists> (_,d) \<in> D. (d,a) \<in> D)
+        \<and> W \<inter> D = {}
         \<and> (\<forall> x\<in>snd`D. \<forall> y\<in>snd`D. x \<noteq> y \<longrightarrow> (x,y) \<in> (bi D)\<^sup>+)
         \<and> (cycle \<longrightarrow> has_undirected_cycle_in (D \<union> W)) 
         (*\<and> (\<forall> x\<in>Discovered. \<forall> y\<in>Discovered. x \<noteq> y \<longrightarrow> 
@@ -117,6 +162,7 @@ lemma cycles_dfs_imp_WHILE_invar_step1:
   shows "cycles_dfs_imp_WHILE_invar E v0 (W, Discovered, True)"
   using assms unfolding cycles_dfs_imp_WHILE_invar_def
   apply(simp)
+  (*a is snd`discovered \<longrightarrow> (d2,a) \<in> D^+ \<longrightarrow> need W disjunct D \<longrightarrow> path: d2,a + (a,d2)*)
   (*TODO*)
 oops
 
@@ -146,6 +192,7 @@ lemma cycles_dfs_imp_WHILE_invar_step2:
   apply(rule conjI)
   apply blast
   apply(rule conjI)
+  nitpick (*dis*)
   apply(simp add: bi_insert)[1]
   apply(clarsimp)
   apply(erule_tac x="(w1,w2)" in ballE, simp)

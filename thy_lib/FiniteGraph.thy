@@ -263,7 +263,8 @@ section {*Lemmata*}
     by(auto simp add: backflows_def)
   lemma backflows_inter: "backflows (A \<inter> B) = (backflows A) \<inter> (backflows B)"
     by(auto simp add: backflows_def)
-    
+  lemma backflows_alt_fstsnd: "backflows E = (\<lambda>e. (snd e, fst e)) ` E"
+    by(auto simp add: backflows_def, force)
 
 
 
