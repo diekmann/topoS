@@ -62,7 +62,7 @@ definition cycles_dfs_imp :: "('a \<times>'a) set \<Rightarrow> 'a \<Rightarrow>
           let W = W \<union> ({v} \<times> succs);
           RETURN (W,Discovered,cycle)
         }
-      }) ({(v0,v0)},{},False);
+      }) ({(v0,v0 (*probably: succs v0????*))},{},False);
       RETURN cycle
   }"
 
@@ -71,7 +71,7 @@ definition cycles_dfs_imp :: "('a \<times>'a) set \<Rightarrow> 'a \<Rightarrow>
 lemma pcas_append: "pcas a p b \<Longrightarrow> pcas a (p @ [(b, c)]) c"
   by(induction a p b rule: pcas.induct, simp_all)
 
-lemma assumes "x \<noteq> y" shows "(\<exists> p. set p \<subseteq> D \<and> pcas x p y) \<longleftrightarrow> (x,y) \<in> D\<^sup>+"
+lemma pcas_iff_trancl: assumes "x \<noteq> y" shows "(\<exists> p. set p \<subseteq> D \<and> pcas x p y) \<longleftrightarrow> (x,y) \<in> D\<^sup>+"
 proof
   assume "\<exists>p. set p \<subseteq> D \<and> pcas x p y"
   from this obtain p where pset: "set p \<subseteq> D" and pcas: "pcas x p y" by auto
@@ -97,6 +97,9 @@ qed
 lemma pcas_start_in_pawalkvert: "pcas a p b \<Longrightarrow> a \<in> set (pawalk_verts a p)"
   by(induction p, simp_all)
 
+lemma pcas_distinct_len: "pcas a p b \<Longrightarrow>  a \<noteq> b \<Longrightarrow> length p \<ge> 1"
+  by(induction a p b rule:pcas.induct, simp_all)
+
 value "dropWhile (\<lambda>x. x \<noteq> (1::nat)) [2,3,4,1,2,3]"
 
 lemma "pcas x p y \<Longrightarrow> \<exists>p'. pcas x p' y \<and> set (pawalk_verts x p') \<subseteq> set (pawalk_verts x p) \<and> distinct (tl (pawalk_verts x p'))"
@@ -118,7 +121,7 @@ lemma "pcas x p y \<Longrightarrow> \<exists>p'. pcas x p' y \<and> set (pawalk_
   apply(rule_tac x="dropWhile (\<lambda>(x1,x2). x1 \<noteq> b) p'" in exI) (*TODO need to cut out circle ....*)
   apply(simp)
   nitpick
-oops
+sorry (*TODOTODO*)
 
 (*everything reachable from V'*)
 lemma "{y. \<exists>x \<in> V'. (x,y) \<in> E\<^sup>*} = E\<^sup>*``V'" by blast
@@ -131,6 +134,10 @@ definition bi :: "('a \<times> 'a) set \<Rightarrow> ('a \<times> 'a) set" where
 
 lemma bi_insert: "bi (insert (x,y) X) = {(x,y), (y,x)} \<union> bi X"
   by(auto simp add: bi_def backflows_def)
+lemma bi_sym: "sym (bi X)"
+  by(simp add: sym_def bi_def backflows_def)
+lemma bi_union: "bi A \<union> bi B = bi (A \<union> B)"
+  by(auto simp add: sym_def bi_def backflows_def)
 
 definition uni_restrict_to :: "('v \<times> 'v) set \<Rightarrow> 'v set \<Rightarrow> ('v \<times> 'v) set" where
   "uni_restrict_to E V \<equiv> restrict_to (bi E) V"
@@ -156,6 +163,59 @@ definition cycles_dfs_imp_WHILE_invar :: "('v \<times> 'v) set \<Rightarrow> 'v 
             (\<exists> p. set p \<subseteq> uni_restrict_to E (Discovered) \<and> pcas x p y \<and> distinct (Pair_Digraph.pawalk_verts x p)))*)
         (*E\<^sup>*``(fst ` V') \<union> fst ` Discovered = E\<^sup>*``{v0} \<and> *)"
 
+
+lemma "(\<forall> x\<in>snd`(bi D). \<forall> y\<in>snd`D. x \<noteq> y \<longrightarrow> (x,y) \<in> (bi D)\<^sup>+) \<Longrightarrow> (\<forall> x\<in>fst`D. \<forall> y\<in>snd`D. x \<noteq> y \<longrightarrow> (x,y) \<in> (bi D)\<^sup>+)"
+  apply(clarsimp)
+  apply(rename_tac a b x y)
+  apply(erule_tac x="(b,a)" in ballE)
+  apply(erule_tac x="(x,y)" in ballE)
+  apply(simp_all)
+  by(simp add: bi_def backflows_def)
+
+lemma assumes D_path: "(\<forall> x\<in>nodes_of D. \<forall> y\<in>snd`D. x \<noteq> y \<longrightarrow> (x,y) \<in> (bi D)\<^sup>+)" (*replace snd with nodes_of*)
+    and ad2W: "(a, d2) \<in> W" and d1d2D: "(d1, d2) \<in> D"
+    and WD_edge: "(\<forall> (a,_) \<in> W. \<exists> (_,d) \<in> D. (d,a) \<in> D)"
+    and nreflW: "\<forall> (x,y) \<in> W. x \<noteq> y"
+    (*and nreflD: "\<forall> (x,y) \<in> D. x \<noteq> y"*)
+    and disjunct: "bi W \<inter> bi D = {}"
+   shows "has_undirected_cycle_in (D \<union> {(a,d2)})"
+   proof(unfold has_undirected_cycle_in_def)
+    from ad2W WD_edge have "\<exists> (x,y) \<in> D. (y, a) \<in> D" by fast
+    from this obtain y where yD: "(y, a) \<in> D" by blast (*maybe add y to the path to prolong it?*)
+    have "a \<noteq> d2" using ad2W nreflW by blast
+    have "y \<noteq> a" sorry
+    from `y \<noteq> a` `a \<noteq> d2` disjunct ad2W yD have "y \<noteq> d2" by(simp add: bi_def backflows_def, blast)
+    (* d2 \<longrightarrow> y \<longrightarrow> (y,a) \<longrightarrow> a,d2 <-- in W*) (*need d2 \<noteq> y*)
+    (*from yD have "set [(y,a)] \<subseteq> bi D \<and> pcas y [(y,a)] a" by (auto simp: bi_def)*)
+    from yD d1d2D D_path have "y \<noteq> d2 \<longrightarrow> (y, d2) \<in> (bi D)\<^sup>+"
+      by(simp add: nodes_of_def, force)
+    from this `y \<noteq> d2` have "(d2, y) \<in> (bi D)\<^sup>+" using bi_sym by (metis symD sym_trancl)
+    from this pcas_iff_trancl[symmetric] `y \<noteq> d2` have "\<exists>p. set p \<subseteq> (bi D) \<and> pcas d2 p y" by metis
+    from this obtain p where p: "set p \<subseteq> (bi D) \<and> pcas d2 p y" and pdist: "distinct (pawalk_verts d2 p)" sorry
+    from pcas_distinct_len p `y \<noteq> d2` have plength: "length p \<ge> 1" by metis
+    let ?pa = "p@[(y,a)]"
+    from p yD have pa: "set ?pa \<subseteq> (bi D) \<and> pcas d2 ?pa a" by(simp add: bi_def pcas_append)
+    from pdist have padist: "distinct (pawalk_verts d2 ?pa)" sorry
+    from plength have palength: "length ?pa \<ge> 2" by simp
+    from ad2W have ad2biW: "(d2,a) \<in> bi W" by(simp add: bi_def backflows_def)
+    hence "set [(a, d2)] \<subseteq> bi {(a,d2)} \<and> pcas a [(a, d2)] d2" by (simp add: bi_def)
+    from this pa have 1: "set ((a, d2)#?pa) \<subseteq> bi {(a,d2)} \<union> bi D \<and> pcas a ((a, d2)#?pa) a" by auto
+    from padist have 2: "distinct (tl (pawalk_verts a ((a, d2)#?pa)))" by simp
+   
+   show "\<exists>u\<in>nodes_of (D \<union> {(a, d2)}). \<exists>p. set p \<subseteq> bi (D \<union> {(a, d2)}) \<and> pcas u p u \<and> distinct (tl (pawalk_verts u p)) \<and> 3 \<le> length p"
+    apply(rule_tac x=a in bexI)
+    apply(rule_tac x="(a, d2)#?pa" in exI)
+    apply(rule conjI)
+    using bi_union 1 apply blast
+    apply(rule conjI)
+    using 1 apply blast
+    apply(rule conjI)
+    using padist apply simp
+    apply(simp add: plength[simplified])
+    apply(simp add: nodes_of_def)
+    done
+oops
+
 lemma cycles_dfs_imp_WHILE_invar_step1:
   assumes "cycles_dfs_imp_WHILE_invar E v0 (W, Discovered, cycle)"
        "(a, snd (d1, d2)) \<in> W" "(d1, d2) \<in> Discovered" "W \<noteq> {}" "\<not> cycle" 
@@ -164,6 +224,9 @@ lemma cycles_dfs_imp_WHILE_invar_step1:
   apply(simp)
   (*a is snd`discovered \<longrightarrow> (d2,a) \<in> D^+ \<longrightarrow> need W disjunct D \<longrightarrow> path: d2,a + (a,d2)*)
   (*TODO*)
+  apply(simp add: has_undirected_cycle_in_def)
+  proof -
+  show "\<exists>u\<in>nodes_of (Discovered \<union> W). \<exists>p. set p \<subseteq> bi (Discovered \<union> W) \<and> pcas u p u \<and> distinct (tl (pawalk_verts u p)) \<and> 3 \<le> length p"
 oops
 
 lemma nodes_of_backflows_snd: "nodes_of E = snd ` E \<union> snd ` (backflows E)"
