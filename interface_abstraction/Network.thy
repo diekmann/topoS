@@ -12,6 +12,16 @@ begin
 
 section{*A network consisting of entities*}
   text{*packet header*}
+
+  (*TODO make generic hdr
+  datatype 'v srcdsthdr = SrcDstHdr "'v entity \<times> 'v entity"
+  value "SrcDstHdr (Host ''Alice'', Host ''Bob'') :: string srcdsthdr"
+  *)
+  (*record 'v hdr = src_addr :: "'v entity"
+                  dst_addr :: "'v entity"
+                  proto :: nat
+                   src_port :: nat
+                   dst_port ::nat*)
   type_synonym 'v hdr="('v entity \<times> 'v entity)" -- "packet header: (src address, dst address)"
 
 

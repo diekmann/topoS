@@ -96,9 +96,12 @@ qed
 
 lemma pcas_start_in_pawalkvert: "pcas a p b \<Longrightarrow> a \<in> set (pawalk_verts a p)"
   by(induction p, simp_all)
-
+lemma pcas_end_in_pawalkvert: "pcas a p b \<Longrightarrow> b \<in> set (pawalk_verts a p)"
+  by(induction p arbitrary: a, simp_all)
 lemma pcas_distinct_len: "pcas a p b \<Longrightarrow>  a \<noteq> b \<Longrightarrow> length p \<ge> 1"
   by(induction a p b rule:pcas.induct, simp_all)
+lemma pawalk_verts_length: "length (pawalk_verts a p) = Suc (length p)"
+  by(induction p arbitrary: a, simp_all)
 
 value "dropWhile (\<lambda>x. x \<noteq> (1::nat)) [2,3,4,1,2,3]"
 
@@ -172,6 +175,9 @@ lemma "(\<forall> x\<in>snd`(bi D). \<forall> y\<in>snd`D. x \<noteq> y \<longri
   apply(simp_all)
   by(simp add: bi_def backflows_def)
 
+lemma distinct_xyz_length: "distinct [x,y,z] \<Longrightarrow> x \<in> set X \<Longrightarrow> y \<in> set X \<Longrightarrow> z \<in> set X \<Longrightarrow> length X \<ge> 3"
+by (smt distinct_length_2_or_more length_pos_if_in_set list.size(4) list_decomp_2 list_tail_coinc set_ConsD)
+
 lemma assumes D_path: "(\<forall> x\<in>nodes_of D. \<forall> y\<in>snd`D. x \<noteq> y \<longrightarrow> (x,y) \<in> (bi D)\<^sup>+)" (*replace snd with nodes_of*)
     and ad2W: "(a, d2) \<in> W" and d1d2D: "(d1, d2) \<in> D"
     and WD_edge: "(\<forall> (a,_) \<in> W. \<exists> (_,d) \<in> D. (d,a) \<in> D)"
@@ -195,7 +201,21 @@ lemma assumes D_path: "(\<forall> x\<in>nodes_of D. \<forall> y\<in>snd`D. x \<n
     from pcas_distinct_len p `y \<noteq> d2` have plength: "length p \<ge> 1" by metis
     let ?pa = "p@[(y,a)]"
     from p yD have pa: "set ?pa \<subseteq> (bi D) \<and> pcas d2 ?pa a" by(simp add: bi_def pcas_append)
-    from pdist have padist: "distinct (pawalk_verts d2 ?pa)" sorry
+    have "pcas d2 p y \<Longrightarrow> pawalk_verts d2 (p @ [(y, a)]) = (pawalk_verts d2 p)@[a]"
+      by(induction p arbitrary: d2, simp_all)
+    from this p have pawalk_verts_simp: "pawalk_verts d2 (p @ [(y, a)]) = (pawalk_verts d2 p)@[a]" by simp
+    have a_in_path_length: "a \<in> set (pawalk_verts d2 p) \<Longrightarrow> length p \<ge> 2"
+    proof -
+      assume 0: "a \<in> set (pawalk_verts d2 p)"
+      from `y \<noteq> a` `a \<noteq> d2` `y \<noteq> d2` have 1: "distinct [d2, y, a]" by auto
+      from p have 2: "d2 \<in> set (pawalk_verts d2 p)" by (metis pcas_start_in_pawalkvert)
+      from p have 3: "y \<in> set (pawalk_verts d2 p)" using pcas_end_in_pawalkvert by metis
+      from distinct_xyz_length 0 1 2 3 have "length (pawalk_verts d2 p) \<ge> 3" by fast
+      from this pawalk_verts_length show "length p \<ge> 2" by (metis le_numeral_Suc pred_numeral_simps(3))
+    qed
+    from pdist have padist: "a \<notin> set (pawalk_verts d2 p) \<Longrightarrow> distinct (pawalk_verts d2 ?pa)"
+      by(simp add: pawalk_verts_simp)
+    (*if a in pa: let ?pa = p*)
     from plength have palength: "length ?pa \<ge> 2" by simp
     from ad2W have ad2biW: "(d2,a) \<in> bi W" by(simp add: bi_def backflows_def)
     hence "set [(a, d2)] \<subseteq> bi {(a,d2)} \<and> pcas a [(a, d2)] d2" by (simp add: bi_def)
@@ -203,6 +223,7 @@ lemma assumes D_path: "(\<forall> x\<in>nodes_of D. \<forall> y\<in>snd`D. x \<n
     from padist have 2: "distinct (tl (pawalk_verts a ((a, d2)#?pa)))" by simp
    
    show "\<exists>u\<in>nodes_of (D \<union> {(a, d2)}). \<exists>p. set p \<subseteq> bi (D \<union> {(a, d2)}) \<and> pcas u p u \<and> distinct (tl (pawalk_verts u p)) \<and> 3 \<le> length p"
+    apply(case_tac "a \<notin> set (pawalk_verts d2 p)")
     apply(rule_tac x=a in bexI)
     apply(rule_tac x="(a, d2)#?pa" in exI)
     apply(rule conjI)
@@ -213,7 +234,6 @@ lemma assumes D_path: "(\<forall> x\<in>nodes_of D. \<forall> y\<in>snd`D. x \<n
     using padist apply simp
     apply(simp add: plength[simplified])
     apply(simp add: nodes_of_def)
-    done
 oops
 
 lemma cycles_dfs_imp_WHILE_invar_step1:
