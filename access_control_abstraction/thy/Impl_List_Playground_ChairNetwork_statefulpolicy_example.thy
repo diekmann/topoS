@@ -156,6 +156,9 @@ section{*An example of bad side-effects in access control policies*}
   lemma "implc_get_offending_flows [ACL_not_with] 
     \<lparr> nodesL = [V ''A'', V ''B'', V ''C''], edgesL = [(V ''B'', V ''A''), (V ''B'', V ''C''), (V ''A'', V ''B'')] \<rparr> =
       [[(V ''B'', V ''C'')], [(V ''A'', V ''B'')]]" by eval
+  lemma "implc_get_offending_flows [ACL_not_with] 
+    \<lparr> nodesL = [V ''A'', V ''B'', V ''C''], edgesL = [(V ''B'', V ''A''), (V ''B'', V ''C''), (V ''C'', V ''B'')] \<rparr> =
+      []" by eval
 
 value[code] "generate_valid_stateful_policy_IFSACS simple_network [ACL_not_with]"
 value[code] "generate_valid_stateful_policy_IFSACS_2 simple_network [ACL_not_with]"
