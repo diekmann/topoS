@@ -36,6 +36,7 @@ definition DomainHierarchy_m::"(vString NetworkSecurityModel)" where
             V ''P1'' \<mapsto> DN (''aircraft''--''entertain''--''POD''--Leaf, 0),
             V ''P2'' \<mapsto> DN (''aircraft''--''entertain''--''POD''--Leaf, 0)
                             ], 
+                          (*At the moment, there is no check whether the assigned node_properties comply with the tree in model_global_properties*)
           model_global_properties = (
             Department ''aircraft'' [
               Department ''entertain'' [
@@ -76,17 +77,38 @@ definition "security_invariants = [ DomainHierarchy_m, SecurityGateway_m, BLP_m]
 
 lemma "implc_get_offending_flows security_invariants policy = []" by eval
 
+
+text{*
+Visualization with a violation
+*}
+ML{*
+vizualize_graph @{context} @{theory} @{term "security_invariants"} @{term "policy\<lparr>edgesL := (V ''P1'', V ''CC'')#edgesL policy\<rparr>"};
+*}
+
+
+
+
+
+
 definition "max_policy = generate_valid_topology security_invariants \<lparr>nodesL = nodesL policy, edgesL = List.product (nodesL policy) (nodesL policy) \<rparr>"
 
 
 text{*calculating the maximum policy*}
 value[code] "max_policy"
 
+
 text{*
-Visualizing the maximum policy
-TODO: color diff
+The diff to the maximum policy
+*}
+ML_val{*
+visualize_edges @{context} @{theory} @{term "edgesL policy"} 
+    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "[e \<leftarrow> edgesL max_policy. e \<notin> set (edgesL policy)]"})]; 
 *}
 
+
+text{*
+Visualizing the maximum policy
+*}
 ML{*
 vizualize_graph @{context} @{theory} @{term "security_invariants"} @{term "policy"};
 *}
