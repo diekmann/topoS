@@ -75,6 +75,8 @@ definition BLP_m::"(vString NetworkSecurityModel)" where
 
 definition "security_invariants = [ DomainHierarchy_m, SecurityGateway_m, BLP_m]"
 
+lemma "all_security_requirements_fulfilled security_invariants policy" by eval
+
 lemma "implc_get_offending_flows security_invariants policy = []" by eval
 
 

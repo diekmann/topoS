@@ -83,11 +83,9 @@ begin
    "eval_model_mono
    \<Longrightarrow> 
    (\<forall> (G:: 'v graph) nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> eval_model (delete_edges G (Y)) nP \<longrightarrow> \<not> eval_model (delete_edges G X) nP )"
-   apply(simp add: delete_edges_def eval_model_mono_def)
-   (* sledgehammer[isar_proofs] *)
-   by (smt Collect_mono delete_edges_def delete_edges_valid prod_caseE prod_caseI2 set_rev_mp)
-   (* by (smt Collect_mono prod.cases prod_caseE set_rev_mp)*)
-
+   apply(intro allI impI, elim conjE)
+   apply(frule_tac G=G in delete_edges_edges_mono)
+   by (metis delete_edges_simp2 delete_edges_valid eval_model_mono_imp_negative_mono graph.select_convs(2))
 
 
   lemma mono_offending_flows_min_set:
@@ -485,20 +483,6 @@ context NetworkModel_preliminaries
     apply(frule(3) minimalize_offending_overapprox_sound)
     apply(simp add: set_offending_flows_def)
     using minimalize_offending_overapprox_subseteq_input[where keeps="[]", simplified] by blast
-
-
-    (*lemma minimalize_offending_overapprox_sound_fixKeep: 
-      "\<lbrakk> valid_graph G; \<forall> x \<in> set ff. x \<notin> set keeps; \<forall> x \<in> set ff. x \<in> edges G; distinct ff; 
-        \<forall>(e1, e2)\<in> set keeps.
-       \<not> eval_model (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox ff keeps G nP)))) nP \<rbrakk>
-        \<Longrightarrow>
-         \<forall>(e1, e2)\<in>set (minimalize_offending_overapprox ff keeps G nP).
-       \<not> eval_model (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox ff keeps G nP)))) nP"
-      apply(insert eval_model_monoI)
-      apply(unfold eval_model_mono_def)
-      using mono_imp_minimalize_offending_overapprox_minimal
-      by (smt eval_model_mono_def eval_model_mono_imp_negative_delete_edge_mono prod_caseI2 splitD)*)
-      (*TODO: better premises, have minimal offending flows keeps, get minimal offending flows that preserve keeps!*)
 
 
     (*TODO better minimality condition for keeps*)
