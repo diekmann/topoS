@@ -109,7 +109,8 @@ section{*monotonic and preliminaries*}
     apply(clarsimp)
     apply(rename_tac nP N E' n E xa)
     apply(erule_tac x=n in ballE)
-      defer apply simp
+     defer
+     apply simp
     apply(simp)
     apply(drule_tac N=N and n=n in undirected_reachable_mono)
     apply(blast)
@@ -120,17 +121,17 @@ section{*monotonic and preliminaries*}
   where eval_model = eval_model
   and verify_globals = verify_globals
     apply unfold_locales
-    apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
-    apply(erule_tac exE)
-    apply(rename_tac list_edges)
-    apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
-    apply(auto)[5]
-    apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops empty_undirected_reachable_false)[1]
-    apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
-    apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
-  done
+       apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
+       apply(erule_tac exE)
+       apply(rename_tac list_edges)
+       apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+           apply(auto)[5]
+       apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops empty_undirected_reachable_false)[1]
+      apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
+     apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
+    done
 
-  sledgehammer_params[isar_proofs]
+
 interpretation NonInterference: NetworkModel
 where default_node_properties = NM_NonInterference.default_node_properties
 and eval_model = NM_NonInterference.eval_model
