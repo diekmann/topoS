@@ -154,6 +154,19 @@ and target_focus = NM_NonInterference.target_focus
   apply(case_tac "nP xa")
   (*case Interfering*)
   apply simp
+
+  (*apply(erule_tac x=n and A="nodes G" in ballE)
+  prefer 2
+  apply fast
+  apply(simp)
+  apply(erule_tac x=n and A="nodes G" in ballE)
+  prefer 2
+  apply fast
+  sledgehammer (*now finds something*)
+  (*apply (smt DiffI fun_upd_image fun_upd_triv insert_subset mem_Collect_eq node_config.distinct(1) singleton_iff)*)
+  (*apply (smt DiffI fun_upd_image fun_upd_triv insert_subset mem_Collect_eq node_config.distinct(1) singleton_iff)*)
+  *)
+
   (*wow, sledgehammer can find it no more!!*)
   (*reproduce: using DiffI empty_iff fun_upd_image fun_upd_triv insert_iff insert_subset mem_Collect_eq node_config.simps(1)
   sledgehammer[provers=z3,verbose=true]*)
