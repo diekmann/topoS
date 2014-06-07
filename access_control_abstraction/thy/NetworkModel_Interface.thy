@@ -6,7 +6,7 @@ begin
 
 section {* NetworkModel definition: *}
   (* 'v is a graph's node type
-     'a are the modes specific node configuration options
+     'a are the model specific node configuration options
      'b are additional configuration options for this model *)
   record ('v::vertex, 'a, 'b) NetworkModel_Params =
     node_properties :: "'v::vertex \<Rightarrow> 'a option"
@@ -37,21 +37,19 @@ text {* A NetworkModel where the offending flows (flows that invalidate the netw
       "\<lbrakk> \<not> eval_model G  nP \<rbrakk> \<Longrightarrow> \<forall> f \<in> set_offending_flows G nP. eval_model (delete_edges G f) nP"
     by(simp add: set_offending_flows_def is_offending_flows_def is_offending_flows_min_set_def graph_ops)
     lemma offending_not_empty: "\<lbrakk> f \<in> set_offending_flows G nP \<rbrakk> \<Longrightarrow> f \<noteq> {}"
-     apply(simp add: set_offending_flows_def is_offending_flows_def is_offending_flows_min_set_def)
-     apply(clarify)
-    by auto
+     by(auto simp add: set_offending_flows_def is_offending_flows_def is_offending_flows_min_set_def)
     lemma empty_offending_contra:
        "\<lbrakk> f \<in> set_offending_flows G nP; f = {}\<rbrakk> \<Longrightarrow> False"
-    by(simp add: set_offending_flows_def is_offending_flows_def is_offending_flows_min_set_def)
+     by(simp add: set_offending_flows_def is_offending_flows_def is_offending_flows_min_set_def)
     lemma "f \<in> set_offending_flows G nP \<Longrightarrow> \<not> eval_model G nP"
-    by(simp add: set_offending_flows_def is_offending_flows_def is_offending_flows_min_set_def)
+     by(simp add: set_offending_flows_def is_offending_flows_def is_offending_flows_min_set_def)
     lemma validmodel_imp_no_offending: 
       "eval_model G nP \<Longrightarrow> set_offending_flows G nP = {}"
-    by(simp add: set_offending_flows_def is_offending_flows_def is_offending_flows_min_set_def)
+     by(simp add: set_offending_flows_def is_offending_flows_def is_offending_flows_min_set_def)
     theorem remove_offending_flows_imp_model_valid:
       "\<forall>f \<in> set_offending_flows G nP. eval_model (delete_edges G f) nP"
       apply(cases "\<not> eval_model G nP")
-      apply (metis removing_offendingFlows_evalTrue)
+       apply (metis removing_offendingFlows_evalTrue)
       apply (metis empty_iff validmodel_imp_no_offending)
     done
   corollary valid_without_offending_flows:
@@ -66,7 +64,7 @@ text {* A NetworkModel where the offending flows (flows that invalidate the netw
     apply(simp only: set_offending_flows_def is_offending_flows_min_set_def 
       is_offending_flows_def delete_edges_simp2 add_edge_def graph.select_convs)
     apply(subgoal_tac "\<And>F e1 e2. F \<subseteq> edges G \<Longrightarrow> (e1, e2) \<in> F \<Longrightarrow> nodes G \<union> {e1, e2} = nodes G")
-    apply fastforce
+     apply fastforce
     apply(simp add: valid_graph_def)
     by (metis fst_conv imageI in_mono insert_absorb snd_conv)
 
@@ -184,7 +182,7 @@ text{*Thus, we introduce a usefullness property that prohibits such useless mode
     lemma node_props_eq_node_props_formaldef: "node_props_formaldef = node_props"
      apply(simp add: fun_eq_iff node_props_formaldef_def)
      apply(rule allI)+
-    by (metis (lifting, mono_tags) domD domIff option.simps(4) option.simps(5) the.simps)
+     by (metis (lifting, mono_tags) domD domIff option.simps(4) option.simps(5) the.simps)
 
 
     definition eval::"'v graph \<Rightarrow> ('v, 'a, 'b)NetworkModel_Params \<Rightarrow> bool" where
@@ -273,24 +271,22 @@ subsection {*Information flow security*}
   
   sublocale NetworkModel_IFS \<subseteq> NetworkModel where target_focus=True
   apply(unfold_locales)
-  apply(simp add: default_secure)
+   apply(simp add: default_secure)
   apply(simp only: HOL.simp_thms)
   apply(drule default_unique_EX_notation)
   apply(assumption)
-  (*apply(fact verify_globals_sound)*)
   done
 
   (*other direction*)
   locale NetworkModel_IFS_otherDirectrion = NetworkModel where target_focus=True
   sublocale NetworkModel_IFS_otherDirectrion \<subseteq> NetworkModel_IFS
   apply(unfold_locales)
-  apply (metis default_secure offending_notevalD)
+   apply (metis default_secure offending_notevalD)
   apply(erule contrapos_pp)
   apply(simp)
   apply(drule default_unique)
   apply(simp)
   apply(blast)
-  (*apply(fact verify_globals_sound)*)
   done
   
 
@@ -321,7 +317,7 @@ subsection {*Access Control*}
   
   sublocale NetworkModel_ACL \<subseteq> NetworkModel where target_focus=False
   apply(unfold_locales)
-  apply(simp add: default_secure)
+   apply(simp add: default_secure)
   apply(simp only: HOL.simp_thms)
   apply(drule default_unique_EX_notation)
   apply(assumption)
@@ -332,7 +328,7 @@ subsection {*Access Control*}
   locale NetworkModel_ACL_otherDirectrion = NetworkModel where target_focus=False
   sublocale NetworkModel_ACL_otherDirectrion \<subseteq> NetworkModel_ACL
   apply(unfold_locales)
-  apply (metis default_secure offending_notevalD)
+   apply (metis default_secure offending_notevalD)
   apply(erule contrapos_pp)
   apply(simp)
   apply(drule default_unique)

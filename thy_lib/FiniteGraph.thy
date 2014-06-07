@@ -2,7 +2,7 @@ theory FiniteGraph
 imports Main 
 begin
 
-section {*Specification of a finite graph*}
+section {*Specification of a finite directed graph*}
 
 text{* A graph G=(V,E) consits of a set of vertices V, also called nodes, 
        and a set of edges E. The edges are tuples of vertices. Both, 
@@ -134,7 +134,7 @@ text {* extended graph operations *}
   apply(unfold num_reachable_def)
   apply(case_tac "finite (succ_tran G v)")
    apply(simp)
-   apply(blast intro: succ_tran_finite)
+  apply(blast intro: succ_tran_finite)
   done
   lemma num_succtran_zero: "\<lbrakk>succ_tran G v = {}\<rbrakk> \<Longrightarrow> num_reachable G v = 0"
   by(unfold num_reachable_def, simp)
@@ -188,7 +188,7 @@ section {*Lemmata*}
  
   -- "delte edges"
   lemma delete_edges_list_valid[simp]: "valid_graph G \<Longrightarrow> valid_graph (delete_edges_list G E)"
-    apply(induction E arbitrary: G) apply simp by force
+    by(induction E arbitrary: G, simp, force)
   lemma delete_edges_valid[simp]: "valid_graph G \<Longrightarrow> valid_graph (delete_edges G E)"
   by(auto simp add: delete_edges_def add_node_def valid_graph_def)
   lemma delete_edges_list_set: "delete_edges_list G E = delete_edges G (set E)"
@@ -223,7 +223,7 @@ section {*Lemmata*}
    apply(frule_tac A="E'" in rev_finite_subset, simp)
    apply(simp add: num_reachable_def)
    apply(simp add: succ_tran_def)
-    apply(metis (lifting, full_types) Collect_mono trancl_mono)
+   apply(metis (lifting, full_types) Collect_mono trancl_mono)
   done
 
   --"num_reachable"
@@ -232,7 +232,7 @@ section {*Lemmata*}
    apply(simp add: num_reachable_def)
    apply(frule_tac E'="E'" and v="v" in succ_tran_mono, simp)
    apply(frule_tac v="v" in succ_tran_finite)
-    apply(simp add: card_mono)
+   apply(simp add: card_mono)
   done
 
   --"num_reachable_norefl"
@@ -288,7 +288,7 @@ lemmas graph_ops=add_node_def delete_node_def add_edge_def delete_edge_def delet
 
   lemma valid_graph_add_subset_edges: "\<lbrakk> valid_graph \<lparr> nodes = V, edges = E \<rparr>; E' \<subseteq> E \<rbrakk> \<Longrightarrow>
      valid_graph \<lparr> nodes = V, edges= E \<union> E'\<rparr>"
-    apply(auto simp add: valid_graph_def) by (metis rev_finite_subset)
+    by(auto simp add: valid_graph_def) (metis rev_finite_subset)
 
 
 

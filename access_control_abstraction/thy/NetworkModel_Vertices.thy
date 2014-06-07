@@ -12,9 +12,9 @@ class vertex =
   fixes vertex_3 :: "'a"
   assumes distince_vertices: "distinct [vertex_1, vertex_2, vertex_3]"
 begin
-  lemma distince_vertices12[simp]: "vertex_1 \<noteq> vertex_2" apply(insert distince_vertices) by(simp)
-  lemma distince_vertices13[simp]: "vertex_1 \<noteq> vertex_3" apply(insert distince_vertices) by(simp)
-  lemma distince_vertices23[simp]: "vertex_2 \<noteq> vertex_3" apply(insert distince_vertices) by(simp)
+  lemma distince_vertices12[simp]: "vertex_1 \<noteq> vertex_2" using distince_vertices by(simp)
+  lemma distince_vertices13[simp]: "vertex_1 \<noteq> vertex_3" using distince_vertices by(simp)
+  lemma distince_vertices23[simp]: "vertex_2 \<noteq> vertex_3" using distince_vertices by(simp)
   
   lemmas distince_vertices_sym = distince_vertices12[symmetric] distince_vertices13[symmetric]
           distince_vertices23[symmetric]
@@ -29,7 +29,7 @@ begin
   definition "vertex_1_nat" ::nat where "vertex_1 \<equiv> (1::nat)"
   definition "vertex_2_nat" ::nat where "vertex_2 \<equiv> (2::nat)"
   definition "vertex_3_nat" ::nat where "vertex_3 \<equiv> (3::nat)"
-instance apply(intro_classes) by(simp add: vertex_1_nat_def vertex_2_nat_def vertex_3_nat_def)
+instance proof qed(simp add: vertex_1_nat_def vertex_2_nat_def vertex_3_nat_def)
 end
 value "vertex_1::nat"
 
@@ -38,7 +38,7 @@ begin
   definition "vertex_1_char" ::char where "vertex_1 \<equiv> CHR ''A''"
   definition "vertex_2_char" ::char where "vertex_2 \<equiv> CHR ''B''"
   definition "vertex_3_char" ::char where "vertex_3 \<equiv> CHR ''C''"
-instance apply(intro_classes) by(simp add: vertex_1_char_def  vertex_2_char_def vertex_3_char_def)
+instance proof(intro_classes) qed(simp add: vertex_1_char_def  vertex_2_char_def vertex_3_char_def)
 end
 value "vertex_1::char"
 
@@ -49,7 +49,7 @@ begin
   definition "vertex_1_vString" ::vString where "vertex_1 \<equiv> V ''A''"
   definition "vertex_2_vString" ::vString where "vertex_2 \<equiv> V ''B''"
   definition "vertex_3_vString" ::vString where "vertex_3 \<equiv> V ''C''"
-instance apply(intro_classes) by(simp add: vertex_1_vString_def vertex_2_vString_def vertex_3_vString_def)
+instance proof(intro_classes) qed(simp add: vertex_1_vString_def vertex_2_vString_def vertex_3_vString_def)
 end
 
 definition string_of_vString :: "vString \<Rightarrow> string" where
@@ -62,10 +62,10 @@ begin
   definition "less_vString" where "less a b \<equiv> (string_of_vString a) < (string_of_vString b)"
 instance
  apply(intro_classes)
- apply(simp_all add: less_eq_vString_def less_vString_def string_of_vString_def)
- apply(case_tac x, simp_all, case_tac y, simp_all)
- apply force
- apply(case_tac x, simp_all, case_tac y, simp_all)
+      apply(simp_all add: less_eq_vString_def less_vString_def string_of_vString_def)
+    apply(case_tac x, simp_all, case_tac y, simp_all)
+    apply force
+   apply(case_tac x, simp_all, case_tac y, simp_all)
  apply(case_tac x, simp_all, case_tac y, simp_all)
  apply(force)
 done
