@@ -74,7 +74,7 @@ hide_const NetworkModel_Vertices.V
       apply(case_tac m)
       apply(rename_tac defbot eval_model target_focus P config)
       apply(drule_tac G=G and P=P and defbot=defbot and eval_model=eval_model and target_focus=target_focus and config=config in c_eval_model_simp2)
-      apply simp
+       apply simp
       apply(clarify)
       apply(simp only: c_nP_def c_gP_def c_P_def)
       by(clarify)
@@ -110,7 +110,7 @@ hide_const NetworkModel_Vertices.V
       apply(rename_tac defbot eval_model target_focus P config)
       apply(drule_tac defbot=defbot and eval_model=eval_model and target_focus=target_focus and P=P 
           and config=config and G=G in c_eval_model_simp2)
-      apply(simp)
+       apply(simp)
       apply(simp)
       apply(simp add: c_nP_def c_gP_def c_P_def)
       apply(thin_tac "?a = ?b")
@@ -147,10 +147,10 @@ hide_const NetworkModel_Vertices.V
      apply(simp add: c_eval_model_def c_nP_def c_gP_def c_P_def c_offending_flows_def)
      apply clarify
      apply(subgoal_tac "NetworkModel_preliminaries eval_model")
-       prefer 2
-       apply(simp add: NetworkModel_def)
+      prefer 2
+      apply(simp add: NetworkModel_def)
      apply(erule_tac NetworkModel_preliminaries.mono_eval_model)
-     by simp_all
+       by simp_all
 
     lemma valid_ENFs1: "valid_ENFs (m # M) \<Longrightarrow> valid_ENF m"
       by(simp add: valid_ENFs_def)
@@ -162,12 +162,12 @@ hide_const NetworkModel_Vertices.V
       all_security_requirements_fulfilled M \<lparr> nodes = V, edges = E \<rparr> \<Longrightarrow>
       all_security_requirements_fulfilled M \<lparr> nodes = V, edges = E' \<rparr>"
       apply(induction M arbitrary: E' E)
-      apply(simp_all add: all_security_requirements_fulfilled_def)
+       apply(simp_all add: all_security_requirements_fulfilled_def)
       apply(rename_tac m M E' E)
       apply(rule conjI)
        apply(drule valid_ENFs1)
        apply(erule c_eval_model_mono)
-       apply(simp_all)
+         apply(simp_all)
        apply force
       apply(drule valid_ENFs2)
       apply blast
@@ -190,7 +190,7 @@ hide_const NetworkModel_Vertices.V
     lemma all_security_requirements_fulfilled_imp_no_offending_flows:
       "all_security_requirements_fulfilled M G \<Longrightarrow> (\<Union>m\<in>set M. \<Union>c_offending_flows m G) = {}"
       apply(induction M)
-      apply(simp_all)
+       apply(simp_all)
       apply(simp add: all_security_requirements_fulfilled_def)
       using c_eval_model_valid_imp_no_offending_flows by metis
 
@@ -210,7 +210,7 @@ hide_const NetworkModel_Vertices.V
     "\<lbrakk> valid_ENFs M; E' \<subseteq> E \<rbrakk> \<Longrightarrow>  
       edges (generate_valid_topology M \<lparr> nodes = V, edges = E' \<rparr>) \<subseteq> edges (generate_valid_topology M \<lparr> nodes = V, edges = E \<rparr>)"
       apply(induction M arbitrary: E' E)
-      apply(simp_all)
+       apply(simp_all)
       apply(simp add: graph_ops)
       apply(simp add: valid_ENFs_def)
       apply(rename_tac m M E' E)
@@ -221,25 +221,25 @@ hide_const NetworkModel_Vertices.V
     lemma generate_valid_topology_subseteq_edges:
     "edges (generate_valid_topology M G) \<subseteq> (edges G)"
       apply(induction M arbitrary: G)
-      apply(simp_all)
+       apply(simp_all)
       apply(simp add: graph_ops)
       by force
   
     lemma generate_valid_topology_nodes:
     "nodes (generate_valid_topology M G) = (nodes G)"
       apply(induction M arbitrary: G)
-      by(simp_all add: graph_ops)
+       by(simp_all add: graph_ops)
   
 
     lemma valid_graph_generate_valid_topology: "valid_graph G \<Longrightarrow> valid_graph (generate_valid_topology M G)"
       apply(induction M arbitrary: G)
-      by(simp_all)
+       by(simp_all)
 
 
   lemma generate_valid_topology_EX_graph_record:
   "\<exists> hypE. (generate_valid_topology M \<lparr>nodes = V, edges = E\<rparr>) = \<lparr>nodes = V, edges = hypE\<rparr> "
     apply(induction M arbitrary: V E)
-    apply(simp_all)
+     apply(simp_all)
     by(simp add: graph_ops)
 
    
@@ -253,14 +253,14 @@ hide_const NetworkModel_Vertices.V
         lemma generate_valid_topology_2_nodes:
         "nodes (generate_valid_topology_2 M G) = (nodes G)"
           apply(induction M arbitrary: G)
-          by(simp_all add: graph_ops)
+           by(simp_all add: graph_ops)
     
         lemma generate_valid_topology_12_eq_rule: "edges (generate_valid_topology M G) = edges (generate_valid_topology_2 M G) 
           \<Longrightarrow> generate_valid_topology M G = generate_valid_topology_2 M G"
           apply(induction M arbitrary: G)
-          apply(simp_all)
+           apply(simp_all)
           apply(rule NetworkModel_withOffendingFlows.graph_eq_intro)
-          by(simp add:generate_valid_topology_nodes generate_valid_topology_2_nodes delete_edges_simp2)+
+           by(simp add:generate_valid_topology_nodes generate_valid_topology_2_nodes delete_edges_simp2)+
     
     
         lemma helper_union_offending_different_models: "valid_ENF m \<Longrightarrow> valid_ENF a \<Longrightarrow> 
@@ -274,7 +274,7 @@ hide_const NetworkModel_Vertices.V
             edges (generate_valid_topology_2 M \<lparr>nodes = nodes G, edges = edges G - (\<Union>c_offending_flows m G)\<rparr>) = 
             edges (generate_valid_topology_2 M G) - (\<Union>c_offending_flows m G)"
         apply(induction M arbitrary: G)
-        apply(simp_all)
+         apply(simp_all)
         apply(frule valid_ENFs2)
         apply(drule valid_ENFs1)
         apply(simp add: delete_edges_simp2)
@@ -285,7 +285,7 @@ hide_const NetworkModel_Vertices.V
           generate_valid_topology M G = generate_valid_topology_2 M G"
         apply(rule generate_valid_topology_12_eq_rule)
         apply(induction M arbitrary: G)
-        apply(simp_all)
+         apply(simp_all)
         apply(frule valid_ENFs2)
         apply(simp)
         apply(drule valid_ENFs1)
@@ -299,9 +299,9 @@ hide_const NetworkModel_Vertices.V
     "\<lbrakk> valid_ENFs (m#M) \<rbrakk> \<Longrightarrow>  
       edges (generate_valid_topology_2 (m#M) \<lparr> nodes = V, edges = E \<rparr>) \<subseteq> edges (generate_valid_topology_2 M \<lparr> nodes = V, edges = E \<rparr>)"
       apply(induction M arbitrary: E m)
+       apply(simp add: delete_edges_simp2)
+       apply fastforce
       apply(simp add: delete_edges_simp2)
-      apply fastforce
-      apply(simp_all add: delete_edges_simp2)
       by blast
     corollary generate_valid_topology_mono_models:
     "\<lbrakk> valid_ENFs (m#M) \<rbrakk> \<Longrightarrow>  
@@ -314,7 +314,7 @@ hide_const NetworkModel_Vertices.V
     lemma generate_valid_topology_2_subseteq_edges:
     "edges (generate_valid_topology_2 M G) \<subseteq> (edges G)"
       apply(induction M arbitrary: G)
-      apply(simp_all)
+       apply(simp_all)
       apply(simp add: delete_edges_simp2)
       by blast
     
@@ -322,7 +322,7 @@ hide_const NetworkModel_Vertices.V
   lemma generate_valid_topology_2_EX_graph_record:
   "\<exists> hypE. (generate_valid_topology_2 M \<lparr>nodes = V, edges = E\<rparr>) = \<lparr>nodes = V, edges = hypE\<rparr> "
     apply(induction M arbitrary: V E)
-    apply(simp_all)
+     apply(simp_all)
     apply(simp add: graph_ops generate_valid_topology_2_nodes)
     done
 
@@ -393,7 +393,7 @@ hide_const NetworkModel_Vertices.V
       show "all_security_requirements_fulfilled (m # M) (generate_valid_topology (m # M) \<lparr>nodes = V, edges = E\<rparr>)"
         apply(subst all_security_requirements_fulfilled_split)
         apply(rule conjI)
-        apply(metis goal1)
+         apply(metis goal1)
         apply(metis goal2)
        done
       qed
@@ -403,7 +403,7 @@ hide_const NetworkModel_Vertices.V
   lemma generate_valid_topology_2_as_set: 
   "generate_valid_topology_2 M G = delete_edges G (\<Union>m \<in> set M. (\<Union> (c_offending_flows m G)))"
    apply(induction M arbitrary: G)
-   apply(simp_all add: delete_edges_simp2 generate_valid_topology_2_nodes) by fastforce
+    apply(simp_all add: delete_edges_simp2 generate_valid_topology_2_nodes) by fastforce
 
 
 
@@ -507,8 +507,7 @@ hide_const NetworkModel_Vertices.V
 
     hence "\<forall>(v1, v2) \<in> V \<times> V - E.
        \<not> all_security_requirements_fulfilled M (add_edge v1 v2 \<lparr> nodes = V, edges = E \<rparr>)" 
-        apply(auto simp add: add_edge_def)
-        by(simp add: insert_absorb)
+        by(auto simp add: add_edge_def insert_absorb)
     from this VE_prop
     have "\<forall>(v1, v2)\<in>nodes (generate_valid_topology M (fully_connected G)) \<times> nodes (generate_valid_topology M (fully_connected G)) -
               edges (generate_valid_topology M (fully_connected G)).
@@ -524,10 +523,10 @@ hide_const NetworkModel_Vertices.V
   theorem generate_valid_topology_max_topo: "\<lbrakk> valid_ENFs M; valid_graph G \<rbrakk> \<Longrightarrow> 
       max_topo M (generate_valid_topology M (fully_connected G))"
   apply(case_tac "\<not> all_security_requirements_fulfilled M (fully_connected G)")
-  apply(simp add: generate_valid_topology_generates_max_topo)
+   apply(simp add: generate_valid_topology_generates_max_topo)
   apply(simp)
   apply(drule generate_valid_topology_does_nothing_if_valid)
-  apply(auto simp add: fully_connected_valid)
+    apply(auto simp add: fully_connected_valid)
   by(simp add: fully_connected_def max_topo_def)
 
 end

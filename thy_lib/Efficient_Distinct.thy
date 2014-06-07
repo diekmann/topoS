@@ -1,7 +1,7 @@
 theory Efficient_Distinct
 imports 
-"./isabelle_afp/Collections/Collections"
-"./isabelle_afp/Collections/common/Misc"
+(*"./isabelle_afp/Collections/Collections"*) (*Collections*)
+"./isabelle_afp/Automatic_Refinement/Lib/Misc" (*mergesort*)
 "~~/src/HOL/Library/List_lexord"
 (*"~~/src/HOL/Library/Char_nat"*)
 (*"~~/src/HOL/Library/Product_ord" conflict with collections *)

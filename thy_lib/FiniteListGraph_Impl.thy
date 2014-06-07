@@ -2,7 +2,7 @@ theory FiniteListGraph_Impl
 imports 
   FiniteListGraph
   (*"Transitive-Closure/Transitive_Closure_List_Impl"*)
-  "isabelle_afp/Collections/Collections" (*red black trees*)
+  "isabelle_afp/Collections/ICF/impl/RBTSetImpl" (*red black trees*)
   (*maybe import the following only at the end*)
   "Efficient_Distinct"
   (* - 2013-2 "~~/src/HOL/Library/Code_Char_chr"*)

@@ -1,7 +1,8 @@
 chapter Corny
 
-session ACView = Collections +
+session "ACView" = "Main" + 
   options [timeout = 600]
   theories [show_question_marks = false]
     NetworkModel_Library
     Impl_List_Playground_statefulpolicycompliance
+    example_forte14
