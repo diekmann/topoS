@@ -64,7 +64,7 @@ section {*offending flows*}
     apply simp
     apply(rule_tac x="{e \<in> edges G. case e of (e1,e2) \<Rightarrow> e1 \<noteq> e2 \<and> \<not>P (nP e1) e1 (nP e2) e2}" in exI)
     apply(rule conjI)
-      apply fastforce+
+     apply fastforce+
    done
 
   lemma (in NetworkModel_withOffendingFlows) ENFnrSR_offending_case1:
@@ -74,7 +74,7 @@ section {*offending flows*}
     apply(insert ENFnrSR_offending_flows_structure[of G nP P])
     apply(simp only:HOL.not_False_eq_True)
     apply rule
-    apply(insert ENFnrSR_notevalmodel_imp_offending_not_empty[of P G nP], simp)
+     apply(insert ENFnrSR_notevalmodel_imp_offending_not_empty[of P G nP], simp)
      apply blast+
     done
   
@@ -93,7 +93,7 @@ section {*offending flows*}
      else 
       { {(e1,e2). (e1, e2) \<in> edges G \<and> e1 \<noteq> e2 \<and> \<not> P (nP e1) e1 (nP e2) e2} })"
   apply(cases "eval_model G nP")
-  apply(drule ENFnrSR_offending_case2, simp)
+   apply(drule ENFnrSR_offending_case2, simp)
    apply simp
   apply(drule ENFnrSR_offending_case1, simp)
   apply(simp)
@@ -141,7 +141,7 @@ section {* Instance helper*}
       apply(rule conjI)
        apply blast
       apply(insert e1e2cond)
-       by simp
+      by simp
   
     from this e1e2cond conjunct1[OF ENFnrSR_offending_members[OF a_not_eval a_enf a_offending]] conjunct1[OF e1e2cond] `e2 \<noteq> e1` have 
       "\<exists> (e1, e2)\<in>(edges G). e2 \<noteq> e1 \<and> \<not> P (?nP' e1) e1 (?nP' e2) e2" by fastforce

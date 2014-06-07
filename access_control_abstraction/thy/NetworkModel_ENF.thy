@@ -62,17 +62,17 @@ section {* offending flows:*}
     f \<in> set_offending_flows G nP
     \<Longrightarrow> f = {(e1,e2). (e1, e2) \<in> edges G \<and> \<not> P (nP e1) (nP e2)}"
     apply rule
-    apply rule
-    apply clarify
-    apply(rename_tac a b)
-    apply rule
-     apply(auto simp add:set_offending_flows_def)[1]
+     apply rule
+     apply clarify
+     apply(rename_tac a b)
+     apply rule
+      apply(auto simp add:set_offending_flows_def)[1]
      apply(simp add: ENF_offending_imp_not_P[of P f G nP])
     unfolding eval_model_all_edges_normal_form_def
     apply(simp add:set_offending_flows_def is_offending_flows_def is_offending_flows_min_set_def graph_ops)
     apply clarify
     apply(rename_tac a b a1 b1)
-     apply(blast)
+    apply(blast)
   done
   
   
@@ -92,8 +92,8 @@ section {* offending flows:*}
     { {(e1,e2). (e1, e2) \<in> edges G \<and> \<not> P (nP e1) (nP e2)} } \<subseteq> set_offending_flows G nP"
     apply rule
     apply(insert ENF_offending_set_P_representation[of P _ G nP],simp)[1]
-      apply blast
-  done
+    apply blast
+   done
   
   
   
@@ -109,7 +109,7 @@ section {* offending flows:*}
     (* select f' as the list of all edges of f which violate P *)
     apply(rule_tac x="{(e1,e2). (e1,e2) \<in> (edges G) \<and> \<not>P (nP e1) (nP e2)}" in exI) (* f better than edges G but proof harder *)
     apply simp
-     apply force
+    apply force
   done
   
   lemma (in NetworkModel_withOffendingFlows) ENF_notevalmodel_imp_ex_offending:
@@ -124,7 +124,7 @@ section {* offending flows:*}
     apply(rule_tac x="{(e1,e2). (e1,e2) \<in> (edges G) \<and> \<not>P (nP e1) (nP e2)}" in exI)
     apply(rule conjI)
      apply blast
-     apply blast
+    apply blast
   done
   
   lemma (in NetworkModel_withOffendingFlows) ENF_notevalmodel_imp_ex_offending_min:
@@ -133,9 +133,7 @@ section {* offending flows:*}
     \<exists>f. f \<subseteq> edges G \<and> is_offending_flows_min_set f G nP"
     apply(frule ENF_notevalmodel_imp_ex_offending[of P G nP], simp)
     apply(erule exE)
-    apply(insert ENF_notevalmodel_offending_imp_ex_offending_min[of P _ G nP])
-      apply fast
-  done
+    using ENF_notevalmodel_offending_imp_ex_offending_min[of P _ G nP] by fast
   
   lemma (in NetworkModel_withOffendingFlows) ENF_notevalmodel_imp_offending_not_empty:
   "eval_model_all_edges_normal_form P \<Longrightarrow> 
@@ -149,11 +147,11 @@ section {* offending flows:*}
     "\<lbrakk> eval_model_all_edges_normal_form P;  \<not> eval_model G nP \<rbrakk> \<Longrightarrow>
     { {(e1,e2). (e1, e2) \<in> (edges G) \<and> \<not> P (nP e1) (nP e2)} } = set_offending_flows G nP"
     apply(rule)
-    apply(frule ENF_notevalmodel_imp_offending_not_empty, simp)
-    apply(rule ENF_offenindg_not_empty_imp_ENF_offending_subseteq_rhs, simp)
-      apply simp
+     apply(frule ENF_notevalmodel_imp_offending_not_empty, simp)
+     apply(rule ENF_offenindg_not_empty_imp_ENF_offending_subseteq_rhs, simp)
+     apply simp
     apply(rule ENF_offending_subseteq_lhs)
-      apply simp
+    apply simp
   done
   
   lemma (in NetworkModel_withOffendingFlows) ENF_offending_case2:
@@ -181,7 +179,6 @@ section {* lemata *}
   by(auto simp add: ENF_offending_set)
  
 
-(* done until here *)
 
 section {* instance helper *}
   
@@ -297,7 +294,7 @@ section {* instance helper *}
       apply(rule conjI)
        apply blast
       apply(insert conjunct2[OF e1e2cond])
-       by simp
+      by simp
   
     from this ENF_refl ENF_offending_members[OF a_not_eval a_enf a_offending]  conjunct1[OF e1e2cond] have 
       "\<exists> (e1, e2) \<in> edges G. \<not> P (?nP' e1) (?nP' e2)" by blast
@@ -338,7 +335,7 @@ section {* instance helper *}
     from e1e2subgoal1 have "e1 \<noteq> e2 \<Longrightarrow> \<not> P (?nP' e1) (?nP' e2)"
       apply simp
       apply(rule conjI)
-      apply(insert conjunct2[OF e1e2cond])
+       apply(insert conjunct2[OF e1e2cond])
        by simp_all
   
     from this ENF_refl e1e2cond ENF_offending_members[OF a_not_eval a_enf a_offending]  conjunct1[OF e1e2cond] have 

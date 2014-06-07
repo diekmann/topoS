@@ -36,17 +36,17 @@ section {* offending flows:*}
     "\<And> F. F \<in> set_offending_flows G nP  \<Longrightarrow> F = {(s,r). (s, r) \<in> edges G \<and> \<not> P (nP s) s (nP r) r}"
       apply -
       apply rule
-      apply rule
-      apply clarify
-      apply(rename_tac a b)
-      apply rule
-       apply(auto simp add:set_offending_flows_def)[1]
+       apply rule
+       apply clarify
+       apply(rename_tac a b)
+       apply rule
+        apply(auto simp add:set_offending_flows_def)[1]
        apply(simp add: ENFsr_offending_imp_not_P)
       unfolding eval_model_all_edges_normal_form_sr_def
       apply(simp add:set_offending_flows_def is_offending_flows_def is_offending_flows_min_set_def graph_ops)
       apply clarify
       apply(rename_tac a b a1 b1)
-       apply(blast)
+      apply(blast)
     done
   
 
