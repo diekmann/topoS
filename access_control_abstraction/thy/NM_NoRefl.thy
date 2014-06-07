@@ -36,14 +36,14 @@ subsubsection {*Preleminaries*}
   where eval_model = eval_model
   and verify_globals = verify_globals
     apply unfold_locales
-    apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
-    apply(erule_tac exE)
-    apply(rename_tac list_edges)
-    apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
-    apply(auto)[6]
-    apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops)[1]
+      apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
+      apply(erule_tac exE)
+      apply(rename_tac list_edges)
+      apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+          apply(auto)[6]
+     apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops)[1]
     apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
-  done
+   done
 
  lemma NoRfl_ENRsr: "NetworkModel_withOffendingFlows.eval_model_all_edges_normal_form_sr eval_model (\<lambda> nP\<^sub>s s nP\<^sub>r r. s = r \<longrightarrow> nP\<^sub>s = Refl)"
     by(simp add: NetworkModel_withOffendingFlows.eval_model_all_edges_normal_form_sr_def)
@@ -66,12 +66,12 @@ subsubsection {*Preleminaries*}
     apply(simp)
     apply(rule)
     apply(rule)
-    apply(clarsimp)
-    using node_config.exhaust apply blast
+     apply(clarsimp)
+     using node_config.exhaust apply blast
     apply(rule)
     apply(rule)
     apply(clarsimp)
-  done
+   done
 
 
 interpretation NoRefl: NetworkModel
@@ -84,23 +84,23 @@ where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = NoRefl_o
   unfolding default_node_properties_def
   apply unfold_locales
 
-  (* only remove target_focus: *)
-  apply(rule conjI) prefer 2 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
+    (* only remove target_focus: *)
+    apply(rule conjI) prefer 2 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
   
-  apply(simp only: NetworkModel_withOffendingFlows.ENFsr_offending_set[OF NoRfl_ENRsr])
-  apply fastforce
+    apply(simp only: NetworkModel_withOffendingFlows.ENFsr_offending_set[OF NoRfl_ENRsr])
+    apply fastforce
 
- apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
+   apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
       NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
       NetworkModel_withOffendingFlows.is_offending_flows_def)
-  apply (simp add:graph_ops)
-  apply (simp split: split_split_asm split_split add:prod_case_beta)
-  apply(rule_tac x="\<lparr> nodes={vertex_1}, edges = {(vertex_1,vertex_1)} \<rparr>" in exI, simp)
-  apply(rule conjI)
-   apply(simp add: valid_graph_def)
-  apply(case_tac otherbot, simp_all)
-  apply(rule_tac x="(\<lambda> x. NoRefl)(vertex_1 := NoRefl, vertex_2 := NoRefl)" in exI, simp)
-    apply(rule_tac x="{(vertex_1,vertex_1)}" in exI, simp)
+   apply (simp add:graph_ops)
+   apply (simp split: split_split_asm split_split add:prod_case_beta)
+   apply(rule_tac x="\<lparr> nodes={vertex_1}, edges = {(vertex_1,vertex_1)} \<rparr>" in exI, simp)
+   apply(rule conjI)
+    apply(simp add: valid_graph_def)
+   apply(case_tac otherbot, simp_all)
+   apply(rule_tac x="(\<lambda> x. NoRefl)(vertex_1 := NoRefl, vertex_2 := NoRefl)" in exI, simp)
+   apply(rule_tac x="{(vertex_1,vertex_1)}" in exI, simp)
 
   apply(fact NoRefl_offending_set)
   done
