@@ -27,7 +27,7 @@ lemma undirected_reachable_mono:
    apply(rule set2subseteq)
    apply(rule trancl_mono)
    apply(rule Set.Un_mono)
-   apply(fact m)
+    apply(fact m)
    using m apply(blast)
    done
   qed
@@ -48,11 +48,11 @@ text{*simplifications for sets we need in the uniqueness proof*}
   lemma tmp6: "{(vertex_1, vertex_2), (vertex_2, vertex_1)}\<^sup>+ = 
     {(vertex_1, vertex_1), (vertex_2, vertex_2), (vertex_1, vertex_2), (vertex_2, vertex_1)}"
     apply(rule)
-    apply(rule)
-    apply(case_tac x, simp)
-    apply(erule_tac r="{(vertex_1, vertex_2), (vertex_2, vertex_1)}" in trancl_induct)
-    apply(auto)
-    apply (metis (mono_tags) insertCI r_r_into_trancl)+
+     apply(rule)
+     apply(case_tac x, simp)
+     apply(erule_tac r="{(vertex_1, vertex_2), (vertex_2, vertex_1)}" in trancl_induct)
+      apply(auto)
+     apply (metis (mono_tags) insertCI r_r_into_trancl)+
   done
   lemma tmp2: "(insert (vertex_1, vertex_2) {(b, a). a = vertex_1 \<and> b = vertex_2})\<^sup>+ = 
     {(vertex_1, vertex_1), (vertex_2, vertex_2), (vertex_1, vertex_2), (vertex_2, vertex_1)}"
@@ -109,7 +109,7 @@ section{*monotonic and preliminaries*}
     apply(clarsimp)
     apply(rename_tac nP N E' n E xa)
     apply(erule_tac x=n in ballE)
-     defer
+     prefer 2
      apply simp
     apply(simp)
     apply(drule_tac N=N and n=n in undirected_reachable_mono)
@@ -121,15 +121,15 @@ section{*monotonic and preliminaries*}
   where eval_model = eval_model
   and verify_globals = verify_globals
     apply unfold_locales
-       apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
-       apply(erule_tac exE)
-       apply(rename_tac list_edges)
-       apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
-           apply(auto)[5]
-       apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops empty_undirected_reachable_false)[1]
-      apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
-     apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
-    done
+      apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
+      apply(erule_tac exE)
+      apply(rename_tac list_edges)
+      apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+          apply(auto)[5]
+      apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops empty_undirected_reachable_false)[1]
+     apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
+    apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
+  done
 
 
 interpretation NonInterference: NetworkModel
@@ -144,17 +144,17 @@ and target_focus = NM_NonInterference.target_focus
     (* only remove target_focus: *)
     apply(rule conjI) prefer 1 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
 
-  apply simp
-  apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
+    apply simp
+   apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
     NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
     NetworkModel_withOffendingFlows.is_offending_flows_def)
-  apply(simp add: undirected_reachable_def succ_tran_def undirected_def graph_ops)
-  apply clarify
-   apply simp_all[2]
-  apply(rename_tac xa)
-  apply(case_tac "nP xa")
-  (*case Interfering*)
-  apply simp
+   apply(simp add: undirected_reachable_def succ_tran_def undirected_def graph_ops)
+   apply clarify
+   apply simp_all
+   apply(rename_tac xa)
+   apply(case_tac "nP xa")
+    (*case Interfering*)
+    apply simp
 
   (*apply(erule_tac x=n and A="nodes G" in ballE)
   prefer 2
@@ -176,7 +176,7 @@ and target_focus = NM_NonInterference.target_focus
   apply (smt singleton_conv2)*)
    (*isabelle 2012: apply (smt Diff_iff empty_iff fun_upd_image fun_upd_triv insert_iff insert_subset mem_Collect_eq node_config.simps(1))*)
    (*isabelle 2013: apply (smt DiffI empty_iff fun_upd_image fun_upd_triv insert_iff insert_subset mem_Collect_eq node_config.simps(1))*)
-   apply (smt DiffI empty_iff fun_upd_image fun_upd_triv insert_iff insert_subset mem_Collect_eq node_config.simps(1))
+    apply (smt DiffI empty_iff fun_upd_image fun_upd_triv insert_iff insert_subset mem_Collect_eq node_config.simps(1))
 (*case Unrelated*)
    apply simp
 
@@ -200,8 +200,8 @@ and target_focus = NM_NonInterference.target_focus
   apply(simp add: unique_default_example_4)
   apply(simp add: unique_default_example_5)
   apply(case_tac otherbot)
-    apply simp
-    apply(simp add:graph_ops)
+   apply simp
+  apply(simp add:graph_ops)
   done
 
 
