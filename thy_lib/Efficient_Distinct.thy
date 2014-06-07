@@ -1,11 +1,12 @@
 theory Efficient_Distinct
 imports 
-(*"./isabelle_afp/Collections/Collections"*) (*Collections*)
 "./isabelle_afp/Automatic_Refinement/Lib/Misc" (*mergesort*)
 "~~/src/HOL/Library/List_lexord"
+
 (*"~~/src/HOL/Library/Char_nat"*)
 (*"~~/src/HOL/Library/Product_ord" conflict with collections *)
 (*"isabelle_afp/Efficient-Mergesort/Efficient_Sort" not tail recursive*)
+
 "~~/src/HOL/Library/Code_Char"
 (*"~~/src/HOL/Library/Code_Char_chr" 2013-2*)
 (*"~~/src/HOL/Library/Code_Char_ord"* 2013-2*)
