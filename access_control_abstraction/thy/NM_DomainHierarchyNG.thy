@@ -110,14 +110,14 @@ section {* Datatype Domain Hierarchy *}
 
    lemma common_inf_imp_comparable: "(z::domainNameDept) \<le> a \<Longrightarrow> z \<le> b \<Longrightarrow> a \<le> b \<or> b \<le> a"
       apply(induction z arbitrary: a b)
-      apply(rename_tac zn zdpt a b)
-      apply(simp_all add: Leaf_Top_Unique)
+       apply(rename_tac zn zdpt a b)
+       apply(simp_all add: Leaf_Top_Unique)
       apply(case_tac a)
-      apply(rename_tac an adpt)
-      apply(simp_all add: Leaf_Top)
+       apply(rename_tac an adpt)
+       apply(simp_all add: Leaf_Top)
       apply(case_tac b)
-      apply(rename_tac bn bdpt)
-      apply(simp_all add: Leaf_Top)
+       apply(rename_tac bn bdpt)
+       apply(simp_all add: Leaf_Top)
       done
   
     lemma prepend_domain: "a \<le> b \<Longrightarrow> x--a \<le> x--b"
@@ -158,7 +158,7 @@ section {* Datatype Domain Hierarchy *}
         fix x y ::domainNameDept
         show "(x < y) = (x \<le> y \<and> \<not> y \<le> x)"
           apply(induction rule: less_domainNameDept.induct)
-          apply(simp_all)
+           apply(simp_all)
           by blast
       next
         fix x::domainNameDept
@@ -172,7 +172,7 @@ section {* Datatype Domain Hierarchy *}
         fix x y ::domainNameDept
         show "x \<le> y \<Longrightarrow> y \<le> x \<Longrightarrow> x = y"
           apply(induction rule: less_domainNameDept.induct)
-          by(simp_all)
+             by(simp_all)
     qed
   end
 
@@ -220,15 +220,15 @@ section {* Datatype Domain Hierarchy *}
     
     theorem chopOne_not_decrease: "dn \<le> domainNameDeptChopOne dn"
       apply(induction dn)
-      apply(rename_tac name dpt)
-      apply(drule_tac x="name" in prepend_domain)
-        apply(case_tac dpt)
-         apply simp_all
+       apply(rename_tac name dpt)
+       apply(drule_tac x="name" in prepend_domain)
+       apply(case_tac dpt)
+        apply simp_all
     done
     
     lemma chopOneContinue: "dpt \<noteq> Leaf \<Longrightarrow> domainNameDeptChopOne (name -- dpt) = name -- domainNameDeptChopOne (dpt)"
     apply(case_tac dpt)
-    by simp_all
+     by simp_all
     
     fun domainNameChop :: "domainNameDept \<Rightarrow> nat \<Rightarrow> domainNameDept" where
       "domainNameChop Leaf _ = Leaf" |
@@ -242,8 +242,8 @@ section {* Datatype Domain Hierarchy *}
     
     
     lemma chop0[simp]: "domainNameChop dn 0 = dn"
-      apply(case_tac dn)
-    by simp_all
+     apply(case_tac dn)
+      by simp_all
     
     
     lemma "(domainNameDeptChopOne^^2) (''d1''--''d2''--''d3''--Leaf) = ''d1''--Leaf" by eval
@@ -251,10 +251,11 @@ section {* Datatype Domain Hierarchy *}
     text {* domainNameChop is equal to applying n times chop one *}
     lemma domainNameChopFunApply: "domainNameChop dn n = (domainNameDeptChopOne^^n) dn"
       apply(induction dn n rule: domainNameChop.induct)
-      apply (simp_all)
+        apply (simp_all)
       apply(rename_tac nat,induct_tac nat, simp_all)
-      apply(rename_tac nat)
-      apply(induct_tac nat, simp_all)
+      apply(rename_tac n)
+      apply(induct_tac n)
+       apply(simp_all)
       done
     
     lemma domainNameChopRotateSuc: "domainNameChop dn (Suc n) = domainNameDeptChopOne (domainNameChop dn n)"
@@ -262,22 +263,22 @@ section {* Datatype Domain Hierarchy *}
     
     lemma domainNameChopRotate: "domainNameChop (domainNameDeptChopOne dn) n = domainNameDeptChopOne (domainNameChop dn n)"
       apply(subgoal_tac "domainNameChop (domainNameDeptChopOne dn) n = domainNameChop dn (Suc n)")
-      apply simp
-      apply(simp add: domainNameChopFunApply)
+       apply simp
+       apply(simp add: domainNameChopFunApply)
       apply(case_tac dn)
-    by(simp_all)
+       by(simp_all)
     
     
     theorem chop_not_decrease_hierarchy: "dn \<le> domainNameChop dn n"
       apply(induction n)
-      apply(simp)
-      apply(case_tac dn)
-      apply(rename_tac name dpt)
-      apply (simp)
-      apply(simp add:domainNameChopRotate)
+       apply(simp)
+       apply(case_tac dn)
+       apply(rename_tac name dpt)
+       apply (simp)
+       apply(simp add:domainNameChopRotate)
        apply (metis chopOne_not_decrease less_eq_refl)
-       apply simp
-    done
+      apply simp
+     done
     
     corollary "dn \<le> domainNameDeptChopOne ((domainNameDeptChopOne ^^ n) (dn))"
     by (metis chop_not_decrease_hierarchy domainNameChopFunApply domainNameChopRotateSuc)
@@ -295,13 +296,13 @@ section {* Datatype Domain Hierarchy *}
 
    lemma chop_sup_commute: "chop_sup a b = chop_sup b a"
     apply(induction a b rule: chop_sup.induct)
-    apply(rename_tac a)
-    apply(simp_all)
+      apply(rename_tac a)
+      apply(simp_all)
     apply(case_tac a, simp_all)
     done
   lemma chop_sup_max1: "a \<le> chop_sup a b"
     apply(induction a b rule: chop_sup.induct)
-    by(simp_all)
+      by(simp_all)
   lemma chop_sup_max2: "b \<le> chop_sup a b"
     apply(subst chop_sup_commute)
     by(simp add: chop_sup_max1)
@@ -318,15 +319,15 @@ section {* Datatype Domain Hierarchy *}
    lemma chop_sup_is_sup: "\<forall>z. a \<le> z \<and> b \<le> z \<longrightarrow> chop_sup a b \<le> z"
     apply(clarify)
     apply(induction a b rule: chop_sup.induct)
-    apply(simp_all)
+      apply(simp_all)
     apply(rule conjI)
-      apply(clarify)
-      apply(subgoal_tac "z=Leaf")
+     apply(clarify)
+     apply(subgoal_tac "z=Leaf")
       apply(simp)
      apply(simp add: uncomparable_sup_is_Top)
     apply(clarify)
     apply(case_tac z)
-    by(simp_all)
+     by(simp_all)
     
 
 
@@ -345,17 +346,17 @@ section {* Datatype Domain Hierarchy *}
       apply(intro_classes)
       (* x \<sqsubseteq> x *)
         apply(case_tac x)
-        apply(simp_all)
+       apply(simp_all)
       (* x \<sqsubseteq> y \<Longrightarrow> y \<sqsubseteq> z \<Longrightarrow> x \<sqsubseteq> z *)
-        apply(case_tac x, rename_tac dnX)
+       apply(case_tac x, rename_tac dnX)
         apply(case_tac y, rename_tac dnY)
-        apply(case_tac z, rename_tac dnZ)
-        apply(simp_all)
+         apply(case_tac z, rename_tac dnZ)
+          apply(simp_all)
       (* x \<sqsubseteq> y \<Longrightarrow> y \<sqsubseteq> x \<Longrightarrow> x = y *)
-        apply(case_tac x, rename_tac dnX)
-        apply(case_tac y, rename_tac dnY)
+      apply(case_tac x, rename_tac dnX)
+       apply(case_tac y, rename_tac dnY)
         apply(simp_all)
-        apply(metis domainName.exhaust leq_domainName.simps(2))
+      apply(metis domainName.exhaust leq_domainName.simps(2))
       done
     end
 
@@ -374,21 +375,21 @@ section {* Datatype Domain Hierarchy *}
 
     lemma DN_inf_commute: "DN_inf x y = DN_inf y x"
       apply(induction x y rule: DN_inf.induct)
-      apply(rename_tac x)
-      apply(case_tac x)
-      by (simp_all)
+        apply(rename_tac x)
+        apply(case_tac x)
+         by (simp_all)
 
     lemma DN_inf_is_inf: "is_inf x y (DN_inf x y)"
       apply(induction x y rule: DN_inf.induct)
-      apply(simp add: is_inf_def)
-      apply(simp add: is_inf_def)
+        apply(simp add: is_inf_def)
+       apply(simp add: is_inf_def)
       apply(simp add: is_inf_def)
       apply(clarify)
       apply(rename_tac z)
       apply(case_tac z)
-      apply(simp)
-      apply(rename_tac zn)
-      apply(simp_all)
+       apply(simp)
+       apply(rename_tac zn)
+       apply(simp_all)
       using common_inf_imp_comparable by blast
 
     
@@ -399,21 +400,21 @@ section {* Datatype Domain Hierarchy *}
 
     lemma DN_sup_commute: "DN_sup x y = DN_sup y x"
       apply(induction x y rule: DN_sup.induct)
-      apply(rename_tac x)
-      apply(case_tac x)
-      by(simp_all add: chop_sup_commute)
+        apply(rename_tac x)
+        apply(case_tac x)
+         by(simp_all add: chop_sup_commute)
 
     lemma DN_sup_is_sup: "is_sup x y (DN_sup x y)"
       apply(induction x y rule: DN_inf.induct)
-      apply(simp add: is_sup_def leq_refl)
-      apply(simp add: is_sup_def)
+        apply(simp add: is_sup_def leq_refl)
+       apply(simp add: is_sup_def)
       apply(simp add: is_sup_def chop_sup_max1 chop_sup_max2)
       apply(clarify)
       apply(rename_tac z)
       apply(case_tac z)
-      apply(simp)
-      apply(rename_tac zn)
-      apply(simp_all)
+       apply(simp)
+       apply(rename_tac zn)
+       apply(simp_all)
       apply(clarify)
       apply(simp add: chop_sup_is_sup)
       done
@@ -423,11 +424,11 @@ section {* Datatype Domain Hierarchy *}
       begin
       instance
         apply intro_classes
-        apply(rule_tac x="DN_inf x y" in exI)
+         apply(rule_tac x="DN_inf x y" in exI)
          apply(fact DN_inf_is_inf)
         apply(rule_tac x="DN_sup x y" in exI)
-         apply(rule DN_sup_is_sup)
-      done
+        apply(rule DN_sup_is_sup)
+       done
     end
     
 
@@ -446,8 +447,8 @@ section {* Datatype Domain Hierarchy *}
 
     lemma leq_domainNameTrust_refl: "x \<sqsubseteq>\<^sub>t\<^sub>r\<^sub>u\<^sub>s\<^sub>t x"
       apply(case_tac x)
-      apply(case_tac prod)
-      apply(simp add: chop_not_decrease_hierarchy)
+       apply(case_tac prod)
+       apply(simp add: chop_not_decrease_hierarchy)
       by(simp)
    
    lemma leq_domainNameTrust_NOT_trans: "\<exists>x y z. x \<sqsubseteq>\<^sub>t\<^sub>r\<^sub>u\<^sub>s\<^sub>t y \<and> y \<sqsubseteq>\<^sub>t\<^sub>r\<^sub>u\<^sub>s\<^sub>t z \<and> \<not> x \<sqsubseteq>\<^sub>t\<^sub>r\<^sub>u\<^sub>s\<^sub>t z"
@@ -495,7 +496,7 @@ lemma eval_model_mono: "NetworkModel_withOffendingFlows.eval_model_mono eval_mod
   apply(rule_tac NetworkModel_withOffendingFlows.eval_model_mono_I_proofrule)
    apply(auto)
   apply(rename_tac nP e1 e2 N E' e1' e2' E)
- apply(blast)
+  apply(blast)
  done
 
 
@@ -503,14 +504,14 @@ interpretation NetworkModel_preliminaries
 where eval_model = eval_model
 and verify_globals = verify_globals
   apply unfold_locales
-     apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
-     apply(erule_tac exE)
-     apply(rename_tac list_edges)
-          apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
-     apply(auto)[5]
-    apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops)[1]
-   apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
-  apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
+    apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
+    apply(erule_tac exE)
+    apply(rename_tac list_edges)
+    apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+        apply(auto)[5]
+   apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops)[1]
+  apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
+ apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
 done
 
 
@@ -558,29 +559,29 @@ section {*ENF*}
     apply(rule conjI)
      apply(simp add: valid_graph_def)
     apply(case_tac otherbot)
-    apply(case_tac prod)
-    apply(rename_tac dn trustlevel)
-    apply(clarify)
-  
-    apply(case_tac dn)
+     apply(case_tac prod)
+     apply(rename_tac dn trustlevel)
+     apply(clarify)
+
+     apply(case_tac dn)
   
     (* case (name -- dpt, trustlevel)  *)
-    apply(rename_tac name dpt)
-    apply(simp)
-    apply(rule_tac x="(\<lambda> x. default_node_properties)(vertex_1 := Unassigned, vertex_2 := DN (name--dpt, 0 ))" in exI, simp)
-    apply(rule_tac x="vertex_1" in exI, simp)
-    apply(rule_tac x="{(vertex_1,vertex_2)}" in exI, simp)
-    apply(simp add:chop_not_decrease_hierarchy)
+      apply(rename_tac name dpt)
+      apply(simp)
+      apply(rule_tac x="(\<lambda> x. default_node_properties)(vertex_1 := Unassigned, vertex_2 := DN (name--dpt, 0 ))" in exI, simp)
+      apply(rule_tac x="vertex_1" in exI, simp)
+      apply(rule_tac x="{(vertex_1,vertex_2)}" in exI, simp)
+      apply(simp add:chop_not_decrease_hierarchy)
   
     (* case (Leaf, trustlevel)*)
-    apply(simp)
-    apply(rule_tac x="(\<lambda> x. default_node_properties)(vertex_1 := Unassigned, vertex_2 := DN (Leaf, 0))" in exI, simp)
-    apply(rule_tac x="vertex_1" in exI, simp)
-    apply(rule_tac x="{(vertex_1,vertex_2)}" in exI, simp)
+     apply(simp)
+     apply(rule_tac x="(\<lambda> x. default_node_properties)(vertex_1 := Unassigned, vertex_2 := DN (Leaf, 0))" in exI, simp)
+     apply(rule_tac x="vertex_1" in exI, simp)
+     apply(rule_tac x="{(vertex_1,vertex_2)}" in exI, simp)
   
     (* case Unassigned *)
     apply(simp add: default_node_properties_def)
-    done
+   done
 
 interpretation DomainHierarchyNG: NetworkModel
 where default_node_properties = default_node_properties
@@ -591,13 +592,13 @@ where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = DomainHi
   unfolding target_focus_def
   apply unfold_locales
   
-  apply(rule conjI) prefer 2 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
-  apply(drule NetworkModel_withOffendingFlows.ENF_fsts_refl_instance[OF _ DomainHierarchyNG_ENF_refl unassigned_default_candidate], simp_all)[1]
+    apply(rule conjI) prefer 2 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
+    apply(drule NetworkModel_withOffendingFlows.ENF_fsts_refl_instance[OF _ DomainHierarchyNG_ENF_refl unassigned_default_candidate], simp_all)[1]
 
-  apply(drule Unassigned_unique_default, simp) 
+   apply(drule Unassigned_unique_default, simp) 
 
   apply(fact DomainHierarchyNG_offending_set)
-done
+ done
 
 
 
