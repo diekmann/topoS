@@ -107,8 +107,9 @@ value[code] "ChairNetwork"
 
 
 ML_val{*
-visualize_edges @{context} @{theory} @{term "edgesL ChairNetwork"} []; 
+vizualize_graph @{context} @{theory} @{term "ChairSecurityRequirements"} @{term "ChairNetwork"};
 *}
+
 
 
 end
