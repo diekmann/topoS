@@ -262,14 +262,14 @@ section {* instance helper *}
   (* fsts version *)
   lemma (in NetworkModel_withOffendingFlows)  ENF_fsts_refl_instance:
     fixes "default_node_properties" :: "'a" ("\<bottom>")
-    assumes a_not_eval: "\<not> eval_model G nP"
-    and   a_enf_refl: "ENF_refl P"
+    assumes a_enf_refl: "ENF_refl P"
     and   a3: "\<forall> (nP::'v \<Rightarrow> 'a) e1 e2. \<not> (P (nP e1) (nP e2)) \<longrightarrow> \<not> (P \<bottom> (nP e2))" (*changed \<And> to \<forall>*)
     and   a_offending: "f \<in> set_offending_flows G nP"
     and   a_i_fsts: "i \<in> fst ` f"
     shows
           "\<not> eval_model G (nP(i := \<bottom>))"
   proof -
+    from a_offending have a_not_eval: "\<not> eval_model G nP" by (metis equals0D validmodel_imp_no_offending)
     from valid_without_offending_flows[OF a_offending] have a_offending_rm: "eval_model (delete_edges G f) nP" .
 
     from a_enf_refl have a_enf: "eval_model_all_edges_normal_form P" using ENF_refl_def by simp

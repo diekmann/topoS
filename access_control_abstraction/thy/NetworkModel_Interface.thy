@@ -291,12 +291,13 @@ subsection {*Information flow security*}
   
 
 lemma default_uniqueness_by_counterexample_IFS:
-  assumes "otherbot \<noteq> default_value \<Longrightarrow>
+  assumes "(\<forall>G F nP i. valid_graph G \<and> F \<in> NetworkModel_withOffendingFlows.set_offending_flows eval_model G nP \<and> i \<in> snd` F 
+                \<longrightarrow> \<not> eval_model G (nP(i := otherbot)))"
+  and "otherbot \<noteq> default_value \<Longrightarrow>
     \<exists>G nP i F. valid_graph G \<and> \<not> eval_model G nP \<and> F \<in> (NetworkModel_withOffendingFlows.set_offending_flows eval_model G nP) \<and>
        eval_model (delete_edges G F) nP \<and>
         i \<in> snd ` F \<and> eval_model G (nP(i := otherbot)) "
-   shows "(\<forall>G F nP i. valid_graph G \<and> F \<in> NetworkModel_withOffendingFlows.set_offending_flows eval_model G nP \<and> i \<in> snd` F 
-                \<longrightarrow> \<not> eval_model G (nP(i := otherbot))) \<Longrightarrow> otherbot = default_value"
+   shows "otherbot = default_value"
    using assms by blast
 
 
@@ -344,6 +345,17 @@ subsection {*Access Control Strategy*}
   apply(simp)
   apply(blast)
   done
+
+
+lemma default_uniqueness_by_counterexample_ACS:
+  assumes "(\<forall>G F nP i. valid_graph G \<and> F \<in> NetworkModel_withOffendingFlows.set_offending_flows eval_model G nP \<and> i \<in> fst ` F 
+                \<longrightarrow> \<not> eval_model G (nP(i := otherbot)))"
+  and "otherbot \<noteq> default_value \<Longrightarrow>
+    \<exists>G nP i F. valid_graph G \<and> \<not> eval_model G nP \<and> F \<in> (NetworkModel_withOffendingFlows.set_offending_flows eval_model G nP) \<and>
+       eval_model (delete_edges G F) nP \<and>
+        i \<in> fst ` F \<and> eval_model G (nP(i := otherbot))"
+  shows "otherbot = default_value"
+  using assms by blast
 
 
 text{* The sublocale relation ship tells that the simplified NetworkModel_ACL and NetworkModel_IFS 

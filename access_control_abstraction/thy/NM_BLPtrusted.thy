@@ -116,7 +116,8 @@ interpretation BLPtrusted: NetworkModel_IFS
       apply (rule_tac f=f in NetworkModel_withOffendingFlows.ENF_snds_refl_instance[OF BLP_ENF_refl zero_default_candidate])
        apply(simp)
       apply(simp)
-     apply(blast intro: default_uniqueness_by_counterexample_IFS[OF BLP_def_unique])
+     apply(erule default_uniqueness_by_counterexample_IFS)
+     apply(fact BLP_def_unique)
     apply(fact BLP_offending_set)
    done
 

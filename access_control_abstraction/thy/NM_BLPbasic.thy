@@ -119,7 +119,8 @@ section {*ENF*}
       apply(rule ballI)
       apply(rule NetworkModel_withOffendingFlows.ENF_snds_refl_instance[OF BLP_ENF_refl])
          apply(simp_all add: BLP_ENF BLP_ENF_refl)[3]
-     apply(blast intro: default_uniqueness_by_counterexample_IFS[OF BLP_def_unique])
+     apply(erule default_uniqueness_by_counterexample_IFS)
+     apply(fact BLP_def_unique)
     apply(fact BLP_offending_set)
    done
 
