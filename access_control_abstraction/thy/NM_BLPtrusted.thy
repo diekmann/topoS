@@ -43,11 +43,13 @@ and verify_globals = verify_globals
   apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
  done
 
+
+lemma "a \<noteq> b \<Longrightarrow> ((\<exists> x. y x)) \<Longrightarrow> ((\<forall> x. \<not> y x) \<Longrightarrow> a = b )" by simp
+
 lemma BLP_def_unique: "otherbot \<noteq> default_node_properties \<Longrightarrow>
     \<exists>G p i f. valid_graph G \<and> \<not> eval_model G p \<and> f \<in> (NetworkModel_withOffendingFlows.set_offending_flows eval_model G p) \<and>
        eval_model (delete_edges G f) p \<and> 
-        (\<not> True \<longrightarrow> i \<in> fst ` f \<and> eval_model G (p(i := otherbot))) \<and>
-        (True \<longrightarrow> i \<in> snd ` f \<and> eval_model G (p(i := otherbot))) "
+         i \<in> snd ` f \<and> eval_model G (p(i := otherbot)) "
   apply(simp add:default_node_properties_def)
   apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
       NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
@@ -66,7 +68,6 @@ lemma BLP_def_unique: "otherbot \<noteq> default_node_properties \<Longrightarro
    apply force
   apply fast
   done
-
 
 
 section {*ENF*}
@@ -105,25 +106,25 @@ section {*ENF*}
   done
    
 
-interpretation BLPtrusted: NetworkModel
+interpretation BLPtrusted: NetworkModel_IFS 
   where default_node_properties = default_node_properties
   and eval_model = eval_model
   and verify_globals = verify_globals
-  and target_focus = target_focus
   where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = BLP_offending_set"
-    unfolding target_focus_def
     apply unfold_locales
-    (* only remove target_focus: *)
-      apply(rule conjI) prefer 1 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
-      apply (drule NetworkModel_withOffendingFlows.ENF_snds_refl_instance[OF _ BLP_ENF_refl zero_default_candidate],simp_all)[1]
-
-     apply(unfold default_node_properties_def)
-     apply(blast intro: BLP_def_unique[simplified default_node_properties_def])
-
+      apply(rule ballI)
+      apply (rule_tac f=f in NetworkModel_withOffendingFlows.ENF_snds_refl_instance[OF _ BLP_ENF_refl zero_default_candidate])
+        apply (metis offending_notevalD)
+       apply(simp)
+      apply(simp)
+     apply (metis BLP_def_unique)
     apply(fact BLP_offending_set)
    done
 
-   
+ 
+
+  lemma NetworkModel_BLPtrusted: "NetworkModel eval_model default_node_properties target_focus"
+  unfolding target_focus_def by unfold_locales  
  
 hide_type (open) node_config
 hide_const (open) eval_model_mono
