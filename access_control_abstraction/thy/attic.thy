@@ -1,5 +1,5 @@
-theory Util_Nat_NM
-imports Main FiniteGraph
+theory attic
+imports Main "../../thy_lib/FiniteGraph"
 begin
 
 (*old lemma, unused. *)
