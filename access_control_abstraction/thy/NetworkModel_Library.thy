@@ -10,6 +10,7 @@ imports String
   NM_CommunicationPartners_impl
   NM_NoRefl_impl
   NM_ACLnotCommunicateWith_impl (*TODO add, has exponential offending runtime*)
+  NM_ACLcommunicateWith_impl
   NM_Dependability_norefl_impl
   "../../thy_lib/Efficient_Distinct"
   (*"~~/src/HOL/Library/Code_Char_chr" "~~/src/HOL/Library/Efficient_Nat" *)
@@ -40,6 +41,7 @@ print_interps NetworkModel_modelLibrary
   thm NM_LIB_SubnetsInGW_interpretation.impl_spec
   thm NM_LIB_CommunicationPartners_interpretation.impl_spec
   thm NM_LIB_Dependability_interpretation.impl_spec
+  thm NM_LIM_ACLcommunicateWith_interpretation.impl_spec
 
 
 (*nothing to see here, just loads all the models, ...*)
