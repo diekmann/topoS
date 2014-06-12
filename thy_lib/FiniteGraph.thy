@@ -304,7 +304,7 @@ lemmas graph_ops=add_node_def delete_node_def add_edge_def delete_edge_def delet
 Benedikt Nordhoff and Peter Lammich
 Dijkstra's Shortest Path Algorithm
 http://afp.sourceforge.net/entries/Dijkstra_Shortest_Path.shtml*)
-
+(*more a literal copy of http://afp.sourceforge.net/browser_info/current/AFP/Dijkstra_Shortest_Path/Graph.html*)
 
   text {* Successors of a node. *}
   definition succ :: "'v graph \<Rightarrow> 'v \<Rightarrow> 'v set"
@@ -340,8 +340,8 @@ subsection {* Paths *}
     
     lemma is_path_memb[simp]:
       "is_path v p v' \<Longrightarrow> v\<in>V \<and> v'\<in>V"
-      apply (induct p arbitrary: v) 
-      apply (auto dest: E_validD)
+      apply (induction p arbitrary: v) 
+       apply (auto dest: E_validD)
       done
 
     lemma is_path_split:
@@ -483,8 +483,6 @@ subsubsection {* Splitting Paths *}
         by auto
     } ultimately show ?case by blast
   qed
-
-
 
 
 

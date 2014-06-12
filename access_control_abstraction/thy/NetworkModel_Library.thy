@@ -2,7 +2,7 @@ theory NetworkModel_Library
 imports String 
   "../../thy_lib/FiniteListGraph_Impl"
   NM_BLPbasic_impl NM_Dependability_impl NM_Subnets_impl 
-  (*NM_DomainHierarchy_impl*) NM_DomainHierarchyNG_impl
+  NM_DomainHierarchyNG_impl
   NM_BLPtrusted_impl
   NM_SecurityGateway_impl NM_SecGwExt_impl NM_Sink_impl
   NM_NonInterference_impl
@@ -10,6 +10,7 @@ imports String
   NM_CommunicationPartners_impl
   NM_NoRefl_impl
   NM_ACLnotCommunicateWith_impl (*TODO add, has exponential offending runtime*)
+  NM_Dependability_norefl_impl
   "../../thy_lib/Efficient_Distinct"
   (*"~~/src/HOL/Library/Code_Char_chr" "~~/src/HOL/Library/Efficient_Nat" *)
   "~~/src/HOL/Library/Code_Target_Nat"
@@ -29,7 +30,6 @@ print_interps NetworkModel_modelLibrary
 (*some check: *)
   thm NM_LIB_BLPbasic_interpretation.impl_spec
   thm NM_LIB_Dependability_interpretation.impl_spec
-  (*thm NM_LIB_DomainHierarchy_interpretation.impl_spec*)
   thm NM_LIB_DomainHierarchyNG_interpretation.impl_spec
   thm NM_LIB_Subnets_interpretation.impl_spec
   thm NM_LIB_BLPtrusted_interpretation.impl_spec
@@ -39,6 +39,7 @@ print_interps NetworkModel_modelLibrary
   thm NM_LIB_NonInterference_interpretation.impl_spec
   thm NM_LIB_SubnetsInGW_interpretation.impl_spec
   thm NM_LIB_CommunicationPartners_interpretation.impl_spec
+  thm NM_LIB_Dependability_interpretation.impl_spec
 
 
 (*nothing to see here, just loads all the models, ...*)
