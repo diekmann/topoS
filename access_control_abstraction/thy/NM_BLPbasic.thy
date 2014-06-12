@@ -117,9 +117,8 @@ section {*ENF*}
     unfolding default_node_properties_def
     apply(unfold_locales)
       apply(rule ballI)
-      apply(rule NetworkModel_withOffendingFlows.ENF_snds_refl_instance[OF _ BLP_ENF_refl])
-         apply(simp_all add: BLP_ENF BLP_ENF_refl)[4]
-      apply (metis eval_model.simps offending_notevalD)
+      apply(rule NetworkModel_withOffendingFlows.ENF_snds_refl_instance[OF BLP_ENF_refl])
+         apply(simp_all add: BLP_ENF BLP_ENF_refl)[3]
      apply(blast intro: default_uniqueness_by_counterexample_IFS[OF BLP_def_unique])
     apply(fact BLP_offending_set)
    done

@@ -113,11 +113,10 @@ interpretation BLPtrusted: NetworkModel_IFS
   where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = BLP_offending_set"
     apply unfold_locales
       apply(rule ballI)
-      apply (rule_tac f=f in NetworkModel_withOffendingFlows.ENF_snds_refl_instance[OF _ BLP_ENF_refl zero_default_candidate])
-        apply (metis offending_notevalD)
+      apply (rule_tac f=f in NetworkModel_withOffendingFlows.ENF_snds_refl_instance[OF BLP_ENF_refl zero_default_candidate])
        apply(simp)
       apply(simp)
-     apply (metis BLP_def_unique)
+     apply(blast intro: default_uniqueness_by_counterexample_IFS[OF BLP_def_unique])
     apply(fact BLP_offending_set)
    done
 
