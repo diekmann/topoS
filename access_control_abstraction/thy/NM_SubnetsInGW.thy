@@ -25,7 +25,7 @@ fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> subnets) \<Right
 definition target_focus :: "bool" where "target_focus = False"
 
 
-subsubsection {*Preleminaries*}
+subsubsection {*Preliminaries*}
   lemma eval_model_mono: "NetworkModel_withOffendingFlows.eval_model_mono eval_model"
     apply(simp only: NetworkModel_withOffendingFlows.eval_model_mono_def)
     apply(clarify)

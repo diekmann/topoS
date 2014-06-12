@@ -28,7 +28,7 @@ definition target_focus :: "bool" where "target_focus = True" (*this is odd.
   thus, responsibility is in the one who accepts and not the one who initiates. two entities are needed for a connection! *)
 
 
-subsubsection {*Preleminaries*}
+subsubsection {*Preliminaries*}
   lemma eval_model_mono: "NetworkModel_withOffendingFlows.eval_model_mono eval_model"
     apply(simp only: NetworkModel_withOffendingFlows.eval_model_mono_def)
     apply(clarify)
