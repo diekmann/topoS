@@ -87,6 +87,7 @@ lemma "set (flows_stateL ChairNetwork_stateful_IFS) \<subseteq> (set (flows_fixL
 value[code] "(set (flows_fixL ChairNetwork_stateful_IFS)) - set (flows_stateL ChairNetwork_stateful_IFS)"
 (*only problems: printers!!!*)
 value[code] "stateful_list_policy_to_list_graph ChairNetwork_stateful_IFS"
+lemma "set (filter_IFS_no_violations ChairNetwork [ConfidentialChairData]) = set (edgesL ChairNetwork)" by eval
 
 definition "ChairNetwork_stateful_ACS = \<lparr> hostsL = nodesL ChairNetwork, flows_fixL = edgesL ChairNetwork, flows_stateL = filter_compliant_stateful_ACS ChairNetwork ChairSecurityRequirements \<rparr>"
 value[code] "edgesL ChairNetwork"
@@ -115,7 +116,22 @@ definition "ChairNetwork_stateful = generate_valid_stateful_policy_IFSACS ChairN
 
 
 ML_val{*
-visualize_edges @{context} @{theory} @{term "flows_fixL ChairNetwork_stateful"} [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "flows_stateL ChairNetwork_stateful"})]; 
+visualize_edges @{context} @{theory} @{term "flows_fixL ChairNetwork_stateful"} 
+    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "flows_stateL ChairNetwork_stateful"})]; 
+*}
+
+(*these requirements impose no restrictoins on the stateful flows*)
+definition "ChairNetwork_stateful_v2 = generate_valid_stateful_policy_IFSACS ChairNetwork [ConfidentialChairData, PrintingACL,  InternalSubnet, FilesSrcACL]"
+ML_val{*
+visualize_edges @{context} @{theory} @{term "flows_fixL ChairNetwork_stateful_v2"} 
+    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "flows_stateL ChairNetwork_stateful_v2"})]; 
+*}
+
+(*The sink requirements imposes the restriction that the printer cannot answer*)
+definition "ChairNetwork_stateful_v3 = generate_valid_stateful_policy_IFSACS ChairNetwork [PrintingSink]"
+ML_val{*
+visualize_edges @{context} @{theory} @{term "flows_fixL ChairNetwork_stateful_v3"} 
+    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "flows_stateL ChairNetwork_stateful_v3"})]; 
 *}
 
 section{*An example of bad side-effects in access control policies*}
@@ -140,6 +156,9 @@ section{*An example of bad side-effects in access control policies*}
   lemma "implc_get_offending_flows [ACL_not_with] 
     \<lparr> nodesL = [V ''A'', V ''B'', V ''C''], edgesL = [(V ''B'', V ''A''), (V ''B'', V ''C''), (V ''A'', V ''B'')] \<rparr> =
       [[(V ''B'', V ''C'')], [(V ''A'', V ''B'')]]" by eval
+  lemma "implc_get_offending_flows [ACL_not_with] 
+    \<lparr> nodesL = [V ''A'', V ''B'', V ''C''], edgesL = [(V ''B'', V ''A''), (V ''B'', V ''C''), (V ''C'', V ''B'')] \<rparr> =
+      []" by eval
 
 value[code] "generate_valid_stateful_policy_IFSACS simple_network [ACL_not_with]"
 value[code] "generate_valid_stateful_policy_IFSACS_2 simple_network [ACL_not_with]"

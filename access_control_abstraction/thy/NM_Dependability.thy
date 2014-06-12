@@ -79,7 +79,7 @@ text{* It does not matter whether we iterate over all edges or all nodes. We cho
       apply(simp)
       apply(clarify)
       apply(rule_tac x="v" in bexI)
-      apply(simp_all)
+       apply(simp_all)
       done
 
 
@@ -91,11 +91,11 @@ by (metis (lifting, no_types) Collect_cong Range.intros Range_empty Range_insert
 lemma unique_default_example_simp1: "{(e1, e2). e1 = vertex_1 \<and> e2 = vertex_2 \<and> (e1 = vertex_1 \<longrightarrow> e2 \<noteq> vertex_2)} = {}" by blast
 lemma unique_default_example_simp2: "{(vertex_1, vertex_2)}\<^sup>+ = {(vertex_1, vertex_2)}"
   apply(rule)
-  apply(rule)
-  apply(clarify)
-  apply(rule_tac P="\<lambda> a b. a = vertex_1 \<and> b = vertex_2" in trancl.induct)
-  apply auto
-done
+   apply(rule)
+   apply(clarify)
+   apply(rule_tac P="\<lambda> a b. a = vertex_1 \<and> b = vertex_2" in trancl.induct)
+     apply auto
+ done
 
 
 (*
@@ -111,28 +111,28 @@ by (metis (lifting) Range_iff finite_Range mem_Collect_eq rev_finite_subset subs
 
 lemma eval_model_mono: "NetworkModel_withOffendingFlows.eval_model_mono eval_model"
   apply(rule_tac NetworkModel_withOffendingFlows.eval_model_mono_I_proofrule)
-  apply(auto)
+   apply(auto)
   apply(rename_tac nP e1 e2 N E' e1' e2' E)
   apply(drule_tac E'="E'" and v="e1'" in num_reachable_mono)
    apply simp
   apply(subgoal_tac "(e1', e2') \<in> E")
    apply(force)
-   apply(blast)
-  done
+  apply(blast)
+ done
   
 
 interpretation NetworkModel_preliminaries
 where eval_model = eval_model
 and verify_globals = verify_globals
   apply unfold_locales
-  apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
-  apply(erule_tac exE)
-  apply(rename_tac list_edges)
-  apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
-  apply(auto)[5]
-  apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops)[1]
+    apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
+    apply(erule_tac exE)
+    apply(rename_tac list_edges)
+    apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+        apply(auto)[5]
+   apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops)[1]
   apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
-  apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
+ apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
 done
 
 
@@ -145,15 +145,14 @@ and target_focus = target_focus
   unfolding NM_Dependability.default_node_properties_def
   apply unfold_locales
   
-  apply simp
-  apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
+   apply simp
+   apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
     NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
     NetworkModel_withOffendingFlows.is_offending_flows_def)
-  apply (simp split: split_split_asm split_split add:prod_case_beta)
-  apply (simp add:graph_ops)
-  apply(clarify)
-  apply (metis gr0I le0)
-
+   apply (simp split: split_split_asm split_split add:prod_case_beta)
+   apply (simp add:graph_ops)
+   apply(clarify)
+   apply (metis gr0I le0)
 
   apply(simp)
   apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def

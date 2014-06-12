@@ -36,9 +36,7 @@ begin
       E' \<subseteq> E \<and> 
       P e1 e2 nP \<lparr>nodes = N, edges = E\<rparr> \<longrightarrow> P e1 e2 nP \<lparr>nodes = N, edges = E'\<rparr>) \<rbrakk> \<Longrightarrow> eval_model_mono"
   unfolding eval_model_mono_def
-  apply(rule allI)+
-  apply(clarify)
-  proof -
+  proof(clarify)
     fix nP N E' E
     assume AllForm: "(\<forall> nP (G:: 'v graph). eval_model G nP = (\<forall> (e1, e2) \<in> edges G. P e1 e2 nP G) )"
     and Pmono: "\<forall>nP e1 e2 N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr> \<and> (e1,e2) \<in> E \<and> E' \<subseteq> E \<and> P e1 e2 nP \<lparr>nodes = N, edges = E\<rparr> \<longrightarrow> P e1 e2 nP \<lparr>nodes = N, edges = E'\<rparr>"
@@ -83,11 +81,9 @@ begin
    "eval_model_mono
    \<Longrightarrow> 
    (\<forall> (G:: 'v graph) nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> eval_model (delete_edges G (Y)) nP \<longrightarrow> \<not> eval_model (delete_edges G X) nP )"
-   apply(simp add: delete_edges_def eval_model_mono_def)
-   (* sledgehammer[isar_proofs] *)
-   by (smt Collect_mono delete_edges_def delete_edges_valid prod_caseE prod_caseI2 set_rev_mp)
-   (* by (smt Collect_mono prod.cases prod_caseE set_rev_mp)*)
-
+   apply(intro allI impI, elim conjE)
+   apply(frule_tac G=G in delete_edges_edges_mono)
+   by (metis delete_edges_simp2 delete_edges_valid eval_model_mono_imp_negative_mono graph.select_convs(2))
 
 
   lemma mono_offending_flows_min_set:
@@ -163,7 +159,7 @@ begin
   apply(simp add:delete_edges_list_union delete_edges_list_union_insert)
   apply(simp add: graph_ops)
   apply(rule conjI)
-  apply(simp add: valid_graph_def)
+   apply(simp add: valid_graph_def)
    apply blast
   apply(simp add: valid_graph_def)
   by fastforce
@@ -171,7 +167,7 @@ begin
   lemma minimalize_offending_overapprox_not_in: 
   "f \<notin> set fs \<Longrightarrow> f \<notin> set keep \<Longrightarrow> f \<notin> set (minimalize_offending_overapprox fs keep G nP)"
    apply(induction fs arbitrary: keep)
-  by(simp_all)
+    by(simp_all)
 
 
   lemma add_delete_edge: "valid_graph (G::'a graph) \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow> 
@@ -179,13 +175,13 @@ begin
    apply(simp add: graph_ops valid_graph_def)
    apply(clarify)
    apply(rule graph_eq_intro)
-  by (auto)
+   by (auto)
 
   lemma add_delete_edges: "valid_graph (G::'v graph) \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow> (a,b) \<notin> fs \<Longrightarrow>
   add_edge a b (delete_edges G (insert (a, b) fs)) = (delete_edges G fs)"
   apply(simp add: graph_ops valid_graph_def)
   apply(clarify)
-  apply(auto)[1]
+  apply(auto)
   done
 
   lemma offending_min_set_ab_in_fs: "valid_graph (G::'v graph) \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow>
@@ -195,7 +191,7 @@ begin
   apply(rule ccontr)
   apply(simp add: is_offending_flows_min_set_def)
   apply(clarify)
-   apply(simp add: add_delete_edges)
+  apply(simp add: add_delete_edges)
   done
 
 
@@ -222,7 +218,7 @@ begin
   "valid_graph G \<Longrightarrow> (a1,a2) \<in> edges G \<Longrightarrow> add_edge a1 a2 (delete_edges G Y) = (delete_edges G (Y - {(a1,a2)}))"
   apply(simp add: graph_ops)
   apply(rule conjI)
-  apply(simp add: valid_graph_def)
+   apply(simp add: valid_graph_def)
    apply(auto)
   done
   lemma not_model_mono_imp_addedge_mono: 
@@ -232,7 +228,7 @@ begin
    apply(simp add: valid_graph_add_delete_edge_simp)
    apply(subgoal_tac "X - {(a1, a2)} \<subseteq> Y - {(a1, a2)}")
     apply(blast)
-    apply(blast)
+   apply(blast)
   done
 
   lemma not_model_mono_imp_addedge_mono_minimalize_offending_overapprox: "
@@ -244,12 +240,12 @@ begin
     \<not> eval_model (delete_edges_list G (ff @ keeps)) nP \<Longrightarrow>
     \<not> eval_model (add_edge (fst a) (snd a) (delete_edges G (set (minimalize_offending_overapprox (a # ff) keeps G nP)))) nP"
     apply(frule delete_edges_list_add_add_iff[of G a ff keeps, symmetric])
-    apply(simp_all)
+       apply(simp_all)
     apply(simp add: delete_edges_list_union delete_edges_list_union_insert)
     apply(insert minimalize_offending_overapprox_subset[of "ff" "a#keeps" G nP])
     apply(simp)
     apply(drule not_model_mono_imp_addedge_mono[simplified])
-    apply(simp_all)
+        apply(simp_all)
     done
 
 
@@ -267,8 +263,8 @@ begin
     (add_edge a b (delete_edges G (insert (a, b) F))) = delete_edges G F"
     apply(simp add: graph_ops)
     apply(rule conjI)
-    apply(simp add: valid_graph_def)
-    apply (auto)[1]
+     apply(simp add: valid_graph_def)
+     apply (auto)[1]
     by fastforce
   lemma a_is_in_offending_flows_min: "valid_graph G \<Longrightarrow> a \<in> edges G \<Longrightarrow>  a \<notin> F \<Longrightarrow>
       \<not> eval_model G nP \<Longrightarrow>
@@ -351,15 +347,13 @@ begin
   apply(rule_tac x="set (minimalize_offending_overapprox ff [] G nP)" in exI)
   (*x \<subseteq> ff \<and> (\<forall>(e1, e2)\<in>x. \<not> eval_model (add_edge e1 e2 (delete_edges G x)) nP)*)
   apply(rule conjI)
-  thm minimalize_offending_overapprox_subset[of "ff" "[]", simplified]
+   thm minimalize_offending_overapprox_subset[of "ff" "[]", simplified]
    apply(simp add:  minimalize_offending_overapprox_subset[of "ff" "[]", simplified])
   apply(rule conjI)
    apply(simp add:minimalize_offending_overapprox_maintains_evalmodel)
-
-  apply(rule mono_imp_minimalize_offending_overapprox_minimal)
-   
-   apply(simp_all)
-   apply(simp add: in_mono)
+  apply(rule mono_imp_minimalize_offending_overapprox_minimal) 
+        apply(simp_all)
+  apply(simp add: in_mono)
   done
 
   theorem is_offending_flows_min_set_minimalize_offending_overapprox:
@@ -371,8 +365,8 @@ begin
   apply(rule conjI)
    apply(simp add:minimalize_offending_overapprox_maintains_evalmodel)
   apply(rule mono_imp_minimalize_offending_overapprox_minimal)
-   apply(simp_all)
-   apply(simp add: in_mono)
+       apply(simp_all)
+  apply(simp add: in_mono)
   done
 
 
@@ -436,13 +430,13 @@ begin
 lemma  minimalize_offending_overapprox_keeps_keeps:
       "(set keeps) \<subseteq> set (minimalize_offending_overapprox ff keeps G nP)"
       apply(induction ff keeps G nP rule: minimalize_offending_overapprox.induct)
-      apply(simp_all)
+       apply(simp_all)
       done
 
 lemma  minimalize_offending_overapprox_subseteq_input:
       "set (minimalize_offending_overapprox ff keeps G nP) \<subseteq> (set ff) \<union> (set keeps)"
       apply(induction ff keeps G nP rule: minimalize_offending_overapprox.induct)
-      apply(simp_all)
+       apply(simp_all)
       apply(simp add: delete_edges_list_set delete_edges_simp2)
       by blast
 
@@ -487,20 +481,6 @@ context NetworkModel_preliminaries
     using minimalize_offending_overapprox_subseteq_input[where keeps="[]", simplified] by blast
 
 
-    (*lemma minimalize_offending_overapprox_sound_fixKeep: 
-      "\<lbrakk> valid_graph G; \<forall> x \<in> set ff. x \<notin> set keeps; \<forall> x \<in> set ff. x \<in> edges G; distinct ff; 
-        \<forall>(e1, e2)\<in> set keeps.
-       \<not> eval_model (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox ff keeps G nP)))) nP \<rbrakk>
-        \<Longrightarrow>
-         \<forall>(e1, e2)\<in>set (minimalize_offending_overapprox ff keeps G nP).
-       \<not> eval_model (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox ff keeps G nP)))) nP"
-      apply(insert eval_model_monoI)
-      apply(unfold eval_model_mono_def)
-      using mono_imp_minimalize_offending_overapprox_minimal
-      by (smt eval_model_mono_def eval_model_mono_imp_negative_delete_edge_mono prod_caseI2 splitD)*)
-      (*TODO: better premises, have minimal offending flows keeps, get minimal offending flows that preserve keeps!*)
-
-
     (*TODO better minimality condition for keeps*)
     lemma  minimalize_offending_overapprox_sound_fixKeep:
       "\<lbrakk> valid_graph G; is_offending_flows (set (ff @ keeps)) G nP; \<forall> x \<in> set ff. x \<notin> set keeps; \<forall> x \<in> set ff. x \<in> edges G; distinct ff; 
@@ -508,21 +488,21 @@ context NetworkModel_preliminaries
         \<Longrightarrow>
          is_offending_flows_min_set (set (minimalize_offending_overapprox ff keeps G nP)) G nP \<and> set keeps \<subseteq> (set (minimalize_offending_overapprox ff keeps G nP))"
        apply(rule conjI)
-       apply(simp only: is_offending_flows_min_set_def)
-       apply(rule conjI)
-          apply(simp add: is_offending_flows_def is_offending_flows_min_set_def)
-           apply(simp add:minimalize_offending_overapprox_maintains_evalmodel)
-          apply(rule mono_imp_minimalize_offending_overapprox_minimal)
-          apply (metis eval_model_monoI eval_model_mono_imp_negative_delete_edge_mono)
+        apply(simp only: is_offending_flows_min_set_def)
+        apply(rule conjI)
+         apply(simp add: is_offending_flows_def is_offending_flows_min_set_def)
+         apply(simp add:minimalize_offending_overapprox_maintains_evalmodel)
+        apply(rule mono_imp_minimalize_offending_overapprox_minimal)
+             apply (metis eval_model_monoI eval_model_mono_imp_negative_delete_edge_mono)
+            apply(simp)
+           apply(simp)
           apply(simp)
-          apply(simp)
-          apply(simp)
-          apply(simp)
-          apply(simp)
+         apply(simp)
+        apply(simp)
           
-      apply(thin_tac "?x")+
-      apply(induction ff keeps G nP rule: minimalize_offending_overapprox.induct)
-      apply(simp_all)
+       apply(thin_tac "?x")+
+       apply(induction ff keeps G nP rule: minimalize_offending_overapprox.induct)
+        apply(simp_all)
       done
  end
 
@@ -570,8 +550,7 @@ begin
               apply(simp add: graph_ops  validG')
               apply(clarify)
               apply(rule conjI)
-              apply(insert validG[unfolded valid_graph_def])
-              apply force
+               using validG[unfolded valid_graph_def] apply force
               by fastforce
 
 
@@ -614,7 +593,7 @@ begin
   "\<lbrakk> eval_model_mono; valid_graph G; is_offending_flows (set ff) G nP; set ff \<subseteq> edges G; distinct ff \<rbrakk> 
     \<Longrightarrow> \<exists>f. f \<in> set_offending_flows G nP \<and> eval_model (delete_edges G f) nP"
     apply(frule mono_imp_set_offending_flows_not_empty[of G nP ff])
-          apply(simp_all add:is_offending_flows_def)
+         apply(simp_all add:is_offending_flows_def)
     apply(simp add: set_offending_flows_def)
     apply(erule exE)
     apply(rename_tac exF)
@@ -652,14 +631,14 @@ section {* Monotonicity of offending flows *}
       have Fadd_notinE': "\<And>Fadd. Fadd \<inter> E' = {} \<Longrightarrow>  E' - (F' \<union> Fadd) =  E' - F'" by blast
       from `F' \<subseteq> E'` a1[simplified valid_graph_def] a2 have FinV1: "fst ` F' \<subseteq> V" and FinV2: "snd ` F' \<subseteq> V" 
         apply (simp_all)
-        apply(erule conjE)+
-        apply(drule image_mono[of _ _ "fst"])+
-        apply(drule dual_order.trans[of "fst ` E" "V" "fst ` E'"])
+       apply(erule conjE)+
+       apply(drule image_mono[of _ _ "fst"])+
+       apply(drule dual_order.trans[of "fst ` E" "V" "fst ` E'"])
         apply(simp_all)
-        apply(erule conjE)+
-        apply(drule image_mono[of _ _ "snd"])+
-        apply(drule dual_order.trans[of "snd ` E" "V" "snd ` E'"])
-        by(simp_all)
+      apply(erule conjE)+
+      apply(drule image_mono[of _ _ "snd"])+
+      apply(drule dual_order.trans[of "snd ` E" "V" "snd ` E'"])
+       by(simp_all)
       hence "\<forall> (e1, e2) \<in> F'. add_edge e1 e2 \<lparr>nodes = V, edges = E'\<rparr> = \<lparr>nodes = V, edges = E' \<union> {(e1, e2)}\<rparr>"
         by(auto simp add: add_edge_def)
       hence add_edge_F: "\<forall> (e1, e2) \<in> F'. add_edge e1 e2 \<lparr>nodes = V, edges = E' - F' \<rparr> =  \<lparr>nodes = V, edges = (E' - F') \<union> {(e1, e2)}\<rparr>"
@@ -676,8 +655,8 @@ section {* Monotonicity of offending flows *}
    
          have Fadd_subseteq_Eadd: "\<And>Fadd. (Fadd \<inter> E' = {} \<and> Fadd \<subseteq> E) = (Fadd \<subseteq> Eadd)"
            apply(rule)
-          using Eadd_prop a2 apply blast
-          using Eadd_prop a2 by (metis `E' \<inter> Eadd = {}` equalityE inf_commute inf_mono le_supI2 subset_empty)
+            using Eadd_prop a2 apply blast
+           using Eadd_prop a2 by (metis `E' \<inter> Eadd = {}` equalityE inf_commute inf_mono le_supI2 subset_empty)
    
          from a4 have "(\<forall>(e1, e2)\<in>F'. \<not> eval_model (add_edge e1 e2 \<lparr>nodes = V, edges = E' - F'\<rparr>) nP)"
           by(simp add: set_offending_flows_def is_offending_flows_min_set_def delete_edges_simp2)
@@ -750,7 +729,7 @@ section {* Monotonicity of offending flows *}
   
         from valid1 have valid2: "valid_graph \<lparr>nodes = V, edges = E' - F' \<union> Eadd\<rparr>"
           apply(subgoal_tac "E' - F' \<union> Eadd = E - F'")
-          apply fastforce
+           apply fastforce
           using Eadd_prop `E' \<inter> Eadd = {}` `F' \<subseteq> E'` by fast
   
         from a4 have offending_F: "\<not> eval_model \<lparr>nodes = V, edges = E'\<rparr> nP"
@@ -764,7 +743,7 @@ section {* Monotonicity of offending flows *}
          from this have eval_E_minus_FEadd: "eval_model (delete_edges \<lparr>nodes = V, edges = E\<rparr> (F' \<union> Eadd)) nP"
           apply(simp add: delete_edges_simp2)
           apply(subgoal_tac "E - (F' \<union> Eadd) = E' - F'")
-          apply(simp)
+           apply(simp)
           apply(subst Eadd_prop[symmetric])
           using `E' \<inter> Eadd = {}` by auto
   
@@ -785,9 +764,9 @@ section {* Monotonicity of offending flows *}
           have "is_offending_flows (set (Eadd_list)) \<lparr>nodes = V, edges = (E' - F') \<union> Eadd\<rparr> nP"
             apply(simp add: is_offending_flows_def E'_list_prop Eadd_list_prop Eadd_prop delete_edges_simp2)
             apply(rule conjI)
-            apply(fact assumption_new_violation)
+             apply(fact assumption_new_violation)
             apply(subgoal_tac "E' - F' \<union> Eadd - Eadd = E' - F'", simp)
-            apply(simp add: eval_E_minus_FEadd_simp)
+             apply(simp add: eval_E_minus_FEadd_simp)
             using  Eadd_prop `E' \<inter> Eadd = {}` `F' \<subseteq> E'` apply blast
             done
         
@@ -807,11 +786,11 @@ section {* Monotonicity of offending flows *}
               goal_eval_Fadd: "eval_model (delete_edges \<lparr>nodes = V, edges = E\<rparr> (F' \<union> Fadd)) nP" and 
               pre_goal_minimal_Fadd: "(\<forall>(e1, e2)\<in>Fadd. \<not> eval_model (add_edge e1 e2 (delete_edges \<lparr>nodes = V, edges = E \<rparr> (F' \<union> Fadd))) nP)"
               apply(simp_all)
-              apply(simp add: `Fadd \<subseteq> Eadd`)
-              apply(simp add: delete_edges_simp2, clarify)
-              apply(thin_tac "\<not> eval_model ?X ?y")
-              apply(thin_tac "\<forall> x\<in> Fadd. ?X x")
-              apply(insert graph_edges_simp_helper, simp)
+                apply(simp add: `Fadd \<subseteq> Eadd`)
+               apply(simp add: delete_edges_simp2, clarify)
+               apply(thin_tac "\<not> eval_model ?X ?y")
+               apply(thin_tac "\<forall> x\<in> Fadd. ?X x")
+               apply(insert graph_edges_simp_helper, simp)
               apply(erule conjE)+
               apply(thin_tac "\<not> eval_model ?X ?y")
               apply(thin_tac "eval_model ?X ?y")
@@ -828,19 +807,18 @@ section {* Monotonicity of offending flows *}
            from Eadd_prop `Fadd \<subseteq> Eadd` `F' \<subseteq> E'` have goal_subset: "F' \<subseteq> E \<and> Fadd \<subseteq> E"
             apply -
             apply(rule conjI)
-            by(blast)+
+             by(blast)+
     
           show "\<exists> F \<in> set_offending_flows \<lparr> nodes = V, edges = E \<rparr> nP. F' \<subseteq> F"
               apply(simp add: set_offending_flows_def is_offending_flows_min_set_def is_offending_flows_def)
               apply(rule_tac x="F' \<union> Fadd" in exI)
               apply(simp add: goal_noteval goal_eval_Fadd goal_minimal goal_subset)
-            done
+             done
       next
           assume "\<not> \<not> eval_model \<lparr>nodes = V, edges = E' - F' \<union> Eadd\<rparr> nP"
           hence assumption_no_new_violation: "eval_model \<lparr>nodes = V, edges = E' - F' \<union> Eadd\<rparr> nP" by simp
           from this  `F' \<subseteq> E'` `E' \<inter> Eadd = {}`  have "eval_model \<lparr>nodes = V, edges = E - F'\<rparr> nP"
-            apply(subst Eadd_prop[symmetric])
-            proof -
+            proof(subst Eadd_prop[symmetric])
               assume a1: "F' \<subseteq> E'"
               assume a2: "E' \<inter> Eadd = {}"
               assume a3: "eval_model \<lparr>nodes = V, edges = E' - F' \<union> Eadd\<rparr> nP"
@@ -916,13 +894,13 @@ section {* Monotonicity of offending flows *}
         apply(case_tac e)
         apply(simp)
         apply(subgoal_tac "insert a (insert b V) = V")
-        apply(simp)
+         apply(simp)
          using goal_not_eval apply fastforce
         apply(thin_tac "\<forall>F \<subseteq> E. ?X F")
         apply(thin_tac "\<exists>F \<subseteq> ?E. ?X F")
         apply(insert validG)
         apply(simp add: valid_graph_def)
-         apply(fastforce)
+        apply(fastforce)
         done
 
        thus "{e} \<in> set_offending_flows \<lparr>nodes = V, edges = insert e E\<rparr> nP"
@@ -1101,12 +1079,12 @@ end
       from this finiteE' show ?thesis
       apply -
       apply(erule Finite_Set.finite_subset_induct[where A="UNIV"])
-      apply(simp)
-      apply(simp add: a1')
+        apply(simp)
+       apply(simp add: a1')
       apply(simp)
       apply(drule_tac f="a" in generic) 
       apply(simp add: EFa_simp)
-      done
+     done
     qed
 
   corollary Un_set_offending_flows_bound_minus_subseteq': 

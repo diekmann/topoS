@@ -38,14 +38,14 @@ subsubsection {*Preleminaries*}
   where eval_model = eval_model
   and verify_globals = verify_globals
     apply unfold_locales
-    apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
-    apply(erule_tac exE)
-    apply(rename_tac list_edges)
-    apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
-    apply(auto)[6]
-    apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops)[1]
+      apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
+      apply(erule_tac exE)
+      apply(rename_tac list_edges)
+      apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+          apply(auto)[6]
+     apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops)[1]
     apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
-  done
+   done
 
 section{*ENF*}
   lemma Sink_ENFnr: "NetworkModel_withOffendingFlows.eval_model_all_edges_normal_form_not_refl eval_model allowed_sink_flow"
@@ -55,11 +55,11 @@ section{*ENF*}
   lemma Unassigned_default_candidate: "\<forall> e1 e2. \<not> allowed_sink_flow e1 e2 \<longrightarrow> \<not> allowed_sink_flow e1 Unassigned"
     apply(rule allI)+
     apply(case_tac "e2")
-     apply simp_all
+      apply simp_all
+     apply(case_tac "e1")
+       apply simp_all
     apply(case_tac "e1")
-     apply simp_all
-    apply(case_tac "e1")
-     apply simp_all
+      apply simp_all
     done
 
   definition Sink_offending_set:: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> ('v \<times> 'v) set set" where
@@ -87,25 +87,25 @@ where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = Sink_off
   apply unfold_locales
 
   (* only remove target_focus: *)
-  apply(rule conjI) prefer 1 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
+    apply(rule conjI) prefer 1 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
   
-  apply (rule NetworkModel_withOffendingFlows.ENFnr_snds_weakrefl_instance[OF _ Sink_ENFnr Unassigned_default_candidate Unassigned_to_All])
-  apply(simp_all)[3]
+    apply (rule NetworkModel_withOffendingFlows.ENFnr_snds_weakrefl_instance[OF _ Sink_ENFnr Unassigned_default_candidate Unassigned_to_All])
+      apply(simp_all)[3]
 
- apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
+   apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
       NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
       NetworkModel_withOffendingFlows.is_offending_flows_def)
-  apply (simp add:graph_ops)
-  apply (simp split: split_split_asm split_split add:prod_case_beta)
-  apply(rule_tac x="\<lparr> nodes={vertex_1,vertex_2}, edges = {(vertex_1,vertex_2)} \<rparr>" in exI, simp)
-  apply(rule conjI)
-   apply(simp add: valid_graph_def)
-  apply(case_tac otherbot, simp_all)
-  apply(rule_tac x="(\<lambda> x. Unassigned)(vertex_1 := SinkPool, vertex_2 := Unassigned)" in exI, simp)
-  apply(rule_tac x="vertex_2" in exI, simp)
-   apply(rule_tac x="{(vertex_1, vertex_2)}" in exI, simp)
-  apply(rule_tac x="(\<lambda> x. Unassigned)(vertex_1 := SinkPool, vertex_2 := Unassigned)" in exI, simp)
-  apply(rule_tac x="vertex_2" in exI, simp)
+   apply (simp add:graph_ops)
+   apply (simp split: split_split_asm split_split add:prod_case_beta)
+   apply(rule_tac x="\<lparr> nodes={vertex_1,vertex_2}, edges = {(vertex_1,vertex_2)} \<rparr>" in exI, simp)
+   apply(rule conjI)
+    apply(simp add: valid_graph_def)
+    apply(case_tac otherbot, simp_all)
+    apply(rule_tac x="(\<lambda> x. Unassigned)(vertex_1 := SinkPool, vertex_2 := Unassigned)" in exI, simp)
+    apply(rule_tac x="vertex_2" in exI, simp)
+    apply(rule_tac x="{(vertex_1, vertex_2)}" in exI, simp)
+   apply(rule_tac x="(\<lambda> x. Unassigned)(vertex_1 := SinkPool, vertex_2 := Unassigned)" in exI, simp)
+   apply(rule_tac x="vertex_2" in exI, simp)
    apply(rule_tac x="{(vertex_1, vertex_2)}" in exI, simp)
 
   apply(fact Sink_offending_set)

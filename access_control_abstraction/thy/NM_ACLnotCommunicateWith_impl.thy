@@ -1,5 +1,5 @@
 theory NM_ACLnotCommunicateWith_impl
-imports NM_ACLnotCommunicateWith NetworkModel_Lists_Impl_Interface FiniteListGraph_Impl
+imports NM_ACLnotCommunicateWith NetworkModel_Lists_Impl_Interface
 begin
 
 code_identifier code_module NM_ACLnotCommunicateWith_impl => (Scala) NM_ACLnotCommunicateWith

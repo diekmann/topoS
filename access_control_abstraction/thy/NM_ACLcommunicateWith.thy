@@ -58,15 +58,15 @@ interpretation NetworkModel_preliminaries
 where eval_model = eval_model
 and verify_globals = verify_globals
   apply unfold_locales
-  apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
-  apply(erule_tac exE)
-  apply(rename_tac list_edges)
-  apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
-  apply(auto)[5]
-  apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops False_set succ_tran_empty accesses_okay_empty)[1]
-  apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
+    apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
+    apply(erule_tac exE)
+    apply(rename_tac list_edges)
+    apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+        apply(auto)[5]
+    apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops False_set succ_tran_empty accesses_okay_empty)[1]
+   apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
   apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
-done
+ done
 
 
 lemma unique_default_example: "succ_tran \<lparr>nodes = {vertex_1, vertex_2}, edges = {(vertex_1, vertex_2)}\<rparr> vertex_2 = {}"
@@ -82,10 +82,10 @@ and target_focus = target_focus
   unfolding NM_ACLcommunicateWith.default_node_properties_def
   apply unfold_locales
   
-  apply simp
-  apply(subst(asm) NetworkModel_withOffendingFlows.set_offending_flows_simp, simp)
-  apply(clarsimp)
-  apply (metis accesses_okay_empty)
+   apply simp
+   apply(subst(asm) NetworkModel_withOffendingFlows.set_offending_flows_simp, simp)
+   apply(clarsimp)
+   apply (metis accesses_okay_empty)
 
 
   apply(case_tac "otherbot")
@@ -100,14 +100,14 @@ and target_focus = target_focus
   apply(erule exE)
   apply(rename_tac canAccessThis)
   apply(case_tac "canAccessThis = vertex_1")
-  apply(rule_tac x="\<lparr> nodes={canAccessThis,vertex_2}, edges = {(vertex_2,canAccessThis)} \<rparr>" in exI, simp)
-  apply(rule conjI)
-   apply(simp add: valid_graph_def)
-  apply(rule_tac x="(\<lambda> x. AccessList [])(vertex_1 := AccessList [], vertex_2 := AccessList [])" in exI, simp)
-  apply(simp add: example_simps)
-  apply(rule_tac x="{(vertex_2,vertex_1)}" in exI, simp)
-  apply(simp add: example_simps)
-  apply(fastforce)
+   apply(rule_tac x="\<lparr> nodes={canAccessThis,vertex_2}, edges = {(vertex_2,canAccessThis)} \<rparr>" in exI, simp)
+   apply(rule conjI)
+    apply(simp add: valid_graph_def)
+   apply(rule_tac x="(\<lambda> x. AccessList [])(vertex_1 := AccessList [], vertex_2 := AccessList [])" in exI, simp)
+   apply(simp add: example_simps)
+   apply(rule_tac x="{(vertex_2,vertex_1)}" in exI, simp)
+   apply(simp add: example_simps)
+   apply(fastforce)
 
   apply(rule_tac x="\<lparr> nodes={vertex_1,canAccessThis}, edges = {(vertex_1,canAccessThis)} \<rparr>" in exI, simp)
   apply(rule conjI)
@@ -117,7 +117,7 @@ and target_focus = target_focus
   apply(rule_tac x="{(vertex_1,canAccessThis)}" in exI, simp)
   apply(simp add: example_simps)
   apply(fastforce)
-  done
+ done
 
 hide_const (open) eval_model verify_globals target_focus default_node_properties
 

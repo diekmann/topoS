@@ -48,15 +48,15 @@ interpretation NetworkModel_preliminaries
 where eval_model = eval_model
 and verify_globals = verify_globals
   apply unfold_locales
-  apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
-  apply(erule_tac exE)
-  apply(rename_tac list_edges)
-  apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
-  apply(auto)[5]
-  apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops False_set succ_tran_empty)[1]
-  apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
+    apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
+    apply(erule_tac exE)
+    apply(rename_tac list_edges)
+    apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+        apply(auto)[5]
+    apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops False_set succ_tran_empty)[1]
+   apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
   apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
-done
+ done
 
 
 lemma unique_default_example: "succ_tran \<lparr>nodes = {vertex_1, vertex_2}, edges = {(vertex_1, vertex_2)}\<rparr> vertex_2 = {}"
@@ -71,14 +71,11 @@ and target_focus = target_focus
   unfolding target_focus_def
   unfolding NM_ACLnotCommunicateWith.default_node_properties_def
   apply unfold_locales
-  
-  apply simp
-  apply(subst(asm) NetworkModel_withOffendingFlows.set_offending_flows_simp, simp)
-  apply(clarsimp)
-  apply (metis)
-
-(*TODO*)
-
+ 
+   apply simp
+   apply(subst(asm) NetworkModel_withOffendingFlows.set_offending_flows_simp, simp)
+   apply(clarsimp)
+   apply (metis)
 
   apply(simp)
   apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
@@ -88,28 +85,28 @@ and target_focus = target_focus
   apply (simp split: split_split_asm split_split add:prod_case_beta)
   apply(case_tac "otherbot = {}")
 
-  apply(rule_tac x="\<lparr> nodes={vertex_1,vertex_2}, edges = {(vertex_1,vertex_2)} \<rparr>" in exI, simp)
-  apply(rule conjI)
-   apply(simp add: valid_graph_def)
-  apply(rule_tac x="(\<lambda> x. UNIV)(vertex_1 := {vertex_2}, vertex_2 := {})" in exI, simp)
-  apply(simp add: example_simps)
-  apply(rule_tac x="{(vertex_1,vertex_2)}" in exI, simp)
-  apply(simp add: example_simps)
+   apply(rule_tac x="\<lparr> nodes={vertex_1,vertex_2}, edges = {(vertex_1,vertex_2)} \<rparr>" in exI, simp)
+   apply(rule conjI)
+    apply(simp add: valid_graph_def)
+   apply(rule_tac x="(\<lambda> x. UNIV)(vertex_1 := {vertex_2}, vertex_2 := {})" in exI, simp)
+   apply(simp add: example_simps)
+   apply(rule_tac x="{(vertex_1,vertex_2)}" in exI, simp)
+   apply(simp add: example_simps)
 
-(*TODO*)
   apply(subgoal_tac "\<exists>canAccess. canAccess \<in> UNIV \<and> canAccess \<notin> otherbot")
-  defer apply blast
+   prefer 2
+   apply blast
   apply(erule exE)
   apply(rename_tac canAccessThis)
   apply(case_tac "vertex_1 \<noteq> canAccessThis")
 
-  apply(rule_tac x="\<lparr> nodes={vertex_1,canAccessThis}, edges = {(vertex_1,canAccessThis)} \<rparr>" in exI, simp)
-  apply(rule conjI)
-   apply(simp add: valid_graph_def)
-  apply(rule_tac x="(\<lambda> x. UNIV)(vertex_1 := UNIV, canAccessThis := {})" in exI, simp)
-  apply(simp add: example_simps)
-  apply(rule_tac x="{(vertex_1,canAccessThis)}" in exI, simp)
-  apply(simp add: example_simps)
+   apply(rule_tac x="\<lparr> nodes={vertex_1,canAccessThis}, edges = {(vertex_1,canAccessThis)} \<rparr>" in exI, simp)
+   apply(rule conjI)
+    apply(simp add: valid_graph_def)
+   apply(rule_tac x="(\<lambda> x. UNIV)(vertex_1 := UNIV, canAccessThis := {})" in exI, simp)
+   apply(simp add: example_simps)
+   apply(rule_tac x="{(vertex_1,canAccessThis)}" in exI, simp)
+   apply(simp add: example_simps)
 
   apply(rule_tac x="\<lparr> nodes={canAccessThis,vertex_2}, edges = {(vertex_2,canAccessThis)} \<rparr>" in exI, simp)
   apply(rule conjI)

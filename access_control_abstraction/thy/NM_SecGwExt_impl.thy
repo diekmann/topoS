@@ -1,5 +1,5 @@
 theory NM_SecGwExt_impl
-imports NM_SecGwExt NetworkModel_Lists_Impl_Interface FiniteListGraph_Impl
+imports NM_SecGwExt NetworkModel_Lists_Impl_Interface
 begin
 
 code_identifier code_module NM_SecGwExt_impl => (Scala) NM_SecGwExt

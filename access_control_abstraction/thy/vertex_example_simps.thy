@@ -1,5 +1,5 @@
 theory vertex_example_simps
-imports FiniteGraph NetworkModel_Vertices
+imports "../../thy_lib/FiniteGraph" NetworkModel_Vertices
 begin
 
 --"The follwoing lemmata are used in the \<exists> style uniqueness proof"
@@ -19,10 +19,10 @@ by (metis (lifting, no_types) Collect_cong Range.intros Range_empty Range_insert
 lemma unique_default_example_simp1: "{(e1, e2). e1 = vertex_1 \<and> e2 = vertex_2 \<and> (e1 = vertex_1 \<longrightarrow> e2 \<noteq> vertex_2)} = {}" by blast
 lemma unique_default_example_simp2: "{(vertex_1, vertex_2)}\<^sup>+ = {(vertex_1, vertex_2)}"
   apply(rule)
-  apply(rule)
-  apply(clarify)
-  apply(rule_tac P="\<lambda> a b. a = vertex_1 \<and> b = vertex_2" in trancl.induct)
-  apply auto
+   apply(rule)
+   apply(clarify)
+   apply(rule_tac P="\<lambda> a b. a = vertex_1 \<and> b = vertex_2" in trancl.induct)
+     apply auto
 done
 lemma unique_default_example_simp3: "{(e1, e2). e1 = vertex_2 \<and> e2 = vertex_1 \<and> (e1 = vertex_2 \<longrightarrow> e2 \<noteq> vertex_1)} = {}" 
   by(blast)

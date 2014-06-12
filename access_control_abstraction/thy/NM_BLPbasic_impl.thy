@@ -1,5 +1,5 @@
 theory NM_BLPbasic_impl
-imports NM_BLPbasic NetworkModel_Lists_Impl_Interface FiniteListGraph_Impl
+imports NM_BLPbasic NetworkModel_Lists_Impl_Interface
 begin
 
 code_identifier code_module NM_BLPbasic_impl => (Scala) NM_BLPbasic

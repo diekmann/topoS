@@ -101,9 +101,9 @@ locale configured_NetworkModel =
     lemma NetworkModel_preliminariesD:
       "NetworkModel_preliminaries (\<lambda> (G::('v::vertex) graph) (nP::'v \<Rightarrow> 'a). c_eval_model m G)"
       apply(unfold_locales)
-      apply(simp add: subst_offending_flows)
-      apply(fact defined_offending')
-      apply(fact mono_eval_model)
+        apply(simp add: subst_offending_flows)
+        apply(fact defined_offending')
+       apply(fact mono_eval_model)
       apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_monoI])
       done
 
@@ -178,8 +178,8 @@ text{*
 
        show ?thesis
         apply(unfold_locales)
-        apply(simp add: c_eval c_offending NetworkModel_withOffendingFlows.set_offending_flows_def NetworkModel_withOffendingFlows.is_offending_flows_min_set_def NetworkModel_withOffendingFlows.is_offending_flows_def)
-        apply(simp add: c_eval eval_empty_graph)
+          apply(simp add: c_eval c_offending NetworkModel_withOffendingFlows.set_offending_flows_def NetworkModel_withOffendingFlows.is_offending_flows_min_set_def NetworkModel_withOffendingFlows.is_offending_flows_def)
+         apply(simp add: c_eval eval_empty_graph)
         apply(simp add: c_eval,drule(3) NetworkModel_preliminaries.mono_eval_model[OF NetModel_p])
         done
    qed
@@ -233,13 +233,13 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
         all_security_requirements_fulfilled M \<lparr> nodes = V, edges = E \<rparr> \<Longrightarrow>
         all_security_requirements_fulfilled M \<lparr> nodes = V, edges = E' \<rparr>"
         apply(induction M arbitrary: E' E)
-        apply(simp_all add: all_security_requirements_fulfilled_def)
+         apply(simp_all add: all_security_requirements_fulfilled_def)
         apply(rename_tac m M E' E)
         apply(rule conjI)
          apply(erule(2) configured_NetworkModel.mono_eval_model[OF valid_reqs1])
          apply(simp_all)
         apply(drule valid_reqs2)
-         apply blast
+        apply blast
         done
 
     subsection{* generate_valid_topology *}
@@ -261,7 +261,7 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
       lemma generate_valid_topology_nodes:
       "nodes (generate_valid_topology M G) = (nodes G)"
         apply(induction M arbitrary: G)
-        by(simp_all add: graph_ops)
+         by(simp_all add: graph_ops)
 
       lemma generate_valid_topology_def_alt:
         "generate_valid_topology M G = delete_edges G (\<Union> (get_offending_flows M G))"
@@ -276,7 +276,7 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
             thus ?case
               apply(simp add: get_offending_flows_def delete_edges_simp2)
               apply(rule)
-              apply(simp add: generate_valid_topology_nodes)
+               apply(simp add: generate_valid_topology_nodes)
               by blast
         qed
     
@@ -287,15 +287,15 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
      lemma generate_valid_topology_mono_models:
       "edges (generate_valid_topology (m#M) \<lparr> nodes = V, edges = E \<rparr>) \<subseteq> edges (generate_valid_topology M \<lparr> nodes = V, edges = E \<rparr>)"
         apply(induction M arbitrary: E m)
+         apply(simp add: delete_edges_simp2)
+         apply fastforce
         apply(simp add: delete_edges_simp2)
-        apply fastforce
-        apply(simp_all add: delete_edges_simp2)
         by blast
      
       lemma generate_valid_topology_subseteq_edges:
       "edges (generate_valid_topology M G) \<subseteq> (edges G)"
         apply(induction M arbitrary: G)
-        apply(simp_all)
+         apply(simp_all)
         apply(simp add: delete_edges_simp2)
         by blast
 
@@ -334,7 +334,7 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
           have generate_valid_topology_EX_graph_record:
             "\<exists> hypE. (generate_valid_topology M \<lparr>nodes = V, edges = E\<rparr>) = \<lparr>nodes = V, edges = hypE\<rparr> "
               apply(induction M arbitrary: V E)
-              by(simp_all add: delete_edges_simp2 generate_valid_topology_nodes)
+               by(simp_all add: delete_edges_simp2 generate_valid_topology_nodes)
               
           from generate_valid_topology_EX_graph_record obtain E_IH where  E_IH_prop:
             "(generate_valid_topology M \<lparr>nodes = V, edges = E\<rparr>) = \<lparr>nodes = V, edges = E_IH\<rparr>" by blast
@@ -378,7 +378,7 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
      lemma all_security_requirements_fulfilled_imp_no_offending_flows:
         "valid_reqs M \<Longrightarrow> all_security_requirements_fulfilled M G \<Longrightarrow> (\<Union>m\<in>set M. \<Union>c_offending_flows m G) = {}"
         apply(induction M)
-        apply(simp_all)
+         apply(simp_all)
         apply(simp add: all_security_requirements_fulfilled_def)
         apply(clarify)
         apply(frule valid_reqs2, drule valid_reqs1)
@@ -403,20 +403,20 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
          F' \<in> get_offending_flows M \<lparr>nodes = V, edges = E'\<rparr> \<rbrakk> \<Longrightarrow>
        \<exists>F\<in>get_offending_flows M \<lparr>nodes = V, edges = E\<rparr>. F' \<subseteq> F"
      apply(induction M)
-     apply(simp add: get_offending_flows_def)
+      apply(simp add: get_offending_flows_def)
      apply(frule valid_reqs2, drule valid_reqs1)
      apply(simp add: get_offending_flows_def)
      apply(erule disjE)
-     apply(drule(3) configured_NetworkModel.mono_extend_set_offending_flows)
-     apply(erule bexE, rename_tac F)
-     apply(rule_tac x="F" in bexI)
-     apply(simp_all)
+      apply(drule(3) configured_NetworkModel.mono_extend_set_offending_flows)
+      apply(erule bexE, rename_tac F)
+      apply(rule_tac x="F" in bexI)
+       apply(simp_all)
      apply blast
      done
 
      lemma get_offending_flows_subseteq_edges: "valid_reqs M \<Longrightarrow> F \<in> get_offending_flows M \<lparr>nodes = V, edges = E\<rparr> \<Longrightarrow> F \<subseteq> E"
       apply(induction M)
-      apply(simp add: get_offending_flows_def)
+       apply(simp add: get_offending_flows_def)
       apply(simp add: get_offending_flows_def)
       apply(frule valid_reqs2, drule valid_reqs1)
       apply(simp add: configured_NetworkModel.valid_c_offending_flows)
@@ -427,7 +427,7 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
       valid_graph \<lparr>nodes = V, edges = E\<rparr>; E' \<subseteq> E \<rbrakk> \<Longrightarrow>
       \<Union>get_offending_flows M \<lparr>nodes = V, edges = E'\<rparr> \<subseteq> \<Union>get_offending_flows M \<lparr>nodes = V, edges = E\<rparr>"
       apply(induction M)
-      apply(simp add: get_offending_flows_def)
+       apply(simp add: get_offending_flows_def)
       apply(frule valid_reqs2, drule valid_reqs1)
       apply(drule(2) configured_NetworkModel.offending_flows_union_mono)
       apply(simp add: get_offending_flows_def)

@@ -1,7 +1,7 @@
 header {* Proving Relation (In)equalities via Regular Expressions *}
 
 theory Regexp_Method
-imports Equivalence_Checking Relation_Interpretation "~~/src/HOL/Library/Reflection"
+imports Equivalence_Checking Relation_Interpretation
 begin
 
 primrec rel_of_regexp :: "('a * 'a) set list \<Rightarrow> nat rexp \<Rightarrow> ('a * 'a) set" where
@@ -27,26 +27,28 @@ lemmas regexp_reify = rel_of_regexp.simps rel_eq.simps
 lemmas regexp_unfold = trancl_unfold_left subset_Un_eq
 
 method_setup regexp = {*
-let
-  val regexp_conv = Code_Runtime.static_holds_conv @{theory}
-  [@{const_name Zero}, @{const_name One}, @{const_name Atom}, @{const_name Plus},
-   @{const_name Times}, @{const_name Star}, 
-   @{const_name check_eqv}, @{const_name Trueprop}]
-in
   Scan.succeed (fn ctxt =>
-    SIMPLE_METHOD' (
-      (TRY o etac @{thm rev_subsetD})
-      THEN' (Subgoal.FOCUS_PARAMS (fn {context=ctxt', ...} =>
-        TRY (Local_Defs.unfold_tac ctxt @{thms regexp_unfold})
-        THEN Reflection.genreify_tac ctxt @{thms regexp_reify} NONE 1
-        THEN rtac @{thm rel_eqI} 1
-        THEN CONVERSION regexp_conv 1
-        THEN rtac TrueI 1) ctxt)))
-end
+    let
+      val thy = Proof_Context.theory_of ctxt
+      val regexp_conv = Code_Runtime.static_holds_conv thy
+      [@{const_name "Nat.zero_nat_inst.zero_nat"}, @{const_name Suc},
+       @{const_name Zero}, @{const_name One}, @{const_name Atom},
+       @{const_name Plus}, @{const_name Times}, @{const_name Star}, 
+       @{const_name check_eqv}, @{const_name Trueprop}]
+    in
+      SIMPLE_METHOD' (
+        (TRY o etac @{thm rev_subsetD})
+        THEN' (Subgoal.FOCUS_PARAMS (fn {context=ctxt', ...} =>
+          TRY (Local_Defs.unfold_tac ctxt' @{thms regexp_unfold})
+          THEN Reification.tac ctxt' @{thms regexp_reify} NONE 1
+          THEN rtac @{thm rel_eqI} 1
+          THEN CONVERSION regexp_conv 1
+          THEN rtac TrueI 1) ctxt))
+    end)
 *} "decide relation equalities via regular expressions"
 
-hide_const (open) le_rexp nPlus nTimes norm nullable bisimilar is_bisimulation closure step test
-  step pre_bisim add_atoms check_eqv rel word_rel rel_eq
+hide_const (open) le_rexp nPlus nTimes norm nullable bisimilar is_bisimulation closure
+  pre_bisim add_atoms check_eqv rel word_rel rel_eq
 
 text {* Example: *}
 

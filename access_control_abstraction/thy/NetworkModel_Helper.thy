@@ -1,5 +1,5 @@
 theory NetworkModel_Helper
-imports Main FiniteGraph NetworkModel_Interface NetworkModel_Util 
+imports Main NetworkModel_Interface NetworkModel_Util 
   NetworkModel_ENF NetworkModel_ENFnr NetworkModel_ENFnrSR
   NetworkModel_ENF_sr
   NetworkModel_withOffendingFlows_lemmata

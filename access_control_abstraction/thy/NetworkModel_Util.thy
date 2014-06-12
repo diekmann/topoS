@@ -1,5 +1,5 @@
 theory NetworkModel_Util
-imports Main FiniteGraph
+imports Main
 begin
 
 (*Utility lemmata go gere*)

@@ -1,5 +1,5 @@
 theory Example
-imports Main FiniteGraph NetworkModel_Interface NM_SecurityGateway_impl NM_BLPtrusted_impl
+imports Main NetworkModel_Interface NM_SecurityGateway_impl NM_BLPtrusted_impl
 begin
 
 section {* Network Graph and Security Requirements *}

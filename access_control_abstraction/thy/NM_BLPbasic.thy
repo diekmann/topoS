@@ -28,14 +28,14 @@ interpretation NetworkModel_preliminaries
 where eval_model = eval_model
 and verify_globals = verify_globals
   apply unfold_locales
-  apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
-  apply(erule_tac exE)
-  apply(rename_tac list_edges)
-  apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
-  apply(auto)[6]
-  apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops)[1]
+    apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
+    apply(erule_tac exE)
+    apply(rename_tac list_edges)
+    apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+        apply(auto)[6]
+   apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops)[1]
   apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
-done
+ done
 
 
 lemma BLP_def_unique: "otherbot \<noteq> 0 \<Longrightarrow>
@@ -51,7 +51,7 @@ lemma BLP_def_unique: "otherbot \<noteq> 0 \<Longrightarrow>
   apply (simp split: split_split_asm split_split add:prod_case_beta)
   apply(rule_tac x="\<lparr> nodes=set [vertex_1,vertex_2], edges = set [(vertex_1,vertex_2)] \<rparr>" in exI, simp)
   apply(rule conjI)
-  apply(simp add: valid_graph_def)
+   apply(simp add: valid_graph_def)
   apply(rule_tac x="(\<lambda> x. 0)(vertex_1 := 1, vertex_2 := 0)" in exI, simp)
   apply(rule_tac x="vertex_2" in exI, simp)
   apply(rule_tac x="set [(vertex_1,vertex_2)]" in exI, simp)
@@ -96,7 +96,7 @@ section {*ENF*}
     unfolding NetworkModel_withOffendingFlows.ENF_refl_def
     apply(rule conjI)
      apply(simp add: BLP_ENF)
-     apply(simp add: privacylevel_refl)
+    apply(simp add: privacylevel_refl)
   done
 
   definition BLP_offending_set:: "'v graph \<Rightarrow> ('v \<Rightarrow> privacy_level) \<Rightarrow> ('v \<times> 'v) set set" where
@@ -124,12 +124,12 @@ section {*ENF*}
     apply(unfold_locales)
 
     (* only remove target_focus: *)
-    apply(rule conjI) prefer 1 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
+       apply(rule conjI) prefer 1 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
 
-    apply(rule NetworkModel_withOffendingFlows.ENF_snds_refl_instance[OF _ BLP_ENF_refl])
-    apply(simp_all add: BLP_ENF BLP_ENF_refl)[4]
+       apply(rule NetworkModel_withOffendingFlows.ENF_snds_refl_instance[OF _ BLP_ENF_refl])
+          apply(simp_all add: BLP_ENF BLP_ENF_refl)[4]
 
-    apply(blast intro: BLP_def_unique)
+     apply(blast intro: BLP_def_unique)
 
     apply(fact BLP_offending_set)
     done

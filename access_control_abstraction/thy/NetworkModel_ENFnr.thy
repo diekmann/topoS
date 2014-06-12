@@ -43,7 +43,7 @@ section {* Instance helper*}
     apply -
     apply(drule ENFnr_to_ENFnrSR)
     apply(drule(1) ENFnrSR_fsts_weakrefl_instance)
-    by auto
+         by auto
   qed
   
   (* snds version *)
@@ -63,7 +63,7 @@ section {* Instance helper*}
     apply -
     apply(drule ENFnr_to_ENFnrSR)
     apply(drule(1) ENFnrSR_snds_weakrefl_instance)
-    by auto
+         by auto
   qed
  
 

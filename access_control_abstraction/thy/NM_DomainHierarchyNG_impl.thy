@@ -1,5 +1,5 @@
 theory NM_DomainHierarchyNG_impl
-imports NM_DomainHierarchyNG NetworkModel_Lists_Impl_Interface FiniteListGraph_Impl
+imports NM_DomainHierarchyNG NetworkModel_Lists_Impl_Interface
 begin
 
 

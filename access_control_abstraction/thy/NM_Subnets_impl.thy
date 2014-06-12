@@ -1,5 +1,5 @@
 theory NM_Subnets_impl
-imports NM_Subnets NetworkModel_Lists_Impl_Interface FiniteListGraph_Impl
+imports NM_Subnets NetworkModel_Lists_Impl_Interface
 begin
 
 

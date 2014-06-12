@@ -33,15 +33,15 @@ interpretation NetworkModel_preliminaries
 where eval_model = eval_model
 and verify_globals = verify_globals
   apply unfold_locales
-  apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
-  apply(erule_tac exE)
-  apply(rename_tac list_edges)
-  apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
-   apply(auto split: split_split split_split_asm)[6]
-  apply(simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops split: split_split split_split_asm)[1]
+    apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
+    apply(erule_tac exE)
+    apply(rename_tac list_edges)
+    apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+        apply(auto split: split_split split_split_asm)[6]
+   apply(simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops split: split_split split_split_asm)[1]
    apply (metis prod.inject)
   apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
-done
+ done
 
 lemma BLP_def_unique: "otherbot \<noteq> default_node_properties \<Longrightarrow>
     \<exists>G p i f. valid_graph G \<and> \<not> eval_model G p \<and> f \<in> (NetworkModel_withOffendingFlows.set_offending_flows eval_model G p) \<and>
@@ -56,7 +56,7 @@ lemma BLP_def_unique: "otherbot \<noteq> default_node_properties \<Longrightarro
   apply (simp split: split_split_asm split_split add:prod_case_beta)
   apply(rule_tac x="\<lparr> nodes={vertex_1, vertex_2}, edges = {(vertex_1,vertex_2)} \<rparr>" in exI, simp)
   apply(rule conjI)
-  apply(simp add: valid_graph_def)
+   apply(simp add: valid_graph_def)
   apply(rule_tac x="(\<lambda> x. default_node_properties)(vertex_1 := \<lparr>privacy_level = 1, trusted = False \<rparr>, vertex_2 := \<lparr>privacy_level = 0, trusted = False \<rparr>)" in exI, simp add:default_node_properties_def)
   apply(rule_tac x="vertex_2" in exI, simp)
   apply(rule_tac x="{(vertex_1,vertex_2)}" in exI, simp)
@@ -64,7 +64,7 @@ lemma BLP_def_unique: "otherbot \<noteq> default_node_properties \<Longrightarro
   apply simp
   apply(erule disjE)
    apply force
-   apply fast
+  apply fast
   done
 
 
@@ -88,7 +88,7 @@ section {*ENF*}
     unfolding NetworkModel_withOffendingFlows.ENF_refl_def
     apply(rule conjI)
      apply(simp add: BLP_ENF)
-     apply(simp add: privacylevel_refl)
+    apply(simp add: privacylevel_refl)
   done
 
 
@@ -114,14 +114,14 @@ interpretation BLPtrusted: NetworkModel
     unfolding target_focus_def
     apply unfold_locales
     (* only remove target_focus: *)
-    apply(rule conjI) prefer 1 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
-     apply (drule NetworkModel_withOffendingFlows.ENF_snds_refl_instance[OF _ BLP_ENF_refl zero_default_candidate],simp_all)[1]
+      apply(rule conjI) prefer 1 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
+      apply (drule NetworkModel_withOffendingFlows.ENF_snds_refl_instance[OF _ BLP_ENF_refl zero_default_candidate],simp_all)[1]
 
-    apply(unfold default_node_properties_def)
+     apply(unfold default_node_properties_def)
      apply(blast intro: BLP_def_unique[simplified default_node_properties_def])
 
-     apply(fact BLP_offending_set)
-    done
+    apply(fact BLP_offending_set)
+   done
 
    
  
