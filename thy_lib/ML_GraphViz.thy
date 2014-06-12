@@ -64,7 +64,7 @@ local
       in
         writeln ("executing: "^cmd);
         Isabelle_System.bash cmd;
-        Isabelle_System.bash ("rm "^file)
+        Isabelle_System.bash ("rm "^file) (*cleanup dot file, PDF file will still exist*)
       end
 in
   val paintGraphDotLinux = paintGraph "xdg-open" "dot"
@@ -94,7 +94,7 @@ local
     fun sanitize_string (s: string) : string =
       String.map (fn c => if is_valid_char c then c else #"_") s;
   
-    val _ = writeln (sanitize_string "asdsa sjhsa saklj \"/$(Tnd 098z8    9");
+    (*val _ = writeln (sanitize_string "asdsa sjhsa saklj \"/$(Tnd 098z8    9");*) (*Example*)
   in
     fun format_dot_edges (tune_node_format : term -> string -> string) (trm: (term * term) list): string list =
       let
