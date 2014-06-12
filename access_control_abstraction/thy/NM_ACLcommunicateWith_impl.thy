@@ -7,9 +7,6 @@ code_identifier code_module NM_ACLcommunicateWith_impl => (Scala) NM_ACLcommunic
 
 section {* List Implementation *}
 
-find_consts "'a access_list \<Rightarrow> _"
-
-find_theorems name:"access_list"
 fun eval_model :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> 'v access_list) \<Rightarrow> bool" where
   "eval_model G nP = (\<forall> v \<in> set (nodesL G). accesses_okay (nP v) (set (succ_tran G v)))"
 
@@ -79,6 +76,23 @@ section {* CommunicationPartners packing *}
 
 
 text {* Examples*}
+  text{*
+    1 can acceess 2 and 3
+    2 can access 3
+  *}
+  definition exampleG :: "nat list_graph" where
+    "exampleG \<equiv> \<lparr> nodesL = [1, 2, 3],
+                    edgesL = [(1,2), (2,3)]\<rparr>"
+
+  definition examplenP :: "nat \<Rightarrow> nat access_list" where
+    "examplenP \<equiv> ((\<lambda>v. NM_ACLcommunicateWith.default_node_properties)
+                    (1 := AccessList [2,3]))
+                    (2 := AccessList [3])"
+
+  lemma "eval_model exampleG examplenP" by eval
+  value[code] "ACLcommunicateWith_offending_list exampleG examplenP"
+
+  hide_const exampleG examplenP
 
 
 
