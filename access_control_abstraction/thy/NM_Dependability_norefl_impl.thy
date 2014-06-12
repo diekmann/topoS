@@ -1,5 +1,5 @@
 theory NM_Dependability_norefl_impl
-imports NM_Dependability_norefl NetworkModel_Lists_Impl_Interface FiniteListGraph_Impl
+imports NM_Dependability_norefl NetworkModel_Lists_Impl_Interface (*FiniteListGraph_Impl*)
 begin
 
 
@@ -49,7 +49,7 @@ lemma eval_model_correct: "valid_list_graph G \<Longrightarrow> NM_Dependability
    apply(clarify)
    apply(rename_tac x)
    apply(drule_tac v="x" in  num_reachable_norefl_correct)
-  apply presburger
+   apply presburger
 done
 
 
@@ -78,8 +78,8 @@ interpretation Dependability_norefl_impl:NetworkModel_List_Impl
    apply(metis Dependability.node_props.simps Dependability.node_props_eq_node_props_formaldef)
    apply(simp only: Dependability_norefl_eval_def)
    apply(rule_tac target_focus=NM_Dependability_norefl.target_focus in NetworkModel_eval_impl_proofrule)
-    apply(unfold_locales) (*instance*)
-   apply(fact eval_model_correct)
+     apply(unfold_locales) (*instance*)
+    apply(fact eval_model_correct)
   apply(simp)
 done
 
