@@ -41,7 +41,7 @@ print_interps NetworkModel_modelLibrary
   thm NM_LIB_SubnetsInGW_interpretation.impl_spec
   thm NM_LIB_CommunicationPartners_interpretation.impl_spec
   thm NM_LIB_Dependability_interpretation.impl_spec
-  thm NM_LIM_ACLcommunicateWith_interpretation.impl_spec
+  thm NM_LIB_ACLcommunicateWith_interpretation.impl_spec
 
 
 (*nothing to see here, just loads all the models, ...*)
