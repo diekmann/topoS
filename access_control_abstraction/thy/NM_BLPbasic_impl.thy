@@ -28,7 +28,7 @@ definition "BLP_eval G P = (valid_list_graph G \<and>
   eval_model G (NetworkModel.node_props NM_BLPbasic.default_node_properties P))"
 
 
-interpretation BLPbasic_impl:NetworkModel_List_Impl 
+interpretation BLPbasic_impl:NetworkModel_List_Impl
   where default_node_properties=NM_BLPbasic.default_node_properties
   and eval_model_spec=NM_BLPbasic.eval_model
   and eval_model_impl=eval_model
@@ -38,17 +38,20 @@ interpretation BLPbasic_impl:NetworkModel_List_Impl
   and offending_flows_impl=BLP_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=BLP_eval
-apply(unfold_locales)
- apply(simp add: list_graph_to_graph_def)
- apply(simp add: list_graph_to_graph_def)
- apply(simp add: list_graph_to_graph_def BLP_offending_set BLP_offending_set_def BLP_offending_list_def)
-apply(simp only: NetModel_node_props_def)
- apply(metis BLPbasic.node_props.simps BLPbasic.node_props_eq_node_props_formaldef)
-apply(simp only: BLP_eval_def)
-apply(rule_tac target_focus=NM_BLPbasic.target_focus in NetworkModel_eval_impl_proofrule)
- apply(unfold_locales) (*instance BLPbasic*)
-apply(simp_all add: list_graph_to_graph_def)
-done
+  apply(unfold NetworkModel_List_Impl_def)
+  apply(rule conjI)
+   apply(simp add: NetworkModel_BLPBasic)
+   apply(simp add: list_graph_to_graph_def)
+  apply(rule conjI)
+   apply(simp add: list_graph_to_graph_def)
+   apply(simp add: list_graph_to_graph_def BLP_offending_set BLP_offending_set_def BLP_offending_list_def)
+  apply(rule conjI)
+   apply(simp only: NetModel_node_props_def)
+   apply(metis BLPbasic.node_props.simps BLPbasic.node_props_eq_node_props_formaldef)
+  apply(simp only: BLP_eval_def)
+  apply(simp add: NetworkModel_eval_impl_proofrule[OF NetworkModel_BLPBasic])
+  apply(simp add: list_graph_to_graph_def)
+ done
 
 
 

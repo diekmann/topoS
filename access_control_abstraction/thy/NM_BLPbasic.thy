@@ -112,31 +112,23 @@ section {*ENF*}
   done
    
 
-  -- "way shorter ENF proof "
-  interpretation BLPbasic: NetworkModel
-  where default_node_properties = default_node_properties
-  and eval_model = eval_model
-  and verify_globals = verify_globals
-  and target_focus = target_focus
+  interpretation BLPbasic: NetworkModel_IFS eval_model verify_globals default_node_properties
   where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = BLP_offending_set"
     unfolding target_focus_def
     unfolding default_node_properties_def
     apply(unfold_locales)
 
-    (* only remove target_focus: *)
-       apply(rule conjI) prefer 1 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
-
-       apply(rule NetworkModel_withOffendingFlows.ENF_snds_refl_instance[OF _ BLP_ENF_refl])
-          apply(simp_all add: BLP_ENF BLP_ENF_refl)[4]
-
-     apply(blast intro: BLP_def_unique)
-
+      apply(rule ballI)
+      apply(rule NetworkModel_withOffendingFlows.ENF_snds_refl_instance[OF _ BLP_ENF_refl])
+         apply(simp_all add: BLP_ENF BLP_ENF_refl)[4]
+      apply (metis eval_model.simps offending_notevalD)
+     apply (metis BLP_def_unique)
     apply(fact BLP_offending_set)
-    done
+   done
 
 
-  lemma "NetworkModel eval_model default_node_properties target_focus"
-  by unfold_locales
+  lemma NetworkModel_BLPBasic: "NetworkModel eval_model default_node_properties target_focus"
+  unfolding target_focus_def by unfold_locales
 
 (* TODO
 -- "specialized IFS locale"

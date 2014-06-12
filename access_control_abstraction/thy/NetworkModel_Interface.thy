@@ -249,13 +249,13 @@ subsection {*Information flow security*}
       and verify_globals::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
       +
       fixes default_node_properties :: "'a" ("\<bottom>") 
-      assumes  default_secure:
+      assumes  default_secure_IFS:
         "\<lbrakk> valid_graph G; f \<in> set_offending_flows G nP \<rbrakk> \<Longrightarrow>
           \<forall>i \<in> snd` f. \<not> eval_model G (nP(i := \<bottom>))"
       and
       --{* If some otherbot fulfills default_secure, it must be \<bottom> 
              Hence, \<bottom> is uniquely defined *}
-      default_unique:
+      default_unique_IFS:
       "(\<forall>G f nP i. valid_graph G \<and> f \<in> set_offending_flows G nP \<and> i \<in> snd` f 
                 \<longrightarrow> \<not> eval_model G (nP(i := otherbot))) \<Longrightarrow> otherbot = \<bottom>"
       begin
@@ -265,13 +265,13 @@ subsection {*Information flow security*}
            (i \<in> snd` f \<and> eval_model G (nP(i := otherbot)))"
           apply(erule contrapos_pp)
           apply(simp)
-          using default_unique NetworkModel_withOffendingFlows.valid_without_offending_flows offending_notevalD
+          using default_unique_IFS NetworkModel_withOffendingFlows.valid_without_offending_flows offending_notevalD
           by metis
       end
   
   sublocale NetworkModel_IFS \<subseteq> NetworkModel where target_focus=True
   apply(unfold_locales)
-   apply(simp add: default_secure)
+   apply(simp add: default_secure_IFS)
   apply(simp only: HOL.simp_thms)
   apply(drule default_unique_EX_notation)
   apply(assumption)
@@ -291,17 +291,17 @@ subsection {*Information flow security*}
   
 
 
-subsection {*Access Control*}
-  locale NetworkModel_ACL = NetworkModel_preliminaries eval_model verify_globals
+subsection {*Access Control Strategy*}
+  locale NetworkModel_ACS = NetworkModel_preliminaries eval_model verify_globals
       for eval_model::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
       and verify_globals::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
       +
       fixes default_node_properties :: "'a" ("\<bottom>") 
-      assumes  default_secure:
+      assumes  default_secure_ACS:
         "\<lbrakk> valid_graph G; f \<in> set_offending_flows G nP \<rbrakk> \<Longrightarrow>
           \<forall>i \<in> fst` f. \<not> eval_model G (nP(i := \<bottom>))"
       and
-      default_unique:
+      default_unique_ACS:
       "(\<forall>G f nP i. valid_graph G \<and> f \<in> set_offending_flows G nP \<and> i \<in> fst` f 
                 \<longrightarrow> \<not> eval_model G (nP(i := otherbot))) \<Longrightarrow> otherbot = \<bottom>"
       begin
@@ -311,13 +311,13 @@ subsection {*Access Control*}
            (i \<in> fst` f \<and> eval_model G (nP(i := otherbot)))"
           apply(erule contrapos_pp)
           apply(simp)
-          using default_unique NetworkModel_withOffendingFlows.valid_without_offending_flows offending_notevalD
+          using default_unique_ACS NetworkModel_withOffendingFlows.valid_without_offending_flows offending_notevalD
           by metis
       end
   
-  sublocale NetworkModel_ACL \<subseteq> NetworkModel where target_focus=False
+  sublocale NetworkModel_ACS \<subseteq> NetworkModel where target_focus=False
   apply(unfold_locales)
-   apply(simp add: default_secure)
+   apply(simp add: default_secure_ACS)
   apply(simp only: HOL.simp_thms)
   apply(drule default_unique_EX_notation)
   apply(assumption)
@@ -325,8 +325,8 @@ subsection {*Access Control*}
 
 
   (*other direction*)
-  locale NetworkModel_ACL_otherDirectrion = NetworkModel where target_focus=False
-  sublocale NetworkModel_ACL_otherDirectrion \<subseteq> NetworkModel_ACL
+  locale NetworkModel_ACS_otherDirectrion = NetworkModel where target_focus=False
+  sublocale NetworkModel_ACS_otherDirectrion \<subseteq> NetworkModel_ACS
   apply(unfold_locales)
    apply (metis default_secure offending_notevalD)
   apply(erule contrapos_pp)
