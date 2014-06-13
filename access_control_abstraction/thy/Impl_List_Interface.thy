@@ -4,7 +4,6 @@ imports NetworkModel_Library Impl_List_Composition
     Impl_List_StatefulPolicy
 begin
 
-
 section{*Util*}
 
   fun rembiflowdups :: "('a \<times> 'a) list \<Rightarrow> ('a \<times> 'a) list" where

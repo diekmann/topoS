@@ -261,7 +261,7 @@ section{*Algorithms*}
   fun inefficient_list_intersect :: "'a list \<Rightarrow> 'a list \<Rightarrow> 'a list" where
     "inefficient_list_intersect [] bs = []" |
     "inefficient_list_intersect (a#as) bs = (if a \<in> set bs then a#(inefficient_list_intersect as bs) else inefficient_list_intersect as bs)"
-  lemma "set (inefficient_list_intersect a b) = (set a) \<inter> (set b)"
+  lemma inefficient_list_intersect_correct: "set (inefficient_list_intersect a b) = (set a) \<inter> (set b)"
     apply(induction a)
     by(simp_all)
 
@@ -269,6 +269,30 @@ section{*Algorithms*}
     "generate_valid_stateful_policy_IFSACS_2 G M =
     \<lparr> hostsL = nodesL G, flows_fixL = edgesL G, flows_stateL = inefficient_list_intersect (filter_IFS_no_violations G M) (filter_compliant_stateful_ACS G M) \<rparr>"
 
+
+   lemma generate_valid_stateful_policy_IFSACS_2_complies: "\<lbrakk>\<forall> (m_impl, m_spec) \<in> set M. NetworkSecurityModel_complies_formal_def m_impl m_spec;
+          valid_list_graph G;
+          valid_reqs (get_spec M);
+          NetworkModel_Composition_Theory.all_security_requirements_fulfilled (get_spec M) (list_graph_to_graph G);
+          \<T> = (generate_valid_stateful_policy_IFSACS_2 G (get_impl M))\<rbrakk> \<Longrightarrow> 
+   stateful_policy_compliance \<lparr>hosts = set (hostsL \<T>), flows_fix = set (flows_fixL \<T>), flows_state = set (flows_stateL \<T>) \<rparr> (list_graph_to_graph G) (get_spec M)"
+    apply(rule_tac edgesList="edgesL G" in generate_valid_stateful_policy_IFSACS_2_stateful_policy_compliance)
+        apply(simp)
+       apply (metis valid_list_graph_def valid_list_graph_iff_valid_graph)
+      apply(simp)
+     apply(simp add: list_graph_to_graph_def)
+    apply(simp add: NetworkModel_Stateful_Policy_Algorithm.generate_valid_stateful_policy_IFSACS_2_def Impl_List_StatefulPolicy.generate_valid_stateful_policy_IFSACS_2_def)
+    apply(simp add: list_graph_to_graph_def inefficient_list_intersect_correct)
+    apply(thin_tac "\<T> = ?x")
+    apply(frule(1) filter_compliant_stateful_ACS_complies)
+    apply(frule(1) filter_IFS_no_violations_complies)
+    apply(thin_tac "?a")
+    apply(thin_tac "?a")
+    apply(thin_tac "?a")
+    apply(thin_tac "?a")
+    apply(simp)
+    by (metis list_graph_to_graph_def)
+    
 
 
 
