@@ -97,7 +97,7 @@ where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = Security
      (* only remove target_focus: *)
      apply(rule conjI) prefer 2 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
   
-     apply (rule NetworkModel_withOffendingFlows.ENFnr_fsts_weakrefl_instance[OF _ SecurityGateway_ENRnr Unassigned_botdefault All_to_Unassigned])
+     apply (rule NetworkModel_withOffendingFlows.ENFnr_fsts_weakrefl_instance[OF SecurityGateway_ENRnr Unassigned_botdefault All_to_Unassigned])
        apply(auto)[3]
 
     apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
