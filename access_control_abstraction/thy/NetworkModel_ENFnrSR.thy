@@ -2,7 +2,7 @@ theory NetworkModel_ENFnrSR
 imports Main NetworkModel_Interface NetworkModel_Util
 begin
 
-
+(*TODO: NetworkModel_ENF_sr should imply most of the results here*)
 
 section {* edges normal form not refl ENFnrSR *}
   definition (in NetworkModel_withOffendingFlows) eval_model_all_edges_normal_form_not_refl_SR :: "('a \<Rightarrow> 'v \<Rightarrow> 'a \<Rightarrow> 'v \<Rightarrow> bool) \<Rightarrow> bool" where
