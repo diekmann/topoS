@@ -9,6 +9,8 @@ section {* NetworkModel theory: Often the @{term "eval_model"} function has a co
   @{term "eval_model"} functions in ENF. Helps instantiation of new models in ENF.*}
 
 
+(*TODO most could be inherited from ENF_sr*)
+
 
 
 

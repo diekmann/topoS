@@ -13,7 +13,7 @@ section {* edges normal form not refl ENFnr *}
     "eval_model_all_edges_normal_form_not_refl P \<Longrightarrow> eval_model_all_edges_normal_form_not_refl_SR (\<lambda> v1 _ v2 _. P v1 v2)"
     by(simp add: eval_model_all_edges_normal_form_not_refl_def eval_model_all_edges_normal_form_not_refl_SR_def)
 
-  (*TODO: most of results should be implied from previous lemma*)
+  (*most of results are now implied from previous lemma*)
 
 section {*offending flows*}
    theorem (in NetworkModel_withOffendingFlows) ENFnr_offending_set:

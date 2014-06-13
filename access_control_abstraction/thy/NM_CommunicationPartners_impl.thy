@@ -44,7 +44,8 @@ interpretation CommunicationPartners_impl:NetworkModel_List_Impl
   and target_focus=NM_CommunicationPartners.target_focus
   and offending_flows_impl=CommunicationPartners_offending_list
   and node_props_impl=NetModel_node_props
-  and eval_impl=CommunicationPartners_eval apply(unfold NetworkModel_List_Impl_def)
+  and eval_impl=CommunicationPartners_eval
+ apply(unfold NetworkModel_List_Impl_def)
  apply(rule conjI)
   apply(simp add: NetworkModel_SubnetsInGW list_graph_to_graph_def)
  apply(rule conjI)
