@@ -106,8 +106,7 @@ section {* Instance helper*}
   (* fsts version *)
   lemma (in NetworkModel_withOffendingFlows)  ENFnrSR_fsts_weakrefl_instance:
     fixes "default_node_properties" :: "'a" ("\<bottom>")
-    assumes a_not_eval: "\<not> eval_model G nP"
-    and   a_enf: "eval_model_all_edges_normal_form_not_refl_SR P"
+    assumes a_enf: "eval_model_all_edges_normal_form_not_refl_SR P"
     and   a_weakrefl: "\<forall> s r. P \<bottom> s \<bottom> r"
     and   a_botdefault: "\<forall> s r. (nP r) \<noteq> \<bottom> \<longrightarrow> \<not> P (nP s) s (nP r) r \<longrightarrow> \<not> P \<bottom> s (nP r) r"
     and   a_alltobot: "\<forall> s r. P (nP s) s \<bottom> r"
@@ -116,6 +115,7 @@ section {* Instance helper*}
     shows
           "\<not> eval_model G (nP(i := \<bottom>))"
   proof -
+    from a_offending have a_not_eval: "\<not> eval_model G nP" by (metis ex_in_conv validmodel_imp_no_offending)
     from valid_without_offending_flows[OF a_offending] have a_offending_rm: "eval_model (delete_edges G f) nP" .
     from a_enf have a_enf': "\<And> G nP. eval_model G nP  = (\<forall> (e1, e2)\<in> (edges G). e1 \<noteq> e2 \<longrightarrow> P (nP e1) e1 (nP e2) e2)" 
       using eval_model_all_edges_normal_form_not_refl_SR_def by simp

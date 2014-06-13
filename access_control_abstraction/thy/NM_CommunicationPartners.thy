@@ -105,47 +105,40 @@ subsection {*ENRnr*}
   done
 
 
-interpretation CommunicationPartners: NetworkModel
+interpretation CommunicationPartners: NetworkModel_ACS
 where default_node_properties = default_node_properties
 and eval_model = eval_model
 and verify_globals = verify_globals
-and target_focus = target_focus
 where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = CommunicationPartners_offending_set"
   unfolding target_focus_def
   unfolding default_node_properties_def
   apply unfold_locales
-
-    apply(frule NetworkModel_withOffendingFlows.ENFnrSR_offending_case1[OF CommunicationPartners_ENRnrSR])
-
-  (* only remove target_focus: *)
-    apply(rule conjI) prefer 2 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
-  
-    apply (rule_tac f="f" in NetworkModel_withOffendingFlows.ENFnrSR_fsts_weakrefl_instance[OF _ CommunicationPartners_ENRnrSR Unassigned_weakrefl Unassigned_botdefault All_to_Unassigned])
-      apply(simp)
+    apply(rule ballI)
+    apply (rule_tac f="f" in NetworkModel_withOffendingFlows.ENFnrSR_fsts_weakrefl_instance[OF CommunicationPartners_ENRnrSR Unassigned_weakrefl Unassigned_botdefault All_to_Unassigned])
      apply(simp)
     apply(simp)
-
-   (*unique*)
-   apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
-      NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
-      NetworkModel_withOffendingFlows.is_offending_flows_def)
-   apply (simp add:graph_ops)
-   apply (simp split: split_split_asm split_split add:prod_case_beta)
-   apply(rule_tac x="\<lparr> nodes={vertex_1,vertex_2}, edges = {(vertex_1,vertex_2)} \<rparr>" in exI, simp)
-   apply(rule conjI)
-    apply(simp add: valid_graph_def)
-   apply(case_tac otherbot, simp_all)
-    apply(rule_tac x="(\<lambda> x. DontCare)(vertex_1 := DontCare, vertex_2 := Master [vertex_1])" in exI, simp)
-    apply(rule_tac x="vertex_1" in exI, simp)
-    apply(rule_tac x="{(vertex_1,vertex_2)}" in exI, simp)
-   apply(rename_tac M) (*case Master M*)
-   apply(rule_tac x="(\<lambda> x. DontCare)(vertex_1 := DontCare, vertex_2 := (Master (vertex_1#M')))" in exI, simp)
-   apply(rule_tac x="{(vertex_1,vertex_2)}" in exI, simp)
-
-  apply(fact CommunicationPartners_offending_set)
-  done
+  apply(erule default_uniqueness_by_counterexample_ACS)
+  apply(rule_tac x="\<lparr> nodes={vertex_1,vertex_2}, edges = {(vertex_1,vertex_2)} \<rparr>" in exI, simp)
+  apply(rule conjI)
+   apply(simp add: valid_graph_def)
+  apply(simp add: CommunicationPartners_offending_set CommunicationPartners_offending_set_def delete_edges_simp2)
+  apply(case_tac otherbot, simp_all)
+   apply(rule_tac x="(\<lambda> x. DontCare)(vertex_1 := DontCare, vertex_2 := Master [vertex_1])" in exI, simp)
+   apply(rule_tac x="vertex_1" in exI, simp)
+   apply(simp split: split_split)
+   apply(clarify)
+   apply force
+  apply(rename_tac M) (*case Master M*)
+  apply(rule_tac x="(\<lambda> x. DontCare)(vertex_1 := DontCare, vertex_2 := (Master (vertex_1#M')))" in exI, simp)
+  apply(simp split: split_split)
+  apply(clarify)
+  apply force
+ apply(fact CommunicationPartners_offending_set)
+done
 
 
+  lemma NetworkModel_SubnetsInGW: "NetworkModel eval_model default_node_properties target_focus"
+  unfolding target_focus_def by unfold_locales
 
 
 hide_fact (open) eval_model_mono   
