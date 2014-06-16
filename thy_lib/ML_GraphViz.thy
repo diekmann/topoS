@@ -2,12 +2,6 @@ theory ML_GraphViz
 imports Main
 begin
 
-
-ML_val {*
-Context.theory_name @{theory}
-*}
-
-
 ML {*
 signature GRAPHVIZ =
 sig
@@ -76,16 +70,7 @@ in
   val paintGraphDotLinux = paintGraph "xdg-open" "dot"
   end;
 
-fun ohShitOpenFileInGedit (f: Path.T): int =
-    let val file = (File.platform_path f);
-        val cmd = ("gedit "^file^" &")
-    in
-      writeln ("executing: "^cmd);
-      Isabelle_System.bash cmd
-    end
-
-
-fun evalutae_term (thy: theory) (edges: term) : term = 
+fun evaluate_term (thy: theory) (edges: term) : term = 
   case Code_Evaluation.dynamic_value thy edges
     of SOME x => x
     | NONE => raise TERM ("could not evaluate", []);
@@ -116,7 +101,7 @@ local
 in
   fun visualize_graph_pretty (thy: theory) (tune_node_format : term -> string -> string) (Es : (string * term) list ) =
     let 
-      val evaluated_edges : (string * term) list = List.map (fn (str, t) => (str, evalutae_term thy t)) Es;
+      val evaluated_edges : (string * term) list = List.map (fn (str, t) => (str, evaluate_term thy t)) Es;
       val edge_to_string  : (term -> string) = HOLogic.dest_list #> map HOLogic.dest_prod #> format_dot_edges tune_node_format #> implode;
       val formatted_edges : string list = List.map (fn (str, t) => str ^ "\n" ^ (edge_to_string t)) evaluated_edges;
     in
@@ -133,16 +118,6 @@ the parameter edges is just a list of pairs
 *)
 fun visualize_graph (thy: theory) (tune_node_format : term -> string -> string) (edges: term) =
   visualize_graph_pretty thy tune_node_format [("", edges)];
-
-
-(*
-the parameter edges is a definition with an equal
-edges = [(a,b), ...]
-*)
-fun visualize_graph_thm (thy: theory) (tune_node_format : term -> string -> string) (edges: thm) =
-  prop_of edges
-  |> HOLogic.dest_Trueprop |> HOLogic.dest_eq |> snd
-  |> visualize_graph thy tune_node_format;
 
 end;
 *}
