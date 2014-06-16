@@ -11,6 +11,8 @@ Context.theory_name @{theory}
 ML {*
 signature GRAPHVIZ =
 sig
+  val open_viewer: bool Unsynchronized.ref
+
   val default_tune_node_format: term -> string -> string
 
   (* edges is a term of type ('a \<times> 'a) list *)
@@ -30,6 +32,8 @@ end;
 ML {*
 structure Graphviz: GRAPHVIZ =
 struct
+
+val open_viewer = Unsynchronized.ref true
 
 val default_tune_node_format = (fn _ => I);
 
@@ -62,8 +66,10 @@ local
           val filePDF = file^".pdf";
           val cmd = (viz^" -o "^filePDF^" -Tpdf "^file^" && "^viewer^" "^filePDF) (*^" && rm "^filePDF*)
       in
-        writeln ("executing: "^cmd);
-        Isabelle_System.bash cmd;
+        if !open_viewer then
+          (writeln ("executing: "^cmd); Isabelle_System.bash cmd; ())
+        else
+          ();
         Isabelle_System.bash ("rm "^file) (*cleanup dot file, PDF file will still exist*)
       end
 in
