@@ -144,9 +144,8 @@ and target_focus = NM_NonInterference.target_focus
     (* only remove target_focus: *)
     apply(rule conjI) prefer 1 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
 
-   apply(simp add: undirected_reachable_def graph_ops)
+   apply(simp)
    apply clarify
-   apply simp_all
    apply(rename_tac xa)
    apply(case_tac "nP xa")
     (*case Interfering*)
@@ -162,8 +161,8 @@ and target_focus = NM_NonInterference.target_focus
   apply(thin_tac "nP n = Interfering")
   apply(thin_tac "f \<in> ?x")
   apply(erule disjE)
-   apply (metis (lifting, no_types) DiffI ex_in_conv fun_upd_image fun_upd_triv insertE insert_subset node_config.distinct(1))
-  apply (metis (lifting, no_types) DiffI ex_in_conv fun_upd_image fun_upd_triv insertE insert_subset node_config.distinct(1))
+   apply (metis (lifting, no_types) ex_in_conv fun_upd_image fun_upd_triv insertE insert_subset node_config.distinct(1))
+  apply (metis (lifting, no_types) ex_in_conv fun_upd_image fun_upd_triv insertE insert_subset node_config.distinct(1))
   (*I'm so horribly sorry ....*)
 
 (*case Unrelated*)
