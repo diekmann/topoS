@@ -144,11 +144,10 @@ and target_focus = NM_NonInterference.target_focus
     (* only remove target_focus: *)
     apply(rule conjI) prefer 1 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
 
-    apply simp
    apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
     NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
     NetworkModel_withOffendingFlows.is_offending_flows_def)
-   apply(simp add: undirected_reachable_def succ_tran_def undirected_def graph_ops)
+   apply(simp add: undirected_reachable_def  graph_ops)
    apply clarify
    apply simp_all
    apply(rename_tac xa)
@@ -156,27 +155,25 @@ and target_focus = NM_NonInterference.target_focus
     (*case Interfering*)
     apply simp
 
-  (*apply(erule_tac x=n and A="nodes G" in ballE)
+  apply(erule_tac x=n and A="nodes G" in ballE)
   prefer 2
   apply fast
   apply(simp)
   apply(erule_tac x=n and A="nodes G" in ballE)
   prefer 2
   apply fast
-  sledgehammer (*now finds something*)
-  (*apply (smt DiffI fun_upd_image fun_upd_triv insert_subset mem_Collect_eq node_config.distinct(1) singleton_iff)*)
-  (*apply (smt DiffI fun_upd_image fun_upd_triv insert_subset mem_Collect_eq node_config.distinct(1) singleton_iff)*)
-  *)
+  apply(thin_tac "\<forall> x \<in> ?X. ?y x")
+  apply(thin_tac "valid_graph G")
+  apply(thin_tac "(a,b) \<in> f")
+  apply(thin_tac "n \<in> nodes G")
+  apply(thin_tac "f \<subseteq> edges G")
+  apply(thin_tac "nP n = Interfering")
+  apply(thin_tac "nP n = Interfering \<longrightarrow> ?x")
+  apply(erule disjE)
+   apply (metis (lifting, no_types) DiffI ex_in_conv fun_upd_image fun_upd_triv insertE insert_subset node_config.distinct(1))
+  apply (metis (lifting, no_types) DiffI ex_in_conv fun_upd_image fun_upd_triv insertE insert_subset node_config.distinct(1))
+  (*I'm so horribly sorry ....*)
 
-  (*wow, sledgehammer can find it no more!!*)
-  (*reproduce: using DiffI empty_iff fun_upd_image fun_upd_triv insert_iff insert_subset mem_Collect_eq node_config.simps(1)
-  sledgehammer[provers=z3,verbose=true]*)
-  (*isabelle 2013: using DiffI empty_iff fun_upd_image fun_upd_triv insert_iff insert_subset mem_Collect_eq node_config.simps(1)
-  using singleton_conv2 sledgehammer[provers=z3,verbose=true,isar_proofs,timeout=60]
-  apply (smt singleton_conv2)*)
-   (*isabelle 2012: apply (smt Diff_iff empty_iff fun_upd_image fun_upd_triv insert_iff insert_subset mem_Collect_eq node_config.simps(1))*)
-   (*isabelle 2013: apply (smt DiffI empty_iff fun_upd_image fun_upd_triv insert_iff insert_subset mem_Collect_eq node_config.simps(1))*)
-    apply (smt DiffI empty_iff fun_upd_image fun_upd_triv insert_iff insert_subset mem_Collect_eq node_config.simps(1))
 (*case Unrelated*)
    apply simp
 
