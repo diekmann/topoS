@@ -32,7 +32,7 @@ fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> secgw_member) \<
 
 definition target_focus :: "bool" where "target_focus = False"
 
-subsubsection {*Preleminaries*}
+subsubsection {*Preliminaries*}
   lemma eval_model_mono: "NetworkModel_withOffendingFlows.eval_model_mono eval_model"
     apply(simp only: NetworkModel_withOffendingFlows.eval_model_mono_def)
     apply(clarify)
@@ -96,7 +96,7 @@ where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = Security
     (* only remove target_focus: *)
     apply(rule conjI) prefer 2 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
   
-    apply (rule NetworkModel_withOffendingFlows.ENFnr_fsts_weakrefl_instance[OF _ SecurityGateway_ENFnr Unassigned_botdefault All_to_Unassigned])[1]
+    apply (rule NetworkModel_withOffendingFlows.ENFnr_fsts_weakrefl_instance[OF SecurityGateway_ENFnr Unassigned_botdefault All_to_Unassigned])[1]
       apply(simp_all)[3]
 
    apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def

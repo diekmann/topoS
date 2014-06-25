@@ -593,7 +593,7 @@ where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = DomainHi
   apply unfold_locales
   
     apply(rule conjI) prefer 2 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
-    apply(drule NetworkModel_withOffendingFlows.ENF_fsts_refl_instance[OF _ DomainHierarchyNG_ENF_refl unassigned_default_candidate], simp_all)[1]
+    apply(drule NetworkModel_withOffendingFlows.ENF_fsts_refl_instance[OF DomainHierarchyNG_ENF_refl unassigned_default_candidate], simp_all)[1]
 
    apply(drule Unassigned_unique_default, simp) 
 

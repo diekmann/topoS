@@ -4,7 +4,6 @@ imports NetworkModel_Library Impl_List_Composition
     Impl_List_StatefulPolicy
 begin
 
-
 section{*Util*}
 
   fun rembiflowdups :: "('a \<times> 'a) list \<Rightarrow> ('a \<times> 'a) list" where
@@ -105,7 +104,12 @@ local
     then
       tune_Vstring_format
     else
-      Graphviz.default_tune_node_format
+      Graphviz.default_tune_node_format;
+
+  fun evalutae_term (thy: theory) (edges: term) : term = 
+    case Code_Evaluation.dynamic_value thy edges
+      of SOME x => x
+      | NONE => raise TERM ("could not evaluate", []);
 in
   fun visualize_edges (ctx: Proof.context) (thy: theory) (edges: term) (coloredges: (string * term) list): int = 
     let
@@ -116,6 +120,37 @@ in
       ("", uniflows),
       ("edge [dir=\"none\", color=\"#000000\"]", biflows)] @ coloredges) (*dir=none, dir=both*)
     end
+
+  (*iterate over the edges in ML, usefull for printing them in certain formats*)
+  fun iterate_edges_ML (ctx: Proof.context) (thy: theory) (edges: term) (all: (string*string) -> unit) (bi: (string*string) -> unit) (uni: (string*string) -> unit): unit =
+    let
+      val _ = writeln("iterate_edges_ML");
+      val tune_node_format = (get_tune_node_format edges);
+      val evaluated_edges : term = evalutae_term thy edges;
+      val (biflows, uniflows) = partition_by_biflows ctx thy evaluated_edges;
+      fun node_to_string (n: term) : string = n |> Syntax.pretty_term ctx |> Pretty.string_of |> ATP_Util.unyxml |> tune_node_format n
+          handle Subscript => let
+            val _ = writeln ("Subscript Exception in iterate_edges_ML: node_to_string");
+          in "ERROR" end;
+    in
+      let
+        fun edge_to_list (es: term) : (term * term) list = es |> HOLogic.dest_list |> map HOLogic.dest_prod;
+        fun edge_to_string (es: (term * term) list) : (string * string) list =
+          List.map (fn (v1, v2) => (node_to_string v1, node_to_string v2)) es
+          handle Subscript => let
+            val _ = writeln ("Subscript Exception in iterate_edges_ML: edge_to_string");
+            val _ = List.map (fn (v1, _) => Pretty.writeln (Syntax.pretty_term ctx v1)) es;
+            val _ = List.map (fn (_, v2) => Pretty.writeln (Syntax.pretty_term ctx v2)) es;
+            in [] end;
+      in
+        edge_to_list evaluated_edges |> edge_to_string |> List.map all;
+        edge_to_list biflows |> edge_to_string |> List.map bi;
+        edge_to_list uniflows |> edge_to_string |> List.map uni;
+        ()
+      end
+      handle Subscript => writeln ("Subscript Exception in iterate_edges_ML")
+    end;
+    
 end
 *}
 

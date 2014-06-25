@@ -13,6 +13,7 @@ section {* edges normal form not refl ENFnr *}
     "eval_model_all_edges_normal_form_not_refl P \<Longrightarrow> eval_model_all_edges_normal_form_not_refl_SR (\<lambda> v1 _ v2 _. P v1 v2)"
     by(simp add: eval_model_all_edges_normal_form_not_refl_def eval_model_all_edges_normal_form_not_refl_SR_def)
 
+  (*most of results are now implied from previous lemma*)
 
 section {*offending flows*}
    theorem (in NetworkModel_withOffendingFlows) ENFnr_offending_set:
@@ -29,9 +30,7 @@ section {* Instance helper*}
   (* fsts version *)
   lemma (in NetworkModel_withOffendingFlows)  ENFnr_fsts_weakrefl_instance:
     fixes "default_node_properties" :: "'a" ("\<bottom>")
-    assumes a_not_eval: "\<not> eval_model G nP"
-    and   a_enf: "eval_model_all_edges_normal_form_not_refl P"
-    (*and   a_weakrefl: "P \<bottom> \<bottom>" (*can be removed!*)*)
+    assumes a_enf: "eval_model_all_edges_normal_form_not_refl P"
     and   a_botdefault: "\<forall> e1 e2. e2 \<noteq> \<bottom> \<longrightarrow> \<not> P e1 e2 \<longrightarrow> \<not> P \<bottom> e2"
     and   a_alltobot: "\<forall> e1. P e1 \<bottom>"
     and   a_offending: "f \<in> set_offending_flows G nP"
@@ -42,16 +41,14 @@ section {* Instance helper*}
     from assms show ?thesis
     apply -
     apply(drule ENFnr_to_ENFnrSR)
-    apply(drule(1) ENFnrSR_fsts_weakrefl_instance)
+    apply(drule ENFnrSR_fsts_weakrefl_instance)
          by auto
   qed
   
   (* snds version *)
   lemma (in NetworkModel_withOffendingFlows)  ENFnr_snds_weakrefl_instance:
     fixes "default_node_properties" :: "'a" ("\<bottom>")
-    assumes a_not_eval: "\<not> eval_model G nP"
-    and   a_enf: "eval_model_all_edges_normal_form_not_refl P"
-    (*and   a_weakrefl: "P \<bottom> \<bottom>" (*can be removed*)*)
+    assumes a_enf: "eval_model_all_edges_normal_form_not_refl P"
     and   a_botdefault: "\<forall> e1 e2. \<not> P e1 e2 \<longrightarrow> \<not> P e1 \<bottom>"
     and   a_bottoall: "\<forall> e2. P \<bottom> e2"
     and   a_offending: "f \<in> set_offending_flows G nP"
@@ -62,7 +59,7 @@ section {* Instance helper*}
     from assms show ?thesis
     apply -
     apply(drule ENFnr_to_ENFnrSR)
-    apply(drule(1) ENFnrSR_snds_weakrefl_instance)
+    apply(drule ENFnrSR_snds_weakrefl_instance)
          by auto
   qed
  

@@ -103,12 +103,14 @@ value[code] "List.product (nodesL ChairNetwork_empty) (nodesL ChairNetwork_empty
 definition "ChairNetwork = generate_valid_topology ChairSecurityRequirements 
       \<lparr>nodesL = nodesL ChairNetwork_empty, edgesL = List.product (nodesL ChairNetwork_empty) (nodesL ChairNetwork_empty) \<rparr>"
 
+lemma "all_security_requirements_fulfilled ChairSecurityRequirements ChairNetwork" by eval
+
 value[code] "ChairNetwork"
 
-
 ML_val{*
-visualize_edges @{context} @{theory} @{term "edgesL ChairNetwork"} []; 
+vizualize_graph @{context} @{theory} @{term "ChairSecurityRequirements"} @{term "ChairNetwork"};
 *}
+
 
 
 end

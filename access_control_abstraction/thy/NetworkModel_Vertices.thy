@@ -78,7 +78,16 @@ ML {*
 fun tune_Vstring_format (t: term) (s: string) : string = 
     (*TODO fails for different pretty printer settings
      Syntax.string_of_typ @{context} @{typ vString}  *)
-    if fastype_of t = @{typ vString} then String.substring (s, (size "NetworkModel_Vertices.vString.V.  "), (size s - (size "NetworkModel_Vertices.vString.V.    "))) else s
+    if fastype_of t = @{typ vString} then
+      if String.isPrefix "NetworkModel_Vertices.vString.V" s then
+        String.substring (s, (size "NetworkModel_Vertices.vString.V.  "), (size s - (size "NetworkModel_Vertices.vString.V.    ")))
+      else if String.isPrefix "vString.V " s then
+        String.substring (s, (size "vString.V.  "), (size s - (size "vString.V.    ")))
+      else if String.isPrefix "V " s then
+        String.substring (s, (size "V.  "), (size s - (size "V.    ")))
+      else let val _ = writeln ("no tune_Vstring_format for \""^s^"\"") in s end
+    else s
+    handle Subscript => let val _ = writeln ("tune_Vstring_format Subscript excpetion") in s end;
 *}
 
 

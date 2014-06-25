@@ -28,7 +28,7 @@ definition target_focus :: "bool" where "target_focus = True" (*this is odd.
   thus, responsibility is in the one who accepts and not the one who initiates. two entities are needed for a connection! *)
 
 
-subsubsection {*Preleminaries*}
+subsubsection {*Preliminaries*}
   lemma eval_model_mono: "NetworkModel_withOffendingFlows.eval_model_mono eval_model"
     apply(simp only: NetworkModel_withOffendingFlows.eval_model_mono_def)
     apply(clarify)
@@ -89,7 +89,7 @@ where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = Sink_off
   (* only remove target_focus: *)
     apply(rule conjI) prefer 1 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
   
-    apply (rule NetworkModel_withOffendingFlows.ENFnr_snds_weakrefl_instance[OF _ Sink_ENFnr Unassigned_default_candidate Unassigned_to_All])
+    apply (rule NetworkModel_withOffendingFlows.ENFnr_snds_weakrefl_instance[OF Sink_ENFnr Unassigned_default_candidate Unassigned_to_All])
       apply(simp_all)[3]
 
    apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def

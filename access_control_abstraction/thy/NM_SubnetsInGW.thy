@@ -25,7 +25,7 @@ fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> subnets) \<Right
 definition target_focus :: "bool" where "target_focus = False"
 
 
-subsubsection {*Preleminaries*}
+subsubsection {*Preliminaries*}
   lemma eval_model_mono: "NetworkModel_withOffendingFlows.eval_model_mono eval_model"
     apply(simp only: NetworkModel_withOffendingFlows.eval_model_mono_def)
     apply(clarify)
@@ -83,23 +83,20 @@ section{*ENF*}
     apply(auto)
   done
 
-interpretation SubnetsInGW: NetworkModel
+interpretation SubnetsInGW: NetworkModel_ACS
 where default_node_properties = NM_SubnetsInGW.default_node_properties
 and eval_model = NM_SubnetsInGW.eval_model
 and verify_globals = verify_globals
-and target_focus = target_focus
 where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = SubnetsInGW_offending_set"
-  unfolding target_focus_def
   unfolding NM_SubnetsInGW.default_node_properties_def
   apply unfold_locales
 
-  (* only remove target_focus: *)
-    apply(rule conjI) prefer 2 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
+    apply(rule ballI)
+    thm NetworkModel_withOffendingFlows.ENF_fsts_refl_instance[OF SubnetsInGW_ENF_refl Unassigned_default_candidate]
+    apply(rule NetworkModel_withOffendingFlows.ENF_fsts_refl_instance[OF SubnetsInGW_ENF_refl Unassigned_default_candidate])
+      apply(simp_all)[2]
 
-    thm NetworkModel_withOffendingFlows.ENF_fsts_refl_instance[OF _ SubnetsInGW_ENF_refl Unassigned_default_candidate]
-    apply(rule NetworkModel_withOffendingFlows.ENF_fsts_refl_instance[OF _ SubnetsInGW_ENF_refl Unassigned_default_candidate])
-      apply(simp_all)[3]
-
+   apply(erule default_uniqueness_by_counterexample_ACS)
    apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
       NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
       NetworkModel_withOffendingFlows.is_offending_flows_def)
@@ -118,6 +115,10 @@ where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = SubnetsI
   apply(fact SubnetsInGW_offending_set)
   done
 
+
+
+  lemma NetworkModel_SubnetsInGW: "NetworkModel eval_model default_node_properties target_focus"
+  unfolding target_focus_def by unfold_locales
 
  
 hide_fact (open) eval_model_mono   

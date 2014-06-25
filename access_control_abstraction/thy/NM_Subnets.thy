@@ -103,8 +103,8 @@ where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = Subnets_
   (* only remove target_focus: *)
   apply(rule conjI) prefer 2 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
 
-  apply (rule NetworkModel_withOffendingFlows.ENF_fsts_refl_instance[OF _ Subnets_ENF_refl Unassigned_default_candidate])[1]
-   apply(simp_all)[3]
+  apply (rule NetworkModel_withOffendingFlows.ENF_fsts_refl_instance[OF Subnets_ENF_refl Unassigned_default_candidate])[1]
+   apply(simp_all)[2]
 
  apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
       NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
