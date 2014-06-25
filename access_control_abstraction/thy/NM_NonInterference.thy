@@ -152,8 +152,8 @@ and target_focus = NM_NonInterference.target_focus
     apply simp
 
   apply(erule_tac x=n and A="nodes G" in ballE)
-  prefer 2
-  apply fast
+   prefer 2
+   apply fast
   apply(simp)
   apply(thin_tac "valid_graph G")
   apply(thin_tac "(a,b) \<in> f")
@@ -161,9 +161,8 @@ and target_focus = NM_NonInterference.target_focus
   apply(thin_tac "nP n = Interfering")
   apply(thin_tac "f \<in> ?x")
   apply(erule disjE)
-   apply (metis (lifting, no_types) ex_in_conv fun_upd_image fun_upd_triv insertE insert_subset node_config.distinct(1))
-  apply (metis (lifting, no_types) ex_in_conv fun_upd_image fun_upd_triv insertE insert_subset node_config.distinct(1))
-  (*I'm so horribly sorry ....*)
+   apply (metis fun_upd_other fun_upd_same imageI node_config.distinct(1) set_rev_mp singleton_iff)
+  apply (metis fun_upd_other fun_upd_same imageI node_config.distinct(1) set_rev_mp singleton_iff)
 
 (*case Unrelated*)
    apply simp
