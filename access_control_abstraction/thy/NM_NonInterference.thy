@@ -132,18 +132,15 @@ section{*monotonic and preliminaries*}
   done
 
 
-interpretation NonInterference: NetworkModel
+interpretation NonInterference: NetworkModel_IFS
 where default_node_properties = NM_NonInterference.default_node_properties
 and eval_model = NM_NonInterference.eval_model
 and verify_globals = verify_globals
-and target_focus = NM_NonInterference.target_focus
-  unfolding target_focus_def
   unfolding NM_NonInterference.default_node_properties_def
   apply unfold_locales
 
-    (* only remove target_focus: *)
-    apply(rule conjI) prefer 1 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
-
+    apply(rule ballI)
+    apply(drule NM_NonInterference.offending_notevalD)
    apply(simp)
    apply clarify
    apply(rename_tac xa)
@@ -159,7 +156,6 @@ and target_focus = NM_NonInterference.target_focus
   apply(thin_tac "(a,b) \<in> f")
   apply(thin_tac "n \<in> nodes G")
   apply(thin_tac "nP n = Interfering")
-  apply(thin_tac "f \<in> ?x")
   apply(erule disjE)
    apply (metis fun_upd_other fun_upd_same imageI node_config.distinct(1) set_rev_mp singleton_iff)
   apply (metis fun_upd_other fun_upd_same imageI node_config.distinct(1) set_rev_mp singleton_iff)
@@ -168,6 +164,7 @@ and target_focus = NM_NonInterference.target_focus
    apply simp
 
   (*unique: *)
+  apply(erule default_uniqueness_by_counterexample_IFS)
   apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
       NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
       NetworkModel_withOffendingFlows.is_offending_flows_def)
@@ -193,7 +190,7 @@ and target_focus = NM_NonInterference.target_focus
 
 
   lemma "NetworkModel eval_model default_node_properties target_focus"
-  by unfold_locales
+  unfolding target_focus_def by unfold_locales
    
 
 hide_const (open) eval_model verify_globals target_focus default_node_properties
