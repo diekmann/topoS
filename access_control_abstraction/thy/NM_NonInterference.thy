@@ -144,10 +144,7 @@ and target_focus = NM_NonInterference.target_focus
     (* only remove target_focus: *)
     apply(rule conjI) prefer 1 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
 
-   apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
-    NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
-    NetworkModel_withOffendingFlows.is_offending_flows_def)
-   apply(simp add: undirected_reachable_def  graph_ops)
+   apply(simp add: undirected_reachable_def graph_ops)
    apply clarify
    apply simp_all
    apply(rename_tac xa)
@@ -159,16 +156,11 @@ and target_focus = NM_NonInterference.target_focus
   prefer 2
   apply fast
   apply(simp)
-  apply(erule_tac x=n and A="nodes G" in ballE)
-  prefer 2
-  apply fast
-  apply(thin_tac "\<forall> x \<in> ?X. ?y x")
   apply(thin_tac "valid_graph G")
   apply(thin_tac "(a,b) \<in> f")
   apply(thin_tac "n \<in> nodes G")
-  apply(thin_tac "f \<subseteq> edges G")
   apply(thin_tac "nP n = Interfering")
-  apply(thin_tac "nP n = Interfering \<longrightarrow> ?x")
+  apply(thin_tac "f \<in> ?x")
   apply(erule disjE)
    apply (metis (lifting, no_types) DiffI ex_in_conv fun_upd_image fun_upd_triv insertE insert_subset node_config.distinct(1))
   apply (metis (lifting, no_types) DiffI ex_in_conv fun_upd_image fun_upd_triv insertE insert_subset node_config.distinct(1))
