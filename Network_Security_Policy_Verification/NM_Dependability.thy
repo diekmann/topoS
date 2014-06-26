@@ -55,7 +55,7 @@ text{* It does not matter whether we iterate over all edges or all nodes. We cho
     using succ_tran_subseteq_nodes card_seteq  nat_le_linear valid_graph.finiteV by metis
 
 
-  text{* nP is valid if all dependability_levels are greater equal the total number of nodes in the graph *}
+  text{* nP is valid if all dependability level are greater equal the total number of nodes in the graph *}
   lemma "\<lbrakk> valid_graph G; \<forall>v \<in> nodes G. nP v \<ge> card (nodes G) \<rbrakk> \<Longrightarrow> eval_model G nP"
     apply(subst eval_model_edges_nodes_iff[symmetric], simp)
     apply(simp add:)
@@ -68,7 +68,7 @@ text{* It does not matter whether we iterate over all edges or all nodes. We cho
    fun fix_nP :: "'v graph \<Rightarrow> ('v \<Rightarrow> dependability_level) \<Rightarrow> ('v \<Rightarrow> dependability_level)" where
       "fix_nP G nP = (\<lambda>v. if num_reachable G v \<le> (nP v) then (nP v) else num_reachable G v)"
   
-   text{* fix_nP always gives you a valid solution *}
+   text{* @{term fix_nP} always gives you a valid solution *}
    lemma fix_nP_valid: "\<lbrakk> valid_graph G \<rbrakk> \<Longrightarrow> eval_model G (fix_nP G nP)"
       by(subst eval_model_edges_nodes_iff[symmetric], simp_all)
   

@@ -40,7 +40,7 @@ section {* we need in instatiated model, i.e. get rid of 'a 'b*}
    by(simp add: Let_def new_configured_NetworkSecurityModel.simps)
 
 
-text{* We now collect all the core properties of a network model, but wihtout the 'a 'b types, so it is instatiated with a configuration.  *}
+text{* We now collect all the core properties of a network model, but wihtout the @{typ "'a"} @{typ "'b"} types, so it is instatiated with a configuration.  *}
 locale configured_NetworkModel =
   fixes m :: "('v::vertex) NetworkSecurityModel_configured"
   assumes
@@ -97,7 +97,7 @@ locale configured_NetworkModel =
             NetworkModel_withOffendingFlows.is_offending_flows_def)
       by(simp add: valid_c_offending_flows)
 
-    text{* all the NetworkModel_preliminaries stuff must hold, for an arbitrary nP *}
+    text{* all the @{term NetworkModel_preliminaries} stuff must hold, for an arbitrary nP *}
     lemma NetworkModel_preliminariesD:
       "NetworkModel_preliminaries (\<lambda> (G::('v::vertex) graph) (nP::'v \<Rightarrow> 'a). c_eval_model m G)"
       apply(unfold_locales)
@@ -152,7 +152,7 @@ text{*
     M :: network security requirement list
 *}
 
-  text{* The function new_configured_NetworkSecurityModel taks some tuple and if it returns a result,
+  text{* The function @{term new_configured_NetworkSecurityModel} takes some tuple and if it returns a result,
          the locale assumptions are automatically fulfilled. *}
   theorem new_configured_NetworkSecurityModel_sound: 
   "\<lbrakk> new_configured_NetworkSecurityModel (eval_model, defbot, target_focus, nP) = Some m \<rbrakk> \<Longrightarrow>
@@ -299,7 +299,7 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
         apply(simp add: delete_edges_simp2)
         by blast
 
-      text{* generate_valid_topology generates a valid topology! *}
+      text{* @{term generate_valid_topology} generates a valid topology! *}
       theorem generate_valid_topology_sound:
       "\<lbrakk> valid_reqs M; valid_graph \<lparr>nodes = V, edges = E\<rparr> \<rbrakk> \<Longrightarrow> 
       all_security_requirements_fulfilled M (generate_valid_topology M \<lparr>nodes = V, edges = E\<rparr>)"

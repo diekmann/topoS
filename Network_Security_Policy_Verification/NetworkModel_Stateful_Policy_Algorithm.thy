@@ -616,7 +616,7 @@ section {* Sketch for generating a stateful policy from a simple directed policy
     qed
 
 
-    text{*filter_compliant_stateful_ACS is correct and maximal*}
+    text{*@{term filter_compliant_stateful_ACS} is correct and maximal*}
     thm filter_compliant_stateful_ACS_correct filter_compliant_stateful_ACS_maximal
 
 

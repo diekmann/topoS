@@ -326,7 +326,7 @@ hide_const NetworkModel_Vertices.V
     apply(simp add: graph_ops generate_valid_topology_2_nodes)
     done
 
-  text{* generate_valid_topology generates a valid topology! *}
+  text{* @{term generate_valid_topology} generates a valid topology! *}
   theorem generate_valid_topology_sound:
   "\<lbrakk> valid_ENFs M; valid_graph \<lparr>nodes = V, edges = E\<rparr> \<rbrakk> \<Longrightarrow> 
   all_security_requirements_fulfilled M (generate_valid_topology M \<lparr>nodes = V, edges = E\<rparr>)"
@@ -399,7 +399,7 @@ hide_const NetworkModel_Vertices.V
       qed
 
 
-  text{* We can also wrtite generate_valid_topology_2 as simply removing all offending flows *}  
+  text{* We can also wrtite @{term generate_valid_topology_2} as simply removing all offending flows *}  
   lemma generate_valid_topology_2_as_set: 
   "generate_valid_topology_2 M G = delete_edges G (\<Union>m \<in> set M. (\<Union> (c_offending_flows m G)))"
    apply(induction M arbitrary: G)

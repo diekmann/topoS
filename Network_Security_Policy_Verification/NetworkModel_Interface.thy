@@ -86,7 +86,7 @@ text {* The offending flows can be empty even for an invalid model!*}
   by(simp add: NetworkModel_withOffendingFlows.set_offending_flows_def 
     NetworkModel_withOffendingFlows.is_offending_flows_min_set_def NetworkModel_withOffendingFlows.is_offending_flows_def)
 
-text {*There exists an eval_model such that the model is invalid and no offending flows exits.*}
+text {*There exists an @{term eval_model} such that the model is invalid and no offending flows exits.*}
   lemma "\<exists>eval_model. \<not> eval_model G nP \<and> NetworkModel_withOffendingFlows.set_offending_flows eval_model G nP = {}"
   apply(simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
     NetworkModel_withOffendingFlows.is_offending_flows_min_set_def NetworkModel_withOffendingFlows.is_offending_flows_def)
@@ -113,7 +113,8 @@ text{*Thus, we introduce a usefullness property that prohibits such useless mode
       "\<lbrakk> valid_graph G; is_offending_flows ff G nP \<rbrakk> \<Longrightarrow> is_offending_flows (ff \<union> f') G nP"
   begin
 
-  text {*
+  text {* TODO: add this to latex document *}
+  (*
   For instance proofs:
     Have a look at NetworkModel_withOffendingFlows_lemmata.thy
     There is a definition of eval_model_mono. It impplies mono_eval_model and mono_offending
@@ -124,7 +125,7 @@ text{*Thus, we introduce a usefullness property that prohibits such useless mode
     defined_offending
   
     Basically, eval_model_mono. implies almost all assumptions here and is equal to mono_eval_model.
-  *}
+  *)
 
   lemma offending_notevalD: "f \<in> set_offending_flows G nP \<Longrightarrow> \<not> eval_model G nP"
     by (metis NetworkModel_withOffendingFlows.validmodel_imp_no_offending empty_iff)
@@ -196,7 +197,6 @@ text{*Thus, we introduce a usefullness property that prohibits such useless mode
         (target_focus \<longrightarrow> i \<in> snd ` f \<longrightarrow>\<not> eval_model G (nP(i := \<bottom>)))"
     by(blast dest:default_secure)
 
-    (* declare[[show_types]] *)
     lemma unique_common_math_notation:
     assumes a: "\<forall>G nP i f. valid_graph (G::('v::vertex) graph) \<and> \<not> eval_model G nP \<and> f \<in> set_offending_flows G nP \<and> 
          eval_model (delete_edges G f) nP \<and> 
@@ -230,7 +230,7 @@ print_locale! NetworkModel
 
 
 section{*Information flow Security and Access Control*}
-text{*target_focus defines the offending host. Thus, it defines when the violation happens. 
+text{*@{term target_focus} defines the offending host. Thus, it defines when the violation happens. 
 
 If the violation happes when the sender sends, we have an access control model. I.e. 
 the sender does not have the appropriate rights ro initiate the connection.
@@ -358,7 +358,7 @@ lemma default_uniqueness_by_counterexample_ACS:
   using assms by blast
 
 
-text{* The sublocale relation ship tells that the simplified NetworkModel_ACL and NetworkModel_IFS 
+text{* The sublocale relation ship tells that the simplified @{term NetworkModel_ACL} and @{term NetworkModel_IFS} 
   assumptions suffice to do tho whole NetworkModel thing. The other direction is just for completeness.  *}
 
 end

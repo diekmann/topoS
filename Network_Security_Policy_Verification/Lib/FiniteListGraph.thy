@@ -27,7 +27,7 @@ text{*Correspondence the FiniteGraph*}
   by(simp add: list_graph_to_graph_def valid_graph_def valid_list_graph_axioms_def)
 
 
-  text{*We say a list_graph is valid if it fulfills the graph axioms and its lists are distinct*}
+  text{*We say a @{typ "'v list_graph"} is valid if it fulfills the graph axioms and its lists are distinct*}
   definition valid_list_graph::"('v) list_graph \<Rightarrow> bool" where
    "valid_list_graph G = (distinct (nodesL G) \<and> distinct (edgesL G) \<and> valid_list_graph_axioms G)"
 

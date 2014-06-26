@@ -131,7 +131,7 @@ subsection{*Helpfull lemmata*}
 
 section {*Helper lemmata*}
 
-  text{* Provide eval_model function and get back a function that computes the list of offending flows
+  text{* Provide @{term eval_model} function and get back a function that computes the list of offending flows
   
   Exponential time!!
   *}

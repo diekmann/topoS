@@ -4,7 +4,7 @@ begin
 
 section {* NetworkModel *}
 
-text{*A version of the NM_Dependability model but if a node reaches itself, it is ignored*}
+text{*A version of the Dependability model but if a node reaches itself, it is ignored*}
 
 
 type_synonym dependability_level = nat

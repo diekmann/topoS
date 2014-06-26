@@ -35,7 +35,7 @@ text {* A graph's validity can be tested with an executable function. *}
   lemma[code]: "FiniteListGraph.valid_list_graph_axioms G = valid_list_graph_impl (nodesL G) (edgesL G)"
     by(simp add: FiniteListGraph.valid_list_graph_axioms_def valid_list_graph_impl_axioms_locale_props)
 
-  text{*The list implementation matches the valid_graph definition*}
+  text{*The list implementation matches the @{term "valid_graph"} definition*}
   theorem valid_list_graph_iff_valid_graph: 
     "valid_graph (list_graph_to_graph G) \<longleftrightarrow> valid_list_graph_axioms G"
   apply(unfold list_graph_to_graph_def valid_graph_def valid_list_graph_axioms_def valid_list_graph_impl_axioms_locale_props)
