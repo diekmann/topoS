@@ -1,11 +1,12 @@
 theory Scratch
 imports Main
 "../thy_lib/FiniteGraph"
-"../thy_lib/isabelle_afp/Graph_Theory/Pair_Digraph"
-"../thy_lib/Collections/Refine_Dflt"
-"../thy_lib/Collections/Examples/Autoref/Nested_DFS"
+"$AFP/Graph_Theory/Pair_Digraph"
+"$AFP/Collections/Refine_Dflt"
+"$AFP/Collections/Examples/Autoref/Nested_DFS"
 begin
 
+(*BROKEN DEPENDENCIES*)
 
 definition graph_to_afp_graph :: "'v graph \<Rightarrow> 'v pair_pre_digraph" where
   "graph_to_afp_graph G \<equiv> \<lparr> pverts = nodes G, parcs = edges G \<rparr>"

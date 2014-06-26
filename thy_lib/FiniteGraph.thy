@@ -2,6 +2,8 @@ theory FiniteGraph
 imports Main 
 begin
 
+(*Lots of this theory is based on a work by Benedikt Nordhoff and Peter Lammich*)
+
 section {*Specification of a finite directed graph*}
 
 text{* A graph G=(V,E) consits of a set of vertices V, also called nodes, 
@@ -321,6 +323,7 @@ http://afp.sourceforge.net/entries/Dijkstra_Shortest_Path.shtml*)
     unfolding succ_def using E_valid
     by (force)
 
+(*
 subsection {* Paths *}
   text {* A path is represented by a list of adjacent edges. *}
   type_synonym 'v path = "('v \<times> 'v) list"
@@ -483,7 +486,7 @@ subsubsection {* Splitting Paths *}
         by auto
     } ultimately show ?case by blast
   qed
-
+*)
 
 
 
