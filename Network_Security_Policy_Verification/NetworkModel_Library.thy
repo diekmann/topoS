@@ -1,6 +1,6 @@
 theory NetworkModel_Library
 imports String 
-  "../../thy_lib/FiniteListGraph_Impl"
+  "Lib/FiniteListGraph_Impl"
   NM_BLPbasic_impl NM_Dependability_impl NM_Subnets_impl 
   NM_DomainHierarchyNG_impl
   NM_BLPtrusted_impl
@@ -12,7 +12,7 @@ imports String
   NM_ACLnotCommunicateWith_impl (*TODO add, has exponential offending runtime*)
   NM_ACLcommunicateWith_impl
   NM_Dependability_norefl_impl
-  "../../thy_lib/Efficient_Distinct"
+  "Lib/Efficient_Distinct"
   (*"~~/src/HOL/Library/Code_Char_chr" "~~/src/HOL/Library/Efficient_Nat" *)
   "~~/src/HOL/Library/Code_Target_Nat"
 begin

@@ -1,5 +1,5 @@
 theory attic
-imports Main "../../thy_lib/FiniteGraph"
+imports Main "Lib/FiniteGraph"
 begin
 
 (*old lemma, unused. *)

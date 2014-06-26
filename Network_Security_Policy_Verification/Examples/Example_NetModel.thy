@@ -1,5 +1,5 @@
 theory Example_NetModel
-imports NetworkModel_Interface NetworkModel_Helper
+imports "../NetworkModel_Interface" "../NetworkModel_Helper"
 begin
 
 text{* A toy example that defines a valid network security requirement model *}

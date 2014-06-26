@@ -1,6 +1,6 @@
 theory Impl_List_Interface
 imports NetworkModel_Library Impl_List_Composition
-    "../../thy_lib/ML_GraphViz"
+    "Lib/ML_GraphViz"
     Impl_List_StatefulPolicy
 begin
 

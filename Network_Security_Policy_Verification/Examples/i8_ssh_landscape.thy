@@ -1,5 +1,5 @@
 theory i8_ssh_landscape
-imports Impl_List_Interface
+imports "../Impl_List_Interface"
 begin
 
 definition I8SSHgraph :: "nat list_graph" where

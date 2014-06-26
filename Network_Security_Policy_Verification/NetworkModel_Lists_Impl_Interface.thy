@@ -1,5 +1,5 @@
 theory NetworkModel_Lists_Impl_Interface
-imports "../../thy_lib/FiniteGraph" "../../thy_lib/FiniteListGraph" NetworkModel_Interface NetworkModel_Helper
+imports "Lib/FiniteGraph" "Lib/FiniteListGraph" NetworkModel_Interface NetworkModel_Helper
 begin
 
   section {*Correspondence List implementation and set Speficiation*}

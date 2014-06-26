@@ -1,0 +1,20 @@
+chapter TopoS
+
+session "Network_Security_Policy_Verification" = HOL + 
+  options [timeout = 600]
+  theories
+    "Lib/ML_GraphViz_Disable"
+    Network_Security_Policy_Verification
+    attic
+    NetworkModel_generateCode
+
+session "Network_Security_Policy_Verification_Examples" = "Network_Security_Policy_Verification" +
+  theories [document = false]
+    NetworkModel_generateCode
+    "Examples/Impl_List_Playground_statefulpolicycompliance"
+    "Examples/example_forte14"
+    "Examples/Example"
+    "Examples/Example_NetModel"
+    "Examples/i8_ssh_landscape"
+    "Examples/Impl_List_Playground"
+    "Examples/Impl_List_Playground_ChairNetwork_statefulpolicy_example"

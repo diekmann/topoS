@@ -1,5 +1,5 @@
 theory example_forte14
-imports Impl_List_Interface
+imports "../Impl_List_Interface"
 begin
 
 

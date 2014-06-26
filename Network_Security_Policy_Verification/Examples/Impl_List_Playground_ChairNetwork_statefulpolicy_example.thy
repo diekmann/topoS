@@ -1,5 +1,5 @@
 theory Impl_List_Playground_ChairNetwork_statefulpolicy_example
-imports Impl_List_Interface
+imports "../Impl_List_Interface"
 begin
 
 

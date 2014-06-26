@@ -59,5 +59,5 @@ fun scala_header thy =
         FiniteListGraph.delete_edges
     BLPexample1 BLPexample3 
     in Scala
-    file "code/isabelle_generated.scala"
+    (*file "code/isabelle_generated.scala"*)
 end

@@ -1,5 +1,5 @@
 theory vertex_example_simps
-imports "../../thy_lib/FiniteGraph" NetworkModel_Vertices
+imports "Lib/FiniteGraph" NetworkModel_Vertices
 begin
 
 --"The follwoing lemmata are used in the \<exists> style uniqueness proof"
