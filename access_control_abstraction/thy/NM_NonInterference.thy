@@ -123,31 +123,27 @@ and eval_model = NM_NonInterference.eval_model
 and verify_globals = verify_globals
   unfolding NM_NonInterference.default_node_properties_def
   apply unfold_locales
-
-    apply(rule ballI)
-    apply(drule NM_NonInterference.offending_notevalD)
+   apply(rule ballI)
+   apply(drule NM_NonInterference.offending_notevalD)
    apply(simp)
    apply clarify
    apply(rename_tac xa)
    apply(case_tac "nP xa")
     (*case Interfering*)
     apply simp
-
-  apply(erule_tac x=n and A="nodes G" in ballE)
-   prefer 2
-   apply fast
-  apply(simp)
-  apply(thin_tac "valid_graph G")
-  apply(thin_tac "(a,b) \<in> f")
-  apply(thin_tac "n \<in> nodes G")
-  apply(thin_tac "nP n = Interfering")
-  apply(erule disjE)
-   apply (metis fun_upd_other fun_upd_same imageI node_config.distinct(1) set_rev_mp singleton_iff)
-  apply (metis fun_upd_other fun_upd_same imageI node_config.distinct(1) set_rev_mp singleton_iff)
-
-(*case Unrelated*)
+    apply(erule_tac x=n and A="nodes G" in ballE)
+     prefer 2
+     apply fast
+    apply(simp)
+    apply(thin_tac "valid_graph G")
+    apply(thin_tac "(a,b) \<in> f")
+    apply(thin_tac "n \<in> nodes G")
+    apply(thin_tac "nP n = Interfering")
+    apply(erule disjE)
+     apply (metis fun_upd_other fun_upd_same imageI node_config.distinct(1) set_rev_mp singleton_iff)
+    apply (metis fun_upd_other fun_upd_same imageI node_config.distinct(1) set_rev_mp singleton_iff)
+   (*case Unrelated*)
    apply simp
-
   (*unique: *)
   apply(erule default_uniqueness_by_counterexample_IFS)
   apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
@@ -174,10 +170,14 @@ and verify_globals = verify_globals
   done
 
 
-  lemma "NetworkModel eval_model default_node_properties target_focus"
+  lemma NetworkModel_NonInterference: "NetworkModel eval_model default_node_properties target_focus"
   unfolding target_focus_def by unfold_locales
    
 
 hide_const (open) eval_model verify_globals target_focus default_node_properties
+
+hide_fact tmp1 tmp2 tmp3 tmp4 tmp5 tmp6 unique_default_example 
+          unique_default_example_2 unique_default_example_3 unique_default_example_4
+          unique_default_example_5 empty_undirected_reachable_false
 
 end

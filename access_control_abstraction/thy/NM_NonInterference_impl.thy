@@ -142,24 +142,33 @@ interpretation NonInterference_impl:NetworkModel_List_Impl
   and offending_flows_impl=NonInterference_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=NonInterference_eval
- apply(unfold_locales)
-      apply(fact eval_model_correct)
-     apply(simp add: list_graph_to_graph_def)
-     apply(unfold NonInterference_offending_list_def)
-      apply(rule Generic_offending_list_correct)
-     apply(simp)
-     apply(clarify)
-    apply(erule eval_model_correct)
-    apply(simp only: NetModel_node_props_def)
-   apply(metis NonInterference.node_props.simps NonInterference.node_props_eq_node_props_formaldef)
-   apply(simp only: NonInterference_eval_def)
-   apply(rule_tac target_focus=NM_NonInterference.target_focus in NetworkModel_eval_impl_proofrule)
-    apply(unfold_locales) (*instance*)
+ apply(unfold NetworkModel_List_Impl_def)
+ apply(rule conjI)
+  apply(rule conjI)
+   apply(simp add: NetworkModel_NonInterference)
+  apply(rule conjI)
+   apply(intro allI impI)
    apply(fact eval_model_correct)
   apply(simp)
+ apply(rule conjI)
+  apply(unfold NonInterference_offending_list_def)
+  apply(intro allI impI)
+  apply(rule Generic_offending_list_correct)
+   apply(assumption)
+  apply(intro allI impI)
+  apply(simp only: eval_model_correct)
+ apply(rule conjI)
+  apply(intro allI)
+  apply(simp only: NetModel_node_props_def)
+  apply(metis NonInterference.node_props.simps NonInterference.node_props_eq_node_props_formaldef)
+ apply(simp only: NonInterference_eval_def)
+ apply(intro allI impI)
+ apply(rule NetworkModel_eval_impl_proofrule[OF NetworkModel_NonInterference])
+  apply(simp only: eval_model_correct)
+ apply(simp)
 done
 
-section {* Dependability packing *}
+section {* NonInterference packing *}
   definition NM_LIB_NonInterference :: "('v::vertex, node_config, unit) NetworkModel_packed" where
     "NM_LIB_NonInterference \<equiv> 
     \<lparr> nm_name = ''NonInterference'', 
