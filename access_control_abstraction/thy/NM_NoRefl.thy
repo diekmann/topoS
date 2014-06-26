@@ -74,22 +74,18 @@ subsubsection {*Preliminaries*}
    done
 
 
-interpretation NoRefl: NetworkModel
+interpretation NoRefl: NetworkModel_ACS
 where default_node_properties = default_node_properties
 and eval_model = eval_model
 and verify_globals = verify_globals
-and target_focus = target_focus
 where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = NoRefl_offending_set"
-  unfolding target_focus_def
   unfolding default_node_properties_def
   apply unfold_locales
-
-    (* only remove target_focus: *)
-    apply(rule conjI) prefer 2 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
-  
+    apply(rule ballI)
+    apply(frule NM_NoRefl.offending_notevalD)
     apply(simp only: NetworkModel_withOffendingFlows.ENFsr_offending_set[OF NoRfl_ENRsr])
     apply fastforce
-
+   apply(erule default_uniqueness_by_counterexample_ACS)
    apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
       NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
       NetworkModel_withOffendingFlows.is_offending_flows_def)
@@ -101,12 +97,14 @@ where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = NoRefl_o
    apply(case_tac otherbot, simp_all)
    apply(rule_tac x="(\<lambda> x. NoRefl)(vertex_1 := NoRefl, vertex_2 := NoRefl)" in exI, simp)
    apply(rule_tac x="{(vertex_1,vertex_1)}" in exI, simp)
-
   apply(fact NoRefl_offending_set)
   done
 
 
 
+
+  lemma NetworkModel_NoRefl: "NetworkModel eval_model default_node_properties target_focus"
+  unfolding target_focus_def by unfold_locales  
 
 hide_fact (open) eval_model_mono   
 hide_const (open) eval_model verify_globals target_focus default_node_properties
