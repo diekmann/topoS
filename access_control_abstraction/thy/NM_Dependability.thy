@@ -136,15 +136,13 @@ and verify_globals = verify_globals
 done
 
 
-interpretation Dependability: NetworkModel
+interpretation Dependability: NetworkModel_ACS
 where default_node_properties = NM_Dependability.default_node_properties
 and eval_model = NM_Dependability.eval_model
 and verify_globals = verify_globals
-and target_focus = target_focus
   unfolding target_focus_def
   unfolding NM_Dependability.default_node_properties_def
   apply unfold_locales
-  
    apply simp
    apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
     NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
@@ -153,7 +151,7 @@ and target_focus = target_focus
    apply (simp add:graph_ops)
    apply(clarify)
    apply (metis gr0I le0)
-
+  apply(erule default_uniqueness_by_counterexample_ACS)
   apply(simp)
   apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
       NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
@@ -171,6 +169,9 @@ and target_focus = target_focus
   apply(simp add: unique_default_example num_reachable_def)
   apply(simp add: succ_tran_def unique_default_example_simp1 unique_default_example_simp2)
   done
+
+  lemma NetworkModel_Dependability: "NetworkModel eval_model default_node_properties target_focus"
+  unfolding target_focus_def by unfold_locales  
 
 hide_const (open) eval_model verify_globals target_focus default_node_properties
 
