@@ -9,14 +9,16 @@ imports String
   NM_SubnetsInGW_impl
   NM_CommunicationPartners_impl
   NM_NoRefl_impl
-  NM_ACLnotCommunicateWith_impl (*TODO add, has exponential offending runtime*)
+  NM_ACLnotCommunicateWith_impl 
   NM_ACLcommunicateWith_impl
   NM_Dependability_norefl_impl
   "Lib/Efficient_Distinct"
-  (*"~~/src/HOL/Library/Code_Char_chr" "~~/src/HOL/Library/Efficient_Nat" *)
   "~~/src/HOL/Library/Code_Target_Nat"
 begin
-
+(*TODO some have exponentaial runtime*)
+(* possibly include: "~~/src/HOL/Library/Code_Char_chr" "~~/src/HOL/Library/Efficient_Nat" *)
+  
+  
 (*none of those should be defined or a hide_const is missing at the end of a NM_*.thy file*)
 term eval_model
 term target_focus
