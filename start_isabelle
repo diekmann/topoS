@@ -1,5 +1,10 @@
 #!/bin/bash
-cd ~/git/topoS
-#isabelle jedit -d isabelle_afp -l "Dijkstra_Shortest_Path" &
+TOPOS_HOME="$(readlink -f "$(pwd)/$(dirname "$0")")"
 
-isabelle jedit -d ./thy_lib/isabelle_afp -l "Collections" &
+echo "setting TOPOS_HOME to: $TOPOS_HOME"
+
+cd "$TOPOS_HOME"
+
+export AFP_HOME="${TOPOS_HOME}/thy_lib/isabelle_afp"
+
+isabelle jedit -d "${TOPOS_HOME}/thy_lib/isabelle_afp" -l "Collections" &
