@@ -14,24 +14,9 @@ definition undirected_reachable :: "'v graph \<Rightarrow> 'v => 'v set" where
 
 
 lemma undirected_reachable_mono:
-  "\<lbrakk>E' \<subseteq> E \<rbrakk> \<Longrightarrow>
-    (undirected_reachable \<lparr>nodes = N, edges = E'\<rparr> n) \<subseteq> (undirected_reachable \<lparr>nodes = N, edges = E\<rparr> n)"
-  proof(simp add: undirected_reachable_def undirected_def succ_tran_def)
-  assume m: "E' \<subseteq> E"
-  have subsetminusmono: "\<And> A B D. A \<subseteq> B \<Longrightarrow> A - D \<subseteq> B - D" by fast
-  have set2subseteq: "\<And> A B. A \<subseteq> B \<Longrightarrow> {e2. (n, e2) \<in> A} \<subseteq> {e2. (n, e2) \<in> B}" by fast
-  have trancl_mono: "\<And> A B. A \<subseteq> B \<Longrightarrow> A^+ \<subseteq> B^+" by (metis subsetI trancl_mono)  
-
-  show "{e2. (n, e2) \<in> (E' \<union> {(b, a). (a, b) \<in> E'})\<^sup>+} - {n} \<subseteq> {e2. (n, e2) \<in> (E \<union> {(b, a). (a, b) \<in> E})\<^sup>+} - {n}"
-   apply(rule subsetminusmono)
-   apply(rule set2subseteq)
-   apply(rule trancl_mono)
-   apply(rule Set.Un_mono)
-    apply(fact m)
-   using m apply(blast)
-   done
-  qed
-  
+  "E' \<subseteq> E \<Longrightarrow> undirected_reachable \<lparr>nodes = N, edges = E'\<rparr> n \<subseteq> undirected_reachable \<lparr>nodes = N, edges = E\<rparr> n"
+unfolding undirected_reachable_def undirected_def succ_tran_def
+by (fastforce intro: trancl_mono)
 
 fun eval_model :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> bool" where
   "eval_model G nP = (\<forall> n \<in> (nodes G). (nP n) = Interfering \<longrightarrow> (nP ` (undirected_reachable G n)) \<subseteq> {Unrelated})"
@@ -105,7 +90,7 @@ text{*simplifications for sets we need in the uniqueness proof*}
 
 section{*monotonic and preliminaries*}
   lemma eval_model_mono: "NetworkModel_withOffendingFlows.eval_model_mono eval_model"
-    apply(simp add: NetworkModel_withOffendingFlows.eval_model_mono_def)
+  unfolding NetworkModel_withOffendingFlows.eval_model_mono_def
     apply(clarsimp)
     apply(rename_tac nP N E' n E xa)
     apply(erule_tac x=n in ballE)
