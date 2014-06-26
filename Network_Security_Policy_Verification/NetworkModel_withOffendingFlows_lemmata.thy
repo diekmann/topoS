@@ -296,8 +296,6 @@ begin
     from Nil show ?case by(simp)
    next
    case (Cons a ff)
-    thm Cons.IH -- "induction hypothesis"
-    thm Cons.prems
     assume valid_graph: "valid_graph G"
     assume not_in_keeps: "\<forall>x\<in>set (a # ff). x \<notin> set keeps"
       hence a_not_in_keeps: "a \<notin> set keeps" by simp
@@ -1075,7 +1073,7 @@ end
 
       find_theorems name:"Set" name:"finite" name:"induct"
 
-      thm Finite_Set.finite_subset_induct[OF finiteE']
+      -- "@{thm Finite_Set.finite_subset_induct[OF finiteE']}"
       from this finiteE' show ?thesis
       apply -
       apply(erule Finite_Set.finite_subset_induct[where A="UNIV"])

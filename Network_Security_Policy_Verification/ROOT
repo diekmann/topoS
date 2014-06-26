@@ -2,8 +2,12 @@ chapter TopoS
 
 session "Network_Security_Policy_Verification" = HOL + 
   options [timeout = 600]
-  theories
+  theories [document = false]
     "Lib/ML_GraphViz_Disable"
+    "Lib/FiniteListGraph_Impl"
+    "Lib/FiniteListGraph"
+    "Lib/Efficient_Distinct"
+  theories
     Network_Security_Policy_Verification
     attic
     NetworkModel_generateCode

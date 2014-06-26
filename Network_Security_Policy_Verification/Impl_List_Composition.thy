@@ -35,7 +35,7 @@ section{*Generating instantiated (configured) network security models*}
             implc_isIFS = nm_target_focus m
           \<rparr>)"
 
-  text{* the NetworkModel_Composition_Theory.new_configured_NetworkSecurityModel must give a result if we have the NetworkModel_modelLibrary*}
+  text{* the @{term NetworkModel_Composition_Theory.new_configured_NetworkSecurityModel} must give a result if we have the NetworkModel modelLibrary*}
   lemma NetworkModel_modelLibrary_yields_new_configured_NetworkSecurityModel:
     assumes NetModelLib: "NetworkModel_modelLibrary m eval_model_spec verify_gloabls_spec"
     and     nPdef:       "nP = nm_node_props m C"
@@ -60,7 +60,7 @@ section{*Generating instantiated (configured) network security models*}
     thm NetworkModel_modelLibrary_yields_new_configured_NetworkSecurityModel[simplified] (*todo fold in Spec*)
 
 
-  text{* The new_* functions comply, i.e. we can instance network security models that are executable. *}
+  (* The new_* functions comply, i.e. we can instance network security models that are executable. *)
   lemma new_configured_list_NetworkSecurityModel_complies:
     assumes NetModelLib: "NetworkModel_modelLibrary m eval_model_spec verify_gloabls_spec"
     and     nPdef:       "nP = nm_node_props m C"

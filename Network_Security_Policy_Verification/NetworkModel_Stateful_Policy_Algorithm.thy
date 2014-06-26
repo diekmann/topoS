@@ -278,7 +278,6 @@ section {* Sketch for generating a stateful policy from a simple directed policy
           from this Nil(6) show ?case by(simp add: filternew_flows_state_alt2)
         next
         case (Cons e Es)
-          thm Cons.prems
           from Cons.IH[OF Cons.prems(1) Cons.prems(2)] Cons.prems(3) Cons.prems(4) Cons.prems(5) Cons.prems(6)
           show ?case by(simp add: filternew_flows_state_alt2 split: split_if split_if_asm)
       qed
@@ -353,7 +352,6 @@ section {* Sketch for generating a stateful policy from a simple directed policy
    case Nil from Nil(5)[simplified] Nil(6) show ?case by(simp)
    next
    case (Cons a Es)
-     thm Cons.prems
      --"case distinction"
      let ?caseDistinction="a \<notin> backflows (E) \<and>  (\<forall>F\<in>get_offending_flows (get_ACS M)
                  (stateful_policy_to_network_graph \<lparr>hosts = V, flows_fix = E, flows_state = set (a # accu)\<rparr>).
@@ -995,7 +993,7 @@ text{* In the following, we see failed attempts which try to prove that under co
     from all_security_requirements_fulfilled_ACS_D Cons.prems have all_fulfilled_ACS: "all_security_requirements_fulfilled (get_ACS M) G" by simp
     from all_security_requirements_fulfilled_IFS_D Cons.prems have all_fulfilled_IFS: "all_security_requirements_fulfilled (get_IFS M) G" by simp
     have validStateful: "\<And>e. e \<in> set Es \<Longrightarrow> valid_stateful_policy \<lparr>hosts = nodes G, flows_fix = edges G, flows_state = insert e (flows_state (generate_valid_stateful_policy_IFSACS_2 G M Es))\<rparr>" sorry
-    thm Cons.prems
+    
 
     from Cons.prems(4) have "set Es \<subseteq> edges G" by simp
 

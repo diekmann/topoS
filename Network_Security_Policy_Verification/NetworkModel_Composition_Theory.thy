@@ -342,8 +342,8 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
           from valid_graph_generate_valid_topology[OF Cons(3)] E_IH_prop
           have valid_G_E_IH: "valid_graph \<lparr>nodes = V, edges = E_IH\<rparr>" by metis
     
-          thm IH[simplified E_IH_prop]
-          thm all_security_requirements_fulfilled_mono[OF `valid_reqs M` _  valid_G_E_IH IH[simplified E_IH_prop]]
+          -- "@{thm IH[simplified E_IH_prop]}"
+          -- "@{thm all_security_requirements_fulfilled_mono[OF `valid_reqs M` _  valid_G_E_IH IH[simplified E_IH_prop]]}"
     
           from all_security_requirements_fulfilled_mono[OF `valid_reqs M` _  valid_G_E_IH IH[simplified E_IH_prop]] have mono_rule:
             "\<And> E'. E' \<subseteq> E_IH \<Longrightarrow> all_security_requirements_fulfilled M \<lparr>nodes = V, edges = E'\<rparr>" .
@@ -441,7 +441,6 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
       case Nil thus ?case by (simp add: get_offending_flows_def)
       next
       case (Cons m M)
-        thm Cons.prems
         from Cons.prems(1) valid_reqs2 have "valid_reqs M" by force
         from Cons.prems(1) valid_reqs1 have "configured_NetworkModel m" by force
         from Cons.prems(4) have "\<Union>get_offending_flows M \<lparr>nodes = V, edges = E\<rparr> \<subseteq> X" by(simp add: get_offending_flows_def)

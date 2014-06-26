@@ -66,8 +66,7 @@ section{*Algorithms*}
         thus ?case by(simp add: get_impl_def get_spec_def)
       next
       case (Cons e Es)
-        thm Cons.prems
-        thm Cons.IH[OF Cons.prems(1) Cons.prems(2)]
+        -- "@{thm Cons.IH[OF Cons.prems(1) Cons.prems(2)]}"
         let ?caseDistinction = "all_security_requirements_fulfilled (Impl_List_Composition.get_IFS (get_impl M)) (stateful_list_policy_to_list_graph \<lparr> hostsL = nodesL G, flows_fixL = edgesL G, flows_stateL = (e#accu) \<rparr>)"
 
         from get_IFS_get_ACS_select_simps(2)[OF Cons.prems(1)] have get_impl_zip_simp: "(get_impl (zip (Impl_List_Composition.get_IFS (get_impl M)) (NetworkModel_Composition_Theory.get_IFS (get_spec M)))) = Impl_List_Composition.get_IFS (get_impl M)" by simp
@@ -162,8 +161,7 @@ section{*Algorithms*}
         thus ?case by(simp add: get_impl_def get_spec_def)
       next
       case (Cons e Es)
-        thm Cons.prems
-        thm Cons.IH[OF Cons.prems(1) Cons.prems(2)]
+        -- "@{thm Cons.IH[OF Cons.prems(1) Cons.prems(2)]}"
         let ?caseDistinction = "e \<notin> set (backlinks (edgesL G)) \<and> (\<forall>F \<in> set (implc_get_offending_flows (get_ACS (get_impl M)) (stateful_list_policy_to_list_graph \<lparr> hostsL = nodesL G, flows_fixL = edgesL G, flows_stateL = (e#accu) \<rparr>)). set F \<subseteq> set (backlinks (e#accu)))"
         
         have backlinks_simp: "(e \<notin> set (backlinks (edgesL G))) <-> (e \<notin> backflows (set (edgesL G)))"
@@ -193,7 +191,7 @@ section{*Algorithms*}
         have "set (backlinks (e # accu)) = backflows (insert e (set accu))"
           by(simp add: backlinks_set backflows_def)
         
-        thm implc_get_offending_flows_simp_rule[OF validLG]
+        -- "@{thm implc_get_offending_flows_simp_rule[OF validLG]}"
         have case_impl_spec: "?caseDistinction <-> (
           e \<notin> backflows (set (edgesL G)) \<and> (\<forall>F \<in> get_offending_flows (NetworkModel_Composition_Theory.get_ACS (get_spec M)) (stateful_policy_to_network_graph \<lparr> hosts = set (nodesL G), flows_fix = set (edgesL G), flows_state = set (e#accu) \<rparr>). F \<subseteq> (backflows (set (e#accu)))))" 
           apply(simp add: backlinks_simp)

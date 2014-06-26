@@ -26,7 +26,7 @@ Result:
 
 term all_security_requirements_fulfilled
 
-text{* G = (V, E\<^sub>f\<^sub>i\<^sub>x, E\<^sub>s\<^sub>t\<^sub>a\<^sub>t\<^sub>e) *}
+text{* @{term "G = (V, E\<^sub>f\<^sub>i\<^sub>x, E\<^sub>s\<^sub>t\<^sub>a\<^sub>t\<^sub>e)"} *}
 record 'v stateful_policy =
     hosts :: "'v set" --"nodes, vertices"
     flows_fix :: "('v \<times>'v) set" --"edges in high-level policy"
@@ -44,7 +44,7 @@ definition stateful_policy_to_network_graph :: "'v stateful_policy \<Rightarrow>
   "stateful_policy_to_network_graph \<T> = \<lparr> nodes = hosts \<T>, edges = all_flows \<T> \<rparr>"
 
 
-text{* stateful_policy syntactically valid *}
+text{* @{typ "'v stateful_policy"} syntactically valid *}
 locale valid_stateful_policy = 
   fixes \<T> :: "'v stateful_policy"
   assumes E_valid: "fst ` (flows_fix \<T>) \<subseteq> (hosts \<T>)"
@@ -147,7 +147,7 @@ text{* given a high-level policy, we can construct a pretty large syntactically 
     by(simp add: valid_stateful_policy_def valid_graph_def)
 
 
-text{* valid_stateful_policy implies valid_graph *}
+text{* @{term valid_stateful_policy} implies @{term valid_graph} *}
   lemma valid_stateful_policy_is_valid_graph: "valid_stateful_policy \<T> \<Longrightarrow> valid_graph \<lparr>nodes = hosts \<T>, edges = all_flows \<T>\<rparr>"
     apply(frule valid_stateful_policy.E_state_backflows_valid)
     apply(frule valid_stateful_policy.E_state_backflows_valid(2))
@@ -168,7 +168,7 @@ lemma "(\<forall>F \<in> get_offending_flows (get_ACS M) (stateful_policy_to_net
     by(simp add: filternew_flows_state_alt backflows_minus_backflows, blast)
 
 
-text{* when is a stateful policy \<T> compliant with a high-level policy G and the security requirements M? *}
+text{* when is a stateful policy @{term "\<T>"} compliant with a high-level policy @{term "G"} and the security requirements @{term "M"}? *}
 locale stateful_policy_compliance =  
   fixes \<T> :: "('v::vertex) stateful_policy"
   fixes G :: "'v graph"
