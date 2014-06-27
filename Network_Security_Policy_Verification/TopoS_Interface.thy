@@ -122,10 +122,18 @@ text {*In general, there exists a @{term sinvar} such that the invariant does no
   done
 
 
-text{*Thus, we introduce a usefulness property that prohibits such useless invariants*}
-text{*Usefullness properties*}
+text{*Thus, we introduce a usefulness property that prohibits such useless invariants.*}
+text{*We capsulate them in an invariant.
+Ir requires the following: 
+1) The offending flows are always defined.
+2) The invariant is monotonic, i.e. prohibiting more is more secure.
+3) And, the (non-minimal) offending flows are monotonic, i.e. prohibiting more solves more security issues.
 
-  locale TopoS_preliminaries = SecurityInvariant_withOffendingFlows sinvar verify_globals
+
+Later, we will show that is suffices to show that the invariant is monotonic. The other two properties can be derived.
+*}
+
+  locale SecurityInvariant_preliminaries = SecurityInvariant_withOffendingFlows sinvar verify_globals
     for sinvar::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
     and verify_globals::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
     +
@@ -142,7 +150,7 @@ text{*Usefullness properties*}
 
   text {* TODO: add this to latex document *}
   (*
-  For instance proofs:
+  For instance proofs of SecurityInvariant_preliminaries:
     Have a look at SecurityInvariant_withOffendingFlows_lemmata.thy
     There is a definition of sinvar_mono. It impplies mono_sinvar and mono_offending
     apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_sinvar_mono[OF sinvar_mono])
@@ -156,30 +164,36 @@ text{*Usefullness properties*}
   end
 
 
-  text {* The base network model: default-node-properties is a secure default value.*}
-  text {* Some notes about the notation:
-          @{text "fst ` f"} means to apply the function @{text "fst"} to the set @{text "f"} elementwise.
-          In the context of network graphs: If @{text "f"} is a set of directed edges 
-          @{text "f = {(s,r) \<in> edges G. s=senders, r=receivers}"}, then @{text "fst ` f"}
-          is the set of senders and @{text "snd ` f"} the set of receivers.*}
+subsection{*Security Invariants with secure auto-completion of host attribute mappings*}
 
-  locale NetworkModel = TopoS_preliminaries sinvar verify_globals
+text{*
+We will now add a new artifact to the Security Invariant.
+It is a secure default host attribute, we will use the symbol @{text "\<bottom>"}.
+*}
+
+  -- {* Some notes about the notation:
+          @{term "fst ` F"} means to apply the function @{const "fst"} to the set @{term "F"} element-wise.
+          Example: If @{term "F"} is a set of directed edges, 
+          @{term "F \<subseteq> edges G"}, then @{term "fst ` F"}
+          is the set of senders and @{term "snd ` f"} the set of receivers.*}
+
+  locale NetworkModel = SecurityInvariant_preliminaries sinvar verify_globals
     for sinvar::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
     and verify_globals::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
     +
     fixes default_node_properties :: "'a" ("\<bottom>") 
     and target_focus :: "bool"
     assumes 
-      -- "default value can never turn an invalid model to valid."
-      -- {*Idea: Giving an offending host the default configuration value does not change the validity of the model. 
+      -- "default value can never fix a security violation."
+      -- {*Idea: Giving an offending host, the default attribute does not change whether the invariant holds.
         I.e this reconfiguration does not remove information, thus preserves all security critical information.
         Thought experiment preliminaries: Can a default configuration ever solve an existing security violation? NO!
         Thought experiment 1: admin forgot to configure host, hence it is handled by default configuration value ..
         Thought experiment 2: new node (attacker) is added to the network. What is its default configuration value ..*}
       default_secure:
-      "\<lbrakk> valid_graph G; \<not> sinvar G nP; f \<in> set_offending_flows G nP \<rbrakk> \<Longrightarrow>
-        (\<not> target_focus \<longrightarrow> i \<in> fst ` f \<longrightarrow> \<not> sinvar G (nP(i := \<bottom>))) \<and>
-        (target_focus \<longrightarrow> i \<in> snd ` f \<longrightarrow> \<not> sinvar G (nP(i := \<bottom>)))"
+      "\<lbrakk> valid_graph G; \<not> sinvar G nP; F \<in> set_offending_flows G nP \<rbrakk> \<Longrightarrow>
+        (\<not> target_focus \<longrightarrow> i \<in> fst ` F \<longrightarrow> \<not> sinvar G (nP(i := \<bottom>))) \<and>
+        (target_focus \<longrightarrow> i \<in> snd ` F \<longrightarrow> \<not> sinvar G (nP(i := \<bottom>)))"
       and
       default_unique:
       "otherbot \<noteq> \<bottom> \<Longrightarrow> 
@@ -268,7 +282,7 @@ We refine our definitions
 *}
 
 subsection {*Information flow security*}
-  locale TopoS_IFS = TopoS_preliminaries sinvar verify_globals
+  locale TopoS_IFS = SecurityInvariant_preliminaries sinvar verify_globals
       for sinvar::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
       and verify_globals::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
       +
@@ -326,7 +340,7 @@ lemma default_uniqueness_by_counterexample_IFS:
 
 
 subsection {*Access Control Strategy*}
-  locale TopoS_ACS = TopoS_preliminaries sinvar verify_globals
+  locale TopoS_ACS = SecurityInvariant_preliminaries sinvar verify_globals
       for sinvar::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
       and verify_globals::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
       +

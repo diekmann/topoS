@@ -54,7 +54,7 @@ lemma accesses_okay_empty: "accesses_okay (nP v) {}"
   by(case_tac "nP v", simp_all)
 
 
-interpretation TopoS_preliminaries
+interpretation SecurityInvariant_preliminaries
 where sinvar = sinvar
 and verify_globals = verify_globals
   apply unfold_locales

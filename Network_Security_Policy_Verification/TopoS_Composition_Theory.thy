@@ -97,9 +97,9 @@ locale configured_NetworkModel =
             SecurityInvariant_withOffendingFlows.is_offending_flows_def)
       by(simp add: valid_c_offending_flows)
 
-    text{* all the @{term TopoS_preliminaries} stuff must hold, for an arbitrary nP *}
-    lemma TopoS_preliminariesD:
-      "TopoS_preliminaries (\<lambda> (G::('v::vertex) graph) (nP::'v \<Rightarrow> 'a). c_sinvar m G)"
+    text{* all the @{term SecurityInvariant_preliminaries} stuff must hold, for an arbitrary nP *}
+    lemma SecurityInvariant_preliminariesD:
+      "SecurityInvariant_preliminaries (\<lambda> (G::('v::vertex) graph) (nP::'v \<Rightarrow> 'a). c_sinvar m G)"
       apply(unfold_locales)
         apply(simp add: subst_offending_flows)
         apply(fact defined_offending')
@@ -117,15 +117,15 @@ locale configured_NetworkModel =
     
     section{*reusing old lemmata*}
       lemmas mono_extend_set_offending_flows =
-      TopoS_preliminaries.mono_extend_set_offending_flows[OF TopoS_preliminariesD, simplified subst_offending_flows]
+      SecurityInvariant_preliminaries.mono_extend_set_offending_flows[OF SecurityInvariant_preliminariesD, simplified subst_offending_flows]
       thm mono_extend_set_offending_flows
 
       lemmas offending_flows_union_mono =
-      TopoS_preliminaries.offending_flows_union_mono[OF TopoS_preliminariesD, simplified subst_offending_flows]
+      SecurityInvariant_preliminaries.offending_flows_union_mono[OF SecurityInvariant_preliminariesD, simplified subst_offending_flows]
       thm offending_flows_union_mono
 
       lemmas sinvar_valid_remove_flattened_offending_flows =
-      TopoS_preliminaries.sinvar_valid_remove_flattened_offending_flows[OF TopoS_preliminariesD, simplified subst_offending_flows]
+      SecurityInvariant_preliminaries.sinvar_valid_remove_flattened_offending_flows[OF SecurityInvariant_preliminariesD, simplified subst_offending_flows]
       thm sinvar_valid_remove_flattened_offending_flows
 
       lemmas empty_offending_contra =
@@ -133,11 +133,11 @@ locale configured_NetworkModel =
       thm empty_offending_contra
 
       lemmas Un_set_offending_flows_bound_minus_subseteq = 
-      TopoS_preliminaries.Un_set_offending_flows_bound_minus_subseteq[OF TopoS_preliminariesD, simplified subst_offending_flows]
+      SecurityInvariant_preliminaries.Un_set_offending_flows_bound_minus_subseteq[OF SecurityInvariant_preliminariesD, simplified subst_offending_flows]
       thm Un_set_offending_flows_bound_minus_subseteq
 
       lemmas Un_set_offending_flows_bound_minus_subseteq' = 
-      TopoS_preliminaries.Un_set_offending_flows_bound_minus_subseteq'[OF TopoS_preliminariesD, simplified subst_offending_flows]
+      SecurityInvariant_preliminaries.Un_set_offending_flows_bound_minus_subseteq'[OF SecurityInvariant_preliminariesD, simplified subst_offending_flows]
       thm Un_set_offending_flows_bound_minus_subseteq'
 end
   
@@ -161,7 +161,7 @@ text{*
       assume a: "new_configured_NetworkSecurityModel (sinvar, defbot, target_focus, nP) = Some m"
       hence NetModel: "NetworkModel sinvar defbot target_focus"
         by(simp add: new_configured_NetworkSecurityModel.simps split: split_if_asm)
-      hence NetModel_p: "TopoS_preliminaries sinvar" by(simp add: NetworkModel_def)
+      hence NetModel_p: "SecurityInvariant_preliminaries sinvar" by(simp add: NetworkModel_def)
 
       from a have c_eval: "c_sinvar m = (\<lambda>G. sinvar G nP)"
          and c_offending: "c_offending_flows m = (\<lambda>G. SecurityInvariant_withOffendingFlows.set_offending_flows sinvar G nP)"
@@ -170,9 +170,9 @@ text{*
 
       have monoI: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
         apply(simp add: SecurityInvariant_withOffendingFlows.sinvar_mono_def, clarify)
-        by(fact TopoS_preliminaries.mono_sinvar[OF NetModel_p])
+        by(fact SecurityInvariant_preliminaries.mono_sinvar[OF NetModel_p])
       from SecurityInvariant_withOffendingFlows.valid_empty_edges_iff_exists_offending_flows[OF monoI, symmetric]
-            TopoS_preliminaries.defined_offending[OF NetModel_p]
+            SecurityInvariant_preliminaries.defined_offending[OF NetModel_p]
       have eval_empty_graph: "\<And> N nP. valid_graph \<lparr>nodes = N, edges = {}\<rparr> \<Longrightarrow> sinvar \<lparr>nodes = N, edges = {}\<rparr> nP"
       by fastforce
 
@@ -180,7 +180,7 @@ text{*
         apply(unfold_locales)
           apply(simp add: c_eval c_offending SecurityInvariant_withOffendingFlows.set_offending_flows_def SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def SecurityInvariant_withOffendingFlows.is_offending_flows_def)
          apply(simp add: c_eval eval_empty_graph)
-        apply(simp add: c_eval,drule(3) TopoS_preliminaries.mono_sinvar[OF NetModel_p])
+        apply(simp add: c_eval,drule(3) SecurityInvariant_preliminaries.mono_sinvar[OF NetModel_p])
         done
    qed
 

@@ -44,7 +44,7 @@ lemma False_set: "{(e1, e2). False} = {}" by blast
 lemma succ_tran_empty: "(succ_tran \<lparr>nodes = nodes G, edges = {}\<rparr> v) = {}"
   by(simp add: succ_tran_def)
 
-interpretation TopoS_preliminaries
+interpretation SecurityInvariant_preliminaries
 where sinvar = sinvar
 and verify_globals = verify_globals
   apply unfold_locales

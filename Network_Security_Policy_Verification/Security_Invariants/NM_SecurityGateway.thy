@@ -38,7 +38,7 @@ subsubsection {*Preleminaries*}
     apply(clarify)
     by auto
   
-  interpretation TopoS_preliminaries
+  interpretation SecurityInvariant_preliminaries
   where sinvar = sinvar
   and verify_globals = verify_globals
     apply unfold_locales

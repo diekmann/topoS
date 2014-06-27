@@ -146,10 +146,10 @@ hide_const TopoS_Vertices.V
      apply(simp add: valid_ENF_def)
      apply(simp add: c_sinvar_def c_nP_def c_gP_def c_P_def c_offending_flows_def)
      apply clarify
-     apply(subgoal_tac "TopoS_preliminaries sinvar")
+     apply(subgoal_tac "SecurityInvariant_preliminaries sinvar")
       prefer 2
       apply(simp add: TopoS_def)
-     apply(erule_tac TopoS_preliminaries.mono_sinvar)
+     apply(erule_tac SecurityInvariant_preliminaries.mono_sinvar)
        by simp_all
 
     lemma valid_ENFs1: "valid_ENFs (m # M) \<Longrightarrow> valid_ENF m"

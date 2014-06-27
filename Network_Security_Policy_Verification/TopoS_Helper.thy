@@ -8,7 +8,7 @@ text {*Imports a lot of usefull NetworkModelling lemmata.*}
 
 
 
-lemma (in TopoS_preliminaries) sinvar_valid_remove_flattened_offending_flows:
+lemma (in SecurityInvariant_preliminaries) sinvar_valid_remove_flattened_offending_flows:
   "valid_graph \<lparr>nodes = nodesG, edges = edgesG\<rparr> \<Longrightarrow> sinvar \<lparr>nodes = nodesG, edges = edgesG - \<Union> (set_offending_flows \<lparr>nodes = nodesG, edges = edgesG\<rparr> nP) \<rparr> nP"
   proof -
   assume a1: "valid_graph \<lparr>nodes = nodesG, edges = edgesG\<rparr>"

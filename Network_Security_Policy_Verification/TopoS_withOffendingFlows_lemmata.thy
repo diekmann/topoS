@@ -443,10 +443,10 @@ end
 
 
 
-context TopoS_preliminaries
+context SecurityInvariant_preliminaries
   begin
     
-    text{* @{const sinvar_mono} naturally holds in @{const TopoS_preliminaries} *}
+    text{* @{const sinvar_mono} naturally holds in @{const SecurityInvariant_preliminaries} *}
     lemma sinvar_monoI: "sinvar_mono"
       apply(unfold sinvar_mono_def)
       apply(insert mono_sinvar)
@@ -608,7 +608,7 @@ end
 
 
 section {* Monotonicity of offending flows *}
-  context TopoS_preliminaries
+  context SecurityInvariant_preliminaries
   begin
   
     (*todo: simplify proof*)
@@ -966,7 +966,7 @@ end
       however, then (set_offending_flows \<lparr>nodes = V, edges = E\<rparr> nP) = {} which renders the whole statement useless
      *)
 
-  context TopoS_preliminaries
+  context SecurityInvariant_preliminaries
   begin
 
     lemma offending_partition_subset_empty: 
@@ -999,7 +999,7 @@ end
   end
 
 
-  context TopoS_preliminaries
+  context SecurityInvariant_preliminaries
   begin
 
     text{* Knowing that the @{text "\<Union> offending is \<subseteq> X"}, removing something from the graphs's edges, 

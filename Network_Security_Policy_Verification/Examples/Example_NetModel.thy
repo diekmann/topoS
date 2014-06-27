@@ -23,7 +23,7 @@ lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
 
  
 -- "The preliminaries: mostly, sinvar is monotonic"
-interpretation TopoS_preliminaries
+interpretation SecurityInvariant_preliminaries
 where sinvar = sinvar
 and verify_globals = verify_globals
   apply unfold_locales
