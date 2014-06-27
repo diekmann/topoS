@@ -6,9 +6,9 @@ begin
 section {*Monotonicity helper lemmata*}
 context NetworkModel_withOffendingFlows
 begin
-  text{*We define the monotonicity of eval_model:
+  text{*We define the monotonicity of @{text "eval_model"}:
   
-  (\<And> nP N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr>  \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> eval_model \<lparr> nodes = N, edges = E \<rparr> nP \<Longrightarrow> eval_model \<lparr> nodes = N, edges = E' \<rparr> nP )
+  @{term "(\<And> nP N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr>  \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> eval_model \<lparr> nodes = N, edges = E \<rparr> nP \<Longrightarrow> eval_model \<lparr> nodes = N, edges = E' \<rparr> nP )"}
   
   Having a valid model, removing edges retains the validity
   *}
@@ -314,7 +314,7 @@ begin
       from this Cons show ?goal using delete_edges_list_union by simp
     next
     case False
-      -- "MONO=Cons.prems(1)"
+      (*MONO=Cons.prems(1)"*)
       thm not_model_mono_imp_addedge_mono_minimalize_offending_overapprox
       from not_model_mono_imp_addedge_mono_minimalize_offending_overapprox[OF Cons.prems(1) valid_graph a_not_in_keeps a_not_in_ff a_in_edges False] have a_minimal: "
       \<not> eval_model (add_edge (fst a) (snd a) (delete_edges G (set (minimalize_offending_overapprox (a # ff) keeps G nP)))) nP"
@@ -446,14 +446,14 @@ end
 context NetworkModel_preliminaries
   begin
     
-    text{* @{term eval_model_mono} naturally holds in @{term NetworkModel_preliminaries} *}
+    text{* @{const eval_model_mono} naturally holds in @{const NetworkModel_preliminaries} *}
     lemma eval_model_monoI: "eval_model_mono"
       apply(unfold eval_model_mono_def)
       apply(insert mono_eval_model)
       by blast
 
     
-    text{* The algorithm @{term minimalize_offending_overapprox} is correct *}
+    text{* The algorithm @{const minimalize_offending_overapprox} is correct *}
     lemma minimalize_offending_overapprox_sound: 
       "\<lbrakk> valid_graph G; is_offending_flows (set ff) G nP; set ff \<subseteq> edges G; distinct ff \<rbrakk>
         \<Longrightarrow>
@@ -464,10 +464,10 @@ context NetworkModel_preliminaries
     by (metis (full_types) eval_model_monoI eval_model_mono_imp_negative_delete_edge_mono)
 
     text{* 
-      If @{text "\<not> eval_model G nP"}
+      If @{term "\<not> eval_model G nP"}
       Given a list ff, (ff is distinct and a subset of G's edges)
-      such that eval_model (V, E - ff) nP
-      @{term minimalize_offending_overapprox} minimizes ff such that we get an offending flows
+      such that @{text "eval_model (V, E - ff) nP"}
+      @{const minimalize_offending_overapprox} minimizes ff such that we get an offending flows
       Note: choosing ff = edges G is a good choice!
     *}
     theorem minimalize_offending_overapprox_gives_back_an_offending_flow:
@@ -584,7 +584,7 @@ end
 
 text{* Old version of network security requirement modelling also gave 
   @{text "f \<in> set_offending_flows G nP; eval_model (delete_edges G f) nP"}
-  as assumption for default_secure. We can conclude this from mono. *}
+  as assumption for @{text "default_secure"}. We can conclude this from mono. *}
 context NetworkModel_withOffendingFlows
 begin
   lemma mono_exists_offending_flows:
@@ -714,7 +714,7 @@ section {* Monotonicity of offending flows *}
         and    a2: "E' \<subseteq> E"
         and    a4: "F' \<in> set_offending_flows \<lparr>nodes = V, edges = E'\<rparr> nP"
 
-        --{* Idea: F = F' \<union> minimize (E - E')*}
+        --{* Idea: @{text "F = F' \<union> minimize (E - E')"}*}
   
         have "\<And>f. valid_graph (delete_edges \<lparr>nodes = V, edges = E\<rparr> f)"
         using delete_edges_valid[OF a1] by fast

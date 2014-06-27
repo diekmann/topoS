@@ -83,7 +83,7 @@ interpretation Dependability_norefl_impl:NetworkModel_List_Impl
   apply(simp)
 done
 
-section {* Dependability_norefl packing *}
+section {* packing *}
   definition NM_LIB_Dependability_norefl :: "('v::vertex, NM_Dependability_norefl.dependability_level, unit) NetworkModel_packed" where
     "NM_LIB_Dependability_norefl \<equiv> 
     \<lparr> nm_name = ''Dependability_norefl'', 

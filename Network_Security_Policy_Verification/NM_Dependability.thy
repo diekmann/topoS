@@ -68,12 +68,12 @@ text{* It does not matter whether we iterate over all edges or all nodes. We cho
    fun fix_nP :: "'v graph \<Rightarrow> ('v \<Rightarrow> dependability_level) \<Rightarrow> ('v \<Rightarrow> dependability_level)" where
       "fix_nP G nP = (\<lambda>v. if num_reachable G v \<le> (nP v) then (nP v) else num_reachable G v)"
   
-   text{* @{term fix_nP} always gives you a valid solution *}
+   text{* @{const fix_nP} always gives you a valid solution *}
    lemma fix_nP_valid: "\<lbrakk> valid_graph G \<rbrakk> \<Longrightarrow> eval_model G (fix_nP G nP)"
       by(subst eval_model_edges_nodes_iff[symmetric], simp_all)
   
    text{* furthermore, it gives you a minimal solution, i.e. if someone supplies a configuration with a value lower than
-          calculated by fix_nP, this is invalid! *}
+          calculated by @{const fix_nP}, this is invalid! *}
    lemma fix_nP_minimal_solution: "\<lbrakk> valid_graph G; \<exists> v \<in> nodes G. (nP v) < (fix_nP G (\<lambda>_. 0)) v \<rbrakk> \<Longrightarrow> \<not> eval_model G nP"
       apply(subst eval_model_edges_nodes_iff[symmetric], simp)
       apply(simp)

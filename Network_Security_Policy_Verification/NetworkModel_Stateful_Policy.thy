@@ -32,7 +32,7 @@ record 'v stateful_policy =
     flows_fix :: "('v \<times>'v) set" --"edges in high-level policy"
     flows_state :: "('v \<times>'v) set" --"edges that can have stateful flows, i.e. backflows"
 
-text{* All the possible ways packets can travel in a stateful_policy.
+text{* All the possible ways packets can travel in a @{typ "'v stateful_policy"}.
         They can either choose the fixed links-
         Or use a stateful link, i.e. establish state.
         Once state is established, packets can flow back via the established link.*}
@@ -235,7 +235,8 @@ locale stateful_policy_compliance =
         \<Union>(c_offending_flows m \<lparr>nodes = hosts \<T>, edges = flows_fix \<T> \<union> filternew_flows_state \<T> \<union> backflows (filternew_flows_state \<T>)\<rparr>) \<subseteq> backflows (filternew_flows_state \<T>)"
         by(simp add: stateful_policy_to_network_graph_def all_flows_def get_offending_flows_def, blast)
     
-      --"idea: use compliant_stateful_ACS with the configured_NetworkModel.Un_set_offending_flows_bound_minus_subseteq lemma and substract backflows (filternew_flows_state \<T>) - E, on the right hand side E remains, as Graph's edges flows_fix \<T>  \<union> E remains"
+      --{*idea: use @{thm compliant_stateful_ACS} with the @{thm configured_NetworkModel.Un_set_offending_flows_bound_minus_subseteq} 
+        lemma and substract @{term "backflows (filternew_flows_state \<T>) - E"}, on the right hand side @{term E} remains, as Graph's edges @{term "flows_fix \<T>  \<union> E"} remains*}
 
       from configured_NetworkModel.Un_set_offending_flows_bound_minus_subseteq[where X="backflows (filternew_flows_state \<T>)", OF _ validGfilternew this]
         `valid_reqs (get_ACS M)`
@@ -310,7 +311,7 @@ locale stateful_policy_compliance =
     
           from this obtain E1 E2 where E1_prop: "E1 \<subseteq> backflows (filternew_flows_state \<T>)" and E2_prop: "E2 \<subseteq> (backflows (flows_state \<T>) - backflows (filternew_flows_state \<T>))" and "E = E1 \<union> E2" and "E1 \<inter> E2 = {}" by blast
     
-          --"the stateful flows are \<subseteq> fix flows. If substracting the new stateful flows, onyly the existing fix flows remain"
+          --{*the stateful flows are @{text "\<subseteq>"} fix flows. If substracting the new stateful flows, onyly the existing fix flows remain*}
           from E2_prop filternew_flows_state_alt have "E2 \<subseteq> flows_fix \<T>" by (metis (hide_lams, no_types) Diff_subset_conv Un_Diff_cancel2 backflows_minus_backflows inf_sup_ord(3) order.trans)
           --"hence, E2 disappears"
           from Set.Un_absorb1[OF this] have E2_absorb: "flows_fix \<T> \<union> E2 = flows_fix \<T>" by blast

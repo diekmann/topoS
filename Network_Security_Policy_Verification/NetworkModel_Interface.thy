@@ -253,8 +253,8 @@ subsection {*Information flow security*}
         "\<lbrakk> valid_graph G; f \<in> set_offending_flows G nP \<rbrakk> \<Longrightarrow>
           \<forall>i \<in> snd` f. \<not> eval_model G (nP(i := \<bottom>))"
       and
-      --{* If some otherbot fulfills default_secure, it must be \<bottom> 
-             Hence, \<bottom> is uniquely defined *}
+      --{* If some otherbot fulfills @{rext default_secure}, it must be @{term "\<bottom>"} 
+             Hence, @{term "\<bottom>"} is uniquely defined *}
       default_unique_IFS:
       "(\<forall>G f nP i. valid_graph G \<and> f \<in> set_offending_flows G nP \<and> i \<in> snd` f 
                 \<longrightarrow> \<not> eval_model G (nP(i := otherbot))) \<Longrightarrow> otherbot = \<bottom>"
@@ -358,7 +358,7 @@ lemma default_uniqueness_by_counterexample_ACS:
   using assms by blast
 
 
-text{* The sublocale relation ship tells that the simplified @{term NetworkModel_ACL} and @{term NetworkModel_IFS} 
+text{* The sublocale relation ship tells that the simplified @{const NetworkModel_ACS} and @{const NetworkModel_IFS} 
   assumptions suffice to do tho whole NetworkModel thing. The other direction is just for completeness.  *}
 
 end
