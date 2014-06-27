@@ -2,7 +2,7 @@ theory NM_NoRefl
 imports "../TopoS_Helper"
 begin
 
-section {* NetworkModel hosts are not allowed to communicate with themselves *}
+section {* SecurityInvariant hosts are not allowed to communicate with themselves *}
 
 text {* This can be used to effectively lift hosts to roles.
         Just list all roles that are allowed to communicate with themselves.
@@ -22,7 +22,7 @@ fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarro
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
 
-definition target_focus :: "bool" where "target_focus = False"
+definition receiver_violation :: "bool" where "receiver_violation = False"
 
 
 
@@ -74,7 +74,7 @@ subsubsection {*Preliminaries*}
    done
 
 
-interpretation NoRefl: TopoS_ACS
+interpretation NoRefl: SecurityInvariant_ACS
 where default_node_properties = default_node_properties
 and sinvar = sinvar
 and verify_globals = verify_globals
@@ -103,11 +103,11 @@ where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = NoRefl_
 
 
 
-  lemma TopoS_NoRefl: "NetworkModel sinvar default_node_properties target_focus"
-  unfolding target_focus_def by unfold_locales  
+  lemma TopoS_NoRefl: "SecurityInvariant sinvar default_node_properties receiver_violation"
+  unfolding receiver_violation_def by unfold_locales  
 
 hide_fact (open) sinvar_mono   
-hide_const (open) sinvar verify_globals target_focus default_node_properties
+hide_const (open) sinvar verify_globals receiver_violation default_node_properties
 
 
 end

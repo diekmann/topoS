@@ -4,7 +4,7 @@ begin
 
 
 
-section {* NetworkModel theory: Often the @{term "sinvar"} function has a common structure.
+section {* SecurityInvariant theory: Often the @{term "sinvar"} function has a common structure.
   We call this the ll edges normal form (ENF). This file provides some theory for 
   @{term "sinvar"} functions in ENF. Helps instantiation of new models in ENF.*}
 

@@ -16,15 +16,15 @@ fun verify_globals :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> 'v access_l
 
 definition "NetModel_node_props (P::('v::vertex, 'v access_list, 'b) TopoS_Params) = 
   (\<lambda> i. (case (node_properties P) i of Some property \<Rightarrow> property | None \<Rightarrow> NM_ACLcommunicateWith.default_node_properties))"
-lemma[code_unfold]: "NetworkModel.node_props NM_ACLcommunicateWith.default_node_properties P = NetModel_node_props P"
+lemma[code_unfold]: "SecurityInvariant.node_props NM_ACLcommunicateWith.default_node_properties P = NetModel_node_props P"
 apply(simp add: NetModel_node_props_def)
 done
 
 definition "ACLcommunicateWith_offending_list = Generic_offending_list sinvar"
 
 definition "ACLcommunicateWith_eval G P = (valid_list_graph G \<and> 
-  verify_globals G (NetworkModel.node_props NM_ACLcommunicateWith.default_node_properties P) (model_global_properties P) \<and> 
-  sinvar G (NetworkModel.node_props NM_ACLcommunicateWith.default_node_properties P))"
+  verify_globals G (SecurityInvariant.node_props NM_ACLcommunicateWith.default_node_properties P) (model_global_properties P) \<and> 
+  sinvar G (SecurityInvariant.node_props NM_ACLcommunicateWith.default_node_properties P))"
 
 
 lemma sinvar_correct: "valid_list_graph G \<Longrightarrow> NM_ACLcommunicateWith.sinvar (list_graph_to_graph G) nP = sinvar G nP"
@@ -37,7 +37,7 @@ interpretation NM_ACLcommunicateWith_impl:TopoS_List_Impl
   and sinvar_impl=sinvar
   and verify_globals_spec=NM_ACLcommunicateWith.verify_globals
   and verify_globals_impl=verify_globals
-  and target_focus=NM_ACLcommunicateWith.target_focus
+  and receiver_violation=NM_ACLcommunicateWith.receiver_violation
   and offending_flows_impl=ACLcommunicateWith_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=ACLcommunicateWith_eval
@@ -72,7 +72,7 @@ section {* packing *}
   definition NM_LIB_ACLcommunicateWith:: "('v::vertex, 'v access_list, unit) TopoS_packed" where
     "NM_LIB_ACLcommunicateWith \<equiv> 
     \<lparr> nm_name = ''ACLcommunicateWith'', 
-      nm_target_focus = NM_ACLcommunicateWith.target_focus,
+      nm_receiver_violation = NM_ACLcommunicateWith.receiver_violation,
       nm_default = NM_ACLcommunicateWith.default_node_properties, 
       nm_sinvar = sinvar,
       nm_verify_globals = verify_globals,

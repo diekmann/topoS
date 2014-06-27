@@ -486,7 +486,7 @@ lemma "verify_globals \<lparr> nodes=set [1,2,3], edges=set [] \<rparr> (\<lambd
   by (simp add: default_node_properties_def)
 
 
-definition target_focus :: "bool" where "target_focus = False"
+definition receiver_violation :: "bool" where "receiver_violation = False"
 
 
 
@@ -583,7 +583,7 @@ section {*ENF*}
     apply(simp add: default_node_properties_def)
    done
 
-interpretation DomainHierarchyNG: TopoS_ACS
+interpretation DomainHierarchyNG: SecurityInvariant_ACS
 where default_node_properties = default_node_properties
 and sinvar = sinvar
 and verify_globals = verify_globals
@@ -600,12 +600,12 @@ where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = DomainH
 
 
 
-lemma TopoS_DomainHierarchyNG: "NetworkModel sinvar default_node_properties target_focus"
-  unfolding target_focus_def by(unfold_locales)
+lemma TopoS_DomainHierarchyNG: "SecurityInvariant sinvar default_node_properties receiver_violation"
+  unfolding receiver_violation_def by(unfold_locales)
 
 
 
 
-hide_const (open) sinvar verify_globals target_focus
+hide_const (open) sinvar verify_globals receiver_violation
 
 end

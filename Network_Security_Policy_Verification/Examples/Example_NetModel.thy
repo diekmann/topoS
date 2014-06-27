@@ -13,7 +13,7 @@ fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> bool) \<Rightarrow> bool
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> bool) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
 
-(* we will not define target_focus!! Works for both! *)
+(* we will not define receiver_violation!! Works for both! *)
 
 
 lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
@@ -38,11 +38,11 @@ done
 
 
 -- "With generic target focus"
-interpretation Example_NetModel: NetworkModel
+interpretation Example_NetModel: SecurityInvariant
 where default_node_properties = default_node_properties
 and sinvar = sinvar
 and verify_globals = verify_globals
-and target_focus = target_focus (*yep, that's a variable*)
+and receiver_violation = receiver_violation (*yep, that's a variable*)
   unfolding default_node_properties_def
   apply unfold_locales
 
@@ -67,7 +67,7 @@ and target_focus = target_focus (*yep, that's a variable*)
   apply(rule conjI)
   apply(simp add: valid_graph_def)
   apply(rule_tac x="(\<lambda> x. default_node_properties)(vertex_1 := False)" in exI, simp add:default_node_properties_def)
-  apply(case_tac target_focus)
+  apply(case_tac receiver_violation)
     apply(simp_all)
     apply(rule_tac x="{(vertex_1,vertex_1)}" in exI, simp)+
 done

@@ -2,7 +2,7 @@ theory NM_Dependability_norefl
 imports "../TopoS_Helper"
 begin
 
-section {* NetworkModel *}
+section {* SecurityInvariant *}
 
 text{*A version of the Dependability model but if a node reaches itself, it is ignored*}
 
@@ -19,8 +19,8 @@ fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> dependability_level) \<R
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> dependability_level) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
 
-definition target_focus :: "bool" where 
-  "target_focus \<equiv> False"
+definition receiver_violation :: "bool" where 
+  "receiver_violation \<equiv> False"
 
 
 
@@ -66,7 +66,7 @@ and verify_globals = verify_globals
  done
 
 
-interpretation Dependability: TopoS_ACS
+interpretation Dependability: SecurityInvariant_ACS
 where default_node_properties = NM_Dependability_norefl.default_node_properties
 and sinvar = NM_Dependability_norefl.sinvar
 and verify_globals = verify_globals
@@ -99,9 +99,9 @@ and verify_globals = verify_globals
   apply(simp add: succ_tran_def unique_default_example_simp1 unique_default_example_simp2)
   done
 
-  lemma TopoS_Dependability_norefl: "NetworkModel sinvar default_node_properties target_focus"
-  unfolding target_focus_def by unfold_locales  
+  lemma TopoS_Dependability_norefl: "SecurityInvariant sinvar default_node_properties receiver_violation"
+  unfolding receiver_violation_def by unfold_locales  
 
-hide_const (open) sinvar verify_globals target_focus default_node_properties
+hide_const (open) sinvar verify_globals receiver_violation default_node_properties
 
 end

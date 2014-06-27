@@ -169,6 +169,8 @@ subsection{*Security Invariants with secure auto-completion of host attribute ma
 text{*
 We will now add a new artifact to the Security Invariant.
 It is a secure default host attribute, we will use the symbol @{text "\<bottom>"}.
+
+The newly introduced Boolean @{text "receiver_violation"} tells whether a security violation happens at the sender's or the receiver's side.
 *}
 
   -- {* Some notes about the notation:
@@ -177,12 +179,12 @@ It is a secure default host attribute, we will use the symbol @{text "\<bottom>"
           @{term "F \<subseteq> edges G"}, then @{term "fst ` F"}
           is the set of senders and @{term "snd ` f"} the set of receivers.*}
 
-  locale NetworkModel = SecurityInvariant_preliminaries sinvar verify_globals
+  locale SecurityInvariant = SecurityInvariant_preliminaries sinvar verify_globals
     for sinvar::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
     and verify_globals::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
     +
     fixes default_node_properties :: "'a" ("\<bottom>") 
-    and target_focus :: "bool"
+    and receiver_violation :: "bool"
     assumes 
       -- "default value can never fix a security violation."
       -- {*Idea: Giving an offending host, the default attribute does not change whether the invariant holds.
@@ -192,15 +194,15 @@ It is a secure default host attribute, we will use the symbol @{text "\<bottom>"
         Thought experiment 2: new node (attacker) is added to the network. What is its default configuration value ..*}
       default_secure:
       "\<lbrakk> valid_graph G; \<not> sinvar G nP; F \<in> set_offending_flows G nP \<rbrakk> \<Longrightarrow>
-        (\<not> target_focus \<longrightarrow> i \<in> fst ` F \<longrightarrow> \<not> sinvar G (nP(i := \<bottom>))) \<and>
-        (target_focus \<longrightarrow> i \<in> snd ` F \<longrightarrow> \<not> sinvar G (nP(i := \<bottom>)))"
+        (\<not> receiver_violation \<longrightarrow> i \<in> fst ` F \<longrightarrow> \<not> sinvar G (nP(i := \<bottom>))) \<and>
+        (receiver_violation \<longrightarrow> i \<in> snd ` F \<longrightarrow> \<not> sinvar G (nP(i := \<bottom>)))"
       and
       default_unique:
       "otherbot \<noteq> \<bottom> \<Longrightarrow> 
-        \<exists> G nP i f. valid_graph (G::('v::vertex) graph) \<and> \<not> sinvar G nP \<and> f \<in> set_offending_flows G nP \<and> 
-         sinvar (delete_edges G f) nP \<and>
-         (\<not> target_focus \<longrightarrow> i \<in> fst ` f \<and> sinvar G (nP(i := otherbot))) \<and>
-         (target_focus \<longrightarrow> i \<in> snd ` f \<and> sinvar G (nP(i := otherbot))) "
+        \<exists> G nP i F. valid_graph (G::('v::vertex) graph) \<and> \<not> sinvar G nP \<and> F \<in> set_offending_flows G nP \<and> 
+         sinvar (delete_edges G F) nP \<and>
+         (\<not> receiver_violation \<longrightarrow> i \<in> fst ` F \<and> sinvar G (nP(i := otherbot))) \<and>
+         (receiver_violation \<longrightarrow> i \<in> snd ` F \<and> sinvar G (nP(i := otherbot))) "
       (*and
       --{*verify_globals does not depend on graph topology, i.e. semantics is in sinvar*}
       verify_globals_sound:
@@ -229,46 +231,23 @@ It is a secure default host attribute, we will use the symbol @{text "\<bottom>"
           sinvar G (node_props P)"
 
 
-    -- "Unbound variables are implicitly all-quantified by mathematical rules. Thus, we require default-secure for all possible graphs, configurations, ..."
-    lemma "\<forall> G nP f i. (valid_graph G \<and> \<not> sinvar G nP \<and> f \<in> set_offending_flows G nP \<and> sinvar (delete_edges G f) nP) \<longrightarrow>
-        (\<not> target_focus \<longrightarrow> i \<in> fst ` f \<longrightarrow> \<not> sinvar G (nP(i := \<bottom>))) \<and>
-        (target_focus \<longrightarrow> i \<in> snd ` f \<longrightarrow>\<not> sinvar G (nP(i := \<bottom>)))"
-    by(blast dest:default_secure)
-
     lemma unique_common_math_notation:
-    assumes a: "\<forall>G nP i f. valid_graph (G::('v::vertex) graph) \<and> \<not> sinvar G nP \<and> f \<in> set_offending_flows G nP \<and> 
-         sinvar (delete_edges G f) nP \<and> 
-         (\<not> target_focus \<longrightarrow> i \<in> fst ` f \<longrightarrow> \<not> sinvar G (nP(i := otherbot))) \<and>
-         (target_focus \<longrightarrow> i \<in> snd ` f \<longrightarrow> \<not> sinvar G (nP(i := otherbot)))"
+    assumes "\<forall>G nP i F. valid_graph (G::('v::vertex) graph) \<and> \<not> sinvar G nP \<and> F \<in> set_offending_flows G nP \<and> 
+         sinvar (delete_edges G F) nP \<and> 
+         (\<not> receiver_violation \<longrightarrow> i \<in> fst ` F \<longrightarrow> \<not> sinvar G (nP(i := otherbot))) \<and>
+         (receiver_violation \<longrightarrow> i \<in> snd ` F \<longrightarrow> \<not> sinvar G (nP(i := otherbot)))"
     shows "otherbot = \<bottom>"
-    proof -
-      have or_imp_eq: "\<And>P Q. \<not> target_focus \<and> P \<or> target_focus \<and> Q \<longleftrightarrow> (\<not>target_focus \<longrightarrow> P) \<and> (target_focus \<longrightarrow> Q)" by blast
-      from default_unique have "\<not> ( \<exists>G nP i f.
-           valid_graph G \<and>
-           \<not> sinvar G nP \<and>
-           f \<in> set_offending_flows G nP \<and>
-           sinvar (delete_edges G f) nP \<and>
-           (\<not> target_focus \<longrightarrow> i \<in> fst ` f \<and> sinvar G (nP(i := otherbot))) \<and> (target_focus \<longrightarrow> i \<in> snd ` f \<and> sinvar G (nP(i := otherbot))))
-      \<Longrightarrow> otherbot = \<bottom>" by blast
-      from this a have "(\<not> ( \<exists>G nP i f.(
-           (\<not> target_focus \<longrightarrow> i \<in> fst` f \<and> sinvar G (nP(i := otherbot))) \<and> (target_focus \<longrightarrow> i \<in> snd` f \<and> sinvar G (nP(i := otherbot))))))
-      \<longrightarrow> otherbot = \<bottom>"
-      by blast
-      hence "(\<forall>G nP i f. (
-           (\<not> target_focus \<longrightarrow> i \<in> fst` f \<longrightarrow> \<not> sinvar G (nP(i := otherbot))) \<and> (target_focus \<longrightarrow> i \<in> snd` f \<longrightarrow> \<not> sinvar G (nP(i := otherbot)))))
-      \<longrightarrow> otherbot = \<bottom>"
-      apply(simp only: HOL.not_ex)
-      by(simp add:or_imp_eq)
-      from this a show ?thesis by blast
-      qed
+    apply(rule ccontr)
+    apply(drule default_unique)
+    using assms by blast
    end
 
-print_locale! NetworkModel
+print_locale! SecurityInvariant
 
 
 
-section{*Information flow Security and Access Control*}
-text{*@{term target_focus} defines the offending host. Thus, it defines when the violation happens. 
+subsection{*Information Flow Security and Access Control*}
+text{*@{term receiver_violation} defines the offending host. Thus, it defines when the violation happens. 
 
 If the violation happes when the sender sends, we have an access control model. I.e. 
 the sender does not have the appropriate rights ro initiate the connection.
@@ -282,7 +261,7 @@ We refine our definitions
 *}
 
 subsection {*Information flow security*}
-  locale TopoS_IFS = SecurityInvariant_preliminaries sinvar verify_globals
+  locale SecurityInvariant_IFS = SecurityInvariant_preliminaries sinvar verify_globals
       for sinvar::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
       and verify_globals::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
       +
@@ -307,7 +286,7 @@ subsection {*Information flow security*}
           by metis
       end
   
-  sublocale TopoS_IFS \<subseteq> NetworkModel where target_focus=True
+  sublocale SecurityInvariant_IFS \<subseteq> SecurityInvariant where receiver_violation=True
   apply(unfold_locales)
    apply(simp add: default_secure_IFS)
   apply(simp only: HOL.simp_thms)
@@ -316,8 +295,8 @@ subsection {*Information flow security*}
   done
 
   (*other direction*)
-  locale TopoS_IFS_otherDirectrion = NetworkModel where target_focus=True
-  sublocale TopoS_IFS_otherDirectrion \<subseteq> TopoS_IFS
+  locale SecurityInvariant_IFS_otherDirectrion = SecurityInvariant where receiver_violation=True
+  sublocale SecurityInvariant_IFS_otherDirectrion \<subseteq> SecurityInvariant_IFS
   apply(unfold_locales)
    apply (metis default_secure offending_notevalD)
   apply(erule contrapos_pp)
@@ -340,7 +319,7 @@ lemma default_uniqueness_by_counterexample_IFS:
 
 
 subsection {*Access Control Strategy*}
-  locale TopoS_ACS = SecurityInvariant_preliminaries sinvar verify_globals
+  locale SecurityInvariant_ACS = SecurityInvariant_preliminaries sinvar verify_globals
       for sinvar::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
       and verify_globals::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
       +
@@ -363,7 +342,7 @@ subsection {*Access Control Strategy*}
           by metis
       end
   
-  sublocale TopoS_ACS \<subseteq> NetworkModel where target_focus=False
+  sublocale SecurityInvariant_ACS \<subseteq> SecurityInvariant where receiver_violation=False
   apply(unfold_locales)
    apply(simp add: default_secure_ACS)
   apply(simp only: HOL.simp_thms)
@@ -373,8 +352,8 @@ subsection {*Access Control Strategy*}
 
 
   (*other direction*)
-  locale TopoS_ACS_otherDirectrion = NetworkModel where target_focus=False
-  sublocale TopoS_ACS_otherDirectrion \<subseteq> TopoS_ACS
+  locale SecurityInvariant_ACS_otherDirectrion = SecurityInvariant where receiver_violation=False
+  sublocale SecurityInvariant_ACS_otherDirectrion \<subseteq> SecurityInvariant_ACS
   apply(unfold_locales)
    apply (metis default_secure offending_notevalD)
   apply(erule contrapos_pp)
@@ -396,7 +375,7 @@ lemma default_uniqueness_by_counterexample_ACS:
   using assms by blast
 
 
-text{* The sublocale relation ship tells that the simplified @{const TopoS_ACS} and @{const TopoS_IFS} 
-  assumptions suffice to do tho whole NetworkModel thing. The other direction is just for completeness.  *}
+text{* The sublocale relation ship tells that the simplified @{const SecurityInvariant_ACS} and @{const SecurityInvariant_IFS} 
+  assumptions suffice to do tho whole SecurityInvariant thing. The other direction is just for completeness.  *}
 
 end

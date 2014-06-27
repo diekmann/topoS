@@ -26,7 +26,7 @@ begin
   
 (*none of those should be defined or a hide_const is missing at the end of a NM_*.thy file*)
 term sinvar
-term target_focus
+term receiver_violation
 term verify_globals
 term eval
 

@@ -11,12 +11,12 @@ begin
     and sinvar_impl::"('v::vertex) list_graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
     and verify_globals_spec::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
     and verify_globals_impl::"('v::vertex) list_graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
-    and target_focus :: "bool"
+    and receiver_violation :: "bool"
     and offending_flows_impl::"('v::vertex) list_graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> ('v \<times> 'v) list list"
     and node_props_impl::"('v::vertex, 'a, 'b) TopoS_Params \<Rightarrow> ('v \<Rightarrow> 'a)"
     and eval_impl::"('v::vertex) list_graph \<Rightarrow> ('v, 'a, 'b)TopoS_Params \<Rightarrow> bool"
     assumes
-      spec: "NetworkModel sinvar_spec default_node_properties target_focus" --"specification is valid"
+      spec: "SecurityInvariant sinvar_spec default_node_properties receiver_violation" --"specification is valid"
     and
       sinvar_spec_impl: "valid_list_graph G \<Longrightarrow> 
         (sinvar_spec (list_graph_to_graph G) nP) = (sinvar_impl G nP)"
@@ -29,11 +29,11 @@ begin
       set`set (offending_flows_impl G nP)"
     and 
       node_props_spec_impl: 
-     "NetworkModel.node_props_formaldef default_node_properties P = node_props_impl P"
+     "SecurityInvariant.node_props_formaldef default_node_properties P = node_props_impl P"
     and
       eval_spec_impl:
      "(distinct (nodesL G) \<and> distinct (edgesL G) \<and> 
-     NetworkModel.eval sinvar_spec verify_globals_spec default_node_properties (list_graph_to_graph G) P ) = 
+     SecurityInvariant.eval sinvar_spec verify_globals_spec default_node_properties (list_graph_to_graph G) P ) = 
      (eval_impl G P)"
     begin
     end
@@ -46,7 +46,7 @@ begin
   section {* many network models together form a library *}
   record ('v::vertex, 'a, 'b) TopoS_packed =
     nm_name :: "string"
-    nm_target_focus :: "bool"
+    nm_receiver_violation :: "bool"
     nm_default :: "'a"
     nm_sinvar::"('v::vertex) list_graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> bool"
     nm_verify_globals::"('v::vertex) list_graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
@@ -70,7 +70,7 @@ begin
         (nm_sinvar m)
         verify_globals_spec
         (nm_verify_globals m)
-        (nm_target_focus m)
+        (nm_receiver_violation m)
         (nm_offending_flows m)
         (nm_node_props m)
         (nm_eval m)"
@@ -90,23 +90,23 @@ subsection{*Helpfull lemmata*}
   
   (*show that eval complies*)
   lemma TopoS_eval_impl_proofrule: 
-    "\<lbrakk>NetworkModel sinvar_spec default_node_properties target_focus;
+    "\<lbrakk>SecurityInvariant sinvar_spec default_node_properties receiver_violation;
     (\<And> nP. valid_list_graph G \<Longrightarrow> sinvar_spec (list_graph_to_graph G) nP = sinvar_impl G nP); 
     (\<And> nP gP. valid_list_graph G \<Longrightarrow> verify_globals_spec (list_graph_to_graph G) nP gP = verify_globals_impl G nP gP) \<rbrakk> \<Longrightarrow>
-      (distinct (nodesL G) \<and> distinct (edgesL G) \<and> NetworkModel.eval sinvar_spec verify_globals_spec default_node_properties (list_graph_to_graph G) P) =
-      (valid_list_graph G \<and> verify_globals_impl G (NetworkModel.node_props default_node_properties P) (model_global_properties P) \<and>
-       sinvar_impl G (NetworkModel.node_props default_node_properties P))"
+      (distinct (nodesL G) \<and> distinct (edgesL G) \<and> SecurityInvariant.eval sinvar_spec verify_globals_spec default_node_properties (list_graph_to_graph G) P) =
+      (valid_list_graph G \<and> verify_globals_impl G (SecurityInvariant.node_props default_node_properties P) (model_global_properties P) \<and>
+       sinvar_impl G (SecurityInvariant.node_props default_node_properties P))"
     proof -
-    assume inst: "NetworkModel sinvar_spec default_node_properties target_focus"
+    assume inst: "SecurityInvariant sinvar_spec default_node_properties receiver_violation"
     assume ev: "\<And> nP. valid_list_graph G \<Longrightarrow> sinvar_spec (list_graph_to_graph G) nP = sinvar_impl G nP"
     assume ver: "\<And> nP gP. valid_list_graph G \<Longrightarrow> verify_globals_spec (list_graph_to_graph G) nP gP = verify_globals_impl G nP gP"
   
-    have case_valid: "valid_list_graph G \<Longrightarrow> (verify_globals_spec (list_graph_to_graph G) (NetworkModel.node_props default_node_properties P) (model_global_properties P) \<and>
-       sinvar_spec (list_graph_to_graph G) (NetworkModel.node_props default_node_properties P)) =
-      (verify_globals_impl G (NetworkModel.node_props default_node_properties P) (model_global_properties P) \<and>
-       sinvar_impl G (NetworkModel.node_props default_node_properties P))" using
-       ev[of "(NetworkModel.node_props default_node_properties P)"]
-       ver[of "(NetworkModel.node_props default_node_properties P)" "(model_global_properties P)"] by blast
+    have case_valid: "valid_list_graph G \<Longrightarrow> (verify_globals_spec (list_graph_to_graph G) (SecurityInvariant.node_props default_node_properties P) (model_global_properties P) \<and>
+       sinvar_spec (list_graph_to_graph G) (SecurityInvariant.node_props default_node_properties P)) =
+      (verify_globals_impl G (SecurityInvariant.node_props default_node_properties P) (model_global_properties P) \<and>
+       sinvar_impl G (SecurityInvariant.node_props default_node_properties P))" using
+       ev[of "(SecurityInvariant.node_props default_node_properties P)"]
+       ver[of "(SecurityInvariant.node_props default_node_properties P)" "(model_global_properties P)"] by blast
 
     show "?thesis"
       proof(cases "valid_list_graph G")
@@ -114,15 +114,15 @@ subsection{*Helpfull lemmata*}
         from inst case_valid[OF True] show ?thesis
         apply(simp add: valid_list_graph_def)
         apply(rule distinct_rm)
-        apply(unfold NetworkModel.eval_def)
+        apply(unfold SecurityInvariant.eval_def)
         apply(simp only: valid_list_graph_iff_valid_graph)
         done
       next
       case False
         from False valid_list_graph_def have "(distinct (nodesL G) \<and> distinct (edgesL G) \<and> valid_list_graph_axioms G) = False" by blast
-        from this NetworkModel.eval_def[OF inst, of verify_globals_spec "(list_graph_to_graph G)"] 
+        from this SecurityInvariant.eval_def[OF inst, of verify_globals_spec "(list_graph_to_graph G)"] 
         valid_list_graph_iff_valid_graph  have "(distinct (nodesL G) \<and> distinct (edgesL G) \<and> 
-          NetworkModel.eval sinvar_spec verify_globals_spec default_node_properties (list_graph_to_graph G) P) = False" by blast
+          SecurityInvariant.eval sinvar_spec verify_globals_spec default_node_properties (list_graph_to_graph G) P) = False" by blast
         from False this show ?thesis by blast
       qed
     qed

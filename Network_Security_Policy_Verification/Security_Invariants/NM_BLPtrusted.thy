@@ -2,7 +2,7 @@ theory NM_BLPtrusted
 imports "../TopoS_Helper"
 begin
 
-section {* Basic Bell LePadula NetworkModel with trusted entities *}
+section {* Basic Bell LePadula SecurityInvariant with trusted entities *}
 
 type_synonym privacy_level = nat
 
@@ -19,7 +19,7 @@ fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarro
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
 
-definition target_focus :: "bool" where "target_focus \<equiv> True"
+definition receiver_violation :: "bool" where "receiver_violation \<equiv> True"
 
 
 lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
@@ -106,7 +106,7 @@ section {*ENF*}
   done
    
 
-interpretation BLPtrusted: TopoS_IFS 
+interpretation BLPtrusted: SecurityInvariant_IFS 
   where default_node_properties = default_node_properties
   and sinvar = sinvar
   and verify_globals = verify_globals
@@ -123,12 +123,12 @@ interpretation BLPtrusted: TopoS_IFS
 
  
 
-  lemma TopoS_BLPtrusted: "NetworkModel sinvar default_node_properties target_focus"
-  unfolding target_focus_def by unfold_locales  
+  lemma TopoS_BLPtrusted: "SecurityInvariant sinvar default_node_properties receiver_violation"
+  unfolding receiver_violation_def by unfold_locales  
  
 hide_type (open) node_config
 hide_const (open) sinvar_mono
 hide_const (open) BLP_P
-hide_const (open) sinvar verify_globals target_focus default_node_properties
+hide_const (open) sinvar verify_globals receiver_violation default_node_properties
 
 end

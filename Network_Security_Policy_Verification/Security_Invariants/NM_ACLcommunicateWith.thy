@@ -4,7 +4,7 @@ begin
 
 text{*Warning: transitive model is slow model*}
 
-section {* NetworkModel *}
+section {* SecurityInvariant *}
 text{*An access control list strategy that says that hosts must only transitively access each other if allowed*}
 
 datatype 'v access_list = AccessList "'v list"
@@ -21,8 +21,8 @@ fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> 'v access_list) \<Righta
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> 'v access_list) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
 
-definition target_focus :: "bool" where 
-  "target_focus \<equiv> False"
+definition receiver_violation :: "bool" where 
+  "receiver_violation \<equiv> False"
 
 
 lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
@@ -73,7 +73,7 @@ lemma unique_default_example: "succ_tran \<lparr>nodes = {vertex_1, vertex_2}, e
 apply (simp add: succ_tran_def)
 by (metis Domain.DomainI Domain_empty Domain_insert distinct_vertices12 singleton_iff trancl_domain)
 
-interpretation ACLcommunicateWith: TopoS_ACS
+interpretation ACLcommunicateWith: SecurityInvariant_ACS
 where default_node_properties = NM_ACLcommunicateWith.default_node_properties
 and sinvar = NM_ACLcommunicateWith.sinvar
 and verify_globals = verify_globals
@@ -119,9 +119,9 @@ and verify_globals = verify_globals
  done
 
 
-  lemma TopoS_ACLcommunicateWith: "NetworkModel sinvar default_node_properties target_focus"
-  unfolding target_focus_def by unfold_locales  
+  lemma TopoS_ACLcommunicateWith: "SecurityInvariant sinvar default_node_properties receiver_violation"
+  unfolding receiver_violation_def by unfold_locales  
 
-hide_const (open) sinvar verify_globals target_focus default_node_properties
+hide_const (open) sinvar verify_globals receiver_violation default_node_properties
 
 end

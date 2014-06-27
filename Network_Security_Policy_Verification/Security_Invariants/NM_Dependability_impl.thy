@@ -6,7 +6,7 @@ begin
 code_identifier code_module NM_Dependability_impl => (Scala) NM_Dependability
 
 
-section {* NetworkModel Dependability implementation *}
+section {* SecurityInvariant Dependability implementation *}
 
 
 text {* Less-equal other nodes depend on the output of a node than its dependability level. *}
@@ -48,13 +48,13 @@ definition Dependability_offending_list:: "'v list_graph \<Rightarrow> ('v \<Rig
 
 
 definition "NetModel_node_props P = (\<lambda> i. (case (node_properties P) i of Some property \<Rightarrow> property | None \<Rightarrow> NM_Dependability.default_node_properties))"
-lemma[code_unfold]: "NetworkModel.node_props NM_Dependability.default_node_properties P = NetModel_node_props P"
+lemma[code_unfold]: "SecurityInvariant.node_props NM_Dependability.default_node_properties P = NetModel_node_props P"
 apply(simp add: NetModel_node_props_def)
 done
 
 definition "Dependability_eval G P = (valid_list_graph G \<and> 
-  verify_globals G (NetworkModel.node_props NM_Dependability.default_node_properties P) (model_global_properties P) \<and> 
-  sinvar G (NetworkModel.node_props NM_Dependability.default_node_properties P))"
+  verify_globals G (SecurityInvariant.node_props NM_Dependability.default_node_properties P) (model_global_properties P) \<and> 
+  sinvar G (SecurityInvariant.node_props NM_Dependability.default_node_properties P))"
 
 
 
@@ -76,7 +76,7 @@ interpretation Dependability_impl:TopoS_List_Impl
   and sinvar_impl=sinvar
   and verify_globals_spec=NM_Dependability.verify_globals
   and verify_globals_impl=verify_globals
-  and target_focus=NM_Dependability.target_focus
+  and receiver_violation=NM_Dependability.receiver_violation
   and offending_flows_impl=Dependability_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=Dependability_eval
@@ -110,7 +110,7 @@ section {* Dependability packing *}
   definition NM_LIB_Dependability :: "('v::vertex, NM_Dependability.dependability_level, unit) TopoS_packed" where
     "NM_LIB_Dependability \<equiv> 
     \<lparr> nm_name = ''Dependability'', 
-      nm_target_focus = NM_Dependability.target_focus,
+      nm_receiver_violation = NM_Dependability.receiver_violation,
       nm_default = NM_Dependability.default_node_properties, 
       nm_sinvar = sinvar,
       nm_verify_globals = verify_globals,

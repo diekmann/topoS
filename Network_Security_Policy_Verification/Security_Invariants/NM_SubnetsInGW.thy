@@ -2,7 +2,7 @@ theory NM_SubnetsInGW
 imports"../TopoS_Helper"
 begin
 
-section {* NetworkModel *}
+section {* SecurityInvariant *}
 
 datatype subnets = Member | InboundGateway | Unassigned
 
@@ -22,7 +22,7 @@ fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> subnets)  \<Rightarrow> 
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> subnets) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
 
-definition target_focus :: "bool" where "target_focus = False"
+definition receiver_violation :: "bool" where "receiver_violation = False"
 
 
 subsubsection {*Preliminaries*}
@@ -83,7 +83,7 @@ section{*ENF*}
     apply(auto)
   done
 
-interpretation SubnetsInGW: TopoS_ACS
+interpretation SubnetsInGW: SecurityInvariant_ACS
 where default_node_properties = NM_SubnetsInGW.default_node_properties
 and sinvar = NM_SubnetsInGW.sinvar
 and verify_globals = verify_globals
@@ -117,11 +117,11 @@ where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = Subnets
 
 
 
-  lemma TopoS_SubnetsInGW: "NetworkModel sinvar default_node_properties target_focus"
-  unfolding target_focus_def by unfold_locales
+  lemma TopoS_SubnetsInGW: "SecurityInvariant sinvar default_node_properties receiver_violation"
+  unfolding receiver_violation_def by unfold_locales
 
  
 hide_fact (open) sinvar_mono   
-hide_const (open) sinvar verify_globals target_focus default_node_properties
+hide_const (open) sinvar verify_globals receiver_violation default_node_properties
 
 end

@@ -5,7 +5,7 @@ begin
 code_identifier code_module NM_CommunicationPartners_impl => (Scala) NM_CommunicationPartners
 
 
-section {* NetworkModel CommunicationPartners List Implementation *}
+section {* SecurityInvariant CommunicationPartners List Implementation *}
 
 
 fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> 'v node_config) \<Rightarrow> bool" where
@@ -26,13 +26,13 @@ definition CommunicationPartners_offending_list:: "'v list_graph \<Rightarrow> (
 thm NM_CommunicationPartners.CommunicationPartners.node_props.simps
 definition "NetModel_node_props (P::('v::vertex, 'v node_config, 'b) TopoS_Params) = 
   (\<lambda> i. (case (node_properties P) i of Some property \<Rightarrow> property | None \<Rightarrow> NM_CommunicationPartners.default_node_properties))"
-lemma[code_unfold]: "NetworkModel.node_props NM_CommunicationPartners.default_node_properties P = NetModel_node_props P"
+lemma[code_unfold]: "SecurityInvariant.node_props NM_CommunicationPartners.default_node_properties P = NetModel_node_props P"
 apply(simp add: NetModel_node_props_def)
 done
 
 definition "CommunicationPartners_eval G P = (valid_list_graph G \<and> 
-  verify_globals G (NetworkModel.node_props NM_CommunicationPartners.default_node_properties P) (model_global_properties P) \<and> 
-  sinvar G (NetworkModel.node_props NM_CommunicationPartners.default_node_properties P))"
+  verify_globals G (SecurityInvariant.node_props NM_CommunicationPartners.default_node_properties P) (model_global_properties P) \<and> 
+  sinvar G (SecurityInvariant.node_props NM_CommunicationPartners.default_node_properties P))"
 
 
 interpretation CommunicationPartners_impl:TopoS_List_Impl 
@@ -41,7 +41,7 @@ interpretation CommunicationPartners_impl:TopoS_List_Impl
   and sinvar_impl=sinvar
   and verify_globals_spec=NM_CommunicationPartners.verify_globals
   and verify_globals_impl=verify_globals
-  and target_focus=NM_CommunicationPartners.target_focus
+  and receiver_violation=NM_CommunicationPartners.receiver_violation
   and offending_flows_impl=CommunicationPartners_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=CommunicationPartners_eval
@@ -63,7 +63,7 @@ section {* CommunicationPartners packing *}
   definition NM_LIB_CommunicationPartners :: "('v::vertex, 'v NM_CommunicationPartners.node_config, unit) TopoS_packed" where
     "NM_LIB_CommunicationPartners \<equiv> 
     \<lparr> nm_name = ''CommunicationPartners'', 
-      nm_target_focus = NM_CommunicationPartners.target_focus,
+      nm_receiver_violation = NM_CommunicationPartners.receiver_violation,
       nm_default = NM_CommunicationPartners.default_node_properties, 
       nm_sinvar = sinvar,
       nm_verify_globals = verify_globals,

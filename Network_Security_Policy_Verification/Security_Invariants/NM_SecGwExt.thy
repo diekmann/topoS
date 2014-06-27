@@ -2,7 +2,7 @@ theory NM_SecGwExt
 imports "../TopoS_Helper"
 begin
 
-section {* NetworkModel SecurityGatewayExtended*}
+section {* SecurityInvariant SecurityGatewayExtended*}
 text {* like SecurityGateway but SecurityGatewayIN and AccessibleMember are accessible from outside world *}
 
 datatype secgw_member = SecurityGateway | SecurityGatewayIN | DomainMember  | AccessibleMember | Unassigned
@@ -30,7 +30,7 @@ fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> secgw_member) \<Rightarr
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> secgw_member) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
 
-definition target_focus :: "bool" where "target_focus = False"
+definition receiver_violation :: "bool" where "receiver_violation = False"
 
 subsubsection {*Preliminaries*}
   lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
@@ -80,7 +80,7 @@ section{*ENF*}
     apply(auto)
   done
 
-interpretation SecurityGatewayExtended: TopoS_ACS
+interpretation SecurityGatewayExtended: SecurityInvariant_ACS
 where default_node_properties = default_node_properties
 and sinvar = sinvar
 and verify_globals = verify_globals
@@ -120,9 +120,9 @@ where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = Securit
 
 
 
-  lemma TopoS_SecurityGatewayExtended: "NetworkModel sinvar default_node_properties target_focus"
-  unfolding target_focus_def by unfold_locales  
+  lemma TopoS_SecurityGatewayExtended: "SecurityInvariant sinvar default_node_properties receiver_violation"
+  unfolding receiver_violation_def by unfold_locales  
 
-hide_const (open) sinvar verify_globals target_focus
+hide_const (open) sinvar verify_globals receiver_violation
 
 end

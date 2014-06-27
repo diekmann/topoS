@@ -27,10 +27,10 @@ definition DomainHierarchyNG_offending_list:: "'v list_graph \<Rightarrow> ('v \
 
 lemma "DomainHierarchyNG.node_props P = 
   (\<lambda>i. case node_properties P i of None \<Rightarrow> NM_DomainHierarchyNG.default_node_properties | Some property \<Rightarrow> property)"
-by(fact NetworkModel.node_props.simps[OF TopoS_DomainHierarchyNG, of "P"])
+by(fact SecurityInvariant.node_props.simps[OF TopoS_DomainHierarchyNG, of "P"])
 
 definition "NetModel_node_props P = (\<lambda> i. (case (node_properties P) i of Some property \<Rightarrow> property | None \<Rightarrow> NM_DomainHierarchyNG.default_node_properties))"
-(*lemma[code_unfold]: "NetworkModel.node_props NM_DomainHierarchy.default_node_properties P = NetModel_node_props P"
+(*lemma[code_unfold]: "SecurityInvariant.node_props NM_DomainHierarchy.default_node_properties P = NetModel_node_props P"
 apply(simp add: NetModel_node_props_def)
 done*)
 
@@ -39,8 +39,8 @@ lemma[code_unfold]: "DomainHierarchyNG.node_props P = NetModel_node_props P"
 by(simp add: NetModel_node_props_def)
 
 definition "DomainHierarchyNG_eval G P = (valid_list_graph G \<and> 
-  verify_globals G (NetworkModel.node_props NM_DomainHierarchyNG.default_node_properties P) (model_global_properties P) \<and> 
-  sinvar G (NetworkModel.node_props NM_DomainHierarchyNG.default_node_properties P))"
+  verify_globals G (SecurityInvariant.node_props NM_DomainHierarchyNG.default_node_properties P) (model_global_properties P) \<and> 
+  sinvar G (SecurityInvariant.node_props NM_DomainHierarchyNG.default_node_properties P))"
 
 
 interpretation DomainHierarchyNG_impl:TopoS_List_Impl 
@@ -49,7 +49,7 @@ interpretation DomainHierarchyNG_impl:TopoS_List_Impl
   and sinvar_impl=sinvar
   and verify_globals_spec=NM_DomainHierarchyNG.verify_globals
   and verify_globals_impl=verify_globals
-  and target_focus=NM_DomainHierarchyNG.target_focus
+  and receiver_violation=NM_DomainHierarchyNG.receiver_violation
   and offending_flows_impl=DomainHierarchyNG_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=DomainHierarchyNG_eval
@@ -72,7 +72,7 @@ section {* DomainHierarchyNG packing *}
   definition NM_LIB_DomainHierarchyNG :: "('v::vertex, domainNameTrust, domainTree) TopoS_packed" where
     "NM_LIB_DomainHierarchyNG \<equiv> 
     \<lparr> nm_name = ''DomainHierarchyNG'', 
-      nm_target_focus = NM_DomainHierarchyNG.target_focus,
+      nm_receiver_violation = NM_DomainHierarchyNG.receiver_violation,
       nm_default = NM_DomainHierarchyNG.default_node_properties, 
       nm_sinvar = sinvar,
       nm_verify_globals = verify_globals,

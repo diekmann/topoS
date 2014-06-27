@@ -13,15 +13,15 @@ section {* we need in instatiated model, i.e. get rid of 'a 'b*}
     c_offending_flows::"('v) graph \<Rightarrow> ('v \<times> 'v) set set"
     c_isIFS::"bool"
 
-  (* First parameters: (sinvar \<bottom> target_focus == NetworkModel) nP *)
+  (* First parameters: (sinvar \<bottom> receiver_violation == SecurityInvariant) nP *)
   fun new_configured_NetworkSecurityModel :: "((('v::vertex) graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> bool) \<times> 'a \<times> bool \<times> ('v \<Rightarrow> 'a)) \<Rightarrow> ('v NetworkSecurityModel_configured) option" where 
-      "new_configured_NetworkSecurityModel (sinvar, defbot, target_focus, nP) = 
+      "new_configured_NetworkSecurityModel (sinvar, defbot, receiver_violation, nP) = 
         ( 
-        if NetworkModel sinvar defbot target_focus then 
+        if SecurityInvariant sinvar defbot receiver_violation then 
           Some \<lparr> 
             c_sinvar = (\<lambda>G. sinvar G nP),
             c_offending_flows = (\<lambda>G. SecurityInvariant_withOffendingFlows.set_offending_flows sinvar G nP),
-            c_isIFS = target_focus
+            c_isIFS = receiver_violation
           \<rparr>
         else None
         )"
@@ -29,22 +29,22 @@ section {* we need in instatiated model, i.e. get rid of 'a 'b*}
    declare new_configured_NetworkSecurityModel.simps[simp del]
 
    lemma new_configured_TopoS_sinvar_correct:
-   "NetworkModel sinvar defbot target_focus \<Longrightarrow> 
-   c_sinvar (the (new_configured_NetworkSecurityModel (sinvar, defbot, target_focus, nP))) = (\<lambda>G. sinvar G nP)"
+   "SecurityInvariant sinvar defbot receiver_violation \<Longrightarrow> 
+   c_sinvar (the (new_configured_NetworkSecurityModel (sinvar, defbot, receiver_violation, nP))) = (\<lambda>G. sinvar G nP)"
    by(simp add: Let_def new_configured_NetworkSecurityModel.simps)
 
    lemma new_configured_TopoS_offending_flows_correct:
-   "NetworkModel sinvar defbot target_focus \<Longrightarrow> 
-   c_offending_flows (the (new_configured_NetworkSecurityModel (sinvar, defbot, target_focus, nP))) = 
+   "SecurityInvariant sinvar defbot receiver_violation \<Longrightarrow> 
+   c_offending_flows (the (new_configured_NetworkSecurityModel (sinvar, defbot, receiver_violation, nP))) = 
    (\<lambda>G. SecurityInvariant_withOffendingFlows.set_offending_flows sinvar G nP)"
    by(simp add: Let_def new_configured_NetworkSecurityModel.simps)
 
 
 text{* We now collect all the core properties of a network model, but wihtout the @{typ "'a"} @{typ "'b"} types, so it is instatiated with a configuration.  *}
-locale configured_NetworkModel =
+locale configured_SecurityInvariant =
   fixes m :: "('v::vertex) NetworkSecurityModel_configured"
   assumes
-    --"As in NetworkModel definition"
+    --"As in SecurityInvariant definition"
     valid_c_offending_flows:
     "c_offending_flows m G = {F. F \<subseteq> (edges G) \<and> \<not> c_sinvar m G \<and> c_sinvar m (delete_edges G F) \<and> 
       (\<forall> (e1, e2) \<in> F. \<not> c_sinvar m (add_edge e1 e2 (delete_edges G F)))}"
@@ -141,8 +141,8 @@ locale configured_NetworkModel =
       thm Un_set_offending_flows_bound_minus_subseteq'
 end
   
-thm configured_NetworkModel_def
-thm configured_NetworkModel.mono_sinvar
+thm configured_SecurityInvariant_def
+thm configured_SecurityInvariant.mono_sinvar
 
 
 
@@ -155,17 +155,17 @@ text{*
   text{* The function @{term new_configured_NetworkSecurityModel} takes some tuple and if it returns a result,
          the locale assumptions are automatically fulfilled. *}
   theorem new_configured_NetworkSecurityModel_sound: 
-  "\<lbrakk> new_configured_NetworkSecurityModel (sinvar, defbot, target_focus, nP) = Some m \<rbrakk> \<Longrightarrow>
-    configured_NetworkModel m"
+  "\<lbrakk> new_configured_NetworkSecurityModel (sinvar, defbot, receiver_violation, nP) = Some m \<rbrakk> \<Longrightarrow>
+    configured_SecurityInvariant m"
     proof -
-      assume a: "new_configured_NetworkSecurityModel (sinvar, defbot, target_focus, nP) = Some m"
-      hence NetModel: "NetworkModel sinvar defbot target_focus"
+      assume a: "new_configured_NetworkSecurityModel (sinvar, defbot, receiver_violation, nP) = Some m"
+      hence NetModel: "SecurityInvariant sinvar defbot receiver_violation"
         by(simp add: new_configured_NetworkSecurityModel.simps split: split_if_asm)
-      hence NetModel_p: "SecurityInvariant_preliminaries sinvar" by(simp add: NetworkModel_def)
+      hence NetModel_p: "SecurityInvariant_preliminaries sinvar" by(simp add: SecurityInvariant_def)
 
       from a have c_eval: "c_sinvar m = (\<lambda>G. sinvar G nP)"
          and c_offending: "c_offending_flows m = (\<lambda>G. SecurityInvariant_withOffendingFlows.set_offending_flows sinvar G nP)"
-         and "c_isIFS m = target_focus"
+         and "c_isIFS m = receiver_violation"
         by(auto simp add: new_configured_NetworkSecurityModel.simps NetModel split: split_if_asm)
 
       have monoI: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
@@ -186,7 +186,7 @@ text{*
 
 text{* All security requirements are valid according to the definition *}
 definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Rightarrow> bool" where
-  "valid_reqs M \<equiv> \<forall> m \<in> set M. configured_NetworkModel m"
+  "valid_reqs M \<equiv> \<forall> m \<in> set M. configured_SecurityInvariant m"
 
  subsection {*Algorithms*}
     text{*A network security model corresponds to type of security requirements.
@@ -220,7 +220,7 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
   
 
    subsection{*Lemmata*}
-    lemma valid_reqs1: "valid_reqs (m # M) \<Longrightarrow> configured_NetworkModel m"
+    lemma valid_reqs1: "valid_reqs (m # M) \<Longrightarrow> configured_SecurityInvariant m"
       by(simp add: valid_reqs_def)
     lemma valid_reqs2: "valid_reqs (m # M) \<Longrightarrow> valid_reqs M"
       by(simp add: valid_reqs_def)
@@ -236,7 +236,7 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
          apply(simp_all add: all_security_requirements_fulfilled_def)
         apply(rename_tac m M E' E)
         apply(rule conjI)
-         apply(erule(2) configured_NetworkModel.mono_sinvar[OF valid_reqs1])
+         apply(erule(2) configured_SecurityInvariant.mono_sinvar[OF valid_reqs1])
          apply(simp_all)
         apply(drule valid_reqs2)
         apply blast
@@ -308,12 +308,12 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
           thus ?case by(simp add: all_security_requirements_fulfilled_def)
         next
           case (Cons m M)
-          from valid_reqs1[OF Cons(2)] have validReq: "configured_NetworkModel m" .
+          from valid_reqs1[OF Cons(2)] have validReq: "configured_SecurityInvariant m" .
 
           from Cons(3) have valid_rmUnOff: "valid_graph \<lparr>nodes = V, edges = E - (\<Union>c_offending_flows m \<lparr>nodes = V, edges = E\<rparr>) \<rparr>"
             by(simp add: valid_graph_remove_edges)
           
-          from configured_NetworkModel.sinvar_valid_remove_flattened_offending_flows[OF validReq Cons(3)]
+          from configured_SecurityInvariant.sinvar_valid_remove_flattened_offending_flows[OF validReq Cons(3)]
           have valid_eval_rmUnOff: "c_sinvar m \<lparr>nodes = V, edges = E - (\<Union>c_offending_flows m \<lparr>nodes = V, edges = E\<rparr>) \<rparr>" .
     
           from generate_valid_topology_subseteq_edges have edges_gentopo_subseteq: 
@@ -321,7 +321,7 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
                \<subseteq>
             E - (\<Union>c_offending_flows m \<lparr>nodes = V, edges = E\<rparr>)"  by fastforce
     
-          from configured_NetworkModel.mono_sinvar[OF validReq valid_rmUnOff edges_gentopo_subseteq valid_eval_rmUnOff]
+          from configured_SecurityInvariant.mono_sinvar[OF validReq valid_rmUnOff edges_gentopo_subseteq valid_eval_rmUnOff]
           have "c_sinvar m \<lparr>nodes = V, edges = (edges (generate_valid_topology M \<lparr>nodes = V, edges = E\<rparr>)) - (\<Union>c_offending_flows m \<lparr>nodes = V, edges = E\<rparr>) \<rparr>" .
           from this have goal1: 
             "c_sinvar m (delete_edges (generate_valid_topology M \<lparr>nodes = V, edges = E\<rparr>) (\<Union>c_offending_flows m \<lparr>nodes = V, edges = E\<rparr>))"
@@ -371,7 +371,7 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
 
 
    subsection{* Moar lemmata *}
-     lemma (in configured_NetworkModel) c_sinvar_valid_imp_no_offending_flows: 
+     lemma (in configured_SecurityInvariant) c_sinvar_valid_imp_no_offending_flows: 
       "c_sinvar m G \<Longrightarrow> \<forall>x\<in>c_offending_flows m G. x = {}"
         by(simp add: valid_c_offending_flows)
 
@@ -382,7 +382,7 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
         apply(simp add: all_security_requirements_fulfilled_def)
         apply(clarify)
         apply(frule valid_reqs2, drule valid_reqs1)
-        apply(drule(1) configured_NetworkModel.c_sinvar_valid_imp_no_offending_flows)
+        apply(drule(1) configured_SecurityInvariant.c_sinvar_valid_imp_no_offending_flows)
         by simp
 
     corollary all_security_requirements_fulfilled_imp_get_offending_empty:
@@ -392,7 +392,7 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
       apply(thin_tac "all_security_requirements_fulfilled M G")
       apply(simp add: valid_reqs_def)
       apply(clarify)
-      using configured_NetworkModel.empty_offending_contra
+      using configured_SecurityInvariant.empty_offending_contra
       by fastforce
 
 
@@ -407,7 +407,7 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
      apply(frule valid_reqs2, drule valid_reqs1)
      apply(simp add: get_offending_flows_def)
      apply(erule disjE)
-      apply(drule(3) configured_NetworkModel.mono_extend_set_offending_flows)
+      apply(drule(3) configured_SecurityInvariant.mono_extend_set_offending_flows)
       apply(erule bexE, rename_tac F)
       apply(rule_tac x="F" in bexI)
        apply(simp_all)
@@ -419,21 +419,21 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
        apply(simp add: get_offending_flows_def)
       apply(simp add: get_offending_flows_def)
       apply(frule valid_reqs2, drule valid_reqs1)
-      apply(simp add: configured_NetworkModel.valid_c_offending_flows)
+      apply(simp add: configured_SecurityInvariant.valid_c_offending_flows)
       by blast
 
-    thm configured_NetworkModel.offending_flows_union_mono
+    thm configured_SecurityInvariant.offending_flows_union_mono
     lemma get_offending_flows_union_mono: "\<lbrakk>valid_reqs M; 
       valid_graph \<lparr>nodes = V, edges = E\<rparr>; E' \<subseteq> E \<rbrakk> \<Longrightarrow>
       \<Union>get_offending_flows M \<lparr>nodes = V, edges = E'\<rparr> \<subseteq> \<Union>get_offending_flows M \<lparr>nodes = V, edges = E\<rparr>"
       apply(induction M)
        apply(simp add: get_offending_flows_def)
       apply(frule valid_reqs2, drule valid_reqs1)
-      apply(drule(2) configured_NetworkModel.offending_flows_union_mono)
+      apply(drule(2) configured_SecurityInvariant.offending_flows_union_mono)
       apply(simp add: get_offending_flows_def)
       by blast
 
-    thm configured_NetworkModel.Un_set_offending_flows_bound_minus_subseteq'
+    thm configured_SecurityInvariant.Un_set_offending_flows_bound_minus_subseteq'
     lemma Un_set_offending_flows_bound_minus_subseteq':"\<lbrakk>valid_reqs M; 
       valid_graph \<lparr>nodes = V, edges = E\<rparr>; E' \<subseteq> E;
       \<Union>get_offending_flows M \<lparr>nodes = V, edges = E\<rparr> \<subseteq> X \<rbrakk> \<Longrightarrow> \<Union>get_offending_flows M \<lparr>nodes = V, edges = E - E'\<rparr> \<subseteq> X - E'"
@@ -442,11 +442,11 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
       next
       case (Cons m M)
         from Cons.prems(1) valid_reqs2 have "valid_reqs M" by force
-        from Cons.prems(1) valid_reqs1 have "configured_NetworkModel m" by force
+        from Cons.prems(1) valid_reqs1 have "configured_SecurityInvariant m" by force
         from Cons.prems(4) have "\<Union>get_offending_flows M \<lparr>nodes = V, edges = E\<rparr> \<subseteq> X" by(simp add: get_offending_flows_def)
         from Cons.IH[OF `valid_reqs M` Cons.prems(2) Cons.prems(3) `\<Union>get_offending_flows M \<lparr>nodes = V, edges = E\<rparr> \<subseteq> X`] have IH: "\<Union>get_offending_flows M \<lparr>nodes = V, edges = E - E'\<rparr> \<subseteq> X - E'" .
         from Cons.prems(4) have "\<Union>c_offending_flows m \<lparr>nodes = V, edges = E\<rparr> \<subseteq> X" by(simp add: get_offending_flows_def)
-        from configured_NetworkModel.Un_set_offending_flows_bound_minus_subseteq'[OF `configured_NetworkModel m` Cons.prems(2) `\<Union>c_offending_flows m \<lparr>nodes = V, edges = E\<rparr> \<subseteq> X`] have "\<Union>c_offending_flows m \<lparr>nodes = V, edges = E - E'\<rparr> \<subseteq> X - E'" .
+        from configured_SecurityInvariant.Un_set_offending_flows_bound_minus_subseteq'[OF `configured_SecurityInvariant m` Cons.prems(2) `\<Union>c_offending_flows m \<lparr>nodes = V, edges = E\<rparr> \<subseteq> X`] have "\<Union>c_offending_flows m \<lparr>nodes = V, edges = E - E'\<rparr> \<subseteq> X - E'" .
         from this IH show ?case by(simp add: get_offending_flows_def)
       qed
 

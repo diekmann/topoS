@@ -2,7 +2,7 @@ theory NM_NonInterference
 imports "../TopoS_Helper"
 begin
 
-section {* NetworkModel NonInterference *}
+section {* SecurityInvariant NonInterference *}
 
 datatype node_config = Interfering | Unrelated
 
@@ -24,8 +24,8 @@ fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarro
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
 
-definition target_focus :: "bool" where 
-  "target_focus = True"
+definition receiver_violation :: "bool" where 
+  "receiver_violation = True"
 
 
 text{*simplifications for sets we need in the uniqueness proof*}
@@ -117,7 +117,7 @@ section{*monotonic and preliminaries*}
   done
 
 
-interpretation NonInterference: TopoS_IFS
+interpretation NonInterference: SecurityInvariant_IFS
 where default_node_properties = NM_NonInterference.default_node_properties
 and sinvar = NM_NonInterference.sinvar
 and verify_globals = verify_globals
@@ -170,11 +170,11 @@ and verify_globals = verify_globals
   done
 
 
-  lemma TopoS_NonInterference: "NetworkModel sinvar default_node_properties target_focus"
-  unfolding target_focus_def by unfold_locales
+  lemma TopoS_NonInterference: "SecurityInvariant sinvar default_node_properties receiver_violation"
+  unfolding receiver_violation_def by unfold_locales
    
 
-hide_const (open) sinvar verify_globals target_focus default_node_properties
+hide_const (open) sinvar verify_globals receiver_violation default_node_properties
 
 hide_fact tmp1 tmp2 tmp3 tmp4 tmp5 tmp6 unique_default_example 
           unique_default_example_2 unique_default_example_3 unique_default_example_4

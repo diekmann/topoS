@@ -6,7 +6,7 @@ begin
 code_identifier code_module NM_NonInterference_impl => (Scala) NM_NonInterference
 
 
-section {* NetworkModel NonInterference Implementation*}
+section {* SecurityInvariant NonInterference Implementation*}
 
 definition undirected_reachable :: "'v list_graph \<Rightarrow> 'v => 'v list" where
   "undirected_reachable G v = removeAll v (succ_tran (undirected G) v)"
@@ -92,13 +92,13 @@ definition NonInterference_offending_list:: "'v list_graph \<Rightarrow> ('v \<R
 
 
 definition "NetModel_node_props P = (\<lambda> i. (case (node_properties P) i of Some property \<Rightarrow> property | None \<Rightarrow> NM_NonInterference.default_node_properties))"
-lemma[code_unfold]: "NetworkModel.node_props NM_NonInterference.default_node_properties P = NetModel_node_props P"
+lemma[code_unfold]: "SecurityInvariant.node_props NM_NonInterference.default_node_properties P = NetModel_node_props P"
 apply(simp add: NetModel_node_props_def)
 done
 
 definition "NonInterference_eval G P = (valid_list_graph G \<and> 
-  verify_globals G (NetworkModel.node_props NM_NonInterference.default_node_properties P) (model_global_properties P) \<and> 
-  sinvar G (NetworkModel.node_props NM_NonInterference.default_node_properties P))"
+  verify_globals G (SecurityInvariant.node_props NM_NonInterference.default_node_properties P) (model_global_properties P) \<and> 
+  sinvar G (SecurityInvariant.node_props NM_NonInterference.default_node_properties P))"
 
 
 
@@ -138,7 +138,7 @@ interpretation NonInterference_impl:TopoS_List_Impl
   and sinvar_impl=sinvar
   and verify_globals_spec=NM_NonInterference.verify_globals
   and verify_globals_impl=verify_globals
-  and target_focus=NM_NonInterference.target_focus
+  and receiver_violation=NM_NonInterference.receiver_violation
   and offending_flows_impl=NonInterference_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=NonInterference_eval
@@ -172,7 +172,7 @@ section {* NonInterference packing *}
   definition NM_LIB_NonInterference :: "('v::vertex, node_config, unit) TopoS_packed" where
     "NM_LIB_NonInterference \<equiv> 
     \<lparr> nm_name = ''NonInterference'', 
-      nm_target_focus = NM_NonInterference.target_focus,
+      nm_receiver_violation = NM_NonInterference.receiver_violation,
       nm_default = NM_NonInterference.default_node_properties, 
       nm_sinvar = sinvar,
       nm_verify_globals = verify_globals,

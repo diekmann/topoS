@@ -22,13 +22,13 @@ definition Subnets_offending_list:: "'v list_graph \<Rightarrow> ('v \<Rightarro
 
 
 definition "NetModel_node_props P = (\<lambda> i. (case (node_properties P) i of Some property \<Rightarrow> property | None \<Rightarrow> NM_Subnets.default_node_properties))"
-lemma[code_unfold]: "NetworkModel.node_props NM_Subnets.default_node_properties P = NetModel_node_props P"
+lemma[code_unfold]: "SecurityInvariant.node_props NM_Subnets.default_node_properties P = NetModel_node_props P"
 apply(simp add: NetModel_node_props_def)
 done
 
 definition "Subnets_eval G P = (valid_list_graph G \<and> 
-  verify_globals G (NetworkModel.node_props NM_Subnets.default_node_properties P) (model_global_properties P) \<and> 
-  sinvar G (NetworkModel.node_props NM_Subnets.default_node_properties P))"
+  verify_globals G (SecurityInvariant.node_props NM_Subnets.default_node_properties P) (model_global_properties P) \<and> 
+  sinvar G (SecurityInvariant.node_props NM_Subnets.default_node_properties P))"
 
 
 interpretation Subnets_impl:TopoS_List_Impl 
@@ -37,7 +37,7 @@ interpretation Subnets_impl:TopoS_List_Impl
   and sinvar_impl=sinvar
   and verify_globals_spec=NM_Subnets.verify_globals
   and verify_globals_impl=verify_globals
-  and target_focus=NM_Subnets.target_focus
+  and receiver_violation=NM_Subnets.receiver_violation
   and offending_flows_impl=Subnets_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=Subnets_eval
@@ -59,7 +59,7 @@ section {* Subnets packing *}
   definition NM_LIB_Subnets :: "('v::vertex, NM_Subnets.subnets, unit) TopoS_packed" where
     "NM_LIB_Subnets \<equiv> 
     \<lparr> nm_name = ''Subnets'', 
-      nm_target_focus = NM_Subnets.target_focus,
+      nm_receiver_violation = NM_Subnets.receiver_violation,
       nm_default = NM_Subnets.default_node_properties, 
       nm_sinvar = sinvar,
       nm_verify_globals = verify_globals,

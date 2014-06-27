@@ -2,7 +2,7 @@ theory NM_BLPbasic
 imports "../TopoS_Helper"
 begin
 
-section {* Basic Bell LePadula NetworkModel *}
+section {* Basic Bell LePadula SecurityInvariant *}
 
 type_synonym privacy_level = nat
 
@@ -15,7 +15,7 @@ fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> privacy_level) \<Rightar
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> privacy_level) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
 
-definition target_focus :: "bool" where "target_focus \<equiv> True"
+definition receiver_violation :: "bool" where "receiver_violation \<equiv> True"
 
 
 lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
@@ -59,13 +59,13 @@ lemma BLP_def_unique: "otherbot \<noteq> 0 \<Longrightarrow>
 
 (*Test instantiation without any fancy lemmata*)
 (*
-interpretation NetworkModel
+interpretation SecurityInvariant
 where default_node_properties = default_node_properties
 and sinvar = sinvar
 and verify_globals = verify_globals
-and target_focus = target_focus
+and receiver_violation = receiver_violation
   unfolding default_node_properties_def
-  unfolding target_focus_def
+  unfolding receiver_violation_def
   apply unfold_locales
   
   apply(simp)
@@ -111,9 +111,9 @@ section {*ENF*}
   done
    
 
-  interpretation BLPbasic: TopoS_IFS sinvar verify_globals default_node_properties
+  interpretation BLPbasic: SecurityInvariant_IFS sinvar verify_globals default_node_properties
   where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = BLP_offending_set"
-    unfolding target_focus_def
+    unfolding receiver_violation_def
     unfolding default_node_properties_def
     apply(unfold_locales)
       apply(rule ballI)
@@ -125,11 +125,11 @@ section {*ENF*}
    done
 
 
-  lemma TopoS_BLPBasic: "NetworkModel sinvar default_node_properties target_focus"
-  unfolding target_focus_def by unfold_locales
+  lemma TopoS_BLPBasic: "SecurityInvariant sinvar default_node_properties receiver_violation"
+  unfolding receiver_violation_def by unfold_locales
    
 hide_fact (open) sinvar_mono   
 
-hide_const (open) sinvar verify_globals target_focus default_node_properties
+hide_const (open) sinvar verify_globals receiver_violation default_node_properties
 
 end

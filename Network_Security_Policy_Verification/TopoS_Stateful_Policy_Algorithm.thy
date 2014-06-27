@@ -827,7 +827,7 @@ section {* Sketch for generating a stateful policy from a simple directed policy
       from edgesList have edgesUnsimp: "edges G \<union> (?filterACS \<inter> ?filterIFS) = edges G"
         using filter_IFS_no_violations_subseteq_input filter_compliant_stateful_ACS_subseteq_input by blast
 
-      --"We set up a ?REM that we use in the @{thm configured_NetworkModel.Un_set_offending_flows_bound_minus_subseteq} lemma"
+      --"We set up a ?REM that we use in the @{thm configured_SecurityInvariant.Un_set_offending_flows_bound_minus_subseteq} lemma"
       let ?REM = "(backflows (?filterACS) - backflows (?filterIFS)) - edges G"
 
       have REM_gives_desired_upper_bound: "(backflows (?filterACS) - edges G) - ?REM = backflows (?filterACS \<inter> ?filterIFS) - edges G"
@@ -840,7 +840,7 @@ section {* Sketch for generating a stateful policy from a simple directed policy
       hence "finite (backflows ?filterACS)" using backflows_finite by (metis List.finite_set)
       hence finite1: "finite (backflows (?filterACS) - backflows (?filterIFS) - edges G)" by fast
 
-      from configured_NetworkModel.Un_set_offending_flows_bound_minus_subseteq[where E'="?REM" and X="(backflows (?filterACS) - edges G)",
+      from configured_SecurityInvariant.Un_set_offending_flows_bound_minus_subseteq[where E'="?REM" and X="(backflows (?filterACS) - edges G)",
           OF _ validG1 offending_filterACS_upperbound, simplified REM_gives_desired_upper_bound REM_gives_desired_edges
           ] valid_reqs_ACS_D[OF validReqs, unfolded valid_reqs_def]
       have "\<And>m. m \<in> set (get_ACS M) \<Longrightarrow>

@@ -2,7 +2,7 @@ theory NM_ACLnotCommunicateWith
 imports "../TopoS_Helper"
 begin
 
-section {* NetworkModel *}
+section {* SecurityInvariant *}
 text{*An access control list strategy that says that hosts must not transitively access each other*}
 
 text{* node properties: a set of hosts this host must no access *}
@@ -17,8 +17,8 @@ fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> 'v set) \<Rightarrow> bo
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> 'v set) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
 
-definition target_focus :: "bool" where 
-  "target_focus \<equiv> False"
+definition receiver_violation :: "bool" where 
+  "receiver_violation \<equiv> False"
 
 
 lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
@@ -63,7 +63,7 @@ lemma unique_default_example: "succ_tran \<lparr>nodes = {vertex_1, vertex_2}, e
 apply (simp add: succ_tran_def)
 by (metis Domain.DomainI Domain_empty Domain_insert distinct_vertices12 singleton_iff trancl_domain)
 
-interpretation ACLnotCommunicateWith: TopoS_ACS
+interpretation ACLnotCommunicateWith: SecurityInvariant_ACS
 where default_node_properties = NM_ACLnotCommunicateWith.default_node_properties
 and sinvar = NM_ACLnotCommunicateWith.sinvar
 and verify_globals = verify_globals
@@ -116,9 +116,9 @@ and verify_globals = verify_globals
   apply(simp add: example_simps)
  done
 
-  lemma TopoS_ACLnotCommunicateWith: "NetworkModel sinvar default_node_properties target_focus"
-  unfolding target_focus_def by unfold_locales  
+  lemma TopoS_ACLnotCommunicateWith: "SecurityInvariant sinvar default_node_properties receiver_violation"
+  unfolding receiver_violation_def by unfold_locales  
 
-hide_const (open) sinvar verify_globals target_focus default_node_properties
+hide_const (open) sinvar verify_globals receiver_violation default_node_properties
 
 end

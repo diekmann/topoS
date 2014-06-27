@@ -5,7 +5,7 @@ begin
 code_identifier code_module  NM_SecurityGateway_impl => (Scala) NM_SecurityGateway
 
 
-section {* NetworkModel SecurityGateway Implementation *}
+section {* SecurityInvariant SecurityGateway Implementation *}
 
 fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> secgw_member) \<Rightarrow> bool" where
   "sinvar G nP = (\<forall> (e1,e2) \<in> set (edgesL G). e1 \<noteq> e2 \<longrightarrow> allowed_secgw_flow (nP e1) (nP e2))"
@@ -23,13 +23,13 @@ definition SecurityGateway_offending_list:: "'v list_graph \<Rightarrow> ('v \<R
 
 
 definition "NetModel_node_props P = (\<lambda> i. (case (node_properties P) i of Some property \<Rightarrow> property | None \<Rightarrow> NM_SecurityGateway.default_node_properties))"
-lemma[code_unfold]: "NetworkModel.node_props NM_SecurityGateway.default_node_properties P = NetModel_node_props P"
+lemma[code_unfold]: "SecurityInvariant.node_props NM_SecurityGateway.default_node_properties P = NetModel_node_props P"
 apply(simp add: NetModel_node_props_def)
 done
 
 definition "SecurityGateway_eval G P = (valid_list_graph G \<and> 
-  verify_globals G (NetworkModel.node_props NM_SecurityGateway.default_node_properties P) (model_global_properties P) \<and> 
-  sinvar G (NetworkModel.node_props NM_SecurityGateway.default_node_properties P))"
+  verify_globals G (SecurityInvariant.node_props NM_SecurityGateway.default_node_properties P) (model_global_properties P) \<and> 
+  sinvar G (SecurityInvariant.node_props NM_SecurityGateway.default_node_properties P))"
 
 
 interpretation SecurityGateway_impl:TopoS_List_Impl 
@@ -38,7 +38,7 @@ interpretation SecurityGateway_impl:TopoS_List_Impl
   and sinvar_impl=sinvar
   and verify_globals_spec=NM_SecurityGateway.verify_globals
   and verify_globals_impl=verify_globals
-  and target_focus=NM_SecurityGateway.target_focus
+  and receiver_violation=NM_SecurityGateway.receiver_violation
   and offending_flows_impl=SecurityGateway_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=SecurityGateway_eval
@@ -49,7 +49,7 @@ apply(unfold_locales)
 apply(simp only: NetModel_node_props_def)
  apply(metis SecurityGateway.node_props.simps SecurityGateway.node_props_eq_node_props_formaldef)
 apply(simp only: SecurityGateway_eval_def)
-apply(rule_tac target_focus=NM_SecurityGateway.target_focus in TopoS_eval_impl_proofrule)
+apply(rule_tac receiver_violation=NM_SecurityGateway.receiver_violation in TopoS_eval_impl_proofrule)
  apply(unfold_locales) (*instance*)
 apply(simp_all add: list_graph_to_graph_def)
 done
@@ -60,7 +60,7 @@ section {* SecurityGateway packing *}
   definition NM_LIB_SecurityGateway :: "('v::vertex, secgw_member, unit) TopoS_packed" where
     "NM_LIB_SecurityGateway \<equiv> 
     \<lparr> nm_name = ''SecurityGateway'', 
-      nm_target_focus = NM_SecurityGateway.target_focus,
+      nm_receiver_violation = NM_SecurityGateway.receiver_violation,
       nm_default = NM_SecurityGateway.default_node_properties, 
       nm_sinvar = sinvar,
       nm_verify_globals = verify_globals,

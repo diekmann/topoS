@@ -2,7 +2,7 @@ theory NM_BLPstrict
 imports TopoS_Interface TopoS_Helper
 begin
 
-section {* Stricter Bell LePadula NetworkModel *}
+section {* Stricter Bell LePadula SecurityInvariant *}
 text{* All unclassified data sources must be labeled, defualt assumption: all is secret
 
 Warning: This is considered here an access control strategy
@@ -58,7 +58,7 @@ fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> security_clearance) \<Ri
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> security_clearance) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
 
-definition target_focus :: "bool" where "target_focus \<equiv> False"
+definition receiver_violation :: "bool" where "receiver_violation \<equiv> False"
 
 
 lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
@@ -112,9 +112,9 @@ section {*ENF*}
   done
    
 
-  interpretation BLPstrict: TopoS_ACS sinvar verify_globals default_node_properties
+  interpretation BLPstrict: SecurityInvariant_ACS sinvar verify_globals default_node_properties
   where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = BLP_offending_set"
-    unfolding target_focus_def
+    unfolding receiver_violation_def
     unfolding default_node_properties_def
     apply(unfold_locales)
       apply(rule ballI)
@@ -135,11 +135,11 @@ section {*ENF*}
    done
 
 
-  lemma TopoS_BLPstrict: "NetworkModel sinvar default_node_properties target_focus"
-  unfolding target_focus_def by unfold_locales
+  lemma TopoS_BLPstrict: "SecurityInvariant sinvar default_node_properties receiver_violation"
+  unfolding receiver_violation_def by unfold_locales
    
 hide_fact (open) sinvar_mono   
 
-hide_const (open) sinvar verify_globals target_focus default_node_properties
+hide_const (open) sinvar verify_globals receiver_violation default_node_properties
 
 end

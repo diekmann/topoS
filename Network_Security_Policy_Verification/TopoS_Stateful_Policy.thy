@@ -235,10 +235,10 @@ locale stateful_policy_compliance =
         \<Union>(c_offending_flows m \<lparr>nodes = hosts \<T>, edges = flows_fix \<T> \<union> filternew_flows_state \<T> \<union> backflows (filternew_flows_state \<T>)\<rparr>) \<subseteq> backflows (filternew_flows_state \<T>)"
         by(simp add: stateful_policy_to_network_graph_def all_flows_def get_offending_flows_def, blast)
     
-      --{*idea: use @{thm compliant_stateful_ACS} with the @{thm configured_NetworkModel.Un_set_offending_flows_bound_minus_subseteq} 
+      --{*idea: use @{thm compliant_stateful_ACS} with the @{thm configured_SecurityInvariant.Un_set_offending_flows_bound_minus_subseteq} 
         lemma and substract @{term "backflows (filternew_flows_state \<T>) - E"}, on the right hand side @{term E} remains, as Graph's edges @{term "flows_fix \<T>  \<union> E"} remains*}
 
-      from configured_NetworkModel.Un_set_offending_flows_bound_minus_subseteq[where X="backflows (filternew_flows_state \<T>)", OF _ validGfilternew this]
+      from configured_SecurityInvariant.Un_set_offending_flows_bound_minus_subseteq[where X="backflows (filternew_flows_state \<T>)", OF _ validGfilternew this]
         `valid_reqs (get_ACS M)`
         have
         "\<And> m E. m \<in> set (get_ACS M) \<Longrightarrow>

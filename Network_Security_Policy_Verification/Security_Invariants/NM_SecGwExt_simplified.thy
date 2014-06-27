@@ -2,7 +2,7 @@ theory NM_SecGwExt_simplified
 imports TopoS_Interface TopoS_Helper
 begin
 
-section {* NetworkModel SecurityGatewayExtended simplified*}
+section {* SecurityInvariant SecurityGatewayExtended simplified*}
 text {* A simplified version for demonstration purposes. Do not use in real world *}
 
 datatype secgw_member = SecurityGateway | SecurityGatewayIN | DomainMember | Unassigned
@@ -30,7 +30,7 @@ fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> secgw_member) \<Rightarr
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> secgw_member) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
 
-definition target_focus :: "bool" where "target_focus = False"
+definition receiver_violation :: "bool" where "receiver_violation = False"
 
 subsubsection {*Preleminaries*}
   lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
@@ -80,20 +80,20 @@ section{*ENF*}
     apply(auto)
   done
 
-interpretation SecurityGatewayExtended_simplified: NetworkModel
+interpretation SecurityGatewayExtended_simplified: SecurityInvariant
 where default_node_properties = default_node_properties
 and sinvar = sinvar
 and verify_globals = verify_globals
-and target_focus = target_focus
+and receiver_violation = receiver_violation
 where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = SecurityGatewayExtended_offending_set"
-  unfolding target_focus_def
+  unfolding receiver_violation_def
   unfolding default_node_properties_def
   apply unfold_locales
 
 
   (*apply(frule SecurityInvariant_withOffendingFlows.ENFnr_offending_case1[OF SecurityGateway_ENFnr])*)
 
-  (* only remove target_focus: *)
+  (* only remove receiver_violation: *)
   apply(rule conjI) prefer 2 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
   
   apply (rule SecurityInvariant_withOffendingFlows.ENFnr_fsts_weakrefl_instance[OF _ SecurityGateway_ENFnr Unassigned_botdefault All_to_Unassigned])[1]
@@ -123,6 +123,6 @@ where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = Securit
 
 
 
-hide_const (open) sinvar verify_globals target_focus
+hide_const (open) sinvar verify_globals receiver_violation
 
 end

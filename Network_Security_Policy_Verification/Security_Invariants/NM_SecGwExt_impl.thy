@@ -4,7 +4,7 @@ begin
 
 code_identifier code_module NM_SecGwExt_impl => (Scala) NM_SecGwExt
 
-section {* NetworkModel SecurityGatewayExtended Implementation *}
+section {* SecurityInvariant SecurityGatewayExtended Implementation *}
 
 fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> NM_SecGwExt.secgw_member) \<Rightarrow> bool" where
   "sinvar G nP = (\<forall> (e1,e2) \<in> set (edgesL G). e1 \<noteq> e2 \<longrightarrow> NM_SecGwExt.allowed_secgw_flow (nP e1) (nP e2))"
@@ -22,13 +22,13 @@ definition SecurityGatewayExtended_offending_list:: "'v list_graph \<Rightarrow>
 
 
 definition "NetModel_node_props P = (\<lambda> i. (case (node_properties P) i of Some property \<Rightarrow> property | None \<Rightarrow> NM_SecGwExt.default_node_properties))"
-lemma[code_unfold]: "NetworkModel.node_props NM_SecGwExt.default_node_properties P = NetModel_node_props P"
+lemma[code_unfold]: "SecurityInvariant.node_props NM_SecGwExt.default_node_properties P = NetModel_node_props P"
 apply(simp add: NetModel_node_props_def)
 done
 
 definition "SecurityGateway_eval G P = (valid_list_graph G \<and> 
-  verify_globals G (NetworkModel.node_props NM_SecGwExt.default_node_properties P) (model_global_properties P) \<and> 
-  sinvar G (NetworkModel.node_props NM_SecGwExt.default_node_properties P))"
+  verify_globals G (SecurityInvariant.node_props NM_SecGwExt.default_node_properties P) (model_global_properties P) \<and> 
+  sinvar G (SecurityInvariant.node_props NM_SecGwExt.default_node_properties P))"
 
 
 interpretation SecurityGateway_impl:TopoS_List_Impl 
@@ -37,7 +37,7 @@ interpretation SecurityGateway_impl:TopoS_List_Impl
   and sinvar_impl=sinvar
   and verify_globals_spec=NM_SecGwExt.verify_globals
   and verify_globals_impl=verify_globals
-  and target_focus=NM_SecGwExt.target_focus
+  and receiver_violation=NM_SecGwExt.receiver_violation
   and offending_flows_impl=SecurityGatewayExtended_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=SecurityGateway_eval
@@ -59,7 +59,7 @@ section {* SecurityGateway packing *}
   definition NM_LIB_SecurityGatewayExtended :: "('v::vertex, secgw_member, unit) TopoS_packed" where
     "NM_LIB_SecurityGatewayExtended \<equiv> 
     \<lparr> nm_name = ''SecurityGatewayExtended'', 
-      nm_target_focus = NM_SecGwExt.target_focus,
+      nm_receiver_violation = NM_SecGwExt.receiver_violation,
       nm_default = NM_SecGwExt.default_node_properties, 
       nm_sinvar = sinvar,
       nm_verify_globals = verify_globals,

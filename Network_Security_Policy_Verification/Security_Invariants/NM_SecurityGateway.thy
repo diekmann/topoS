@@ -4,7 +4,7 @@ begin
 
 (*deprecated by SecurityGatewayExtended*)
 
-section {* NetworkModel SecurityGateway *}
+section {* SecurityInvariant SecurityGateway *}
 
 datatype secgw_member = SecurityGateway | DomainMember | Unassigned
 
@@ -28,7 +28,7 @@ fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> secgw_member) \<Rightarr
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> secgw_member) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
 
-definition target_focus :: "bool" where "target_focus = False"
+definition receiver_violation :: "bool" where "receiver_violation = False"
 
 
 
@@ -86,17 +86,17 @@ subsection {*ENRnr*}
   done
 
 
-interpretation SecurityGateway: NetworkModel
+interpretation SecurityGateway: SecurityInvariant
 where default_node_properties = default_node_properties
 and sinvar = sinvar
 and verify_globals = verify_globals
-and target_focus = target_focus
+and receiver_violation = receiver_violation
 where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = SecurityGateway_offending_set"
-  unfolding target_focus_def
+  unfolding receiver_violation_def
   unfolding default_node_properties_def
   apply unfold_locales
 
-     (* only remove target_focus: *)
+     (* only remove receiver_violation: *)
      apply(rule conjI) prefer 2 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
   
      apply (rule SecurityInvariant_withOffendingFlows.ENFnr_fsts_weakrefl_instance[OF SecurityGateway_ENRnr Unassigned_botdefault All_to_Unassigned])
@@ -125,7 +125,7 @@ where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = Securit
 
 
 hide_fact (open) sinvar_mono   
-hide_const (open) sinvar verify_globals target_focus default_node_properties
+hide_const (open) sinvar verify_globals receiver_violation default_node_properties
 
 
 end
