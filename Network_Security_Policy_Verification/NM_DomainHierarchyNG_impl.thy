@@ -27,7 +27,7 @@ definition DomainHierarchyNG_offending_list:: "'v list_graph \<Rightarrow> ('v \
 
 lemma "DomainHierarchyNG.node_props P = 
   (\<lambda>i. case node_properties P i of None \<Rightarrow> NM_DomainHierarchyNG.default_node_properties | Some property \<Rightarrow> property)"
-by(fact NetworkModel.node_props.simps[OF DomainHierarchyTE_NetworkModel, of "P"])
+by(fact NetworkModel.node_props.simps[OF NetworkModel_DomainHierarchyNG, of "P"])
 
 definition "NetModel_node_props P = (\<lambda> i. (case (node_properties P) i of Some property \<Rightarrow> property | None \<Rightarrow> NM_DomainHierarchyNG.default_node_properties))"
 (*lemma[code_unfold]: "NetworkModel.node_props NM_DomainHierarchy.default_node_properties P = NetModel_node_props P"
@@ -53,18 +53,19 @@ interpretation DomainHierarchyNG_impl:NetworkModel_List_Impl
   and offending_flows_impl=DomainHierarchyNG_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=DomainHierarchyNG_eval
-apply(unfold_locales)
-     apply(simp add: list_graph_to_graph_def)
-    apply(simp add: list_graph_to_graph_def)
-   apply(simp add: list_graph_to_graph_def DomainHierarchyNG_offending_set DomainHierarchyNG_offending_set_def DomainHierarchyNG_offending_list_def)
+ apply(unfold NetworkModel_List_Impl_def)
+ apply(rule conjI)
+  apply(simp add: NetworkModel_DomainHierarchyNG list_graph_to_graph_def)
+ apply(rule conjI)
+  apply(simp add: list_graph_to_graph_def DomainHierarchyNG_offending_set DomainHierarchyNG_offending_set_def DomainHierarchyNG_offending_list_def)
+ apply(rule conjI)
   apply(simp only: NetModel_node_props_def)
- apply(metis DomainHierarchyNG.node_props.simps DomainHierarchyNG.node_props_eq_node_props_formaldef)
-apply(simp only: DomainHierarchyNG_eval_def)
-apply(rule_tac target_focus=NM_DomainHierarchyNG.target_focus in NetworkModel_eval_impl_proofrule)
-   apply(unfold_locales) (*instance *)
-apply(simp_all add: list_graph_to_graph_def)
+  apply(metis DomainHierarchyNG.node_props.simps DomainHierarchyNG.node_props_eq_node_props_formaldef)
+ apply(simp only: DomainHierarchyNG_eval_def)
+ apply(intro allI)
+ apply(rule NetworkModel_eval_impl_proofrule[OF NetworkModel_DomainHierarchyNG])
+ apply(simp_all add: list_graph_to_graph_def)
 done
-
 
 
 section {* DomainHierarchyNG packing *}

@@ -583,28 +583,25 @@ section {*ENF*}
     apply(simp add: default_node_properties_def)
    done
 
-interpretation DomainHierarchyNG: NetworkModel
+interpretation DomainHierarchyNG: NetworkModel_ACS
 where default_node_properties = default_node_properties
 and eval_model = eval_model
 and verify_globals = verify_globals
-and target_focus = target_focus
 where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = DomainHierarchyNG_offending_set"
-  unfolding target_focus_def
   apply unfold_locales
-  
-    apply(rule conjI) prefer 2 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
+    apply(rule ballI)
     apply(drule NetworkModel_withOffendingFlows.ENF_fsts_refl_instance[OF DomainHierarchyNG_ENF_refl unassigned_default_candidate], simp_all)[1]
-
-   apply(drule Unassigned_unique_default, simp) 
-
+   apply(erule default_uniqueness_by_counterexample_ACS)
+   apply(drule Unassigned_unique_default) 
+   apply(simp)
   apply(fact DomainHierarchyNG_offending_set)
  done
 
 
 
 
-lemma DomainHierarchyTE_NetworkModel: "NetworkModel eval_model default_node_properties target_focus"
-  by(unfold_locales)
+lemma NetworkModel_DomainHierarchyNG: "NetworkModel eval_model default_node_properties target_focus"
+  unfolding target_focus_def by(unfold_locales)
 
 
 

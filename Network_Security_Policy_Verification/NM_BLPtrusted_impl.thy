@@ -48,7 +48,8 @@ interpretation BLPtrusted_impl:NetworkModel_List_Impl
   apply(simp only: NetModel_node_props_def)
   apply(metis BLPtrusted.node_props.simps BLPtrusted.node_props_eq_node_props_formaldef)
  apply(simp only: BLP_eval_def)
- apply(simp add: NetworkModel_eval_impl_proofrule[OF NetworkModel_BLPtrusted])
+ apply(intro allI)
+ apply(rule NetworkModel_eval_impl_proofrule[OF NetworkModel_BLPtrusted])
  apply(simp_all add: list_graph_to_graph_def)
 done
 

@@ -64,24 +64,32 @@ interpretation Dependability_norefl_impl:NetworkModel_List_Impl
   and offending_flows_impl=Dependability_norefl_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=Dependability_norefl_eval
- apply(unfold_locales)
-      apply(fact eval_model_correct)
-     apply(simp add: list_graph_to_graph_def)
-     apply(unfold Dependability_norefl_offending_list_def)
-      apply(rule Generic_offending_list_correct)
-     apply(simp)
-     apply(clarify)
-     apply(simp)
-     apply(simp add: FiniteListGraph.num_reachable_norefl_correct)
-    apply(simp add: list_graph_to_graph_def)
-    apply(simp only: NetModel_node_props_def)
-   apply(metis Dependability.node_props.simps Dependability.node_props_eq_node_props_formaldef)
-   apply(simp only: Dependability_norefl_eval_def)
-   apply(rule_tac target_focus=NM_Dependability_norefl.target_focus in NetworkModel_eval_impl_proofrule)
-     apply(unfold_locales) (*instance*)
-    apply(fact eval_model_correct)
+ apply(unfold NetworkModel_List_Impl_def)
+ apply(rule conjI)
+  apply(rule conjI)
+   apply(simp add: NetworkModel_Dependability_norefl)
+  apply(rule conjI)
+   apply(intro allI impI)
+   apply(fact eval_model_correct)
   apply(simp)
+ apply(rule conjI)
+  apply(unfold Dependability_norefl_offending_list_def)
+  apply(intro allI impI)
+  apply(rule Generic_offending_list_correct)
+   apply(assumption)
+  apply(intro allI impI)
+  apply(simp only: eval_model_correct)
+ apply(rule conjI)
+  apply(intro allI)
+  apply(simp only: NetModel_node_props_def)
+  apply(metis Dependability.node_props.simps Dependability.node_props_eq_node_props_formaldef)
+ apply(simp only: Dependability_norefl_eval_def)
+ apply(intro allI impI)
+ apply(rule NetworkModel_eval_impl_proofrule[OF NetworkModel_Dependability_norefl])
+  apply(simp only: eval_model_correct)
+ apply(simp)
 done
+
 
 section {* packing *}
   definition NM_LIB_Dependability_norefl :: "('v::vertex, NM_Dependability_norefl.dependability_level, unit) NetworkModel_packed" where
