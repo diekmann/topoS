@@ -1,7 +1,6 @@
 theory NetworkModel_Helper
 imports Main NetworkModel_Interface NetworkModel_Util 
-  NetworkModel_ENF NetworkModel_ENFnr NetworkModel_ENFnrSR
-  NetworkModel_ENF_sr
+  NetworkModel_ENF
   NetworkModel_withOffendingFlows_lemmata
   vertex_example_simps
 begin
