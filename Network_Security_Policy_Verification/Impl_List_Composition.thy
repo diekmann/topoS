@@ -91,7 +91,7 @@ section{*Generating instantiated (configured) network security models*}
 
   --"From"
   thm new_configured_NetworkSecurityModel_sound
-  --"we get that new_configured_list_NetworkSecurityModel has all the necessary properties (modulo NetworkSecurityModel_complies_formal_def)"
+  --"we get that @{const new_configured_list_NetworkSecurityModel} has all the necessary properties (modulo @{const NetworkSecurityModel_complies_formal_def})"
 
 section{*About valid network security requirements*}
 

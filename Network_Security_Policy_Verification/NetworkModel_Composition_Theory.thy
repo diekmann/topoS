@@ -242,7 +242,7 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
         apply blast
         done
 
-    subsection{* generate_valid_topology *}
+    subsection{* generate valid topology *}
     (*
       lemma generate_valid_topology_def_delete_multiple: 
         "generate_valid_topology M G = delete_edges (generate_valid_topology M G) (\<Union> (get_offending_flows M G))"

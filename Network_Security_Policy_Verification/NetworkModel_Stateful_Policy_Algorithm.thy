@@ -106,7 +106,7 @@ section {* Sketch for generating a stateful policy from a simple directed policy
       case(Cons e Es)
         from Cons.prems(3) Cons.prems(2) have "fst ` set accu \<subseteq> V" and "snd ` set accu \<subseteq> V"
           by(auto simp add: valid_graph_def)
-        --"valid_graph for some complicated structures"
+        --"@{const valid_graph} for some complicated structures"
         from Cons.prems(2) this Cons.prems(4)  have "\<And>ea. ea\<in>E \<Longrightarrow> valid_graph \<lparr> nodes = V, edges = insert e (insert ea (set accu)) \<rparr>"
           by(auto simp add: valid_graph_def)
         from backflows_valid[OF this] valid_graph_union_edges[OF Cons.prems(2)]
@@ -244,7 +244,7 @@ section {* Sketch for generating a stateful policy from a simple directed policy
 
 
 
-  text{*Next, *}
+  text{*Next *}
     (*"\<forall>F \<in> get_offending_flows (get_ACS M) (stateful_policy_to_network_graph \<T> ). F \<subseteq> backflows (filternew_flows_state \<T>)"*)
     (*first in list are more likely to be kept*)
     fun filter_compliant_stateful_ACS_accu :: "'v::vertex graph \<Rightarrow> 'v NetworkSecurityModel_configured list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list" where
@@ -620,7 +620,7 @@ section {* Sketch for generating a stateful policy from a simple directed policy
     thm filter_compliant_stateful_ACS_correct filter_compliant_stateful_ACS_maximal
 
 
-    text{*get those together. We cannot say edgesList = E here because one filters first. i guess filtering ACS first is easier, ...*}
+    text{*get those together. We cannot say @{text "edgesList = E"} here because one filters first. I guess filtering ACS first is easier, ...*}
 
 
 
@@ -827,7 +827,7 @@ section {* Sketch for generating a stateful policy from a simple directed policy
       from edgesList have edgesUnsimp: "edges G \<union> (?filterACS \<inter> ?filterIFS) = edges G"
         using filter_IFS_no_violations_subseteq_input filter_compliant_stateful_ACS_subseteq_input by blast
 
-      --"We set up a ?REM that we use in the configured_NetworkModel.Un_set_offending_flows_bound_minus_subseteq lemma"
+      --"We set up a ?REM that we use in the @{thm configured_NetworkModel.Un_set_offending_flows_bound_minus_subseteq} lemma"
       let ?REM = "(backflows (?filterACS) - backflows (?filterIFS)) - edges G"
 
       have REM_gives_desired_upper_bound: "(backflows (?filterACS) - edges G) - ?REM = backflows (?filterACS \<inter> ?filterIFS) - edges G"

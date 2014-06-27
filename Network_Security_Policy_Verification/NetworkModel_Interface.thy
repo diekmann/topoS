@@ -253,7 +253,7 @@ subsection {*Information flow security*}
         "\<lbrakk> valid_graph G; f \<in> set_offending_flows G nP \<rbrakk> \<Longrightarrow>
           \<forall>i \<in> snd` f. \<not> eval_model G (nP(i := \<bottom>))"
       and
-      --{* If some otherbot fulfills @{rext default_secure}, it must be @{term "\<bottom>"} 
+      --{* If some otherbot fulfills @{text default_secure}, it must be @{term "\<bottom>"} 
              Hence, @{term "\<bottom>"} is uniquely defined *}
       default_unique_IFS:
       "(\<forall>G f nP i. valid_graph G \<and> f \<in> set_offending_flows G nP \<and> i \<in> snd` f 

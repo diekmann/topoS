@@ -7,6 +7,7 @@ session "Network_Security_Policy_Verification" = HOL +
     "Lib/FiniteListGraph_Impl"
     "Lib/FiniteListGraph"
     "Lib/Efficient_Distinct"
+    "~~/src/HOL/Lattice/CompleteLattice"
   theories
     Network_Security_Policy_Verification
     attic
