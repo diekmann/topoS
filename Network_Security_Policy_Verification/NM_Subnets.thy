@@ -90,40 +90,38 @@ section{*ENF*}
   done
 
 
-interpretation Subnets: NetworkModel
+interpretation Subnets: NetworkModel_ACS
 where default_node_properties = NM_Subnets.default_node_properties
 and eval_model = NM_Subnets.eval_model
 and verify_globals = verify_globals
-and target_focus = target_focus
 where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = Subnets_offending_set"
-  unfolding target_focus_def
   unfolding NM_Subnets.default_node_properties_def
   apply unfold_locales
-
-  (* only remove target_focus: *)
-  apply(rule conjI) prefer 2 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
-
-  apply (rule NetworkModel_withOffendingFlows.ENF_fsts_refl_instance[OF Subnets_ENF_refl Unassigned_default_candidate])[1]
-   apply(simp_all)[2]
-
- apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
+    apply(rule ballI)
+    apply (rule NetworkModel_withOffendingFlows.ENF_fsts_refl_instance[OF Subnets_ENF_refl Unassigned_default_candidate])[1]
+      apply(simp_all)[2]
+   apply(erule default_uniqueness_by_counterexample_ACS)
+   apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
       NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
       NetworkModel_withOffendingFlows.is_offending_flows_def)
-  apply (simp add:graph_ops)
-  apply (simp split: split_split_asm split_split add:prod_case_beta)
-  apply(rule_tac x="\<lparr> nodes={vertex_1,vertex_2}, edges = {(vertex_1,vertex_2)} \<rparr>" in exI, simp)
-  apply(rule conjI)
-   apply(simp add: valid_graph_def)
-  apply(case_tac otherbot, simp_all)
-  apply(rename_tac mysubnetcase)
-  apply(rule_tac x="(\<lambda> x. Unassigned)(vertex_1 := Unassigned, vertex_2 := BorderRouter mysubnetcase)" in exI, simp)
-    apply(rule_tac x="{(vertex_1,vertex_2)}" in exI, simp)
-  apply(rule_tac x="(\<lambda> x. Unassigned)(vertex_1 := Unassigned, vertex_2 := BorderRouter whatever)" in exI, simp)
-    apply(rule_tac x="{(vertex_1,vertex_2)}" in exI, simp)
+    apply (simp add:graph_ops)
+    apply (simp split: split_split_asm split_split add:prod_case_beta)
+    apply(rule_tac x="\<lparr> nodes={vertex_1,vertex_2}, edges = {(vertex_1,vertex_2)} \<rparr>" in exI, simp)
+    apply(rule conjI)
+     apply(simp add: valid_graph_def)
+    apply(case_tac otherbot, simp_all)
+    apply(rename_tac mysubnetcase)
+    apply(rule_tac x="(\<lambda> x. Unassigned)(vertex_1 := Unassigned, vertex_2 := BorderRouter mysubnetcase)" in exI, simp)
+      apply(rule_tac x="{(vertex_1,vertex_2)}" in exI, simp)
+    apply(rule_tac x="(\<lambda> x. Unassigned)(vertex_1 := Unassigned, vertex_2 := BorderRouter whatever)" in exI, simp)
+      apply(rule_tac x="{(vertex_1,vertex_2)}" in exI, simp)
 
-  apply(fact Subnets_offending_set)
+   apply(fact Subnets_offending_set)
   done
 
+
+  lemma NetworkModel_Subnets: "NetworkModel eval_model default_node_properties target_focus"
+  unfolding target_focus_def by unfold_locales
 
 subsection {* Analysis *}
 

@@ -80,25 +80,18 @@ section{*ENF*}
     apply(auto)
   done
 
-interpretation SecurityGatewayExtended: NetworkModel
+interpretation SecurityGatewayExtended: NetworkModel_ACS
 where default_node_properties = default_node_properties
 and eval_model = eval_model
 and verify_globals = verify_globals
-and target_focus = target_focus
 where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = SecurityGatewayExtended_offending_set"
-  unfolding target_focus_def
   unfolding default_node_properties_def
   apply unfold_locales
-
-
-  (*apply(frule NetworkModel_withOffendingFlows.ENFnr_offending_case1[OF SecurityGateway_ENFnr])*)
-
-    (* only remove target_focus: *)
-    apply(rule conjI) prefer 2 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
-  
+    apply(rule ballI)
     apply (rule NetworkModel_withOffendingFlows.ENFnr_fsts_weakrefl_instance[OF SecurityGateway_ENFnr Unassigned_botdefault All_to_Unassigned])[1]
-      apply(simp_all)[3]
-
+     apply(simp)
+    apply(simp)
+   apply(erule default_uniqueness_by_counterexample_ACS)
    apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
       NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
       NetworkModel_withOffendingFlows.is_offending_flows_def)
@@ -126,6 +119,9 @@ where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = Security
  done
 
 
+
+  lemma NetworkModel_SecurityGatewayExtended: "NetworkModel eval_model default_node_properties target_focus"
+  unfolding target_focus_def by unfold_locales  
 
 hide_const (open) eval_model verify_globals target_focus
 

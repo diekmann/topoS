@@ -13,8 +13,8 @@ fun verify_globals :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> NM_SecGwExt
   "verify_globals _ _ _ = True"
 
 
-definition SecurityGateway_offending_list:: "'v list_graph \<Rightarrow> ('v \<Rightarrow> secgw_member) \<Rightarrow> ('v \<times> 'v) list list" where
-  "SecurityGateway_offending_list G nP = (if eval_model G nP then
+definition SecurityGatewayExtended_offending_list:: "'v list_graph \<Rightarrow> ('v \<Rightarrow> secgw_member) \<Rightarrow> ('v \<times> 'v) list list" where
+  "SecurityGatewayExtended_offending_list G nP = (if eval_model G nP then
     []
    else 
     [ [e \<leftarrow> edgesL G. case e of (e1,e2) \<Rightarrow> e1 \<noteq> e2 \<and> \<not> allowed_secgw_flow (nP e1) (nP e2)] ])"
@@ -38,21 +38,21 @@ interpretation SecurityGateway_impl:NetworkModel_List_Impl
   and verify_globals_spec=NM_SecGwExt.verify_globals
   and verify_globals_impl=verify_globals
   and target_focus=NM_SecGwExt.target_focus
-  and offending_flows_impl=SecurityGateway_offending_list
+  and offending_flows_impl=SecurityGatewayExtended_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=SecurityGateway_eval
-apply(unfold_locales)
- apply(simp add: list_graph_to_graph_def)
- apply(simp add: list_graph_to_graph_def)
- apply(simp add: list_graph_to_graph_def SecurityGatewayExtended_offending_set SecurityGatewayExtended_offending_set_def SecurityGateway_offending_list_def)
-apply(simp only: NetModel_node_props_def)
- apply(metis SecurityGatewayExtended.node_props.simps SecurityGatewayExtended.node_props_eq_node_props_formaldef)
-apply(simp only: SecurityGateway_eval_def)
-apply(rule_tac target_focus=NM_SecGwExt.target_focus in NetworkModel_eval_impl_proofrule)
- apply(unfold_locales) (*instance*)
-apply(simp_all add: list_graph_to_graph_def)
+ apply(unfold NetworkModel_List_Impl_def)
+ apply(rule conjI)
+  apply(simp add: NetworkModel_SecurityGatewayExtended list_graph_to_graph_def)
+ apply(rule conjI)
+  apply(simp add: list_graph_to_graph_def SecurityGatewayExtended_offending_set SecurityGatewayExtended_offending_set_def SecurityGatewayExtended_offending_list_def)
+ apply(rule conjI)
+  apply(simp only: NetModel_node_props_def)
+  apply(metis SecurityGatewayExtended.node_props.simps SecurityGatewayExtended.node_props_eq_node_props_formaldef)
+ apply(simp only: SecurityGateway_eval_def)
+ apply(simp add: NetworkModel_eval_impl_proofrule[OF NetworkModel_SecurityGatewayExtended])
+ apply(simp_all add: list_graph_to_graph_def)
 done
-
 
 
 section {* SecurityGateway packing *}
@@ -63,7 +63,7 @@ section {* SecurityGateway packing *}
       nm_default = NM_SecGwExt.default_node_properties, 
       nm_eval_model = eval_model,
       nm_verify_globals = verify_globals,
-      nm_offending_flows = SecurityGateway_offending_list, 
+      nm_offending_flows = SecurityGatewayExtended_offending_list, 
       nm_node_props = NetModel_node_props,
       nm_eval = SecurityGateway_eval
       \<rparr>"

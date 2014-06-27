@@ -2,6 +2,8 @@ theory NM_SecurityGateway
 imports NetworkModel_Interface NetworkModel_Helper
 begin
 
+(*deprecated by SecurityGatewayExtended*)
+
 section {* NetworkModel SecurityGateway *}
 
 datatype secgw_member = SecurityGateway | DomainMember | Unassigned

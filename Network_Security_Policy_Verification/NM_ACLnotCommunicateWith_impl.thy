@@ -28,6 +28,10 @@ definition "ACLnotCommunicateWith_eval G P = (valid_list_graph G \<and>
   eval_model G (NetworkModel.node_props NM_ACLnotCommunicateWith.default_node_properties P))"
 
 
+lemma eval_model_correct: "valid_list_graph G \<Longrightarrow> NM_ACLnotCommunicateWith.eval_model (list_graph_to_graph G) nP = eval_model G nP"
+by (metis NM_ACLnotCommunicateWith.eval_model.simps NM_ACLnotCommunicateWith_impl.eval_model.simps graph.select_convs(1) list_graph_to_graph_def succ_tran_correct)
+
+
 interpretation ACLnotCommunicateWith_impl:NetworkModel_List_Impl 
   where default_node_properties=NM_ACLnotCommunicateWith.default_node_properties
   and eval_model_spec=NM_ACLnotCommunicateWith.eval_model
@@ -38,23 +42,33 @@ interpretation ACLnotCommunicateWith_impl:NetworkModel_List_Impl
   and offending_flows_impl=ACLnotCommunicateWith_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=ACLnotCommunicateWith_eval
-apply(unfold_locales)
- apply(simp add: FiniteListGraph.succ_tran_correct[symmetric] list_graph_to_graph_def)
- apply(simp add: list_graph_to_graph_def)
- apply(unfold ACLnotCommunicateWith_offending_list_def)
-  apply(rule Generic_offending_list_correct)
+ apply(unfold NetworkModel_List_Impl_def)
+ apply(rule conjI)
+  apply(rule conjI)
+   apply(simp add: NetworkModel_ACLnotCommunicateWith)
+  apply(rule conjI)
+   apply(intro allI impI)
+   apply(fact eval_model_correct)
   apply(simp)
- apply(simp add: FiniteListGraph.succ_tran_correct[symmetric] list_graph_to_graph_def)
-apply(simp only: NetModel_node_props_def)
- apply(metis ACLnotCommunicateWith.node_props.simps ACLnotCommunicateWith.node_props_eq_node_props_formaldef)
-apply(simp only: ACLnotCommunicateWith_eval_def)
-apply(rule_tac target_focus=NM_ACLnotCommunicateWith.target_focus in NetworkModel_eval_impl_proofrule)
- apply(unfold_locales) (*instance*)
-apply(simp_all add: list_graph_to_graph_def FiniteListGraph.succ_tran_correct[symmetric])
+ apply(rule conjI)
+  apply(unfold ACLnotCommunicateWith_offending_list_def)
+  apply(intro allI impI)
+  apply(rule Generic_offending_list_correct)
+   apply(assumption)
+  apply(intro allI impI)
+  apply(simp only: eval_model_correct)
+ apply(rule conjI)
+  apply(intro allI)
+  apply(simp only: NetModel_node_props_def)
+  apply(metis ACLnotCommunicateWith.node_props.simps ACLnotCommunicateWith.node_props_eq_node_props_formaldef)
+ apply(simp only: ACLnotCommunicateWith_eval_def)
+ apply(intro allI impI)
+ apply(rule NetworkModel_eval_impl_proofrule[OF NetworkModel_ACLnotCommunicateWith])
+  apply(simp only: eval_model_correct)
+ apply(simp)
 done
 
-
-section {* CommunicationPartners packing *}
+section {* packing *}
   definition NM_LIB_ACLnotCommunicateWith:: "('v::vertex, 'v set, unit) NetworkModel_packed" where
     "NM_LIB_ACLnotCommunicateWith \<equiv> 
     \<lparr> nm_name = ''ACLnotCommunicateWith'', 

@@ -41,16 +41,17 @@ interpretation Subnets_impl:NetworkModel_List_Impl
   and offending_flows_impl=Subnets_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=Subnets_eval
-apply(unfold_locales)
- apply(simp add: list_graph_to_graph_def)
- apply(simp add: list_graph_to_graph_def)
- apply(simp add: list_graph_to_graph_def Subnets_offending_set Subnets_offending_set_def Subnets_offending_list_def)
-apply(simp only: NetModel_node_props_def)
- apply(metis Subnets.node_props.simps Subnets.node_props_eq_node_props_formaldef)
-apply(simp only: Subnets_eval_def)
-apply(rule_tac target_focus=NM_Subnets.target_focus in NetworkModel_eval_impl_proofrule)
- apply(unfold_locales) (*instance*)
-apply(simp_all add: list_graph_to_graph_def)
+ apply(unfold NetworkModel_List_Impl_def)
+ apply(rule conjI)
+  apply(simp add: NetworkModel_Subnets list_graph_to_graph_def)
+ apply(rule conjI)
+  apply(simp add: list_graph_to_graph_def Subnets_offending_set Subnets_offending_set_def Subnets_offending_list_def)
+ apply(rule conjI)
+  apply(simp only: NetModel_node_props_def)
+  apply(metis Subnets.node_props.simps Subnets.node_props_eq_node_props_formaldef)
+ apply(simp only: Subnets_eval_def)
+ apply(simp add: NetworkModel_eval_impl_proofrule[OF NetworkModel_Subnets])
+ apply(simp_all add: list_graph_to_graph_def)
 done
 
 

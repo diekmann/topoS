@@ -76,22 +76,18 @@ section{*ENF*}
   done
 
 
-interpretation Sink: NetworkModel
+interpretation Sink: NetworkModel_IFS
 where default_node_properties = default_node_properties
 and eval_model = eval_model
 and verify_globals = verify_globals
-and target_focus = target_focus
 where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = Sink_offending_set"
-  unfolding target_focus_def
   unfolding default_node_properties_def
   apply unfold_locales
-
-  (* only remove target_focus: *)
-    apply(rule conjI) prefer 1 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
-  
+    apply(rule ballI)
     apply (rule NetworkModel_withOffendingFlows.ENFnr_snds_weakrefl_instance[OF Sink_ENFnr Unassigned_default_candidate Unassigned_to_All])
-      apply(simp_all)[3]
+     apply(simp_all)[2]
 
+   apply(erule default_uniqueness_by_counterexample_IFS)
    apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
       NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
       NetworkModel_withOffendingFlows.is_offending_flows_def)
@@ -111,6 +107,9 @@ where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = Sink_off
   apply(fact Sink_offending_set)
   done
 
+
+  lemma NetworkModel_Sink: "NetworkModel eval_model default_node_properties target_focus"
+  unfolding target_focus_def by unfold_locales
 
 hide_fact (open) eval_model_mono   
 hide_const (open) eval_model verify_globals target_focus default_node_properties

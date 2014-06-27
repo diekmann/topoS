@@ -73,12 +73,10 @@ lemma unique_default_example: "succ_tran \<lparr>nodes = {vertex_1, vertex_2}, e
 apply (simp add: succ_tran_def)
 by (metis Domain.DomainI Domain_empty Domain_insert distince_vertices12 singleton_iff trancl_domain)
 
-interpretation ACLcommunicateWith: NetworkModel
+interpretation ACLcommunicateWith: NetworkModel_ACS
 where default_node_properties = NM_ACLcommunicateWith.default_node_properties
 and eval_model = NM_ACLcommunicateWith.eval_model
 and verify_globals = verify_globals
-and target_focus = target_focus
-  unfolding target_focus_def
   unfolding NM_ACLcommunicateWith.default_node_properties_def
   apply unfold_locales
   
@@ -88,6 +86,7 @@ and target_focus = target_focus
    apply (metis accesses_okay_empty)
 
 
+  apply(erule default_uniqueness_by_counterexample_ACS)
   apply(case_tac "otherbot")
   apply(simp)
   apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
@@ -118,6 +117,10 @@ and target_focus = target_focus
   apply(simp add: example_simps)
   apply(fastforce)
  done
+
+
+  lemma NetworkModel_ACLcommunicateWith: "NetworkModel eval_model default_node_properties target_focus"
+  unfolding target_focus_def by unfold_locales  
 
 hide_const (open) eval_model verify_globals target_focus default_node_properties
 
