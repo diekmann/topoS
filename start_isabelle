@@ -5,6 +5,6 @@ echo "setting TOPOS_HOME to: $TOPOS_HOME"
 
 cd "$TOPOS_HOME"
 
-export AFP="${TOPOS_HOME}/thy_lib/isabelle_afp"
+export AFP="${TOPOS_HOME}/isabelle_afp"
 
-isabelle jedit -d "${TOPOS_HOME}/thy_lib/isabelle_afp" -l "Collections" &
+isabelle jedit -d "${TOPOS_HOME}/isabelle_afp" -l "Collections" &
