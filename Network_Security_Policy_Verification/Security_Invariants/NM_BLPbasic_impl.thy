@@ -4,14 +4,14 @@ begin
 
 code_identifier code_module NM_BLPbasic_impl => (Scala) NM_BLPbasic
 
-fun eval_model :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> privacy_level) \<Rightarrow> bool" where
-  "eval_model G nP = (\<forall> (e1,e2) \<in> set (edgesL G). (nP e1) \<le> (nP e2))"
+fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> privacy_level) \<Rightarrow> bool" where
+  "sinvar G nP = (\<forall> (e1,e2) \<in> set (edgesL G). (nP e1) \<le> (nP e2))"
 
 fun verify_globals :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> privacy_level) \<Rightarrow> unit \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
 
 definition BLP_offending_list:: "'v list_graph \<Rightarrow> ('v \<Rightarrow> privacy_level) \<Rightarrow> ('v \<times> 'v) list list" where
-  "BLP_offending_list G nP = (if eval_model G nP then
+  "BLP_offending_list G nP = (if sinvar G nP then
     []
    else 
     [ [e \<leftarrow> edgesL G. case e of (e1,e2) \<Rightarrow> (nP e1) > (nP e2)] ])"
@@ -25,13 +25,13 @@ done
 
 definition "BLP_eval G P = (valid_list_graph G \<and> 
   verify_globals G (NetworkModel.node_props NM_BLPbasic.default_node_properties P) (model_global_properties P) \<and> 
-  eval_model G (NetworkModel.node_props NM_BLPbasic.default_node_properties P))"
+  sinvar G (NetworkModel.node_props NM_BLPbasic.default_node_properties P))"
 
 
 interpretation BLPbasic_impl:TopoS_List_Impl
   where default_node_properties=NM_BLPbasic.default_node_properties
-  and eval_model_spec=NM_BLPbasic.eval_model
-  and eval_model_impl=eval_model
+  and sinvar_spec=NM_BLPbasic.sinvar
+  and sinvar_impl=sinvar
   and verify_globals_spec=NM_BLPbasic.verify_globals
   and verify_globals_impl=verify_globals
   and target_focus=NM_BLPbasic.target_focus
@@ -61,14 +61,14 @@ section {* BLPbasic packing *}
     \<lparr> nm_name = ''BLPbasic'', 
       nm_target_focus = NM_BLPbasic.target_focus,
       nm_default = NM_BLPbasic.default_node_properties, 
-      nm_eval_model = eval_model,
+      nm_sinvar = sinvar,
       nm_verify_globals = verify_globals,
       nm_offending_flows = BLP_offending_list, 
       nm_node_props = NetModel_node_props,
       nm_eval = BLP_eval
       \<rparr>"
   interpretation NM_LIB_BLPbasic_interpretation: TopoS_modelLibrary NM_LIB_BLPbasic 
-      NM_BLPbasic.eval_model NM_BLPbasic.verify_globals
+      NM_BLPbasic.sinvar NM_BLPbasic.verify_globals
     apply(unfold TopoS_modelLibrary_def NM_LIB_BLPbasic_def)
     apply(rule conjI)
      apply(simp)
@@ -91,26 +91,26 @@ section{* Example *}
   definition sensorProps_try1 :: "vString \<Rightarrow> privacy_level" where
     "sensorProps_try1 \<equiv> (\<lambda> n. NM_BLPbasic.default_node_properties)(TopoS_Vertices.V ''PresenceSensor'' := 2, TopoS_Vertices.V ''Webcam'' := 3)"
   value[code] "BLP_offending_list fabNet sensorProps_try1"
-  value[code] "eval_model fabNet sensorProps_try1"
+  value[code] "sinvar fabNet sensorProps_try1"
 
   definition sensorProps_try2 :: "vString \<Rightarrow> privacy_level" where
     "sensorProps_try2 \<equiv> (\<lambda> n. NM_BLPbasic.default_node_properties)(TopoS_Vertices.V ''PresenceSensor'' := 2, TopoS_Vertices.V ''Webcam'' := 3, 
                                                        TopoS_Vertices.V ''SensorSink'' := 3)"
   value[code] "BLP_offending_list fabNet sensorProps_try2"
-  value[code] "eval_model fabNet sensorProps_try2"
+  value[code] "sinvar fabNet sensorProps_try2"
 
   definition sensorProps_try3 :: "vString \<Rightarrow> privacy_level" where
     "sensorProps_try3 \<equiv> (\<lambda> n. NM_BLPbasic.default_node_properties)(TopoS_Vertices.V ''PresenceSensor'' := 2, TopoS_Vertices.V ''Webcam'' := 3, 
                                                        TopoS_Vertices.V ''SensorSink'' := 3, TopoS_Vertices.V ''Statistics'' := 3)"
   value[code] "BLP_offending_list fabNet sensorProps_try3"
-  value[code] "eval_model fabNet sensorProps_try3"
+  value[code] "sinvar fabNet sensorProps_try3"
 
   text {* Another parameter set for confidential controlling information*}
   definition sensorProps_conf :: "vString \<Rightarrow> privacy_level" where
     "sensorProps_conf \<equiv> (\<lambda> n. NM_BLPbasic.default_node_properties)(TopoS_Vertices.V ''MissionControl1'' := 1, TopoS_Vertices.V ''MissionControl2'' := 2,
       TopoS_Vertices.V ''Bot1'' := 1, TopoS_Vertices.V ''Bot2'' := 2 )"
   value[code] "BLP_offending_list fabNet sensorProps_conf"
-  value[code] "eval_model fabNet sensorProps_conf"
+  value[code] "sinvar fabNet sensorProps_conf"
 
 
 text {* Complete example:*}
@@ -128,6 +128,6 @@ export_code NM_LIB_BLPbasic in Scala
 
 hide_const (open) NetModel_node_props BLP_offending_list BLP_eval
 
-hide_const (open) eval_model verify_globals
+hide_const (open) sinvar verify_globals
 
 end

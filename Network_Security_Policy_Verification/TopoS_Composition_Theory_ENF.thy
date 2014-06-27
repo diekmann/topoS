@@ -12,14 +12,14 @@ hide_const TopoS_Vertices.V
   (*'v should be of type ::vertex*)
   type_synonym ('v, 'a, 'b) network_security_requirement_ENF =
    "'a \<times> (('v) graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> bool) \<times> bool         \<times> ('a \<Rightarrow> 'a \<Rightarrow> bool) \<times> ('v, 'a, 'b) TopoS_Params"
-  (*\<bottom> \<times> eval_model                         \<times> target_focus \<times>  P                 \<times> scenario-specific information    *)
+  (*\<bottom> \<times> sinvar                         \<times> target_focus \<times>  P                 \<times> scenario-specific information    *)
 
 
 
   definition valid_ENF :: "('v::vertex, 'a, 'b) network_security_requirement_ENF \<Rightarrow> bool" where
-    "valid_ENF m \<equiv> (case m of (defbot, eval_model, target_focus, P, config) \<Rightarrow>
-          NetworkModel eval_model defbot target_focus \<and>
-          TopoS_withOffendingFlows.eval_model_all_edges_normal_form eval_model P)"
+    "valid_ENF m \<equiv> (case m of (defbot, sinvar, target_focus, P, config) \<Rightarrow>
+          NetworkModel sinvar defbot target_focus \<and>
+          SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form sinvar P)"
 
   (*WARNING!! 'a and 'b are the same for the complete list. So the list of network security requirements does not model all requirements but only those of the 
               same type. The generic Composition theory does not have this problem. The generate_valid_topology_sound holds for both! 
@@ -30,50 +30,50 @@ hide_const TopoS_Vertices.V
 
   subsection {*Accessors*}
     definition c_nP :: "('v::vertex, 'a, 'b) network_security_requirement_ENF \<Rightarrow> ('v \<Rightarrow> 'a)" where
-      "c_nP m = (case m of (defbot, eval_model, target_focus, P, config) \<Rightarrow> NetworkModel.node_props defbot config)"
+      "c_nP m = (case m of (defbot, sinvar, target_focus, P, config) \<Rightarrow> NetworkModel.node_props defbot config)"
   
     definition c_gP :: "('v::vertex, 'a, 'b) network_security_requirement_ENF \<Rightarrow> 'b" where
-      "c_gP m = (case m of (defbot, eval_model, target_focus, P, config) \<Rightarrow> (model_global_properties config))"
+      "c_gP m = (case m of (defbot, sinvar, target_focus, P, config) \<Rightarrow> (model_global_properties config))"
     
-    definition c_eval_model :: "('v::vertex, 'a, 'b) network_security_requirement_ENF \<Rightarrow> (('v) graph \<Rightarrow> bool)" where
-      "c_eval_model m = (case m of (defbot, eval_model, target_focus, P, config) \<Rightarrow> \<lambda>G. eval_model G (c_nP m))"
+    definition c_sinvar :: "('v::vertex, 'a, 'b) network_security_requirement_ENF \<Rightarrow> (('v) graph \<Rightarrow> bool)" where
+      "c_sinvar m = (case m of (defbot, sinvar, target_focus, P, config) \<Rightarrow> \<lambda>G. sinvar G (c_nP m))"
 
     definition c_offending_flows :: "('v::vertex, 'a, 'b) network_security_requirement_ENF \<Rightarrow> (('v) graph \<Rightarrow> ('v \<times> 'v) set set)" where
-      "c_offending_flows m = (case m of (defbot, eval_model, target_focus, P, config) \<Rightarrow> 
-        (\<lambda>G. TopoS_withOffendingFlows.set_offending_flows eval_model G (c_nP m)))"
+      "c_offending_flows m = (case m of (defbot, sinvar, target_focus, P, config) \<Rightarrow> 
+        (\<lambda>G. SecurityInvariant_withOffendingFlows.set_offending_flows sinvar G (c_nP m)))"
     
     definition c_P :: "('v::vertex, 'a, 'b) network_security_requirement_ENF \<Rightarrow> ('a \<Rightarrow> 'a \<Rightarrow> bool)" where
-      "c_P m \<equiv> (case m of (defbot, eval_model, target_focus, P, config) \<Rightarrow> P)"
+      "c_P m \<equiv> (case m of (defbot, sinvar, target_focus, P, config) \<Rightarrow> P)"
 
   subsection {*Lemma*}
     
-    lemma c_eval_model_simp: 
+    lemma c_sinvar_simp: 
       "valid_ENF m \<Longrightarrow>
-        c_eval_model m = (case m of (defbot, eval_model, target_focus, P, config) \<Rightarrow> 
+        c_sinvar m = (case m of (defbot, sinvar, target_focus, P, config) \<Rightarrow> 
           (\<lambda> G. (\<forall> (s, r)\<in> edges G. P (NetworkModel.node_props defbot config s) (NetworkModel.node_props defbot config r)))
           )"
       apply(simp add: valid_ENF_def)
       apply(clarify)
-      apply(rename_tac defbot eval_model target_focus P config)
+      apply(rename_tac defbot sinvar target_focus P config)
       apply(simp only: fun_eq_iff)
       apply(rule allI, rename_tac G)
-      apply(simp add: TopoS_withOffendingFlows.eval_model_all_edges_normal_form_def)
-      by(simp add: c_eval_model_def c_nP_def)
+      apply(simp add: SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form_def)
+      by(simp add: c_sinvar_def c_nP_def)
 
-    lemma c_eval_model_simp2: 
+    lemma c_sinvar_simp2: 
       "valid_ENF m \<Longrightarrow>
-        m = (defbot, eval_model, target_focus, P, config) \<Longrightarrow>
-        c_eval_model (defbot, eval_model, target_focus, P, config) G = 
+        m = (defbot, sinvar, target_focus, P, config) \<Longrightarrow>
+        c_sinvar (defbot, sinvar, target_focus, P, config) G = 
         (\<forall> (s, r)\<in> edges G. P (NetworkModel.node_props defbot config s) (NetworkModel.node_props defbot config r))"
-      apply(drule c_eval_model_simp)
+      apply(drule c_sinvar_simp)
       by force
-    lemma c_eval_model_simp3: 
+    lemma c_sinvar_simp3: 
       "valid_ENF m \<Longrightarrow>
-        c_eval_model m G = 
+        c_sinvar m G = 
         (\<forall> (s, r)\<in> edges G. (c_P m) (c_nP m s) (c_nP m r))"
       apply(case_tac m)
-      apply(rename_tac defbot eval_model target_focus P config)
-      apply(drule_tac G=G and P=P and defbot=defbot and eval_model=eval_model and target_focus=target_focus and config=config in c_eval_model_simp2)
+      apply(rename_tac defbot sinvar target_focus P config)
+      apply(drule_tac G=G and P=P and defbot=defbot and sinvar=sinvar and target_focus=target_focus and config=config in c_sinvar_simp2)
        apply simp
       apply(clarify)
       apply(simp only: c_nP_def c_gP_def c_P_def)
@@ -85,20 +85,20 @@ hide_const TopoS_Vertices.V
 
     lemma c_offending_flows_simp: 
       "valid_ENF m \<Longrightarrow> c_offending_flows m = 
-      (\<lambda> G. (if (c_eval_model m G) then
+      (\<lambda> G. (if (c_sinvar m G) then
           {}
          else 
           { {(e1,e2). (e1, e2) \<in> edges G \<and> \<not> (c_P m) (c_nP m e1) (c_nP m e2)} })
       )"
       apply(simp add: valid_ENF_def)
       apply(clarify)
-      apply(rename_tac defbot eval_model target_focus P config)
+      apply(rename_tac defbot sinvar target_focus P config)
       apply(simp only: fun_eq_iff)
       apply(rule allI, rename_tac G)
-      apply(simp add: c_eval_model_def c_nP_def c_gP_def c_P_def c_offending_flows_def)
-      thm TopoS_withOffendingFlows.ENF_offending_set
+      apply(simp add: c_sinvar_def c_nP_def c_gP_def c_P_def c_offending_flows_def)
+      thm SecurityInvariant_withOffendingFlows.ENF_offending_set
       apply(drule_tac G=G and P=P and nP="(NetworkModel.node_props defbot config)" 
-          in TopoS_withOffendingFlows.ENF_offending_set)
+          in SecurityInvariant_withOffendingFlows.ENF_offending_set)
       by simp
 
       lemma c_offending_flows_Union_simp: 
@@ -107,9 +107,9 @@ hide_const TopoS_Vertices.V
       apply(simp split:split_if_asm)
       apply(clarify)
       apply(case_tac m)
-      apply(rename_tac defbot eval_model target_focus P config)
-      apply(drule_tac defbot=defbot and eval_model=eval_model and target_focus=target_focus and P=P 
-          and config=config and G=G in c_eval_model_simp2)
+      apply(rename_tac defbot sinvar target_focus P config)
+      apply(drule_tac defbot=defbot and sinvar=sinvar and target_focus=target_focus and P=P 
+          and config=config and G=G in c_sinvar_simp2)
        apply(simp)
       apply(simp)
       apply(simp add: c_nP_def c_gP_def c_P_def)
@@ -117,17 +117,17 @@ hide_const TopoS_Vertices.V
       by fastforce
       lemma c_offending_flows_Union_simp2: 
       "valid_ENF m \<Longrightarrow> 
-      m = (defbot, eval_model, target_focus, P, config) \<Longrightarrow> 
-      \<Union> c_offending_flows (defbot, eval_model, target_focus, P, config) G = 
+      m = (defbot, sinvar, target_focus, P, config) \<Longrightarrow> 
+      \<Union> c_offending_flows (defbot, sinvar, target_focus, P, config) G = 
         {(e1,e2). (e1, e2) \<in> edges G \<and> \<not> P (NetworkModel.node_props defbot config e1) (NetworkModel.node_props defbot config e2)}"
       apply(drule_tac G=G in c_offending_flows_Union_simp)
       by(simp add: c_nP_def c_gP_def c_P_def)
   
 
   subsection {*Algorithms*}
-    (*Note: is only eval_model, not eval!!*)
+    (*Note: is only sinvar, not eval!!*)
     definition all_security_requirements_fulfilled :: "('v::vertex, 'a, 'b) network_security_requirement_ENF list \<Rightarrow> 'v graph \<Rightarrow> bool" where
-      "all_security_requirements_fulfilled M G \<equiv> \<forall>m \<in> set M. (c_eval_model m) G"
+      "all_security_requirements_fulfilled M G \<equiv> \<forall>m \<in> set M. (c_sinvar m) G"
   
   
     (*would be easier to remove at the end*)
@@ -138,18 +138,18 @@ hide_const TopoS_Vertices.V
 
 
   subsection {*Lemmata*}
-    lemma c_eval_model_mono:
-    "\<lbrakk> valid_ENF m; E' \<subseteq> E; valid_graph \<lparr>nodes = V, edges = E\<rparr>; c_eval_model m \<lparr>nodes = V, edges = E\<rparr>\<rbrakk> \<Longrightarrow>
-       c_eval_model m \<lparr>nodes = V, edges = E'\<rparr>"
+    lemma c_sinvar_mono:
+    "\<lbrakk> valid_ENF m; E' \<subseteq> E; valid_graph \<lparr>nodes = V, edges = E\<rparr>; c_sinvar m \<lparr>nodes = V, edges = E\<rparr>\<rbrakk> \<Longrightarrow>
+       c_sinvar m \<lparr>nodes = V, edges = E'\<rparr>"
      apply(cases m)
-     apply(rename_tac defbot eval_model target_focus P config)
+     apply(rename_tac defbot sinvar target_focus P config)
      apply(simp add: valid_ENF_def)
-     apply(simp add: c_eval_model_def c_nP_def c_gP_def c_P_def c_offending_flows_def)
+     apply(simp add: c_sinvar_def c_nP_def c_gP_def c_P_def c_offending_flows_def)
      apply clarify
-     apply(subgoal_tac "TopoS_preliminaries eval_model")
+     apply(subgoal_tac "TopoS_preliminaries sinvar")
       prefer 2
       apply(simp add: TopoS_def)
-     apply(erule_tac TopoS_preliminaries.mono_eval_model)
+     apply(erule_tac TopoS_preliminaries.mono_sinvar)
        by simp_all
 
     lemma valid_ENFs1: "valid_ENFs (m # M) \<Longrightarrow> valid_ENF m"
@@ -166,7 +166,7 @@ hide_const TopoS_Vertices.V
       apply(rename_tac m M E' E)
       apply(rule conjI)
        apply(drule valid_ENFs1)
-       apply(erule c_eval_model_mono)
+       apply(erule c_sinvar_mono)
          apply(simp_all)
        apply force
       apply(drule valid_ENFs2)
@@ -174,25 +174,25 @@ hide_const TopoS_Vertices.V
       done
 
 
-    lemma c_eval_model_valid_imp_no_offending_flows: 
-      "c_eval_model m G \<Longrightarrow> \<forall>x\<in>c_offending_flows m G. x = {}"
+    lemma c_sinvar_valid_imp_no_offending_flows: 
+      "c_sinvar m G \<Longrightarrow> \<forall>x\<in>c_offending_flows m G. x = {}"
       apply(case_tac m)
-      apply(rename_tac defbot eval_model target_focus P config)
-      apply(simp add: c_eval_model_def)
+      apply(rename_tac defbot sinvar target_focus P config)
+      apply(simp add: c_sinvar_def)
       apply(simp add: c_nP_def c_gP_def)
       apply(simp add: c_offending_flows_def)
       apply(simp add: c_nP_def c_gP_def)
       apply(clarify)
-      by(simp add: TopoS_withOffendingFlows.set_offending_flows_def
-          TopoS_withOffendingFlows.is_offending_flows_min_set_def
-          TopoS_withOffendingFlows.is_offending_flows_def)
+      by(simp add: SecurityInvariant_withOffendingFlows.set_offending_flows_def
+          SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def
+          SecurityInvariant_withOffendingFlows.is_offending_flows_def)
 
     lemma all_security_requirements_fulfilled_imp_no_offending_flows:
       "all_security_requirements_fulfilled M G \<Longrightarrow> (\<Union>m\<in>set M. \<Union>c_offending_flows m G) = {}"
       apply(induction M)
        apply(simp_all)
       apply(simp add: all_security_requirements_fulfilled_def)
-      using c_eval_model_valid_imp_no_offending_flows by metis
+      using c_sinvar_valid_imp_no_offending_flows by metis
 
 
     lemma remove_offending_subseteq: "valid_ENF m \<Longrightarrow>
@@ -203,7 +203,7 @@ hide_const TopoS_Vertices.V
     apply(simp add: c_offending_flows_simp)
     apply auto
     apply(case_tac m)
-    apply(simp add: c_eval_model_simp c_nP_def c_gP_def c_P_def) 
+    apply(simp add: c_sinvar_simp c_nP_def c_gP_def c_P_def) 
     by fast
 
     lemma generate_valid_topology_mono_edges:
@@ -259,7 +259,7 @@ hide_const TopoS_Vertices.V
           \<Longrightarrow> generate_valid_topology M G = generate_valid_topology_2 M G"
           apply(induction M arbitrary: G)
            apply(simp_all)
-          apply(rule TopoS_withOffendingFlows.graph_eq_intro)
+          apply(rule SecurityInvariant_withOffendingFlows.graph_eq_intro)
            by(simp add:generate_valid_topology_nodes generate_valid_topology_2_nodes delete_edges_simp2)+
     
     
@@ -342,10 +342,10 @@ hide_const TopoS_Vertices.V
       
       from a2 have a2_hyp: "valid_ENFs M" by(simp add: valid_ENFs_def)
       from a2 have a2': "valid_ENF m" using valid_ENFs_def by force
-      from this obtain defbot eval_model target_focus P config where m_components: 
-          "m = (defbot, eval_model, target_focus, P, config) \<and>
-          NetworkModel eval_model defbot target_focus \<and>
-          TopoS_withOffendingFlows.eval_model_all_edges_normal_form eval_model P"
+      from this obtain defbot sinvar target_focus P config where m_components: 
+          "m = (defbot, sinvar, target_focus, P, config) \<and>
+          NetworkModel sinvar defbot target_focus \<and>
+          SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form sinvar P"
           apply(simp add:valid_ENF_def)
           apply(case_tac m)
           by blast
@@ -379,7 +379,7 @@ hide_const TopoS_Vertices.V
         apply(subst generate_valid_topology_1_2_eq[OF a2])
         apply(simp add: all_security_requirements_fulfilled_def)
         apply(simp add: delete_edges_simp2 generate_valid_topology_2_nodes)
-        apply(simp add: c_eval_model_simp2[OF a2'] m_components)
+        apply(simp add: c_sinvar_simp2[OF a2'] m_components)
         apply(simp add: c_offending_flows_Union_simp2[OF a2' conjunct1[OF m_components]])
         using generate_valid_topology_2_subseteq_edges by fastforce
       
@@ -464,11 +464,11 @@ hide_const TopoS_Vertices.V
       using c_offending_flows_Union_simp[of _ "\<lparr>nodes = V, edges = V \<times> V\<rparr>", simplified] valid_models[unfolded valid_ENFs_def]
       by blast
 
-      have subst_hlp2: "\<And>G. \<forall>m\<in>set M. c_eval_model m G = (\<forall>(s, r)\<in>edges G. c_P m (c_nP m s) (c_nP m r))"      
-      using c_eval_model_simp3 valid_models[unfolded valid_ENFs_def] by fast
+      have subst_hlp2: "\<And>G. \<forall>m\<in>set M. c_sinvar m G = (\<forall>(s, r)\<in>edges G. c_P m (c_nP m s) (c_nP m r))"      
+      using c_sinvar_simp3 valid_models[unfolded valid_ENFs_def] by fast
 
       from not_valid_by_default 
-      have EX_invalid_fully_connected: "\<exists> m \<in> set M. \<not> c_eval_model m \<lparr>nodes = V, edges = V \<times> V\<rparr>" 
+      have EX_invalid_fully_connected: "\<exists> m \<in> set M. \<not> c_sinvar m \<lparr>nodes = V, edges = V \<times> V\<rparr>" 
         by(simp add: all_security_requirements_fulfilled_def fully_connected_def V_prop)
       hence EX_invalid_fully_connected_simp:
         "\<exists> m \<in> set M. \<not> (\<forall>(s, r)\<in> V \<times> V. c_P m (c_nP m s) (c_nP m r))" using subst_hlp2 by auto
@@ -478,7 +478,7 @@ hide_const TopoS_Vertices.V
       apply(simp only: fully_connected_def V_prop)
       apply(subst(asm) subst_hlp1) .
 
-      from VE_all_valid have "\<forall>m\<in>set M. c_eval_model m 
+      from VE_all_valid have "\<forall>m\<in>set M. c_sinvar m 
         \<lparr>nodes = V, 
          edges = V \<times> V - (\<Union>m\<in>set M. {(e1, e2). (e1, e2) \<in> V \<times> V \<and> \<not> c_P m (c_nP m e1) (c_nP m e2)})
         \<rparr>"
@@ -489,11 +489,11 @@ hide_const TopoS_Vertices.V
       hence "\<forall>m\<in>set M. 
         (\<forall> (s,r) \<in> V \<times> V - (\<Union>m\<in>set M. {(e1, e2). (e1, e2) \<in> V \<times> V \<and> \<not> c_P m (c_nP m e1) (c_nP m e2)}). 
           c_P m (c_nP m s) (c_nP m r))"
-      using c_eval_model_simp3 valid_models[unfolded valid_ENFs_def] by blast
+      using c_sinvar_simp3 valid_models[unfolded valid_ENFs_def] by blast
       hence "(\<Union>m\<in>set M. {(e1, e2). (e1, e2) \<in> V \<times> V \<and> \<not> c_P m (c_nP m e1) (c_nP m e2)}) \<noteq> {}"
       using EX_invalid_fully_connected_simp by blast
 
-      hence "\<exists> m \<in> set M. \<not> c_eval_model m \<lparr>nodes = V, edges = E \<union> {(a, b)}\<rparr>"
+      hence "\<exists> m \<in> set M. \<not> c_sinvar m \<lparr>nodes = V, edges = E \<union> {(a, b)}\<rparr>"
         apply(simp add: all_security_requirements_fulfilled_def)
         apply(simp add: E_prop)
         apply(simp add: fully_connected_def V_prop)

@@ -4,92 +4,92 @@ begin
 
 
 section {*Monotonicity helper lemmata*}
-context TopoS_withOffendingFlows
+context SecurityInvariant_withOffendingFlows
 begin
-  text{*We define the monotonicity of @{text "eval_model"}:
+  text{*We define the monotonicity of @{text "sinvar"}:
   
-  @{term "(\<And> nP N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr>  \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> eval_model \<lparr> nodes = N, edges = E \<rparr> nP \<Longrightarrow> eval_model \<lparr> nodes = N, edges = E' \<rparr> nP )"}
+  @{term "(\<And> nP N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr>  \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E \<rparr> nP \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E' \<rparr> nP )"}
   
   Having a valid model, removing edges retains the validity
   *}
 
-  definition eval_model_mono :: "bool" where
-    "eval_model_mono \<longleftrightarrow> (\<forall> nP N E' E. 
+  definition sinvar_mono :: "bool" where
+    "sinvar_mono \<longleftrightarrow> (\<forall> nP N E' E. 
       valid_graph \<lparr> nodes = N, edges = E \<rparr> \<and> 
       E' \<subseteq> E \<and> 
-      eval_model \<lparr> nodes = N, edges = E \<rparr> nP \<longrightarrow> eval_model \<lparr> nodes = N, edges = E' \<rparr> nP )"
+      sinvar \<lparr> nodes = N, edges = E \<rparr> nP \<longrightarrow> sinvar \<lparr> nodes = N, edges = E' \<rparr> nP )"
 
 
-  lemma eval_model_mono_I_proofrule_simple: 
-  "\<lbrakk> (\<forall> G nP. eval_model G nP = (\<forall> (e1, e2) \<in> edges G. P e1 e2 nP) ) \<rbrakk> \<Longrightarrow> eval_model_mono"
-  apply(simp add: eval_model_mono_def)
+  lemma sinvar_mono_I_proofrule_simple: 
+  "\<lbrakk> (\<forall> G nP. sinvar G nP = (\<forall> (e1, e2) \<in> edges G. P e1 e2 nP) ) \<rbrakk> \<Longrightarrow> sinvar_mono"
+  apply(simp add: sinvar_mono_def)
   apply(clarify)
   apply(fast)
   done
 
 
-  lemma eval_model_mono_I_proofrule:
-  "\<lbrakk> (\<forall> nP (G:: 'v graph). eval_model G nP = (\<forall> (e1, e2) \<in> edges G. P e1 e2 nP G) ); 
+  lemma sinvar_mono_I_proofrule:
+  "\<lbrakk> (\<forall> nP (G:: 'v graph). sinvar G nP = (\<forall> (e1, e2) \<in> edges G. P e1 e2 nP G) ); 
     (\<forall> nP e1 e2 N E' E. 
       valid_graph \<lparr> nodes = N, edges = E \<rparr> \<and> 
       (e1,e2) \<in> E \<and> 
       E' \<subseteq> E \<and> 
-      P e1 e2 nP \<lparr>nodes = N, edges = E\<rparr> \<longrightarrow> P e1 e2 nP \<lparr>nodes = N, edges = E'\<rparr>) \<rbrakk> \<Longrightarrow> eval_model_mono"
-  unfolding eval_model_mono_def
+      P e1 e2 nP \<lparr>nodes = N, edges = E\<rparr> \<longrightarrow> P e1 e2 nP \<lparr>nodes = N, edges = E'\<rparr>) \<rbrakk> \<Longrightarrow> sinvar_mono"
+  unfolding sinvar_mono_def
   proof(clarify)
     fix nP N E' E
-    assume AllForm: "(\<forall> nP (G:: 'v graph). eval_model G nP = (\<forall> (e1, e2) \<in> edges G. P e1 e2 nP G) )"
+    assume AllForm: "(\<forall> nP (G:: 'v graph). sinvar G nP = (\<forall> (e1, e2) \<in> edges G. P e1 e2 nP G) )"
     and Pmono: "\<forall>nP e1 e2 N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr> \<and> (e1,e2) \<in> E \<and> E' \<subseteq> E \<and> P e1 e2 nP \<lparr>nodes = N, edges = E\<rparr> \<longrightarrow> P e1 e2 nP \<lparr>nodes = N, edges = E'\<rparr>"
     and validG: "valid_graph \<lparr>nodes = N, edges = E\<rparr>"
     and E'subset: "E' \<subseteq> E"
-    and evalE: "eval_model \<lparr>nodes = N, edges = E\<rparr> nP"
+    and evalE: "sinvar \<lparr>nodes = N, edges = E\<rparr> nP"
     
     from Pmono have Pmono1: 
       "\<And>nP N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> (\<forall>(e1,e2) \<in> E. P e1 e2 nP \<lparr>nodes = N, edges = E\<rparr> \<longrightarrow> P e1 e2 nP \<lparr>nodes = N, edges = E'\<rparr>)" 
     by blast
 
-    from AllForm have "eval_model \<lparr>nodes = N, edges = E\<rparr> nP = (\<forall> (e1, e2) \<in> E. P e1 e2 nP \<lparr>nodes = N, edges = E\<rparr>)" by force
+    from AllForm have "sinvar \<lparr>nodes = N, edges = E\<rparr> nP = (\<forall> (e1, e2) \<in> E. P e1 e2 nP \<lparr>nodes = N, edges = E\<rparr>)" by force
     from this evalE have "(\<forall> (e1, e2) \<in> E. P e1 e2 nP \<lparr>nodes = N, edges = E\<rparr>)" by simp
     from Pmono1[OF validG E'subset, of "nP"] this have "\<forall>(e1, e2) \<in> E. P e1 e2 nP \<lparr>nodes = N, edges = E'\<rparr>" by fast
     from this E'subset have "\<forall>(e1, e2) \<in> E'. P e1 e2 nP \<lparr>nodes = N, edges = E'\<rparr>" by fast
     from this have "\<forall>(e1, e2) \<in> (edges \<lparr>nodes = N, edges = E'\<rparr>). P e1 e2 nP \<lparr>nodes = N, edges = E'\<rparr>" by simp
-    from this AllForm show "eval_model \<lparr>nodes = N, edges = E'\<rparr> nP" by presburger
+    from this AllForm show "sinvar \<lparr>nodes = N, edges = E'\<rparr> nP" by presburger
   qed
 
-  lemma eval_model_mono_pure_imp_fol: "
-  (\<And> nP N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> eval_model \<lparr> nodes = N, edges = E \<rparr> nP \<Longrightarrow> eval_model \<lparr> nodes = N, edges = E' \<rparr> nP) \<Longrightarrow>
-  eval_model_mono"
-  unfolding eval_model_mono_def
+  lemma sinvar_mono_pure_imp_fol: "
+  (\<And> nP N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E \<rparr> nP \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E' \<rparr> nP) \<Longrightarrow>
+  sinvar_mono"
+  unfolding sinvar_mono_def
   by force
-  lemma eval_model_mono_fol_imp_pure: "
-  eval_model_mono \<Longrightarrow>
-  (\<And> nP N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> eval_model \<lparr> nodes = N, edges = E \<rparr> nP \<Longrightarrow> eval_model \<lparr> nodes = N, edges = E' \<rparr> nP )"
-  unfolding eval_model_mono_def
+  lemma sinvar_mono_fol_imp_pure: "
+  sinvar_mono \<Longrightarrow>
+  (\<And> nP N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E \<rparr> nP \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E' \<rparr> nP )"
+  unfolding sinvar_mono_def
   by metis
  
 
     (*helper_reverse_implication*) lemma "(Q \<longrightarrow> P) = (\<not> P \<longrightarrow> \<not> Q)" by fastforce
-   lemma eval_model_mono_imp_negative_mono:
-   "eval_model_mono
+   lemma sinvar_mono_imp_negative_mono:
+   "sinvar_mono
    \<Longrightarrow> 
    (\<forall> nP N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr> \<and> 
-   E' \<subseteq> E \<and> \<not> eval_model \<lparr> nodes = N, edges = E' \<rparr> nP \<longrightarrow> \<not> eval_model \<lparr> nodes = N, edges = E \<rparr> nP )"
-   apply (unfold eval_model_mono_def)
+   E' \<subseteq> E \<and> \<not> sinvar \<lparr> nodes = N, edges = E' \<rparr> nP \<longrightarrow> \<not> sinvar \<lparr> nodes = N, edges = E \<rparr> nP )"
+   apply (unfold sinvar_mono_def)
    by(blast)
 
-  lemma eval_model_mono_imp_negative_delete_edge_mono:
-   "eval_model_mono
+  lemma sinvar_mono_imp_negative_delete_edge_mono:
+   "sinvar_mono
    \<Longrightarrow> 
-   (\<forall> (G:: 'v graph) nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> eval_model (delete_edges G (Y)) nP \<longrightarrow> \<not> eval_model (delete_edges G X) nP )"
+   (\<forall> (G:: 'v graph) nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP )"
    apply(intro allI impI, elim conjE)
    apply(frule_tac G=G in delete_edges_edges_mono)
-   by (metis delete_edges_simp2 delete_edges_valid eval_model_mono_imp_negative_mono graph.select_convs(2))
+   by (metis delete_edges_simp2 delete_edges_valid sinvar_mono_imp_negative_mono graph.select_convs(2))
 
 
   lemma mono_offending_flows_min_set:
   assumes mono: "(\<forall> ff f' G nP. is_offending_flows ff G nP \<longrightarrow> is_offending_flows (f' \<union> ff) G nP)"
   and offending: "is_offending_flows_min_set As G nP"
-  shows "eval_model (delete_edges G (As \<union> Bs)) nP"
+  shows "sinvar (delete_edges G (As \<union> Bs)) nP"
   proof -
     from offending have "is_offending_flows As G nP" using is_offending_flows_min_set_def by simp
     from mono this have "is_offending_flows (Bs \<union> As) G nP" by simp
@@ -99,8 +99,8 @@ begin
 
 
   (*use this to show locale preliminaries from mono*)
-  lemma eval_model_mono_imp_is_offending_flows_mono:
-  assumes mono: "eval_model_mono"
+  lemma sinvar_mono_imp_is_offending_flows_mono:
+  assumes mono: "sinvar_mono"
   and validG: "valid_graph G"
   shows "is_offending_flows FF G nP  \<Longrightarrow> is_offending_flows (FF \<union> F) G nP"
   proof -
@@ -108,16 +108,16 @@ begin
       by (metis delete_edges_def delete_edges_valid)
     have "\<And> G FF F. {(e1, e2). (e1, e2) \<in> edges G \<and> (e1, e2) \<notin> FF \<and> (e1, e2) \<notin> F} \<subseteq> {(e1, e2). (e1, e2) \<in> edges G \<and> (e1, e2) \<notin> FF} "
       apply(rule Collect_mono) by(simp)
-    from eval_model_mono_fol_imp_pure[OF mono validG' this]
+    from sinvar_mono_fol_imp_pure[OF mono validG' this]
     show "is_offending_flows FF G nP \<Longrightarrow> is_offending_flows (FF \<union> F) G nP"
       by(simp add: is_offending_flows_def graph_ops)
   qed
 
-  (*use this to show locale eval_model_mono*)
-  lemma eval_model_mono_imp_eval_model_mono: 
-  "eval_model_mono \<Longrightarrow> valid_graph \<lparr> nodes = N, edges = E \<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> eval_model \<lparr> nodes = N, edges = E \<rparr> nP \<Longrightarrow> 
-        eval_model \<lparr> nodes = N, edges = E' \<rparr> nP"
-  apply(simp add: eval_model_mono_def)
+  (*use this to show locale sinvar_mono*)
+  lemma sinvar_mono_imp_sinvar_mono: 
+  "sinvar_mono \<Longrightarrow> valid_graph \<lparr> nodes = N, edges = E \<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E \<rparr> nP \<Longrightarrow> 
+        sinvar \<lparr> nodes = N, edges = E' \<rparr> nP"
+  apply(simp add: sinvar_mono_def)
   by blast
 
 end
@@ -125,7 +125,7 @@ end
 
 
 section {*offending flows not empty helper lemmata*}
-context TopoS_withOffendingFlows
+context SecurityInvariant_withOffendingFlows
 begin
   text {* Give an overapproximation of offending flows (e.g. all edges) and get back a
           minimal set *}
@@ -133,7 +133,7 @@ begin
   fun minimalize_offending_overapprox :: "('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> 
   'v graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> ('v \<times> 'v) list" where
   "minimalize_offending_overapprox [] keep _ _ = keep" |
-  "minimalize_offending_overapprox (f#fs) keep G nP = (if eval_model (delete_edges_list G (fs@keep)) nP then
+  "minimalize_offending_overapprox (f#fs) keep G nP = (if sinvar (delete_edges_list G (fs@keep)) nP then
       minimalize_offending_overapprox fs keep G nP 
     else
       minimalize_offending_overapprox fs (f#keep) G nP
@@ -186,7 +186,7 @@ begin
 
   lemma offending_min_set_ab_in_fs: "valid_graph (G::'v graph) \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow>
        is_offending_flows_min_set ({(a, b)} \<union> fs) G nP \<Longrightarrow>
-       eval_model (delete_edges G fs) nP \<Longrightarrow>
+       sinvar (delete_edges G fs) nP \<Longrightarrow>
        (a,b) \<in> fs"
   apply(rule ccontr)
   apply(simp add: is_offending_flows_min_set_def)
@@ -202,10 +202,10 @@ begin
     thus ?case by simp
    next
    case (Cons a ff)
-    from Cons have case1: "(eval_model (delete_edges_list G (ff @ keeps)) nP \<Longrightarrow>
+    from Cons have case1: "(sinvar (delete_edges_list G (ff @ keeps)) nP \<Longrightarrow>
      set (minimalize_offending_overapprox ff keeps G nP) \<subseteq> insert a (set ff \<union> set keeps))" 
       by blast
-     from Cons have case2: "(\<not> eval_model (delete_edges_list G (ff @ keeps)) nP \<Longrightarrow>
+     from Cons have case2: "(\<not> sinvar (delete_edges_list G (ff @ keeps)) nP \<Longrightarrow>
      set (minimalize_offending_overapprox ff (a # keeps) G nP) \<subseteq> insert a (set ff \<union> set keeps))"
       by fastforce
     from case1 case2 show ?case by simp
@@ -222,9 +222,9 @@ begin
    apply(auto)
   done
   lemma not_model_mono_imp_addedge_mono: 
-  "(\<forall> G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> eval_model (delete_edges G (Y)) nP \<longrightarrow> \<not> eval_model (delete_edges G X) nP ) \<Longrightarrow>
-   valid_graph G \<Longrightarrow> (a1,a2) \<in> edges G \<Longrightarrow> X \<subseteq> Y \<Longrightarrow> \<not> eval_model (add_edge a1 a2 (delete_edges G (Y))) nP \<Longrightarrow>  
-      \<not> eval_model (add_edge a1 a2 (delete_edges G X)) nP"
+  "(\<forall> G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP ) \<Longrightarrow>
+   valid_graph G \<Longrightarrow> (a1,a2) \<in> edges G \<Longrightarrow> X \<subseteq> Y \<Longrightarrow> \<not> sinvar (add_edge a1 a2 (delete_edges G (Y))) nP \<Longrightarrow>  
+      \<not> sinvar (add_edge a1 a2 (delete_edges G X)) nP"
    apply(simp add: valid_graph_add_delete_edge_simp)
    apply(subgoal_tac "X - {(a1, a2)} \<subseteq> Y - {(a1, a2)}")
     apply(blast)
@@ -232,13 +232,13 @@ begin
   done
 
   lemma not_model_mono_imp_addedge_mono_minimalize_offending_overapprox: "
-  (\<forall> G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> eval_model (delete_edges G (Y)) nP \<longrightarrow> \<not> eval_model (delete_edges G X) nP ) \<Longrightarrow>
+  (\<forall> G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP ) \<Longrightarrow>
     valid_graph G \<Longrightarrow>
     a \<notin> set keeps \<Longrightarrow>
     a \<notin> set ff \<Longrightarrow>
     a \<in> edges G \<Longrightarrow>
-    \<not> eval_model (delete_edges_list G (ff @ keeps)) nP \<Longrightarrow>
-    \<not> eval_model (add_edge (fst a) (snd a) (delete_edges G (set (minimalize_offending_overapprox (a # ff) keeps G nP)))) nP"
+    \<not> sinvar (delete_edges_list G (ff @ keeps)) nP \<Longrightarrow>
+    \<not> sinvar (add_edge (fst a) (snd a) (delete_edges G (set (minimalize_offending_overapprox (a # ff) keeps G nP)))) nP"
     apply(frule delete_edges_list_add_add_iff[of G a ff keeps, symmetric])
        apply(simp_all)
     apply(simp add: delete_edges_list_union delete_edges_list_union_insert)
@@ -250,8 +250,8 @@ begin
 
 
   lemma minimalize_offending_overapprox_maintains_evalmodel: "valid_graph G \<Longrightarrow>
-    eval_model (delete_edges G (set ff \<union> set keeps)) nP \<Longrightarrow> 
-    eval_model (delete_edges G (set (minimalize_offending_overapprox ff keeps G nP))) nP"
+    sinvar (delete_edges G (set ff \<union> set keeps)) nP \<Longrightarrow> 
+    sinvar (delete_edges G (set (minimalize_offending_overapprox ff keeps G nP))) nP"
    apply(induction ff arbitrary: keeps)
     apply(simp) 
    apply(simp)
@@ -267,10 +267,10 @@ begin
      apply (auto)[1]
     by fastforce
   lemma a_is_in_offending_flows_min: "valid_graph G \<Longrightarrow> a \<in> edges G \<Longrightarrow>  a \<notin> F \<Longrightarrow>
-      \<not> eval_model G nP \<Longrightarrow>
-       eval_model (delete_edges G (insert a F)) nP \<Longrightarrow>
-       \<not> eval_model (delete_edges G F) nP \<Longrightarrow> 
-       (\<forall>(e1, e2)\<in> F. \<not> eval_model (add_edge e1 e2 (delete_edges G (insert a F))) nP) \<Longrightarrow>
+      \<not> sinvar G nP \<Longrightarrow>
+       sinvar (delete_edges G (insert a F)) nP \<Longrightarrow>
+       \<not> sinvar (delete_edges G F) nP \<Longrightarrow> 
+       (\<forall>(e1, e2)\<in> F. \<not> sinvar (add_edge e1 e2 (delete_edges G (insert a F))) nP) \<Longrightarrow>
        is_offending_flows_min_set (insert a F) G nP"
   apply(unfold is_offending_flows_min_set_def is_offending_flows_def)
   apply(rule conjI)
@@ -282,15 +282,15 @@ begin
 
 
   lemma mono_imp_minimalize_offending_overapprox_minimal: "
-   (\<forall> G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> eval_model (delete_edges G (Y)) nP \<longrightarrow> \<not> eval_model (delete_edges G X) nP ) \<Longrightarrow>
+   (\<forall> G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP ) \<Longrightarrow>
     valid_graph G \<Longrightarrow>
     \<forall> x \<in> set ff. x \<notin> set keeps \<Longrightarrow>
     \<forall> x \<in> set ff. x \<in> edges G \<Longrightarrow>
     distinct ff \<Longrightarrow>
     \<forall>(e1, e2)\<in> set keeps.
-       \<not> eval_model (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox ff keeps G nP)))) nP \<Longrightarrow>
+       \<not> sinvar (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox ff keeps G nP)))) nP \<Longrightarrow>
     \<forall>(e1, e2)\<in>set (minimalize_offending_overapprox ff keeps G nP).
-       \<not> eval_model (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox ff keeps G nP)))) nP"
+       \<not> sinvar (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox ff keeps G nP)))) nP"
    proof(induction ff arbitrary: keeps)
    case Nil
     from Nil show ?case by(simp)
@@ -304,31 +304,31 @@ begin
     assume distinct: "distinct (a # ff)"
       hence ff_distinct: "distinct ff" and a_not_in_ff: "a \<notin> set ff "by simp_all
     assume minimal: "\<forall>(e1, e2)\<in>set keeps. 
-      \<not> eval_model (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox (a # ff) keeps G nP)))) nP"
+      \<not> sinvar (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox (a # ff) keeps G nP)))) nP"
 
     let ?goal="?case" --"we show this by case distinction"
     show ?case
-    proof(cases "eval_model (delete_edges_list G (ff@keeps)) nP")
+    proof(cases "sinvar (delete_edges_list G (ff@keeps)) nP")
     case True 
-      from True have "eval_model (delete_edges_list G (ff@keeps)) nP" .
+      from True have "sinvar (delete_edges_list G (ff@keeps)) nP" .
       from this Cons show ?goal using delete_edges_list_union by simp
     next
     case False
       (*MONO=Cons.prems(1)"*)
       thm not_model_mono_imp_addedge_mono_minimalize_offending_overapprox
       from not_model_mono_imp_addedge_mono_minimalize_offending_overapprox[OF Cons.prems(1) valid_graph a_not_in_keeps a_not_in_ff a_in_edges False] have a_minimal: "
-      \<not> eval_model (add_edge (fst a) (snd a) (delete_edges G (set (minimalize_offending_overapprox (a # ff) keeps G nP)))) nP"
+      \<not> sinvar (add_edge (fst a) (snd a) (delete_edges G (set (minimalize_offending_overapprox (a # ff) keeps G nP)))) nP"
       by simp
       from minimal a_minimal
       have a_keeps_minimal: "\<forall>(e1, e2)\<in>set (a # keeps). 
-      \<not> eval_model (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox ff (a # keeps) G nP)))) nP" 
+      \<not> sinvar (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox ff (a # keeps) G nP)))) nP" 
         by (metis (lifting) False minimalize_offending_overapprox.simps(2) prod_case_beta set_ConsD)
       from Cons.prems have a_not_in_keeps: "\<forall>x\<in>set ff. x \<notin> set (a#keeps)" by auto
       from Cons.IH[OF Cons.prems(1) valid_graph a_not_in_keeps ff_in_edges ff_distinct a_keeps_minimal] have IH:
         "\<forall>(e1, e2)\<in>set (minimalize_offending_overapprox ff (a # keeps) G nP).
-       \<not> eval_model (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox ff (a # keeps) G nP)))) nP" .
+       \<not> sinvar (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox ff (a # keeps) G nP)))) nP" .
       
-      from False have "\<not> eval_model (delete_edges G (set ff \<union> set keeps)) nP " using delete_edges_list_union by metis
+      from False have "\<not> sinvar (delete_edges G (set ff \<union> set keeps)) nP " using delete_edges_list_union by metis
       from this have "set (minimalize_offending_overapprox (a # ff) keeps G nP) = 
         set (minimalize_offending_overapprox ff (a#keeps) G nP)"
         by(simp add: delete_edges_list_union)
@@ -337,13 +337,13 @@ begin
     qed
   qed
   
-  lemma "\<lbrakk> (\<forall> G nP X Y. X \<subseteq> Y \<and> \<not> eval_model (delete_edges G (Y)) nP \<longrightarrow> \<not> eval_model (delete_edges G X) nP );
+  lemma "\<lbrakk> (\<forall> G nP X Y. X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP );
       valid_graph G; is_offending_flows (set ff) G nP; set ff \<subseteq> edges G; distinct ff \<rbrakk> \<Longrightarrow> 
     \<exists> f \<subseteq> (set ff). is_offending_flows_min_set f G nP"
   apply(simp add: is_offending_flows_def is_offending_flows_min_set_def)
   apply(clarify)
   apply(rule_tac x="set (minimalize_offending_overapprox ff [] G nP)" in exI)
-  (*x \<subseteq> ff \<and> (\<forall>(e1, e2)\<in>x. \<not> eval_model (add_edge e1 e2 (delete_edges G x)) nP)*)
+  (*x \<subseteq> ff \<and> (\<forall>(e1, e2)\<in>x. \<not> sinvar (add_edge e1 e2 (delete_edges G x)) nP)*)
   apply(rule conjI)
    thm minimalize_offending_overapprox_subset[of "ff" "[]", simplified]
    apply(simp add:  minimalize_offending_overapprox_subset[of "ff" "[]", simplified])
@@ -355,7 +355,7 @@ begin
   done
 
   theorem is_offending_flows_min_set_minimalize_offending_overapprox:
-  "\<lbrakk> (\<forall> G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> eval_model (delete_edges G (Y)) nP \<longrightarrow> \<not> eval_model (delete_edges G X) nP );
+  "\<lbrakk> (\<forall> G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP );
       valid_graph G; is_offending_flows (set ff) G nP; set ff \<subseteq> edges G; distinct ff \<rbrakk> \<Longrightarrow> 
     is_offending_flows_min_set (set (minimalize_offending_overapprox ff [] G nP)) G nP"
   apply(simp add: is_offending_flows_def is_offending_flows_min_set_def)
@@ -370,13 +370,13 @@ begin
 
   (*use this corollary to show that set_offending_flows is not empty*)
   corollary mono_imp_set_offending_flows_not_empty:
-  assumes mono_eval_model: "eval_model_mono"
-  and other_assms: "valid_graph G" "\<not> eval_model G nP" "is_offending_flows (set ff) G nP" "set ff \<subseteq> edges G" "distinct ff"
+  assumes mono_sinvar: "sinvar_mono"
+  and other_assms: "valid_graph G" "\<not> sinvar G nP" "is_offending_flows (set ff) G nP" "set ff \<subseteq> edges G" "distinct ff"
   shows
     "set_offending_flows G nP \<noteq> {}"
   proof -
-    from eval_model_mono_imp_negative_delete_edge_mono[OF mono_eval_model] have negative_delete_edge_mono: 
-      "\<forall> G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> eval_model (delete_edges G (Y)) nP \<longrightarrow> \<not> eval_model (delete_edges G X) nP" by simp
+    from sinvar_mono_imp_negative_delete_edge_mono[OF mono_sinvar] have negative_delete_edge_mono: 
+      "\<forall> G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP" by simp
       
     from is_offending_flows_min_set_minimalize_offending_overapprox[OF _ other_assms(1) other_assms(3) other_assms(4) other_assms(5)] 
     negative_delete_edge_mono have "is_offending_flows_min_set (set (minimalize_offending_overapprox ff [] G nP)) G nP" by simp
@@ -393,10 +393,10 @@ begin
    there a means to fix it if and only if the network in which nobody comunicates with anyone fulfills the security requirement
    *}
    theorem valid_empty_edges_iff_exists_offending_flows: 
-    assumes mono: "eval_model_mono" and validG: "valid_graph G" and noteval: "\<not> eval_model G nP"
-    shows "eval_model \<lparr> nodes = nodes G, edges = {} \<rparr> nP \<longleftrightarrow> set_offending_flows G nP \<noteq> {}"
+    assumes mono: "sinvar_mono" and validG: "valid_graph G" and noteval: "\<not> sinvar G nP"
+    shows "sinvar \<lparr> nodes = nodes G, edges = {} \<rparr> nP \<longleftrightarrow> set_offending_flows G nP \<noteq> {}"
    proof 
-      assume a: "eval_model \<lparr> nodes = nodes G, edges = {} \<rparr> nP"
+      assume a: "sinvar \<lparr> nodes = nodes G, edges = {} \<rparr> nP"
   
       from finite_distinct_list[OF valid_graph.finiteE] validG
       obtain list_edges where list_edges_props: "set list_edges = edges G \<and> distinct list_edges" by blast
@@ -406,7 +406,7 @@ begin
       from a is_offending_flows_def noteval list_edges_props empty_edge_graph_simp 
         have overapprox: "is_offending_flows (set list_edges) G nP" by auto
   
-      from TopoS_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF 
+      from SecurityInvariant_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF 
           mono validG noteval overapprox listedges_subseteq_edges] list_edges_props 
       show "set_offending_flows G nP \<noteq> {}" by simp
     next
@@ -414,14 +414,14 @@ begin
   
       from a obtain f where f_props: "f \<subseteq> edges G \<and> is_offending_flows_min_set f G nP" using set_offending_flows_def by fastforce
   
-      from f_props have "eval_model (delete_edges G f) nP" using is_offending_flows_min_set_def is_offending_flows_def by simp
-        hence evalGf: "eval_model \<lparr>nodes = nodes G, edges = {(e1, e2). (e1, e2) \<in> edges G \<and> (e1, e2) \<notin> f}\<rparr> nP" by(simp add: graph_ops)
+      from f_props have "sinvar (delete_edges G f) nP" using is_offending_flows_min_set_def is_offending_flows_def by simp
+        hence evalGf: "sinvar \<lparr>nodes = nodes G, edges = {(e1, e2). (e1, e2) \<in> edges G \<and> (e1, e2) \<notin> f}\<rparr> nP" by(simp add: graph_ops)
       from delete_edges_valid[OF validG, unfolded delete_edges_def] 
         have validGf: "valid_graph \<lparr>nodes = nodes G, edges = {(e1, e2). (e1, e2) \<in> edges G \<and> (e1, e2) \<notin> f}\<rparr>" by simp
       have emptyseqGf: "{} \<subseteq>  {(e1, e2). (e1, e2) \<in> edges G \<and> (e1, e2) \<notin> f}" by simp
   
-      from mono[unfolded eval_model_mono_def] evalGf validGf emptyseqGf have "eval_model \<lparr>nodes = nodes G, edges = {}\<rparr> nP" by blast
-      thus "eval_model \<lparr>nodes = nodes G, edges = {}\<rparr> nP" .
+      from mono[unfolded sinvar_mono_def] evalGf validGf emptyseqGf have "sinvar \<lparr>nodes = nodes G, edges = {}\<rparr> nP" by blast
+      thus "sinvar \<lparr>nodes = nodes G, edges = {}\<rparr> nP" .
   qed
 
 
@@ -446,10 +446,10 @@ end
 context TopoS_preliminaries
   begin
     
-    text{* @{const eval_model_mono} naturally holds in @{const TopoS_preliminaries} *}
-    lemma eval_model_monoI: "eval_model_mono"
-      apply(unfold eval_model_mono_def)
-      apply(insert mono_eval_model)
+    text{* @{const sinvar_mono} naturally holds in @{const TopoS_preliminaries} *}
+    lemma sinvar_monoI: "sinvar_mono"
+      apply(unfold sinvar_mono_def)
+      apply(insert mono_sinvar)
       by blast
 
     
@@ -458,15 +458,15 @@ context TopoS_preliminaries
       "\<lbrakk> valid_graph G; is_offending_flows (set ff) G nP; set ff \<subseteq> edges G; distinct ff \<rbrakk>
         \<Longrightarrow>
          is_offending_flows_min_set (set (minimalize_offending_overapprox ff [] G nP)) G nP "
-    apply(insert eval_model_monoI)
-    apply(unfold eval_model_mono_def)
+    apply(insert sinvar_monoI)
+    apply(unfold sinvar_mono_def)
     using is_offending_flows_min_set_minimalize_offending_overapprox
-    by (metis (full_types) eval_model_monoI eval_model_mono_imp_negative_delete_edge_mono)
+    by (metis (full_types) sinvar_monoI sinvar_mono_imp_negative_delete_edge_mono)
 
     text{* 
-      If @{term "\<not> eval_model G nP"}
+      If @{term "\<not> sinvar G nP"}
       Given a list ff, (ff is distinct and a subset of G's edges)
-      such that @{text "eval_model (V, E - ff) nP"}
+      such that @{text "sinvar (V, E - ff) nP"}
       @{const minimalize_offending_overapprox} minimizes ff such that we get an offending flows
       Note: choosing ff = edges G is a good choice!
     *}
@@ -482,7 +482,7 @@ context TopoS_preliminaries
     (*TODO better minimality condition for keeps*)
     lemma  minimalize_offending_overapprox_sound_fixKeep:
       "\<lbrakk> valid_graph G; is_offending_flows (set (ff @ keeps)) G nP; \<forall> x \<in> set ff. x \<notin> set keeps; \<forall> x \<in> set ff. x \<in> edges G; distinct ff; 
-        \<forall>(e1, e2)\<in> set keeps. \<not> eval_model (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox ff keeps G nP)))) nP \<rbrakk>
+        \<forall>(e1, e2)\<in> set keeps. \<not> sinvar (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox ff keeps G nP)))) nP \<rbrakk>
         \<Longrightarrow>
          is_offending_flows_min_set (set (minimalize_offending_overapprox ff keeps G nP)) G nP \<and> set keeps \<subseteq> (set (minimalize_offending_overapprox ff keeps G nP))"
        apply(rule conjI)
@@ -491,7 +491,7 @@ context TopoS_preliminaries
          apply(simp add: is_offending_flows_def is_offending_flows_min_set_def)
          apply(simp add:minimalize_offending_overapprox_maintains_evalmodel)
         apply(rule mono_imp_minimalize_offending_overapprox_minimal)
-             apply (metis eval_model_monoI eval_model_mono_imp_negative_delete_edge_mono)
+             apply (metis sinvar_monoI sinvar_mono_imp_negative_delete_edge_mono)
             apply(simp)
            apply(simp)
           apply(simp)
@@ -505,16 +505,16 @@ context TopoS_preliminaries
  end
 
 
-context TopoS_withOffendingFlows
+context SecurityInvariant_withOffendingFlows
 begin
 
     lemma mono_imp_emptyoffending_eq_nevervalid:
-       "\<lbrakk> eval_model_mono; valid_graph G; \<not> eval_model G nP; set_offending_flows G nP = {}\<rbrakk> \<Longrightarrow> 
-        \<not> (\<exists> f \<subseteq> edges G. eval_model (delete_edges G f) nP)"
+       "\<lbrakk> sinvar_mono; valid_graph G; \<not> sinvar G nP; set_offending_flows G nP = {}\<rbrakk> \<Longrightarrow> 
+        \<not> (\<exists> f \<subseteq> edges G. sinvar (delete_edges G f) nP)"
     proof -
-      assume mono: "eval_model_mono"
+      assume mono: "sinvar_mono"
       and validG: "valid_graph G"
-      and a1:  "\<not> eval_model G nP"
+      and a1:  "\<not> sinvar G nP"
       and a2: "set_offending_flows G nP = {}"
 
       from validG have validG': "valid_graph \<lparr>nodes = nodes G, edges = edges G\<rparr>" by(simp add:valid_graph_def)
@@ -522,23 +522,23 @@ begin
       from a2 set_offending_flows_def have "\<forall>f \<subseteq> edges G. \<not> is_offending_flows_min_set f G nP" by simp
       from this is_offending_flows_min_set_def is_offending_flows_def a1 have notdeleteconj:
         "\<forall>f \<subseteq> edges G. 
-          \<not> eval_model (delete_edges G f) nP \<or> 
-          \<not> ((\<forall>(e1, e2)\<in>f. \<not> eval_model (add_edge e1 e2 (delete_edges G f)) nP))" 
+          \<not> sinvar (delete_edges G f) nP \<or> 
+          \<not> ((\<forall>(e1, e2)\<in>f. \<not> sinvar (add_edge e1 e2 (delete_edges G f)) nP))" 
       by simp
-      have "\<forall>f\<subseteq>edges G. \<not> eval_model (delete_edges G f) nP"
+      have "\<forall>f\<subseteq>edges G. \<not> sinvar (delete_edges G f) nP"
       proof (rule allI, rule impI)
         fix f
         assume "f \<subseteq> edges G"
         from this notdeleteconj have 
-         "\<not> eval_model (delete_edges G f) nP \<or> 
-          \<not> ((\<forall>(e1, e2)\<in>f. \<not> eval_model (add_edge e1 e2 (delete_edges G f)) nP))" by simp
-        from this show "\<not> eval_model (delete_edges G f) nP"
+         "\<not> sinvar (delete_edges G f) nP \<or> 
+          \<not> ((\<forall>(e1, e2)\<in>f. \<not> sinvar (add_edge e1 e2 (delete_edges G f)) nP))" by simp
+        from this show "\<not> sinvar (delete_edges G f) nP"
           proof
-            assume "\<not> eval_model (delete_edges G f) nP" thus "\<not> eval_model (delete_edges G f) nP" .
+            assume "\<not> sinvar (delete_edges G f) nP" thus "\<not> sinvar (delete_edges G f) nP" .
           next
-            assume "\<not> (\<forall>(e1, e2)\<in>f. \<not> eval_model (add_edge e1 e2 (delete_edges G f)) nP)"
-            hence "\<exists>(e1,e2)\<in>f. eval_model (add_edge e1 e2 (delete_edges G f)) nP" by(auto)
-            from this obtain e1 e2 where e1e2cond: "(e1,e2)\<in>f \<and> eval_model (add_edge e1 e2 (delete_edges G f)) nP" by blast
+            assume "\<not> (\<forall>(e1, e2)\<in>f. \<not> sinvar (add_edge e1 e2 (delete_edges G f)) nP)"
+            hence "\<exists>(e1,e2)\<in>f. sinvar (add_edge e1 e2 (delete_edges G f)) nP" by(auto)
+            from this obtain e1 e2 where e1e2cond: "(e1,e2)\<in>f \<and> sinvar (add_edge e1 e2 (delete_edges G f)) nP" by blast
             
             from `f \<subseteq> edges G` validG have "finite f" apply(simp add: valid_graph_def) by (metis rev_finite_subset)
             from this obtain listf where listf: "set listf = f \<and> distinct listf" by (metis finite_distinct_list)
@@ -554,14 +554,14 @@ begin
 
             from this[symmetric] add_edge_valid[OF delete_edges_valid[OF validG]] have 
               "valid_graph \<lparr>nodes = nodes G, edges = edges G - f \<union> {(e1, e2)}\<rparr>" by simp
-            from eval_model_mono_fol_imp_pure[OF mono this] have mono'':
+            from sinvar_mono_fol_imp_pure[OF mono this] have mono'':
               "\<And> E'. E' \<subseteq> edges G - f \<union> {(e1, e2)} \<Longrightarrow>
-                eval_model \<lparr>nodes = nodes G, edges = edges G - f \<union> {(e1, e2)}\<rparr> nP \<Longrightarrow> 
-                eval_model \<lparr>nodes = nodes G, edges = E'\<rparr> nP" by simp
+                sinvar \<lparr>nodes = nodes G, edges = edges G - f \<union> {(e1, e2)}\<rparr> nP \<Longrightarrow> 
+                sinvar \<lparr>nodes = nodes G, edges = E'\<rparr> nP" by simp
             
-            from e1e2cond Geq have "eval_model \<lparr> nodes = nodes G, edges = edges G - f \<union> {(e1,e2)}\<rparr> nP" by simp
-            from this mono'' have "eval_model \<lparr> nodes = nodes G, edges = edges G - f\<rparr> nP" by auto
-            hence overapprox: "eval_model (delete_edges G f) nP" by (simp add: delete_edges_simp2) 
+            from e1e2cond Geq have "sinvar \<lparr> nodes = nodes G, edges = edges G - f \<union> {(e1,e2)}\<rparr> nP" by simp
+            from this mono'' have "sinvar \<lparr> nodes = nodes G, edges = edges G - f\<rparr> nP" by auto
+            hence overapprox: "sinvar (delete_edges G f) nP" by (simp add: delete_edges_simp2) 
             (*Interesting, the opposite of what we want to show holds ...*)
 
             from a1 overapprox have "is_offending_flows f G nP" by(simp add: is_offending_flows_def)
@@ -573,7 +573,7 @@ begin
             from this a2 have "False" by simp
             (*I knew this can't be!*)
 
-            thus "\<not> eval_model (delete_edges G f) nP" by simp
+            thus "\<not> sinvar (delete_edges G f) nP" by simp
           qed
       qed
       thus ?thesis by simp
@@ -583,13 +583,13 @@ end
 
 
 text{* Old version of network security requirement modelling also gave 
-  @{text "f \<in> set_offending_flows G nP; eval_model (delete_edges G f) nP"}
+  @{text "f \<in> set_offending_flows G nP; sinvar (delete_edges G f) nP"}
   as assumption for @{text "default_secure"}. We can conclude this from mono. *}
-context TopoS_withOffendingFlows
+context SecurityInvariant_withOffendingFlows
 begin
   lemma mono_exists_offending_flows:
-  "\<lbrakk> eval_model_mono; valid_graph G; is_offending_flows (set ff) G nP; set ff \<subseteq> edges G; distinct ff \<rbrakk> 
-    \<Longrightarrow> \<exists>f. f \<in> set_offending_flows G nP \<and> eval_model (delete_edges G f) nP"
+  "\<lbrakk> sinvar_mono; valid_graph G; is_offending_flows (set ff) G nP; set ff \<subseteq> edges G; distinct ff \<rbrakk> 
+    \<Longrightarrow> \<exists>f. f \<in> set_offending_flows G nP \<and> sinvar (delete_edges G f) nP"
     apply(frule mono_imp_set_offending_flows_not_empty[of G nP ff])
          apply(simp_all add:is_offending_flows_def)
     apply(simp add: set_offending_flows_def)
@@ -615,7 +615,7 @@ section {* Monotonicity of offending flows *}
     text{*If there is some F' in the offending flows of a small graph and you have a bigger graph, you can extend F' by some Fadd and minimality in F is preserved *}
     lemma minimality_offending_flows_mono_edges_graph_extend:
     "\<lbrakk> valid_graph \<lparr> nodes = V, edges = E \<rparr>; E' \<subseteq> E; Fadd \<inter> E' = {}; F' \<in> set_offending_flows \<lparr>nodes = V, edges = E'\<rparr> nP \<rbrakk> \<Longrightarrow> 
-            (\<forall>(e1, e2)\<in>F'. \<not> eval_model (add_edge e1 e2 (delete_edges \<lparr>nodes = V, edges = E \<rparr> (F' \<union> Fadd))) nP)"
+            (\<forall>(e1, e2)\<in>F'. \<not> sinvar (add_edge e1 e2 (delete_edges \<lparr>nodes = V, edges = E \<rparr> (F' \<union> Fadd))) nP)"
     proof -
       assume a1: "valid_graph \<lparr> nodes = V, edges = E \<rparr>"
       and    a2: "E' \<subseteq> E"
@@ -643,7 +643,7 @@ section {* Monotonicity of offending flows *}
         by(auto simp add: add_edge_def)
       from FinV1 FinV2 have insert_e1_e2_V: "\<forall> (e1, e2) \<in> F'. insert e1 (insert e2 V) = V" by auto
       have "\<And> Fadd. (Fadd \<inter> E' = {}) \<Longrightarrow> 
-       \<forall>(e1, e2)\<in>F'. \<not> eval_model \<lparr>nodes = V, edges = (E - (F' \<union> Fadd)) \<union> {(e1, e2)}\<rparr> nP"
+       \<forall>(e1, e2)\<in>F'. \<not> sinvar \<lparr>nodes = V, edges = (E - (F' \<union> Fadd)) \<union> {(e1, e2)}\<rparr> nP"
        proof -
         fix Fadd
          assume f1: "(Fadd \<inter> E' = {})"
@@ -656,24 +656,24 @@ section {* Monotonicity of offending flows *}
             using Eadd_prop a2 apply blast
            using Eadd_prop a2 by (metis `E' \<inter> Eadd = {}` equalityE inf_commute inf_mono le_supI2 subset_empty)
    
-         from a4 have "(\<forall>(e1, e2)\<in>F'. \<not> eval_model (add_edge e1 e2 \<lparr>nodes = V, edges = E' - F'\<rparr>) nP)"
+         from a4 have "(\<forall>(e1, e2)\<in>F'. \<not> sinvar (add_edge e1 e2 \<lparr>nodes = V, edges = E' - F'\<rparr>) nP)"
           by(simp add: set_offending_flows_def is_offending_flows_min_set_def delete_edges_simp2)
-        from this add_edge_F have noteval_F: "\<forall>(e1, e2)\<in>F'. \<not> eval_model \<lparr>nodes = V, edges = (E' - F') \<union> {(e1, e2)}\<rparr> nP"
+        from this add_edge_F have noteval_F: "\<forall>(e1, e2)\<in>F'. \<not> sinvar \<lparr>nodes = V, edges = (E' - F') \<union> {(e1, e2)}\<rparr> nP"
            by fastforce 
  
          (*proof rule that preserves the tuple*)
          have tupleBallI: "\<And>A P. (\<And>e1 e2. (e1, e2)\<in>A \<Longrightarrow> P (e1, e2)) \<Longrightarrow> ALL (e1, e2):A. P (e1, e2)" by force
-         show "\<forall>(e1, e2)\<in>F'. \<not> eval_model \<lparr>nodes = V, edges = (E - (F' \<union> Fadd)) \<union> {(e1, e2)}\<rparr> nP"
+         show "\<forall>(e1, e2)\<in>F'. \<not> sinvar \<lparr>nodes = V, edges = (E - (F' \<union> Fadd)) \<union> {(e1, e2)}\<rparr> nP"
           proof(rule tupleBallI)
            fix e1 e2
            assume f2: "(e1, e2) \<in> F'"
               from a4 have "\<And> Fadd. (Fadd \<inter> E' = {}) \<Longrightarrow> 
-                  (\<forall>(e1, e2)\<in>F'. \<not> eval_model (add_edge e1 e2 \<lparr>nodes = V, edges = E' - (F' \<union> Fadd)\<rparr>) nP)"
+                  (\<forall>(e1, e2)\<in>F'. \<not> sinvar (add_edge e1 e2 \<lparr>nodes = V, edges = E' - (F' \<union> Fadd)\<rparr>) nP)"
                by(simp add: set_offending_flows_def is_offending_flows_min_set_def delete_edges_simp2 Fadd_notinE')
                from this have "\<And> Fadd. (Fadd \<inter> E' = {}) \<Longrightarrow> 
-                 \<forall>(e1, e2)\<in>F'.  \<not> eval_model \<lparr>nodes = V, edges = (E' - (F' \<union> Fadd)) \<union> {(e1, e2)}\<rparr> nP"
+                 \<forall>(e1, e2)\<in>F'.  \<not> sinvar \<lparr>nodes = V, edges = (E' - (F' \<union> Fadd)) \<union> {(e1, e2)}\<rparr> nP"
                 using insert_e1_e2_V by (metis Fadd_notinE' noteval_F)
-              from this[OF f1] f2 have gFadd1: "\<not> eval_model \<lparr>nodes = V, edges = (E' - (F' \<union> Fadd)) \<union> {(e1, e2)}\<rparr> nP" by simp
+              from this[OF f1] f2 have gFadd1: "\<not> sinvar \<lparr>nodes = V, edges = (E' - (F' \<union> Fadd)) \<union> {(e1, e2)}\<rparr> nP" by simp
        
               from a1 FinV1 FinV2 f1 f2 have gFadd2: 
                   "valid_graph \<lparr>nodes = V, edges = (E - (F' \<union> Fadd)) \<union> {(e1, e2)}\<rparr>"
@@ -682,14 +682,14 @@ section {* Monotonicity of offending flows *}
               from a2 f1 f2 have gFadd3: 
                    "(E' - (F' \<union> Fadd)) \<union> {(e1, e2)} \<subseteq> (E - (F' \<union> Fadd)) \<union> {(e1, e2)}" by fast
              
-              from eval_model_mono_imp_negative_mono[OF eval_model_monoI] have negative_mono_HOL:
-                  "\<And>nP N E' E. valid_graph \<lparr>nodes = N, edges = E\<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> \<not> eval_model \<lparr>nodes = N, edges = E'\<rparr> nP \<Longrightarrow> \<not> eval_model \<lparr>nodes = N, edges = E\<rparr> nP" by metis      
+              from sinvar_mono_imp_negative_mono[OF sinvar_monoI] have negative_mono_HOL:
+                  "\<And>nP N E' E. valid_graph \<lparr>nodes = N, edges = E\<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> \<not> sinvar \<lparr>nodes = N, edges = E'\<rparr> nP \<Longrightarrow> \<not> sinvar \<lparr>nodes = N, edges = E\<rparr> nP" by metis      
               from negative_mono_HOL[where E="(E - (F' \<union> Fadd)) \<union> {(e1, e2)}" and E'="(E' - (F' \<union> Fadd)) \<union> {(e1, e2)}" and N="V" and nP="nP", OF gFadd2 gFadd3 gFadd1]
-              show "\<not> eval_model \<lparr>nodes = V, edges = (E - (F' \<union> Fadd)) \<union> {(e1, e2)}\<rparr> nP" .
+              show "\<not> sinvar \<lparr>nodes = V, edges = (E - (F' \<union> Fadd)) \<union> {(e1, e2)}\<rparr> nP" .
           qed
        qed
        hence mono_delete_edges_minimal: "\<And> Fadd. (Fadd \<inter> E' = {}) \<Longrightarrow> 
-          (\<forall>(e1, e2)\<in>F'. \<not> eval_model (add_edge e1 e2 (delete_edges \<lparr>nodes = V, edges = E \<rparr> (F' \<union> Fadd))) nP)"
+          (\<forall>(e1, e2)\<in>F'. \<not> sinvar (add_edge e1 e2 (delete_edges \<lparr>nodes = V, edges = E \<rparr> (F' \<union> Fadd))) nP)"
         apply(simp add: delete_edges_simp2 Fadd_notinE' add_edge_def)
         apply(clarify)
         using insert_e1_e2_V by fastforce
@@ -701,7 +701,7 @@ section {* Monotonicity of offending flows *}
       "\<lbrakk> valid_graph \<lparr> nodes = V, edges = E \<rparr>; 
          E' \<subseteq> E;
          F \<in> set_offending_flows \<lparr>nodes = V, edges = E'\<rparr> nP \<rbrakk> \<Longrightarrow>
-      \<forall>(e1, e2)\<in>F. \<not> eval_model (add_edge e1 e2 (delete_edges \<lparr>nodes = V, edges = E \<rparr> F)) nP"
+      \<forall>(e1, e2)\<in>F. \<not> sinvar (add_edge e1 e2 (delete_edges \<lparr>nodes = V, edges = E \<rparr> F)) nP"
       using minimality_offending_flows_mono_edges_graph_extend[where Fadd="{}", simplified] by presburger
 
 
@@ -730,15 +730,15 @@ section {* Monotonicity of offending flows *}
            apply fastforce
           using Eadd_prop `E' \<inter> Eadd = {}` `F' \<subseteq> E'` by fast
   
-        from a4 have offending_F: "\<not> eval_model \<lparr>nodes = V, edges = E'\<rparr> nP"
+        from a4 have offending_F: "\<not> sinvar \<lparr>nodes = V, edges = E'\<rparr> nP"
           by(simp add: set_offending_flows_def is_offending_flows_min_set_def is_offending_flows_def)
-        from this mono_eval_model[OF a1 a2] have 
-          goal_noteval: "\<not> eval_model \<lparr>nodes = V, edges = E\<rparr> nP" by blast
+        from this mono_sinvar[OF a1 a2] have 
+          goal_noteval: "\<not> sinvar \<lparr>nodes = V, edges = E\<rparr> nP" by blast
   
   
-         from a4 have eval_E_minus_FEadd_simp: "eval_model \<lparr>nodes = V, edges = E' - F'\<rparr> nP"
+         from a4 have eval_E_minus_FEadd_simp: "sinvar \<lparr>nodes = V, edges = E' - F'\<rparr> nP"
           by(simp add: set_offending_flows_def is_offending_flows_min_set_def is_offending_flows_def delete_edges_simp2)
-         from this have eval_E_minus_FEadd: "eval_model (delete_edges \<lparr>nodes = V, edges = E\<rparr> (F' \<union> Eadd)) nP"
+         from this have eval_E_minus_FEadd: "sinvar (delete_edges \<lparr>nodes = V, edges = E\<rparr> (F' \<union> Eadd)) nP"
           apply(simp add: delete_edges_simp2)
           apply(subgoal_tac "E - (F' \<union> Eadd) = E' - F'")
            apply(simp)
@@ -747,8 +747,8 @@ section {* Monotonicity of offending flows *}
   
   
         show "\<exists> F \<in> set_offending_flows \<lparr> nodes = V, edges = E \<rparr> nP. F' \<subseteq> F"
-        proof(cases "\<not> eval_model \<lparr>nodes = V, edges = E' - F' \<union> Eadd\<rparr> nP")
-          assume assumption_new_violation: "\<not> eval_model \<lparr>nodes = V, edges = E' - F' \<union> Eadd\<rparr> nP"
+        proof(cases "\<not> sinvar \<lparr>nodes = V, edges = E' - F' \<union> Eadd\<rparr> nP")
+          assume assumption_new_violation: "\<not> sinvar \<lparr>nodes = V, edges = E' - F' \<union> Eadd\<rparr> nP"
           from a1 have "finite Eadd"
             apply(simp add: valid_graph_def)
             using Eadd_prop by (metis finite_Un)
@@ -781,26 +781,26 @@ section {* Monotonicity of offending flows *}
         
           from Fadd_prop[simplified is_offending_flows_min_set_def is_offending_flows_def] have
               "Fadd \<subseteq> Eadd" and 
-              goal_eval_Fadd: "eval_model (delete_edges \<lparr>nodes = V, edges = E\<rparr> (F' \<union> Fadd)) nP" and 
-              pre_goal_minimal_Fadd: "(\<forall>(e1, e2)\<in>Fadd. \<not> eval_model (add_edge e1 e2 (delete_edges \<lparr>nodes = V, edges = E \<rparr> (F' \<union> Fadd))) nP)"
+              goal_eval_Fadd: "sinvar (delete_edges \<lparr>nodes = V, edges = E\<rparr> (F' \<union> Fadd)) nP" and 
+              pre_goal_minimal_Fadd: "(\<forall>(e1, e2)\<in>Fadd. \<not> sinvar (add_edge e1 e2 (delete_edges \<lparr>nodes = V, edges = E \<rparr> (F' \<union> Fadd))) nP)"
               apply(simp_all)
                 apply(simp add: `Fadd \<subseteq> Eadd`)
                apply(simp add: delete_edges_simp2, clarify)
-               apply(thin_tac "\<not> eval_model ?X ?y")
+               apply(thin_tac "\<not> sinvar ?X ?y")
                apply(thin_tac "\<forall> x\<in> Fadd. ?X x")
                apply(insert graph_edges_simp_helper, simp)
               apply(erule conjE)+
-              apply(thin_tac "\<not> eval_model ?X ?y")
-              apply(thin_tac "eval_model ?X ?y")
+              apply(thin_tac "\<not> sinvar ?X ?y")
+              apply(thin_tac "sinvar ?X ?y")
               apply(simp add: delete_edges_simp2)
               done
     
           from `E' \<inter> Eadd = {}` `Fadd \<subseteq> Eadd` have "Fadd \<inter> E' = {}" by blast
           from minimality_offending_flows_mono_edges_graph_extend[OF a1 `E' \<subseteq> E` `Fadd \<inter> E' = {}` a4]
-          have mono_delete_edges_minimal: "(\<forall>(e1, e2)\<in>F'. \<not> eval_model (add_edge e1 e2 (delete_edges \<lparr>nodes = V, edges = E \<rparr> (F' \<union> Fadd))) nP)" .
+          have mono_delete_edges_minimal: "(\<forall>(e1, e2)\<in>F'. \<not> sinvar (add_edge e1 e2 (delete_edges \<lparr>nodes = V, edges = E \<rparr> (F' \<union> Fadd))) nP)" .
     
           from mono_delete_edges_minimal pre_goal_minimal_Fadd have goal_minimal: 
-            "\<forall>(e1, e2)\<in>F' \<union> Fadd. \<not> eval_model (add_edge e1 e2 (delete_edges \<lparr>nodes = V, edges = E\<rparr> (F' \<union> Fadd))) nP" by fastforce
+            "\<forall>(e1, e2)\<in>F' \<union> Fadd. \<not> sinvar (add_edge e1 e2 (delete_edges \<lparr>nodes = V, edges = E\<rparr> (F' \<union> Fadd))) nP" by fastforce
     
            from Eadd_prop `Fadd \<subseteq> Eadd` `F' \<subseteq> E'` have goal_subset: "F' \<subseteq> E \<and> Fadd \<subseteq> E"
             apply -
@@ -813,30 +813,30 @@ section {* Monotonicity of offending flows *}
               apply(simp add: goal_noteval goal_eval_Fadd goal_minimal goal_subset)
              done
       next
-          assume "\<not> \<not> eval_model \<lparr>nodes = V, edges = E' - F' \<union> Eadd\<rparr> nP"
-          hence assumption_no_new_violation: "eval_model \<lparr>nodes = V, edges = E' - F' \<union> Eadd\<rparr> nP" by simp
-          from this  `F' \<subseteq> E'` `E' \<inter> Eadd = {}`  have "eval_model \<lparr>nodes = V, edges = E - F'\<rparr> nP"
+          assume "\<not> \<not> sinvar \<lparr>nodes = V, edges = E' - F' \<union> Eadd\<rparr> nP"
+          hence assumption_no_new_violation: "sinvar \<lparr>nodes = V, edges = E' - F' \<union> Eadd\<rparr> nP" by simp
+          from this  `F' \<subseteq> E'` `E' \<inter> Eadd = {}`  have "sinvar \<lparr>nodes = V, edges = E - F'\<rparr> nP"
             proof(subst Eadd_prop[symmetric])
               assume a1: "F' \<subseteq> E'"
               assume a2: "E' \<inter> Eadd = {}"
-              assume a3: "eval_model \<lparr>nodes = V, edges = E' - F' \<union> Eadd\<rparr> nP"
+              assume a3: "sinvar \<lparr>nodes = V, edges = E' - F' \<union> Eadd\<rparr> nP"
               have "\<And>x\<^sub>1. x\<^sub>1 \<inter> E' - Eadd = x\<^sub>1 \<inter> E'"
                 using a2 Un_Diff_Int by auto
               hence "F' - Eadd = F'"
                 using a1 by auto
               hence "{} \<union> (Eadd - F') = Eadd"
                 using Int_Diff Un_Diff_Int sup_commute by auto
-              thus "eval_model \<lparr>nodes = V, edges = E' \<union> Eadd - F'\<rparr> nP"
+              thus "sinvar \<lparr>nodes = V, edges = E' \<union> Eadd - F'\<rparr> nP"
                 using a3 by (metis Un_Diff sup_bot.left_neutral)
             qed
-          from this have goal_eval: "eval_model (delete_edges \<lparr>nodes = V, edges = E\<rparr> F') nP" 
+          from this have goal_eval: "sinvar (delete_edges \<lparr>nodes = V, edges = E\<rparr> F') nP" 
           by(simp add: delete_edges_simp2)
   
           from Eadd_prop `F' \<subseteq> E'` have goal_subset: "F' \<subseteq> E" by(blast)
   
   
           from minimality_offending_flows_mono_edges_graph[OF a1 a2 a4] 
-          have goal_minimal: "(\<forall>(e1, e2)\<in>F'. \<not> eval_model (add_edge e1 e2 (delete_edges \<lparr>nodes = V, edges = E \<rparr> F')) nP)" .
+          have goal_minimal: "(\<forall>(e1, e2)\<in>F'. \<not> sinvar (add_edge e1 e2 (delete_edges \<lparr>nodes = V, edges = E \<rparr> F')) nP)" .
   
           show "\<exists> F \<in> set_offending_flows \<lparr> nodes = V, edges = E \<rparr> nP. F' \<subseteq> F"
               apply(simp add: set_offending_flows_def is_offending_flows_min_set_def is_offending_flows_def)
@@ -877,11 +877,11 @@ section {* Monotonicity of offending flows *}
 
        from validG have validG': "valid_graph \<lparr> nodes = V, edges = E \<rparr>" by(simp add:valid_graph_def)
 
-       from a1 defined_offending[OF validG'] have evalG: "eval_model \<lparr>nodes = V, edges = E \<rparr> nP" by blast
-       from eval_model_monoI[unfolded eval_model_mono_def] validG' this
-       have goal_eval: "eval_model \<lparr>nodes = V, edges = E - {e}\<rparr> nP" by (metis Diff_subset)
+       from a1 defined_offending[OF validG'] have evalG: "sinvar \<lparr>nodes = V, edges = E \<rparr> nP" by blast
+       from sinvar_monoI[unfolded sinvar_mono_def] validG' this
+       have goal_eval: "sinvar \<lparr>nodes = V, edges = E - {e}\<rparr> nP" by (metis Diff_subset)
 
-       from validmodel_imp_no_offending a2 have goal_not_eval: "\<not> eval_model \<lparr>nodes = V, edges = insert e E\<rparr> nP" by blast
+       from sinvar_no_offending a2 have goal_not_eval: "\<not> sinvar \<lparr>nodes = V, edges = insert e E\<rparr> nP" by blast
 
        from a1' a2' have min_set_e: "is_offending_flows_min_set {e} \<lparr>nodes = V, edges = insert e E\<rparr> nP"
         apply(simp add: is_offending_flows_min_set_def is_offending_flows_def delete_edges_simp2 add_edge_def)

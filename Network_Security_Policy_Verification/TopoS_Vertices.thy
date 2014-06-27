@@ -5,20 +5,39 @@ imports Main
 begin
 
 
-text {*We need at least some vertices available for a graph ...*}
+section{*A type for vertices*}
+
+text{*
+This theory makes extensive use of graphs.
+We define a typeclass @{text "vertex"} for the vertices we will use in our theory.
+The vertices will correspond to network or policy entities.
+
+Later, we will conduct some proves by providing counterexamples.
+Therefore, we say that the type of a vertex has at least three pairwise distinct members.
+
+For example, the types @{typ "string"}, @{typ nat}, @{typ "bool \<times> bool"} and many other fulfill this assumption. 
+The type @{typ "bool"} alone does not fulfill this assumption, because it only has two elements.
+
+This is only a constraint over the type, of course, a policy with less than three entities can also be verified.
+
+TL;DR: We define @{typ "'a"} @{text vertex}, which is as good as @{typ "'a"}.
+*}
+
+
+-- {*We need at least some vertices available for a graph ...*}
 class vertex =
   fixes vertex_1 :: "'a"
   fixes vertex_2 :: "'a"
   fixes vertex_3 :: "'a"
-  assumes distince_vertices: "distinct [vertex_1, vertex_2, vertex_3]"
+  assumes distinct_vertices: "distinct [vertex_1, vertex_2, vertex_3]"
 begin
-  lemma distince_vertices12[simp]: "vertex_1 \<noteq> vertex_2" using distince_vertices by(simp)
-  lemma distince_vertices13[simp]: "vertex_1 \<noteq> vertex_3" using distince_vertices by(simp)
-  lemma distince_vertices23[simp]: "vertex_2 \<noteq> vertex_3" using distince_vertices by(simp)
+  lemma distinct_vertices12[simp]: "vertex_1 \<noteq> vertex_2" using distinct_vertices by(simp)
+  lemma distinct_vertices13[simp]: "vertex_1 \<noteq> vertex_3" using distinct_vertices by(simp)
+  lemma distinct_vertices23[simp]: "vertex_2 \<noteq> vertex_3" using distinct_vertices by(simp)
   
-  lemmas distince_vertices_sym = distince_vertices12[symmetric] distince_vertices13[symmetric]
-          distince_vertices23[symmetric]
-  declare distince_vertices_sym[simp]
+  lemmas distinct_vertices_sym = distinct_vertices12[symmetric] distinct_vertices13[symmetric]
+          distinct_vertices23[symmetric]
+  declare distinct_vertices_sym[simp]
 end
 
 
@@ -73,7 +92,7 @@ end
 
 
 
-(*for the ML graphviz vizualizer*)
+--"for the ML graphviz visualizer"
 ML {*
 fun tune_Vstring_format (t: term) (s: string) : string = 
     (*TODO fails for different pretty printer settings

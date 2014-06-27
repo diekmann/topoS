@@ -13,8 +13,8 @@ record node_config =
 definition default_node_properties :: "node_config"
   where  "default_node_properties \<equiv> \<lparr> privacy_level = 0, trusted = False \<rparr>"
 
-fun eval_model :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow>  bool" where
-  "eval_model G nP = (\<forall> (e1,e2) \<in> edges G. (if trusted (nP e2) then True else privacy_level (nP e1) \<le> privacy_level (nP e2) ))"
+fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow>  bool" where
+  "sinvar G nP = (\<forall> (e1,e2) \<in> edges G. (if trusted (nP e2) then True else privacy_level (nP e1) \<le> privacy_level (nP e2) ))"
 
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
@@ -22,38 +22,38 @@ fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<R
 definition target_focus :: "bool" where "target_focus \<equiv> True"
 
 
-lemma eval_model_mono: "TopoS_withOffendingFlows.eval_model_mono eval_model"
-  apply(simp only: TopoS_withOffendingFlows.eval_model_mono_def)
+lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
+  apply(simp only: SecurityInvariant_withOffendingFlows.sinvar_mono_def)
   apply(clarify)
   apply(simp split: split_split split_split_asm)
   by auto
 
 
 interpretation TopoS_preliminaries
-where eval_model = eval_model
+where sinvar = sinvar
 and verify_globals = verify_globals
   apply unfold_locales
     apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
     apply(erule_tac exE)
     apply(rename_tac list_edges)
-    apply(rule_tac ff="list_edges" in TopoS_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+    apply(rule_tac ff="list_edges" in SecurityInvariant_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF sinvar_mono])
         apply(auto split: split_split split_split_asm)[6]
-   apply(simp add: TopoS_withOffendingFlows.is_offending_flows_def graph_ops split: split_split split_split_asm)[1]
+   apply(simp add: SecurityInvariant_withOffendingFlows.is_offending_flows_def graph_ops split: split_split split_split_asm)[1]
    apply (metis prod.inject)
-  apply(fact TopoS_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
+  apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_mono])
  done
 
 
 lemma "a \<noteq> b \<Longrightarrow> ((\<exists> x. y x)) \<Longrightarrow> ((\<forall> x. \<not> y x) \<Longrightarrow> a = b )" by simp
 
 lemma BLP_def_unique: "otherbot \<noteq> default_node_properties \<Longrightarrow>
-    \<exists>G p i f. valid_graph G \<and> \<not> eval_model G p \<and> f \<in> (TopoS_withOffendingFlows.set_offending_flows eval_model G p) \<and>
-       eval_model (delete_edges G f) p \<and> 
-         i \<in> snd ` f \<and> eval_model G (p(i := otherbot)) "
+    \<exists>G p i f. valid_graph G \<and> \<not> sinvar G p \<and> f \<in> (SecurityInvariant_withOffendingFlows.set_offending_flows sinvar G p) \<and>
+       sinvar (delete_edges G f) p \<and> 
+         i \<in> snd ` f \<and> sinvar G (p(i := otherbot)) "
   apply(simp add:default_node_properties_def)
-  apply (simp add: TopoS_withOffendingFlows.set_offending_flows_def
-      TopoS_withOffendingFlows.is_offending_flows_min_set_def
-      TopoS_withOffendingFlows.is_offending_flows_def)
+  apply (simp add: SecurityInvariant_withOffendingFlows.set_offending_flows_def
+      SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def
+      SecurityInvariant_withOffendingFlows.is_offending_flows_def)
   apply (simp add:graph_ops)
   apply (simp split: split_split_asm split_split add:prod_case_beta)
   apply(rule_tac x="\<lparr> nodes={vertex_1, vertex_2}, edges = {(vertex_1,vertex_2)} \<rparr>" in exI, simp)
@@ -81,12 +81,12 @@ section {*ENF*}
     done
   lemma privacylevel_refl: "BLP_P e e"
     by(simp_all add: BLP_P_def)
-  lemma BLP_ENF: "TopoS_withOffendingFlows.eval_model_all_edges_normal_form eval_model BLP_P"
-    unfolding TopoS_withOffendingFlows.eval_model_all_edges_normal_form_def
+  lemma BLP_ENF: "SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form sinvar BLP_P"
+    unfolding SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form_def
     unfolding BLP_P_def
     by simp
-  lemma BLP_ENF_refl: "TopoS_withOffendingFlows.ENF_refl eval_model BLP_P"
-    unfolding TopoS_withOffendingFlows.ENF_refl_def
+  lemma BLP_ENF_refl: "SecurityInvariant_withOffendingFlows.ENF_refl sinvar BLP_P"
+    unfolding SecurityInvariant_withOffendingFlows.ENF_refl_def
     apply(rule conjI)
      apply(simp add: BLP_ENF)
     apply(simp add: privacylevel_refl)
@@ -94,12 +94,12 @@ section {*ENF*}
 
 
   definition BLP_offending_set:: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> ('v \<times> 'v) set set" where
-  "BLP_offending_set G nP = (if eval_model G nP then
+  "BLP_offending_set G nP = (if sinvar G nP then
       {}
      else 
       { {e \<in> edges G. case e of (e1,e2) \<Rightarrow> \<not> BLP_P (nP e1) (nP e2)} })"
-  lemma BLP_offending_set: "TopoS_withOffendingFlows.set_offending_flows eval_model = BLP_offending_set"
-    apply(simp only: fun_eq_iff TopoS_withOffendingFlows.ENF_offending_set[OF BLP_ENF] BLP_offending_set_def)
+  lemma BLP_offending_set: "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = BLP_offending_set"
+    apply(simp only: fun_eq_iff SecurityInvariant_withOffendingFlows.ENF_offending_set[OF BLP_ENF] BLP_offending_set_def)
     apply(rule allI)+
     apply(rename_tac G nP)
     apply(auto)
@@ -108,12 +108,12 @@ section {*ENF*}
 
 interpretation BLPtrusted: TopoS_IFS 
   where default_node_properties = default_node_properties
-  and eval_model = eval_model
+  and sinvar = sinvar
   and verify_globals = verify_globals
-  where "TopoS_withOffendingFlows.set_offending_flows eval_model = BLP_offending_set"
+  where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = BLP_offending_set"
     apply unfold_locales
       apply(rule ballI)
-      apply (rule_tac f=f in TopoS_withOffendingFlows.ENF_snds_refl_instance[OF BLP_ENF_refl zero_default_candidate])
+      apply (rule_tac f=f in SecurityInvariant_withOffendingFlows.ENF_snds_refl_instance[OF BLP_ENF_refl zero_default_candidate])
        apply(simp)
       apply(simp)
      apply(erule default_uniqueness_by_counterexample_IFS)
@@ -123,12 +123,12 @@ interpretation BLPtrusted: TopoS_IFS
 
  
 
-  lemma TopoS_BLPtrusted: "NetworkModel eval_model default_node_properties target_focus"
+  lemma TopoS_BLPtrusted: "NetworkModel sinvar default_node_properties target_focus"
   unfolding target_focus_def by unfold_locales  
  
 hide_type (open) node_config
-hide_const (open) eval_model_mono
+hide_const (open) sinvar_mono
 hide_const (open) BLP_P
-hide_const (open) eval_model verify_globals target_focus default_node_properties
+hide_const (open) sinvar verify_globals target_focus default_node_properties
 
 end

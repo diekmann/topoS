@@ -87,11 +87,11 @@ section{*Our security requirements*}
   subsection{*emplyees are reachable from the Internet*}
     (*nothing to do here*)
 
-lemma "implc_eval_model ConfidentialChairData ChairNetwork_empty" by eval
-lemma "implc_eval_model PrintingACL ChairNetwork_empty" by eval
-lemma "implc_eval_model PrintingSink ChairNetwork_empty" by eval
-lemma "implc_eval_model StudentSubnet ChairNetwork_empty" by eval
-lemma "implc_eval_model FilesSrcACL ChairNetwork_empty" by eval
+lemma "implc_sinvar ConfidentialChairData ChairNetwork_empty" by eval
+lemma "implc_sinvar PrintingACL ChairNetwork_empty" by eval
+lemma "implc_sinvar PrintingSink ChairNetwork_empty" by eval
+lemma "implc_sinvar StudentSubnet ChairNetwork_empty" by eval
+lemma "implc_sinvar FilesSrcACL ChairNetwork_empty" by eval
 
 definition "ChairSecurityRequirements = [ConfidentialChairData, PrintingACL, PrintingSink, StudentSubnet, FilesSrcACL]"
 

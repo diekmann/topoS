@@ -7,8 +7,8 @@ text{* A toy example that defines a valid network security requirement model *}
 definition default_node_properties :: "bool"
   where  "default_node_properties \<equiv> False"
 
-fun eval_model :: "'v graph \<Rightarrow> ('v \<Rightarrow> bool) \<Rightarrow> bool" where
-  "eval_model G nP = (\<forall> (e1,e2) \<in> (edges G). (nP e1) \<and> (nP e2))"
+fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> bool) \<Rightarrow> bool" where
+  "sinvar G nP = (\<forall> (e1,e2) \<in> (edges G). (nP e1) \<and> (nP e2))"
 
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> bool) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
@@ -16,31 +16,31 @@ fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> bool) \<Rightarr
 (* we will not define target_focus!! Works for both! *)
 
 
-lemma eval_model_mono: "TopoS_withOffendingFlows.eval_model_mono eval_model"
-  apply(simp only: TopoS_withOffendingFlows.eval_model_mono_def)
+lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
+  apply(simp only: SecurityInvariant_withOffendingFlows.sinvar_mono_def)
   apply(clarify)
   by auto
 
  
--- "The preliminaries: mostly, eval_model is monotonic"
+-- "The preliminaries: mostly, sinvar is monotonic"
 interpretation TopoS_preliminaries
-where eval_model = eval_model
+where sinvar = sinvar
 and verify_globals = verify_globals
   apply unfold_locales
   apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
   apply(erule_tac exE)
   apply(rename_tac list_edges)
-  apply(rule_tac ff="list_edges" in TopoS_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+  apply(rule_tac ff="list_edges" in SecurityInvariant_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF sinvar_mono])
   apply(auto)[6]
-  apply(auto simp add: TopoS_withOffendingFlows.is_offending_flows_def graph_ops)[2]
-  apply(fact TopoS_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
+  apply(auto simp add: SecurityInvariant_withOffendingFlows.is_offending_flows_def graph_ops)[2]
+  apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_mono])
 done
 
 
 -- "With generic target focus"
 interpretation Example_NetModel: NetworkModel
 where default_node_properties = default_node_properties
-and eval_model = eval_model
+and sinvar = sinvar
 and verify_globals = verify_globals
 and target_focus = target_focus (*yep, that's a variable*)
   unfolding default_node_properties_def
@@ -48,18 +48,18 @@ and target_focus = target_focus (*yep, that's a variable*)
 
   -- "Secure bydefault"
   apply(simp)
-  apply (simp add: TopoS_withOffendingFlows.set_offending_flows_def
-      TopoS_withOffendingFlows.is_offending_flows_min_set_def
-      TopoS_withOffendingFlows.is_offending_flows_def)
+  apply (simp add: SecurityInvariant_withOffendingFlows.set_offending_flows_def
+      SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def
+      SecurityInvariant_withOffendingFlows.is_offending_flows_def)
   apply (simp add:delete_edges_simp2 graph_ops)
   apply (simp split: split_split_asm split_split add:prod_case_beta)
     apply blast
 
  -- "Uniqueness"
  apply(simp add:default_node_properties_def)
-  apply (simp add: TopoS_withOffendingFlows.set_offending_flows_def
-      TopoS_withOffendingFlows.is_offending_flows_min_set_def
-      TopoS_withOffendingFlows.is_offending_flows_def)
+  apply (simp add: SecurityInvariant_withOffendingFlows.set_offending_flows_def
+      SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def
+      SecurityInvariant_withOffendingFlows.is_offending_flows_def)
   apply (simp add:delete_edges_simp2 graph_ops)
   apply (simp split: split_split_asm split_split add:prod_case_beta)
   -- "proof by counter example: assume False is not the unique default parameter"

@@ -15,8 +15,8 @@ definition default_node_properties :: "'v access_list"
 fun accesses_okay :: "'v access_list \<Rightarrow> 'v set \<Rightarrow> bool" where
   "accesses_okay (AccessList ACL) accesses = (\<forall> a \<in> accesses. a \<in> set ACL)"
 
-fun eval_model :: "'v graph \<Rightarrow> ('v \<Rightarrow> 'v access_list) \<Rightarrow> bool" where
-  "eval_model G nP = (\<forall> v \<in> nodes G. accesses_okay (nP v) (succ_tran G v))"
+fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> 'v access_list) \<Rightarrow> bool" where
+  "sinvar G nP = (\<forall> v \<in> nodes G. accesses_okay (nP v) (succ_tran G v))"
 
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> 'v access_list) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
@@ -25,22 +25,22 @@ definition target_focus :: "bool" where
   "target_focus \<equiv> False"
 
 
-lemma eval_model_mono: "TopoS_withOffendingFlows.eval_model_mono eval_model"
-  apply(simp only: TopoS_withOffendingFlows.eval_model_mono_def)
+lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
+  apply(simp only: SecurityInvariant_withOffendingFlows.sinvar_mono_def)
   apply(rule)+
   apply(clarify)
   proof -
     fix nP::"('v \<Rightarrow> 'v access_list)" and N E' E
     assume a1: "valid_graph \<lparr>nodes = N, edges = E\<rparr>"
     and    a2: "E' \<subseteq> E"
-    and    a3: "eval_model \<lparr>nodes = N, edges = E\<rparr> nP"
+    and    a3: "sinvar \<lparr>nodes = N, edges = E\<rparr> nP"
 
     from a3 have "\<And>v ACL. v \<in> N \<Longrightarrow> nP v = AccessList ACL \<Longrightarrow> accesses_okay (nP v) (succ_tran \<lparr>nodes = N, edges = E\<rparr> v)" by fastforce
     hence "\<And>v ACL. v \<in> N \<Longrightarrow> nP v = AccessList ACL \<Longrightarrow> (\<forall> a \<in> (succ_tran \<lparr>nodes = N, edges = E\<rparr> v). a \<in> set ACL)" by simp
     from this a2 have g2: "\<And>v ACL. v \<in> N \<Longrightarrow> nP v = AccessList ACL \<Longrightarrow> (\<forall> a \<in> (succ_tran \<lparr>nodes = N, edges = E'\<rparr> v). a \<in> set ACL)"
       using succ_tran_mono[OF a1] by blast
 
-    thus "eval_model \<lparr>nodes = N, edges = E'\<rparr> nP"
+    thus "sinvar \<lparr>nodes = N, edges = E'\<rparr> nP"
       apply(clarsimp)
       apply(rename_tac v)
       apply(case_tac "(nP v)")
@@ -55,33 +55,33 @@ lemma accesses_okay_empty: "accesses_okay (nP v) {}"
 
 
 interpretation TopoS_preliminaries
-where eval_model = eval_model
+where sinvar = sinvar
 and verify_globals = verify_globals
   apply unfold_locales
     apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
     apply(erule_tac exE)
     apply(rename_tac list_edges)
-    apply(rule_tac ff="list_edges" in TopoS_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+    apply(rule_tac ff="list_edges" in SecurityInvariant_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF sinvar_mono])
         apply(auto)[5]
-    apply(auto simp add: TopoS_withOffendingFlows.is_offending_flows_def graph_ops False_set succ_tran_empty accesses_okay_empty)[1]
-   apply(fact TopoS_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
-  apply(fact TopoS_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
+    apply(auto simp add: SecurityInvariant_withOffendingFlows.is_offending_flows_def graph_ops False_set succ_tran_empty accesses_okay_empty)[1]
+   apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_sinvar_mono[OF sinvar_mono])
+  apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_mono])
  done
 
 
 lemma unique_default_example: "succ_tran \<lparr>nodes = {vertex_1, vertex_2}, edges = {(vertex_1, vertex_2)}\<rparr> vertex_2 = {}"
 apply (simp add: succ_tran_def)
-by (metis Domain.DomainI Domain_empty Domain_insert distince_vertices12 singleton_iff trancl_domain)
+by (metis Domain.DomainI Domain_empty Domain_insert distinct_vertices12 singleton_iff trancl_domain)
 
 interpretation ACLcommunicateWith: TopoS_ACS
 where default_node_properties = NM_ACLcommunicateWith.default_node_properties
-and eval_model = NM_ACLcommunicateWith.eval_model
+and sinvar = NM_ACLcommunicateWith.sinvar
 and verify_globals = verify_globals
   unfolding NM_ACLcommunicateWith.default_node_properties_def
   apply unfold_locales
   
    apply simp
-   apply(subst(asm) TopoS_withOffendingFlows.set_offending_flows_simp, simp)
+   apply(subst(asm) SecurityInvariant_withOffendingFlows.set_offending_flows_simp, simp)
    apply(clarsimp)
    apply (metis accesses_okay_empty)
 
@@ -89,9 +89,9 @@ and verify_globals = verify_globals
   apply(erule default_uniqueness_by_counterexample_ACS)
   apply(case_tac "otherbot")
   apply(simp)
-  apply (simp add: TopoS_withOffendingFlows.set_offending_flows_def
-      TopoS_withOffendingFlows.is_offending_flows_min_set_def
-      TopoS_withOffendingFlows.is_offending_flows_def)
+  apply (simp add: SecurityInvariant_withOffendingFlows.set_offending_flows_def
+      SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def
+      SecurityInvariant_withOffendingFlows.is_offending_flows_def)
   apply (simp add:graph_ops)
   apply (simp split: split_split_asm split_split add:prod_case_beta)
   thm List.neq_Nil_conv
@@ -119,9 +119,9 @@ and verify_globals = verify_globals
  done
 
 
-  lemma TopoS_ACLcommunicateWith: "NetworkModel eval_model default_node_properties target_focus"
+  lemma TopoS_ACLcommunicateWith: "NetworkModel sinvar default_node_properties target_focus"
   unfolding target_focus_def by unfold_locales  
 
-hide_const (open) eval_model verify_globals target_focus default_node_properties
+hide_const (open) sinvar verify_globals target_focus default_node_properties
 
 end

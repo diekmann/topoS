@@ -17,8 +17,8 @@ fun allowed_sink_flow :: "node_config \<Rightarrow> node_config \<Rightarrow> bo
   "allowed_sink_flow Unassigned _ = True"
 
 
-fun eval_model :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> bool" where
-  "eval_model G nP = (\<forall> (e1,e2) \<in> edges G. e1 \<noteq> e2 \<longrightarrow> allowed_sink_flow (nP e1) (nP e2))"
+fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> bool" where
+  "sinvar G nP = (\<forall> (e1,e2) \<in> edges G. e1 \<noteq> e2 \<longrightarrow> allowed_sink_flow (nP e1) (nP e2))"
 
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
@@ -29,27 +29,27 @@ definition target_focus :: "bool" where "target_focus = True" (*this is odd.
 
 
 subsubsection {*Preliminaries*}
-  lemma eval_model_mono: "TopoS_withOffendingFlows.eval_model_mono eval_model"
-    apply(simp only: TopoS_withOffendingFlows.eval_model_mono_def)
+  lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
+    apply(simp only: SecurityInvariant_withOffendingFlows.sinvar_mono_def)
     apply(clarify)
     by auto
   
   interpretation TopoS_preliminaries
-  where eval_model = eval_model
+  where sinvar = sinvar
   and verify_globals = verify_globals
     apply unfold_locales
       apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
       apply(erule_tac exE)
       apply(rename_tac list_edges)
-      apply(rule_tac ff="list_edges" in TopoS_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+      apply(rule_tac ff="list_edges" in SecurityInvariant_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF sinvar_mono])
           apply(auto)[6]
-     apply(auto simp add: TopoS_withOffendingFlows.is_offending_flows_def graph_ops)[1]
-    apply(fact TopoS_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
+     apply(auto simp add: SecurityInvariant_withOffendingFlows.is_offending_flows_def graph_ops)[1]
+    apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_mono])
    done
 
 section{*ENF*}
-  lemma Sink_ENFnr: "TopoS_withOffendingFlows.eval_model_all_edges_normal_form_not_refl eval_model allowed_sink_flow"
-    by(simp add: TopoS_withOffendingFlows.eval_model_all_edges_normal_form_not_refl_def)
+  lemma Sink_ENFnr: "SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form_not_refl sinvar allowed_sink_flow"
+    by(simp add: SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form_not_refl_def)
   lemma Unassigned_to_All: "\<forall> e2. allowed_sink_flow Unassigned e2"
     by (rule allI, case_tac e2, simp_all)
   lemma Unassigned_default_candidate: "\<forall> e1 e2. \<not> allowed_sink_flow e1 e2 \<longrightarrow> \<not> allowed_sink_flow e1 Unassigned"
@@ -63,12 +63,12 @@ section{*ENF*}
     done
 
   definition Sink_offending_set:: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> ('v \<times> 'v) set set" where
-  "Sink_offending_set G nP = (if eval_model G nP then
+  "Sink_offending_set G nP = (if sinvar G nP then
       {}
      else 
       { {e \<in> edges G. case e of (e1,e2) \<Rightarrow> e1 \<noteq> e2 \<and> \<not> allowed_sink_flow (nP e1) (nP e2)} })"
   lemma Sink_offending_set: 
-  "TopoS_withOffendingFlows.set_offending_flows eval_model = Sink_offending_set"
+  "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = Sink_offending_set"
     apply(simp only: fun_eq_iff ENFnr_offending_set[OF Sink_ENFnr] Sink_offending_set_def)
     apply(rule allI)+
     apply(rename_tac G nP)
@@ -78,19 +78,19 @@ section{*ENF*}
 
 interpretation Sink: TopoS_IFS
 where default_node_properties = default_node_properties
-and eval_model = eval_model
+and sinvar = sinvar
 and verify_globals = verify_globals
-where "TopoS_withOffendingFlows.set_offending_flows eval_model = Sink_offending_set"
+where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = Sink_offending_set"
   unfolding default_node_properties_def
   apply unfold_locales
     apply(rule ballI)
-    apply (rule TopoS_withOffendingFlows.ENFnr_snds_weakrefl_instance[OF Sink_ENFnr Unassigned_default_candidate Unassigned_to_All])
+    apply (rule SecurityInvariant_withOffendingFlows.ENFnr_snds_weakrefl_instance[OF Sink_ENFnr Unassigned_default_candidate Unassigned_to_All])
      apply(simp_all)[2]
 
    apply(erule default_uniqueness_by_counterexample_IFS)
-   apply (simp add: TopoS_withOffendingFlows.set_offending_flows_def
-      TopoS_withOffendingFlows.is_offending_flows_min_set_def
-      TopoS_withOffendingFlows.is_offending_flows_def)
+   apply (simp add: SecurityInvariant_withOffendingFlows.set_offending_flows_def
+      SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def
+      SecurityInvariant_withOffendingFlows.is_offending_flows_def)
    apply (simp add:graph_ops)
    apply (simp split: split_split_asm split_split add:prod_case_beta)
    apply(rule_tac x="\<lparr> nodes={vertex_1,vertex_2}, edges = {(vertex_1,vertex_2)} \<rparr>" in exI, simp)
@@ -108,10 +108,10 @@ where "TopoS_withOffendingFlows.set_offending_flows eval_model = Sink_offending_
   done
 
 
-  lemma TopoS_Sink: "NetworkModel eval_model default_node_properties target_focus"
+  lemma TopoS_Sink: "NetworkModel sinvar default_node_properties target_focus"
   unfolding target_focus_def by unfold_locales
 
-hide_fact (open) eval_model_mono   
-hide_const (open) eval_model verify_globals target_focus default_node_properties
+hide_fact (open) sinvar_mono   
+hide_const (open) sinvar verify_globals target_focus default_node_properties
 
 end

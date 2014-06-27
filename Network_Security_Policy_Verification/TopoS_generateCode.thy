@@ -45,7 +45,7 @@ fun scala_header thy =
         nm_node_props
         nm_offending_flows
         nm_verify_globals
-        nm_eval_model
+        nm_sinvar
         nm_default
         nm_target_focus nm_name
     (*TopoS_Params*)

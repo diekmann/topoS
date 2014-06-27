@@ -61,7 +61,7 @@ section{*Our security requirements*}
 
 definition "ChairSecurityRequirements = [ConfidentialChairData, PrintingACL, PrintingSink, InternalSubnet, FilesSrcACL]"
 
-lemma "\<forall>m \<in> set ChairSecurityRequirements. implc_eval_model m ChairNetwork_empty" by eval
+lemma "\<forall>m \<in> set ChairSecurityRequirements. implc_sinvar m ChairNetwork_empty" by eval
 
 value[code] "implc_get_offending_flows ChairSecurityRequirements ChairNetwork_empty"
 value[code] "generate_valid_topology ChairSecurityRequirements ChairNetwork_empty"
@@ -149,7 +149,7 @@ section{*An example of bad side-effects in access control policies*}
                       edgesL = [(V ''B'', V ''A''), (V ''B'', V ''C'')] \<rparr>"
   
   lemma "valid_list_graph ChairNetwork_empty" by eval
-  lemma "\<forall>m \<in> set [ACL_not_with]. implc_eval_model m simple_network" by eval
+  lemma "\<forall>m \<in> set [ACL_not_with]. implc_sinvar m simple_network" by eval
 
 
   lemma "implc_get_offending_flows [ACL_not_with] simple_network = []" by eval

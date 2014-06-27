@@ -25,7 +25,7 @@ begin
   
   
 (*none of those should be defined or a hide_const is missing at the end of a NM_*.thy file*)
-term eval_model
+term sinvar
 term target_focus
 term verify_globals
 term eval

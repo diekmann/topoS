@@ -12,7 +12,7 @@ apply (simp add: succ_tran_def)
 by (metis (lifting, no_types) Collect_cong Range.intros Range_empty Range_insert mem_Collect_eq singleton_conv singleton_iff trancl.r_into_trancl trancl_range)
 lemma unique_default_example2: "succ_tran \<lparr>nodes = {vertex_1, vertex_2}, edges = {(vertex_2, vertex_1)}\<rparr> vertex_1 = {}"
 apply (simp add: succ_tran_def)
-by (metis Domain.DomainI Domain_empty Domain_insert distince_vertices12 singleton_iff trancl_domain)
+by (metis Domain.DomainI Domain_empty Domain_insert distinct_vertices12 singleton_iff trancl_domain)
 lemma unique_default_example3: "succ_tran \<lparr>nodes = {vertex_1, vertex_2}, edges = {(vertex_2, vertex_1)}\<rparr> vertex_2 = {vertex_1}"
 apply (simp add: succ_tran_def)
 by (metis (lifting, no_types) Collect_cong Range.intros Range_empty Range_insert mem_Collect_eq singleton_conv singleton_iff trancl.r_into_trancl trancl_range)

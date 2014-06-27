@@ -7,15 +7,15 @@ code_identifier code_module  NM_NoRefl_impl => (Scala) NM_NoRefl
 
 section {* NetworkModel NoRefl Implementation *}
 
-fun eval_model :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> bool" where
-  "eval_model G nP = (\<forall> (s,r) \<in> set (edgesL G). s = r \<longrightarrow> nP s = Refl)"
+fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> bool" where
+  "sinvar G nP = (\<forall> (s,r) \<in> set (edgesL G). s = r \<longrightarrow> nP s = Refl)"
 
 fun verify_globals :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> unit \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
 
 
 definition NoRefl_offending_list:: "'v list_graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> ('v \<times> 'v) list list" where
-  "NoRefl_offending_list G nP = (if eval_model G nP then
+  "NoRefl_offending_list G nP = (if sinvar G nP then
     []
    else 
     [ [e \<leftarrow> edgesL G. case e of (e1,e2) \<Rightarrow> e1 = e2 \<and> nP e1 = NoRefl] ])"
@@ -29,13 +29,13 @@ done
 
 definition "NoRefl_eval G P = (valid_list_graph G \<and> 
   verify_globals G (NetworkModel.node_props NM_NoRefl.default_node_properties P) (model_global_properties P) \<and> 
-  eval_model G (NetworkModel.node_props NM_NoRefl.default_node_properties P))"
+  sinvar G (NetworkModel.node_props NM_NoRefl.default_node_properties P))"
 
 
 interpretation NoRefl_impl:TopoS_List_Impl 
   where default_node_properties=NM_NoRefl.default_node_properties
-  and eval_model_spec=NM_NoRefl.eval_model
-  and eval_model_impl=eval_model
+  and sinvar_spec=NM_NoRefl.sinvar
+  and sinvar_impl=sinvar
   and verify_globals_spec=NM_NoRefl.verify_globals
   and verify_globals_impl=verify_globals
   and target_focus=NM_NoRefl.target_focus
@@ -62,14 +62,14 @@ section {* SecurityGateway packing *}
     \<lparr> nm_name = ''NoRefl'', 
       nm_target_focus = NM_NoRefl.target_focus,
       nm_default = NM_NoRefl.default_node_properties, 
-      nm_eval_model = eval_model,
+      nm_sinvar = sinvar,
       nm_verify_globals = verify_globals,
       nm_offending_flows = NoRefl_offending_list, 
       nm_node_props = NetModel_node_props,
       nm_eval = NoRefl_eval
       \<rparr>"
   interpretation NM_LIB_NoRefl_interpretation: TopoS_modelLibrary NM_LIB_NoRefl
-      NM_NoRefl.eval_model NM_NoRefl.verify_globals
+      NM_NoRefl.sinvar NM_NoRefl.verify_globals
     apply(unfold TopoS_modelLibrary_def NM_LIB_NoRefl_def)
     apply(rule conjI)
      apply(simp)
@@ -86,11 +86,11 @@ text {* Examples*}
   definition example_conf where
   "example_conf \<equiv> ((\<lambda>e. NM_NoRefl.default_node_properties)(2:= Refl))" 
   
-  lemma "eval_model example_net example_conf" by eval
+  lemma "sinvar example_net example_conf" by eval
   lemma "NoRefl_offending_list example_net (\<lambda>e. NM_NoRefl.default_node_properties) = [[(2, 2)]]" by eval
 
 
 hide_const (open) NetModel_node_props
-hide_const (open) eval_model verify_globals
+hide_const (open) sinvar verify_globals
 
 end

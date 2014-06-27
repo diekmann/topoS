@@ -5,8 +5,8 @@ begin
 
 code_identifier code_module NM_DomainHierarchyNG_impl => (Scala) NM_DomainHierarchyNG
 
-fun eval_model :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> domainNameTrust) \<Rightarrow> bool" where
-  "eval_model G nP = (\<forall> (s, r) \<in> set (edgesL G). (nP r) \<sqsubseteq>\<^sub>t\<^sub>r\<^sub>u\<^sub>s\<^sub>t (nP s))"
+fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> domainNameTrust) \<Rightarrow> bool" where
+  "sinvar G nP = (\<forall> (s, r) \<in> set (edgesL G). (nP r) \<sqsubseteq>\<^sub>t\<^sub>r\<^sub>u\<^sub>s\<^sub>t (nP s))"
 
 
 fun verify_globals :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> domainNameTrust) \<Rightarrow> domainTree \<Rightarrow> bool" where
@@ -18,7 +18,7 @@ fun verify_globals :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> domainNameT
 
 
 definition DomainHierarchyNG_offending_list:: "'v list_graph \<Rightarrow> ('v \<Rightarrow> domainNameTrust) \<Rightarrow> ('v \<times> 'v) list list" where
-  "DomainHierarchyNG_offending_list G nP = (if eval_model G nP then
+  "DomainHierarchyNG_offending_list G nP = (if sinvar G nP then
     []
    else 
     [ [e \<leftarrow> edgesL G. case e of (s,r) \<Rightarrow> \<not> (nP r) \<sqsubseteq>\<^sub>t\<^sub>r\<^sub>u\<^sub>s\<^sub>t (nP s) ] ])"
@@ -40,13 +40,13 @@ by(simp add: NetModel_node_props_def)
 
 definition "DomainHierarchyNG_eval G P = (valid_list_graph G \<and> 
   verify_globals G (NetworkModel.node_props NM_DomainHierarchyNG.default_node_properties P) (model_global_properties P) \<and> 
-  eval_model G (NetworkModel.node_props NM_DomainHierarchyNG.default_node_properties P))"
+  sinvar G (NetworkModel.node_props NM_DomainHierarchyNG.default_node_properties P))"
 
 
 interpretation DomainHierarchyNG_impl:TopoS_List_Impl 
   where default_node_properties=NM_DomainHierarchyNG.default_node_properties
-  and eval_model_spec=NM_DomainHierarchyNG.eval_model
-  and eval_model_impl=eval_model
+  and sinvar_spec=NM_DomainHierarchyNG.sinvar
+  and sinvar_impl=sinvar
   and verify_globals_spec=NM_DomainHierarchyNG.verify_globals
   and verify_globals_impl=verify_globals
   and target_focus=NM_DomainHierarchyNG.target_focus
@@ -74,14 +74,14 @@ section {* DomainHierarchyNG packing *}
     \<lparr> nm_name = ''DomainHierarchyNG'', 
       nm_target_focus = NM_DomainHierarchyNG.target_focus,
       nm_default = NM_DomainHierarchyNG.default_node_properties, 
-      nm_eval_model = eval_model,
+      nm_sinvar = sinvar,
       nm_verify_globals = verify_globals,
       nm_offending_flows = DomainHierarchyNG_offending_list, 
       nm_node_props = NetModel_node_props,
       nm_eval = DomainHierarchyNG_eval
       \<rparr>"
   interpretation NM_LIB_DomainHierarchyNG_interpretation: TopoS_modelLibrary NM_LIB_DomainHierarchyNG 
-      NM_DomainHierarchyNG.eval_model NM_DomainHierarchyNG.verify_globals
+      NM_DomainHierarchyNG.sinvar NM_DomainHierarchyNG.verify_globals
     apply(unfold TopoS_modelLibrary_def NM_LIB_DomainHierarchyNG_def)
     apply(rule conjI)
      apply(simp)
@@ -116,19 +116,19 @@ definition example_TUM_hierarchy :: "domainTree" where
        ])"
 
 value[code] "verify_globals example_TUM_net example_TUM_config example_TUM_hierarchy"
-value[code] "eval_model     example_TUM_net example_TUM_config"
+value[code] "sinvar     example_TUM_net example_TUM_config"
 
 definition example_TUM_net_invalid where
 "example_TUM_net_invalid \<equiv> example_TUM_net\<lparr>edgesL :=  
     (TopoS_Vertices.V ''LowerSRV'', TopoS_Vertices.V ''UpperSRV'')#(edgesL example_TUM_net)\<rparr>"
 
 value[code] "verify_globals example_TUM_net_invalid example_TUM_config example_TUM_hierarchy"
-value[code] "eval_model     example_TUM_net_invalid example_TUM_config"
+value[code] "sinvar     example_TUM_net_invalid example_TUM_config"
 value[code] "DomainHierarchyNG_offending_list example_TUM_net_invalid example_TUM_config"
 
 
 hide_const (open) NetModel_node_props
 
-hide_const (open) eval_model verify_globals 
+hide_const (open) sinvar verify_globals 
 
 end

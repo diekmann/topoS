@@ -14,26 +14,26 @@ definition undirected_reachable :: "'v list_graph \<Rightarrow> 'v => 'v list" w
 lemma undirected_reachable_set: "set (undirected_reachable G v) = {e2. (v,e2) \<in> (set (edgesL (undirected G)))\<^sup>+} - {v}"
   by(simp add: undirected_succ_tran_set undirected_nodes_set undirected_reachable_def)
 
-fun eval_model_set :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> bool" where
-  "eval_model_set G nP = (\<forall> n \<in> set (nodesL G). (nP n) = Interfering \<longrightarrow> set (map nP (undirected_reachable G n)) \<subseteq> {Unrelated})"
+fun sinvar_set :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> bool" where
+  "sinvar_set G nP = (\<forall> n \<in> set (nodesL G). (nP n) = Interfering \<longrightarrow> set (map nP (undirected_reachable G n)) \<subseteq> {Unrelated})"
 
-(* equal: lemma eval_model_list_eq_set*)
-fun eval_model :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> bool" where
-  "eval_model G nP = (\<forall> n \<in> set (nodesL G). (nP n) = Interfering \<longrightarrow> (let result = remdups (map nP (undirected_reachable G n)) in result = [] \<or> result = [Unrelated]))"
+(* equal: lemma sinvar_list_eq_set*)
+fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> bool" where
+  "sinvar G nP = (\<forall> n \<in> set (nodesL G). (nP n) = Interfering \<longrightarrow> (let result = remdups (map nP (undirected_reachable G n)) in result = [] \<or> result = [Unrelated]))"
 
 lemma "P = Q \<Longrightarrow> (\<forall> x. P x) = (\<forall> x. Q x)"
   by(erule arg_cong)
 
 
-lemma eval_model_eq_help1: "nP ` set (undirected_reachable G n) = set (map nP (undirected_reachable G n))"
+lemma sinvar_eq_help1: "nP ` set (undirected_reachable G n) = set (map nP (undirected_reachable G n))"
   by auto
-lemma eval_model_eq_help2: "set l = {Unrelated} \<Longrightarrow> remdups l = [Unrelated]"
+lemma sinvar_eq_help2: "set l = {Unrelated} \<Longrightarrow> remdups l = [Unrelated]"
  apply(induction l)
   apply simp
  apply(simp)
   apply (metis empty_iff insertI1 set_empty2 subset_singletonD)
  done
-lemma eval_model_eq_help3: "(let result = remdups (map nP (undirected_reachable G n)) in result = [] \<or> result = [Unrelated]) = (set (map nP (undirected_reachable G n)) \<subseteq> {Unrelated})"
+lemma sinvar_eq_help3: "(let result = remdups (map nP (undirected_reachable G n)) in result = [] \<or> result = [Unrelated]) = (set (map nP (undirected_reachable G n)) \<subseteq> {Unrelated})"
   apply simp
   apply(rule iffI)
   apply(erule disjE)
@@ -50,12 +50,12 @@ lemma eval_model_eq_help3: "(let result = remdups (map nP (undirected_reachable 
    apply (metis subset_singletonD)
   apply simp
   apply(rule disjI2)
-  apply(simp only: eval_model_eq_help1)
-   apply(simp add:eval_model_eq_help2)
+  apply(simp only: sinvar_eq_help1)
+   apply(simp add:sinvar_eq_help2)
   done
 
-lemma eval_model_list_eq_set: "eval_model = eval_model_set"
-  apply(insert eval_model_eq_help3)
+lemma sinvar_list_eq_set: "sinvar = sinvar_set"
+  apply(insert sinvar_eq_help3)
   apply(simp add: fun_eq_iff)
   apply(rule allI)+
   apply fastforce
@@ -66,16 +66,16 @@ fun verify_globals :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> node_config
 
 
 
-value[code] "eval_model 
+value[code] "sinvar 
     \<lparr> nodesL = [1::nat,2,3,4], edgesL = [(1,2), (2,3), (3,4), (8,9),(9,8)] \<rparr>
     (\<lambda>e. NM_NonInterference.default_node_properties)"
-value[code] "eval_model 
+value[code] "sinvar 
     \<lparr> nodesL = [1::nat,2,3,4,8,9,10], edgesL = [(1,2), (2,3), (3,4)] \<rparr>
     ((\<lambda>e. NM_NonInterference.default_node_properties)(1:= Interfering, 2:= Unrelated, 3:= Unrelated, 4:= Unrelated))"
-value[code] "eval_model 
+value[code] "sinvar 
     \<lparr> nodesL = [1::nat,2,3,4,5, 8,9,10], edgesL = [(1,2), (2,3), (3,4), (5,4), (8,9),(9,8)] \<rparr>
     ((\<lambda>e. NM_NonInterference.default_node_properties)(1:= Interfering, 2:= Unrelated, 3:= Unrelated, 4:= Unrelated))"
-value[code] "eval_model 
+value[code] "sinvar 
     \<lparr> nodesL = [1::nat], edgesL = [(1,1)] \<rparr>
     ((\<lambda>e. NM_NonInterference.default_node_properties)(1:= Interfering))"
 
@@ -87,7 +87,7 @@ value[code] "(undirected_reachable \<lparr> nodesL = [1::nat], edgesL = [(1,1)] 
 
 
 definition NonInterference_offending_list:: "'v list_graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> ('v \<times> 'v) list list" where
-  "NonInterference_offending_list = Generic_offending_list eval_model"
+  "NonInterference_offending_list = Generic_offending_list sinvar"
 
 
 
@@ -98,12 +98,12 @@ done
 
 definition "NonInterference_eval G P = (valid_list_graph G \<and> 
   verify_globals G (NetworkModel.node_props NM_NonInterference.default_node_properties P) (model_global_properties P) \<and> 
-  eval_model G (NetworkModel.node_props NM_NonInterference.default_node_properties P))"
+  sinvar G (NetworkModel.node_props NM_NonInterference.default_node_properties P))"
 
 
 
-lemma eval_model_correct: "valid_list_graph G \<Longrightarrow> NM_NonInterference.eval_model (list_graph_to_graph G) nP = eval_model G nP"
-   apply(simp add: eval_model_list_eq_set)
+lemma sinvar_correct: "valid_list_graph G \<Longrightarrow> NM_NonInterference.sinvar (list_graph_to_graph G) nP = sinvar G nP"
+   apply(simp add: sinvar_list_eq_set)
    apply(rule all_nodes_list_I)
    apply(simp add: fun_eq_iff)
    apply(clarify)
@@ -113,7 +113,7 @@ lemma eval_model_correct: "valid_list_graph G \<Longrightarrow> NM_NonInterferen
     have f1: "\<And>e_x1 e_x2. - insert (e_x1\<Colon>'a) (List.coset e_x2) = set e_x2 - {e_x1}"
       by (metis compl_coset insert_code(2) set_removeAll)
     hence f2: "\<And>e_x1 e_x e_x2. e_x1 ` (- insert (e_x\<Colon>'a) (List.coset (FiniteListGraph.succ_tran (FiniteListGraph.undirected e_x2) e_x))) = set (map e_x1 (removeAll e_x (FiniteListGraph.succ_tran (FiniteListGraph.undirected e_x2) e_x))\<Colon>node_config list)"
-      by (metis NM_NonInterference_impl.undirected_reachable_def eval_model_eq_help1 set_removeAll)
+      by (metis NM_NonInterference_impl.undirected_reachable_def sinvar_eq_help1 set_removeAll)
     have f3: "\<And>e_x2 e_x1. - insert (e_x2\<Colon>'a) (List.coset (FiniteListGraph.succ_tran (FiniteListGraph.undirected e_x1) e_x2)) = NM_NonInterference.undirected_reachable (list_graph_to_graph e_x1) e_x2"
       using f1 by (metis NM_NonInterference.undirected_reachable_def succ_tran_correct undirected_correct)
     have "\<not> nP ` (- insert x (List.coset (FiniteListGraph.succ_tran (FiniteListGraph.undirected G) x))) \<subseteq> {Unrelated} \<and> \<not> nP ` (- insert x (List.coset (FiniteListGraph.succ_tran (FiniteListGraph.undirected G) x))) \<subseteq> {Unrelated} \<or> nP ` (- insert x (List.coset (FiniteListGraph.succ_tran (FiniteListGraph.undirected G) x))) \<subseteq> {Unrelated} \<and> nP ` (- insert x (List.coset (FiniteListGraph.succ_tran (FiniteListGraph.undirected G) x))) \<subseteq> {Unrelated}"
@@ -134,8 +134,8 @@ lemma eval_model_correct: "valid_list_graph G \<Longrightarrow> NM_NonInterferen
 
 interpretation NonInterference_impl:TopoS_List_Impl 
   where default_node_properties=NM_NonInterference.default_node_properties
-  and eval_model_spec=NM_NonInterference.eval_model
-  and eval_model_impl=eval_model
+  and sinvar_spec=NM_NonInterference.sinvar
+  and sinvar_impl=sinvar
   and verify_globals_spec=NM_NonInterference.verify_globals
   and verify_globals_impl=verify_globals
   and target_focus=NM_NonInterference.target_focus
@@ -148,7 +148,7 @@ interpretation NonInterference_impl:TopoS_List_Impl
    apply(simp add: TopoS_NonInterference)
   apply(rule conjI)
    apply(intro allI impI)
-   apply(fact eval_model_correct)
+   apply(fact sinvar_correct)
   apply(simp)
  apply(rule conjI)
   apply(unfold NonInterference_offending_list_def)
@@ -156,7 +156,7 @@ interpretation NonInterference_impl:TopoS_List_Impl
   apply(rule Generic_offending_list_correct)
    apply(assumption)
   apply(intro allI impI)
-  apply(simp only: eval_model_correct)
+  apply(simp only: sinvar_correct)
  apply(rule conjI)
   apply(intro allI)
   apply(simp only: NetModel_node_props_def)
@@ -164,7 +164,7 @@ interpretation NonInterference_impl:TopoS_List_Impl
  apply(simp only: NonInterference_eval_def)
  apply(intro allI impI)
  apply(rule TopoS_eval_impl_proofrule[OF TopoS_NonInterference])
-  apply(simp only: eval_model_correct)
+  apply(simp only: sinvar_correct)
  apply(simp)
 done
 
@@ -174,14 +174,14 @@ section {* NonInterference packing *}
     \<lparr> nm_name = ''NonInterference'', 
       nm_target_focus = NM_NonInterference.target_focus,
       nm_default = NM_NonInterference.default_node_properties, 
-      nm_eval_model = eval_model,
+      nm_sinvar = sinvar,
       nm_verify_globals = verify_globals,
       nm_offending_flows = NonInterference_offending_list, 
       nm_node_props = NetModel_node_props,
       nm_eval = NonInterference_eval
       \<rparr>"
   interpretation NM_LIB_NonInterference_interpretation: TopoS_modelLibrary NM_LIB_NonInterference
-      NM_NonInterference.eval_model NM_NonInterference.verify_globals
+      NM_NonInterference.sinvar NM_NonInterference.verify_globals
     apply(unfold TopoS_modelLibrary_def NM_LIB_NonInterference_def)
     apply(rule conjI)
      apply(simp)
@@ -196,12 +196,12 @@ text {*Example: *}
   definition "example_graph  = \<lparr> nodesL = [1::nat,2,3,4,5, 8,9,10], edgesL = [(1,2), (2,3), (3,4), (5,4), (8,9),(9,8)] \<rparr>"
   definition"example_conf = ((\<lambda>e. NM_NonInterference.default_node_properties)(1:= Interfering, 2:= Unrelated, 3:= Unrelated, 4:= Unrelated, 8:= Unrelated, 9:= Unrelated))"
   
-  value[code] "eval_model example_graph example_conf"
+  value[code] "sinvar example_graph example_conf"
   value[code] "NonInterference_offending_list example_graph example_conf"
 
 
 
 hide_const (open) NetModel_node_props
-hide_const (open) eval_model verify_globals
+hide_const (open) sinvar verify_globals
 
 end

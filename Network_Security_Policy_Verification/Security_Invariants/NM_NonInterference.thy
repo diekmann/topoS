@@ -18,8 +18,8 @@ lemma undirected_reachable_mono:
 unfolding undirected_reachable_def undirected_def succ_tran_def
 by (fastforce intro: trancl_mono)
 
-fun eval_model :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> bool" where
-  "eval_model G nP = (\<forall> n \<in> (nodes G). (nP n) = Interfering \<longrightarrow> (nP ` (undirected_reachable G n)) \<subseteq> {Unrelated})"
+fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> bool" where
+  "sinvar G nP = (\<forall> n \<in> (nodes G). (nP n) = Interfering \<longrightarrow> (nP ` (undirected_reachable G n)) \<subseteq> {Unrelated})"
 
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
@@ -89,8 +89,8 @@ text{*simplifications for sets we need in the uniqueness proof*}
     by fastforce
 
 section{*monotonic and preliminaries*}
-  lemma eval_model_mono: "TopoS_withOffendingFlows.eval_model_mono eval_model"
-  unfolding TopoS_withOffendingFlows.eval_model_mono_def
+  lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
+  unfolding SecurityInvariant_withOffendingFlows.sinvar_mono_def
     apply(clarsimp)
     apply(rename_tac nP N E' n E xa)
     apply(erule_tac x=n in ballE)
@@ -103,23 +103,23 @@ section{*monotonic and preliminaries*}
     
   
   interpretation TopoS_preliminaries
-  where eval_model = eval_model
+  where sinvar = sinvar
   and verify_globals = verify_globals
     apply unfold_locales
       apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
       apply(erule_tac exE)
       apply(rename_tac list_edges)
-      apply(rule_tac ff="list_edges" in TopoS_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+      apply(rule_tac ff="list_edges" in SecurityInvariant_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF sinvar_mono])
           apply(auto)[5]
-      apply(auto simp add: TopoS_withOffendingFlows.is_offending_flows_def graph_ops empty_undirected_reachable_false)[1]
-     apply(fact TopoS_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
-    apply(fact TopoS_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
+      apply(auto simp add: SecurityInvariant_withOffendingFlows.is_offending_flows_def graph_ops empty_undirected_reachable_false)[1]
+     apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_sinvar_mono[OF sinvar_mono])
+    apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_mono])
   done
 
 
 interpretation NonInterference: TopoS_IFS
 where default_node_properties = NM_NonInterference.default_node_properties
-and eval_model = NM_NonInterference.eval_model
+and sinvar = NM_NonInterference.sinvar
 and verify_globals = verify_globals
   unfolding NM_NonInterference.default_node_properties_def
   apply unfold_locales
@@ -146,9 +146,9 @@ and verify_globals = verify_globals
    apply simp
   (*unique: *)
   apply(erule default_uniqueness_by_counterexample_IFS)
-  apply (simp add: TopoS_withOffendingFlows.set_offending_flows_def
-      TopoS_withOffendingFlows.is_offending_flows_min_set_def
-      TopoS_withOffendingFlows.is_offending_flows_def)
+  apply (simp add: SecurityInvariant_withOffendingFlows.set_offending_flows_def
+      SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def
+      SecurityInvariant_withOffendingFlows.is_offending_flows_def)
   apply (simp add:delete_edges_set_nodes)
   apply (simp split: split_split_asm split_split add:prod_case_beta)
   apply(rule_tac x="\<lparr> nodes={vertex_1,vertex_2}, edges = {(vertex_1,vertex_2)} \<rparr>" in exI, simp)
@@ -170,11 +170,11 @@ and verify_globals = verify_globals
   done
 
 
-  lemma TopoS_NonInterference: "NetworkModel eval_model default_node_properties target_focus"
+  lemma TopoS_NonInterference: "NetworkModel sinvar default_node_properties target_focus"
   unfolding target_focus_def by unfold_locales
    
 
-hide_const (open) eval_model verify_globals target_focus default_node_properties
+hide_const (open) sinvar verify_globals target_focus default_node_properties
 
 hide_fact tmp1 tmp2 tmp3 tmp4 tmp5 tmp6 unique_default_example 
           unique_default_example_2 unique_default_example_3 unique_default_example_4

@@ -11,7 +11,7 @@ section{*Generating instantiated (configured) network security models*}
   --"a configured network security model in list implementaion"
   (*very minimal version, no eval, ...*)
   record ('v) NetworkSecurityModel =
-    implc_eval_model::"('v) list_graph \<Rightarrow> bool"
+    implc_sinvar::"('v) list_graph \<Rightarrow> bool"
     implc_offending_flows::"('v) list_graph \<Rightarrow> ('v \<times> 'v) list list"
     implc_isIFS::"bool"
 
@@ -19,7 +19,7 @@ section{*Generating instantiated (configured) network security models*}
   definition NetworkSecurityModel_complies_formal_def :: 
     "('v) NetworkSecurityModel \<Rightarrow> 'v TopoS_Composition_Theory.NetworkSecurityModel_configured \<Rightarrow> bool" where
     "NetworkSecurityModel_complies_formal_def impl spec \<equiv> 
-      (\<forall> G. valid_list_graph G \<longrightarrow> implc_eval_model impl G = c_eval_model spec (list_graph_to_graph G)) \<and>
+      (\<forall> G. valid_list_graph G \<longrightarrow> implc_sinvar impl G = c_sinvar spec (list_graph_to_graph G)) \<and>
       (\<forall> G. valid_list_graph G \<longrightarrow> set`set (implc_offending_flows impl G) = c_offending_flows spec (list_graph_to_graph G)) \<and>
       (implc_isIFS impl = c_isIFS spec)"
     
@@ -30,27 +30,27 @@ section{*Generating instantiated (configured) network security models*}
       "new_configured_list_NetworkSecurityModel m C = 
         (let nP = nm_node_props m C in
          \<lparr> 
-            implc_eval_model = (\<lambda>G. (nm_eval_model m) G nP),
+            implc_sinvar = (\<lambda>G. (nm_sinvar m) G nP),
             implc_offending_flows = (\<lambda>G. (nm_offending_flows m) G nP),
             implc_isIFS = nm_target_focus m
           \<rparr>)"
 
   text{* the @{term TopoS_Composition_Theory.new_configured_NetworkSecurityModel} must give a result if we have the NetworkModel modelLibrary*}
   lemma TopoS_modelLibrary_yields_new_configured_NetworkSecurityModel:
-    assumes NetModelLib: "TopoS_modelLibrary m eval_model_spec verify_gloabls_spec"
+    assumes NetModelLib: "TopoS_modelLibrary m sinvar_spec verify_gloabls_spec"
     and     nPdef:       "nP = nm_node_props m C"
     and formalSpec:      "Spec = \<lparr> 
-                              c_eval_model = (\<lambda>G. eval_model_spec G nP),
-                              c_offending_flows = (\<lambda>G. TopoS_withOffendingFlows.set_offending_flows eval_model_spec G nP),
+                              c_sinvar = (\<lambda>G. sinvar_spec G nP),
+                              c_offending_flows = (\<lambda>G. SecurityInvariant_withOffendingFlows.set_offending_flows sinvar_spec G nP),
                               c_isIFS = nm_target_focus m
                             \<rparr>"
-    shows "new_configured_NetworkSecurityModel (eval_model_spec, nm_default m, nm_target_focus m, nP) = Some Spec"
+    shows "new_configured_NetworkSecurityModel (sinvar_spec, nm_default m, nm_target_focus m, nP) = Some Spec"
     proof -
-      from NetModelLib have NetModel: "NetworkModel eval_model_spec (nm_default m) (nm_target_focus m)"
+      from NetModelLib have NetModel: "NetworkModel sinvar_spec (nm_default m) (nm_target_focus m)"
         by(simp add: TopoS_modelLibrary_def TopoS_List_Impl_def)
 
-      have Spec: "\<lparr>c_eval_model = \<lambda>G. eval_model_spec G nP,
-             c_offending_flows = \<lambda>G. TopoS_withOffendingFlows.set_offending_flows eval_model_spec G nP,
+      have Spec: "\<lparr>c_sinvar = \<lambda>G. sinvar_spec G nP,
+             c_offending_flows = \<lambda>G. SecurityInvariant_withOffendingFlows.set_offending_flows sinvar_spec G nP,
              c_isIFS = nm_target_focus m\<rparr> = Spec"
       by(simp add: formalSpec)
       show ?thesis
@@ -62,16 +62,16 @@ section{*Generating instantiated (configured) network security models*}
 
   (* The new_* functions comply, i.e. we can instance network security models that are executable. *)
   lemma new_configured_list_NetworkSecurityModel_complies:
-    assumes NetModelLib: "TopoS_modelLibrary m eval_model_spec verify_gloabls_spec"
+    assumes NetModelLib: "TopoS_modelLibrary m sinvar_spec verify_gloabls_spec"
     and     nPdef:       "nP = nm_node_props m C"
-    and formalSpec:      "Spec = new_configured_NetworkSecurityModel (eval_model_spec, nm_default m, nm_target_focus m, nP)"
+    and formalSpec:      "Spec = new_configured_NetworkSecurityModel (sinvar_spec, nm_default m, nm_target_focus m, nP)"
     and implSpec:        "Impl = new_configured_list_NetworkSecurityModel m C"
     shows "NetworkSecurityModel_complies_formal_def Impl (the Spec)"
     proof -
       from TopoS_modelLibrary_yields_new_configured_NetworkSecurityModel[OF NetModelLib nPdef]
-      have SpecUnfolded: "new_configured_NetworkSecurityModel (eval_model_spec, nm_default m, nm_target_focus m, nP) =
-        Some \<lparr>c_eval_model = \<lambda>G. eval_model_spec G nP,
-             c_offending_flows = \<lambda>G. TopoS_withOffendingFlows.set_offending_flows eval_model_spec G nP,
+      have SpecUnfolded: "new_configured_NetworkSecurityModel (sinvar_spec, nm_default m, nm_target_focus m, nP) =
+        Some \<lparr>c_sinvar = \<lambda>G. sinvar_spec G nP,
+             c_offending_flows = \<lambda>G. SecurityInvariant_withOffendingFlows.set_offending_flows sinvar_spec G nP,
              c_isIFS = nm_target_focus m\<rparr>" by simp
       
       from NetModelLib show ?thesis
@@ -84,8 +84,8 @@ section{*Generating instantiated (configured) network security models*}
 
 
   corollary new_configured_list_NetworkSecurityModel_complies':
-    "\<lbrakk> TopoS_modelLibrary m eval_model_spec verify_gloabls_spec \<rbrakk> \<Longrightarrow> 
-    NetworkSecurityModel_complies_formal_def (new_configured_list_NetworkSecurityModel m C) (the (new_configured_NetworkSecurityModel (eval_model_spec, nm_default m, nm_target_focus m,  nm_node_props m C)))"
+    "\<lbrakk> TopoS_modelLibrary m sinvar_spec verify_gloabls_spec \<rbrakk> \<Longrightarrow> 
+    NetworkSecurityModel_complies_formal_def (new_configured_list_NetworkSecurityModel m C) (the (new_configured_NetworkSecurityModel (sinvar_spec, nm_default m, nm_target_focus m,  nm_node_props m C)))"
     apply(drule new_configured_list_NetworkSecurityModel_complies)
     by(simp_all)
 
@@ -251,7 +251,7 @@ section{*Accessors*}
 
 section{*All security requirements fulfilled*}
    definition all_security_requirements_fulfilled :: "'v NetworkSecurityModel list \<Rightarrow> 'v list_graph \<Rightarrow> bool" where
-      "all_security_requirements_fulfilled M G \<equiv> \<forall>m \<in> set M. (implc_eval_model m) G"
+      "all_security_requirements_fulfilled M G \<equiv> \<forall>m \<in> set M. (implc_sinvar m) G"
 
   lemma all_security_requirements_fulfilled_complies:
     "\<lbrakk> \<forall> (m_impl, m_spec) \<in> set M. NetworkSecurityModel_complies_formal_def m_impl m_spec; 

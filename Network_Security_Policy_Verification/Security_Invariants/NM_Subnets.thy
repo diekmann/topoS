@@ -19,8 +19,8 @@ fun allowed_subnet_flow :: "subnets \<Rightarrow> subnets \<Rightarrow> bool" wh
   "allowed_subnet_flow Unassigned Unassigned  = True" |
   "allowed_subnet_flow Unassigned _  = False"
 
-fun eval_model :: "'v graph \<Rightarrow> ('v \<Rightarrow> subnets) \<Rightarrow> bool" where
-  "eval_model G nP = (\<forall> (e1,e2) \<in> edges G. allowed_subnet_flow (nP e1) (nP e2))"
+fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> subnets) \<Rightarrow> bool" where
+  "sinvar G nP = (\<forall> (e1,e2) \<in> edges G. allowed_subnet_flow (nP e1) (nP e2))"
 
 
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> subnets) \<Rightarrow> 'b \<Rightarrow> bool" where
@@ -31,22 +31,22 @@ definition target_focus :: "bool" where "target_focus = False"
 
 
 subsubsection {*Preleminaries*}
-  lemma eval_model_mono: "TopoS_withOffendingFlows.eval_model_mono eval_model"
-    apply(simp only: TopoS_withOffendingFlows.eval_model_mono_def)
+  lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
+    apply(simp only: SecurityInvariant_withOffendingFlows.sinvar_mono_def)
     apply(clarify)
     by auto
   
   interpretation TopoS_preliminaries
-  where eval_model = eval_model
+  where sinvar = sinvar
   and verify_globals = verify_globals
     apply unfold_locales
     apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
     apply(erule_tac exE)
     apply(rename_tac list_edges)
-    apply(rule_tac ff="list_edges" in TopoS_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+    apply(rule_tac ff="list_edges" in SecurityInvariant_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF sinvar_mono])
     apply(auto)[6]
-    apply(auto simp add: TopoS_withOffendingFlows.is_offending_flows_def graph_ops)[1]
-    apply(fact TopoS_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
+    apply(auto simp add: SecurityInvariant_withOffendingFlows.is_offending_flows_def graph_ops)[1]
+    apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_mono])
   done
 
 
@@ -65,11 +65,11 @@ section{*ENF*}
     by(simp add: All_to_Unassigned)
   lemma allowed_subnet_flow_refl: "\<forall> e. allowed_subnet_flow e e"
     by(rule allI, case_tac e, simp_all)
-  lemma Subnets_ENF: "TopoS_withOffendingFlows.eval_model_all_edges_normal_form eval_model allowed_subnet_flow"
-    unfolding TopoS_withOffendingFlows.eval_model_all_edges_normal_form_def
+  lemma Subnets_ENF: "SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form sinvar allowed_subnet_flow"
+    unfolding SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form_def
     by simp
-  lemma Subnets_ENF_refl: "TopoS_withOffendingFlows.ENF_refl eval_model allowed_subnet_flow"
-    unfolding TopoS_withOffendingFlows.ENF_refl_def
+  lemma Subnets_ENF_refl: "SecurityInvariant_withOffendingFlows.ENF_refl sinvar allowed_subnet_flow"
+    unfolding SecurityInvariant_withOffendingFlows.ENF_refl_def
     apply(rule conjI)
      apply(simp add: Subnets_ENF)
      apply(simp add: allowed_subnet_flow_refl)
@@ -77,12 +77,12 @@ section{*ENF*}
 
 
   definition Subnets_offending_set:: "'v graph \<Rightarrow> ('v \<Rightarrow> subnets) \<Rightarrow> ('v \<times> 'v) set set" where
-  "Subnets_offending_set G nP = (if eval_model G nP then
+  "Subnets_offending_set G nP = (if sinvar G nP then
       {}
      else 
       { {e \<in> edges G. case e of (e1,e2) \<Rightarrow> \<not> allowed_subnet_flow (nP e1) (nP e2)} })"
   lemma Subnets_offending_set: 
-  "TopoS_withOffendingFlows.set_offending_flows eval_model = Subnets_offending_set"
+  "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = Subnets_offending_set"
     apply(simp only: fun_eq_iff ENF_offending_set[OF Subnets_ENF] Subnets_offending_set_def)
     apply(rule allI)+
     apply(rename_tac G nP)
@@ -92,18 +92,18 @@ section{*ENF*}
 
 interpretation Subnets: TopoS_ACS
 where default_node_properties = NM_Subnets.default_node_properties
-and eval_model = NM_Subnets.eval_model
+and sinvar = NM_Subnets.sinvar
 and verify_globals = verify_globals
-where "TopoS_withOffendingFlows.set_offending_flows eval_model = Subnets_offending_set"
+where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = Subnets_offending_set"
   unfolding NM_Subnets.default_node_properties_def
   apply unfold_locales
     apply(rule ballI)
-    apply (rule TopoS_withOffendingFlows.ENF_fsts_refl_instance[OF Subnets_ENF_refl Unassigned_default_candidate])[1]
+    apply (rule SecurityInvariant_withOffendingFlows.ENF_fsts_refl_instance[OF Subnets_ENF_refl Unassigned_default_candidate])[1]
       apply(simp_all)[2]
    apply(erule default_uniqueness_by_counterexample_ACS)
-   apply (simp add: TopoS_withOffendingFlows.set_offending_flows_def
-      TopoS_withOffendingFlows.is_offending_flows_min_set_def
-      TopoS_withOffendingFlows.is_offending_flows_def)
+   apply (simp add: SecurityInvariant_withOffendingFlows.set_offending_flows_def
+      SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def
+      SecurityInvariant_withOffendingFlows.is_offending_flows_def)
     apply (simp add:graph_ops)
     apply (simp split: split_split_asm split_split add:prod_case_beta)
     apply(rule_tac x="\<lparr> nodes={vertex_1,vertex_2}, edges = {(vertex_1,vertex_2)} \<rparr>" in exI, simp)
@@ -120,12 +120,12 @@ where "TopoS_withOffendingFlows.set_offending_flows eval_model = Subnets_offendi
   done
 
 
-  lemma TopoS_Subnets: "NetworkModel eval_model default_node_properties target_focus"
+  lemma TopoS_Subnets: "NetworkModel sinvar default_node_properties target_focus"
   unfolding target_focus_def by unfold_locales
 
 subsection {* Analysis *}
 
-lemma violating_configurations: "\<not> eval_model G nP \<Longrightarrow> 
+lemma violating_configurations: "\<not> sinvar G nP \<Longrightarrow> 
     \<exists> (e1, e2) \<in> edges G. nP e1 = Unassigned \<or> (\<exists> s1. nP e1 = Subnet s1) \<or> (\<exists> s1. nP e1 = BorderRouter s1)"
   apply simp
   apply clarify
@@ -164,7 +164,7 @@ lemma violating_configurations_exhaust_BorderRouter: "\<And>n1 n2. (n1, n2) \<in
 done
 
 text {* All cases where the model can become invalid: *}
-theorem violating_configurations_exhaust: "\<not> eval_model G nP \<Longrightarrow> 
+theorem violating_configurations_exhaust: "\<not> sinvar G nP \<Longrightarrow> 
     \<exists> (e1, e2) \<in> (edges G). 
       nP e1 = Unassigned \<and> nP e2 \<noteq> Unassigned \<or> 
       (\<exists> s1 s2. nP e1 = Subnet s1 \<and> s1 \<noteq> s2 \<and> (nP e2 = Subnet s2 \<or> nP e2 = BorderRouter s2)) \<or> 
@@ -184,7 +184,7 @@ theorem violating_configurations_exhaust: "\<not> eval_model G nP \<Longrightarr
 done
 
 
-hide_fact (open) eval_model_mono   
-hide_const (open) eval_model verify_globals target_focus default_node_properties
+hide_fact (open) sinvar_mono   
+hide_const (open) sinvar verify_globals target_focus default_node_properties
 
 end

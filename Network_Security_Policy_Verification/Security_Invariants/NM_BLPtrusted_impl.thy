@@ -4,15 +4,15 @@ begin
 
 code_identifier code_module NM_BLPtrusted_impl => (Scala) NM_BLPtrusted
 
-fun eval_model :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> NM_BLPtrusted.node_config) \<Rightarrow> bool" where
-  "eval_model G nP = (\<forall> (e1,e2) \<in> set (edgesL G). (if trusted (nP e2) then True else privacy_level (nP e1) \<le> privacy_level (nP e2) ))"
+fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> NM_BLPtrusted.node_config) \<Rightarrow> bool" where
+  "sinvar G nP = (\<forall> (e1,e2) \<in> set (edgesL G). (if trusted (nP e2) then True else privacy_level (nP e1) \<le> privacy_level (nP e2) ))"
 
 fun verify_globals :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> NM_BLPtrusted.node_config) \<Rightarrow> unit \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
 
 
 definition BLP_offending_list:: "'v list_graph \<Rightarrow> ('v \<Rightarrow> NM_BLPtrusted.node_config) \<Rightarrow> ('v \<times> 'v) list list" where
-  "BLP_offending_list G nP = (if eval_model G nP then
+  "BLP_offending_list G nP = (if sinvar G nP then
     []
    else 
     [ [e \<leftarrow> edgesL G. case e of (e1,e2) \<Rightarrow> \<not> NM_BLPtrusted.BLP_P (nP e1) (nP e2)] ])"
@@ -26,13 +26,13 @@ done
 
 definition "BLP_eval G P = (valid_list_graph G \<and> 
   verify_globals G (NetworkModel.node_props NM_BLPtrusted.default_node_properties P) (model_global_properties P) \<and> 
-  eval_model G (NetworkModel.node_props NM_BLPtrusted.default_node_properties P))"
+  sinvar G (NetworkModel.node_props NM_BLPtrusted.default_node_properties P))"
 
 
 interpretation BLPtrusted_impl:TopoS_List_Impl 
   where default_node_properties=NM_BLPtrusted.default_node_properties
-  and eval_model_spec=NM_BLPtrusted.eval_model
-  and eval_model_impl=eval_model
+  and sinvar_spec=NM_BLPtrusted.sinvar
+  and sinvar_impl=sinvar
   and verify_globals_spec=NM_BLPtrusted.verify_globals
   and verify_globals_impl=verify_globals
   and target_focus=NM_BLPtrusted.target_focus
@@ -61,14 +61,14 @@ section {* BLPtrusted packing *}
     \<lparr> nm_name = ''BLPtrusted'', 
       nm_target_focus = NM_BLPtrusted.target_focus,
       nm_default = NM_BLPtrusted.default_node_properties, 
-      nm_eval_model = eval_model,
+      nm_sinvar = sinvar,
       nm_verify_globals = verify_globals,
       nm_offending_flows = BLP_offending_list, 
       nm_node_props = NetModel_node_props,
       nm_eval = BLP_eval
       \<rparr>"
   interpretation NM_LIB_BLPtrusted_interpretation: TopoS_modelLibrary NM_LIB_BLPtrusted 
-      NM_BLPtrusted.eval_model NM_BLPtrusted.verify_globals
+      NM_BLPtrusted.sinvar NM_BLPtrusted.verify_globals
     apply(unfold TopoS_modelLibrary_def NM_LIB_BLPtrusted_def)
     apply(rule conjI)
      apply(simp)
@@ -84,6 +84,6 @@ export_code NM_LIB_BLPtrusted in Scala
 
 hide_const (open) NetModel_node_props BLP_offending_list BLP_eval
 
-hide_const (open) eval_model verify_globals
+hide_const (open) sinvar verify_globals
 
 end
