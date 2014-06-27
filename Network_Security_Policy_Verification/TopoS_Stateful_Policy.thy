@@ -1,9 +1,9 @@
-theory NetworkModel_Stateful_Policy
-imports NetworkModel_Composition_Theory
+theory TopoS_Stateful_Policy
+imports TopoS_Composition_Theory
 begin
 
 text{* Algorithm *}
-term NetworkModel_Composition_Theory.generate_valid_topology
+term TopoS_Composition_Theory.generate_valid_topology
 text{* generates a valid high-level topology. Now we discuss how to turn this into
        a stateful policy. *}
 

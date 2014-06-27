@@ -1,5 +1,5 @@
 theory NM_CommunicationPartners_impl
-imports NM_CommunicationPartners "../NetworkModel_Lists_Impl_Interface"
+imports NM_CommunicationPartners "../TopoS_Lists_Impl_Interface"
 begin
 
 code_identifier code_module NM_CommunicationPartners_impl => (Scala) NM_CommunicationPartners
@@ -24,7 +24,7 @@ definition CommunicationPartners_offending_list:: "'v list_graph \<Rightarrow> (
 
 
 thm NM_CommunicationPartners.CommunicationPartners.node_props.simps
-definition "NetModel_node_props (P::('v::vertex, 'v node_config, 'b) NetworkModel_Params) = 
+definition "NetModel_node_props (P::('v::vertex, 'v node_config, 'b) TopoS_Params) = 
   (\<lambda> i. (case (node_properties P) i of Some property \<Rightarrow> property | None \<Rightarrow> NM_CommunicationPartners.default_node_properties))"
 lemma[code_unfold]: "NetworkModel.node_props NM_CommunicationPartners.default_node_properties P = NetModel_node_props P"
 apply(simp add: NetModel_node_props_def)
@@ -35,7 +35,7 @@ definition "CommunicationPartners_eval G P = (valid_list_graph G \<and>
   eval_model G (NetworkModel.node_props NM_CommunicationPartners.default_node_properties P))"
 
 
-interpretation CommunicationPartners_impl:NetworkModel_List_Impl 
+interpretation CommunicationPartners_impl:TopoS_List_Impl 
   where default_node_properties=NM_CommunicationPartners.default_node_properties
   and eval_model_spec=NM_CommunicationPartners.eval_model
   and eval_model_impl=eval_model
@@ -45,22 +45,22 @@ interpretation CommunicationPartners_impl:NetworkModel_List_Impl
   and offending_flows_impl=CommunicationPartners_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=CommunicationPartners_eval
- apply(unfold NetworkModel_List_Impl_def)
+ apply(unfold TopoS_List_Impl_def)
  apply(rule conjI)
-  apply(simp add: NetworkModel_SubnetsInGW list_graph_to_graph_def)
+  apply(simp add: TopoS_SubnetsInGW list_graph_to_graph_def)
  apply(rule conjI)
   apply(simp add: list_graph_to_graph_def CommunicationPartners_offending_set CommunicationPartners_offending_set_def CommunicationPartners_offending_list_def)
  apply(rule conjI)
   apply(simp only: NetModel_node_props_def)
   apply(metis CommunicationPartners.node_props.simps CommunicationPartners.node_props_eq_node_props_formaldef)
  apply(simp only: CommunicationPartners_eval_def)
- apply(simp add: NetworkModel_eval_impl_proofrule[OF NetworkModel_SubnetsInGW])
+ apply(simp add: TopoS_eval_impl_proofrule[OF TopoS_SubnetsInGW])
  apply(simp_all add: list_graph_to_graph_def)
 done
 
 
 section {* CommunicationPartners packing *}
-  definition NM_LIB_CommunicationPartners :: "('v::vertex, 'v NM_CommunicationPartners.node_config, unit) NetworkModel_packed" where
+  definition NM_LIB_CommunicationPartners :: "('v::vertex, 'v NM_CommunicationPartners.node_config, unit) TopoS_packed" where
     "NM_LIB_CommunicationPartners \<equiv> 
     \<lparr> nm_name = ''CommunicationPartners'', 
       nm_target_focus = NM_CommunicationPartners.target_focus,
@@ -71,9 +71,9 @@ section {* CommunicationPartners packing *}
       nm_node_props = NetModel_node_props,
       nm_eval = CommunicationPartners_eval
       \<rparr>"
-  interpretation NM_LIB_CommunicationPartners_interpretation: NetworkModel_modelLibrary NM_LIB_CommunicationPartners
+  interpretation NM_LIB_CommunicationPartners_interpretation: TopoS_modelLibrary NM_LIB_CommunicationPartners
       NM_CommunicationPartners.eval_model NM_CommunicationPartners.verify_globals
-    apply(unfold NetworkModel_modelLibrary_def NM_LIB_CommunicationPartners_def)
+    apply(unfold TopoS_modelLibrary_def NM_LIB_CommunicationPartners_def)
     apply(rule conjI)
      apply(simp)
     apply(simp)

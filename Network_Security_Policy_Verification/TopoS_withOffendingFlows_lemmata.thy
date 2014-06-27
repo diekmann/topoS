@@ -1,10 +1,10 @@
-theory NetworkModel_withOffendingFlows_lemmata
-imports NetworkModel_Interface
+theory TopoS_withOffendingFlows_lemmata
+imports TopoS_Interface
 begin
 
 
 section {*Monotonicity helper lemmata*}
-context NetworkModel_withOffendingFlows
+context TopoS_withOffendingFlows
 begin
   text{*We define the monotonicity of @{text "eval_model"}:
   
@@ -125,7 +125,7 @@ end
 
 
 section {*offending flows not empty helper lemmata*}
-context NetworkModel_withOffendingFlows
+context TopoS_withOffendingFlows
 begin
   text {* Give an overapproximation of offending flows (e.g. all edges) and get back a
           minimal set *}
@@ -406,7 +406,7 @@ begin
       from a is_offending_flows_def noteval list_edges_props empty_edge_graph_simp 
         have overapprox: "is_offending_flows (set list_edges) G nP" by auto
   
-      from NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF 
+      from TopoS_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF 
           mono validG noteval overapprox listedges_subseteq_edges] list_edges_props 
       show "set_offending_flows G nP \<noteq> {}" by simp
     next
@@ -443,10 +443,10 @@ end
 
 
 
-context NetworkModel_preliminaries
+context TopoS_preliminaries
   begin
     
-    text{* @{const eval_model_mono} naturally holds in @{const NetworkModel_preliminaries} *}
+    text{* @{const eval_model_mono} naturally holds in @{const TopoS_preliminaries} *}
     lemma eval_model_monoI: "eval_model_mono"
       apply(unfold eval_model_mono_def)
       apply(insert mono_eval_model)
@@ -505,7 +505,7 @@ context NetworkModel_preliminaries
  end
 
 
-context NetworkModel_withOffendingFlows
+context TopoS_withOffendingFlows
 begin
 
     lemma mono_imp_emptyoffending_eq_nevervalid:
@@ -585,7 +585,7 @@ end
 text{* Old version of network security requirement modelling also gave 
   @{text "f \<in> set_offending_flows G nP; eval_model (delete_edges G f) nP"}
   as assumption for @{text "default_secure"}. We can conclude this from mono. *}
-context NetworkModel_withOffendingFlows
+context TopoS_withOffendingFlows
 begin
   lemma mono_exists_offending_flows:
   "\<lbrakk> eval_model_mono; valid_graph G; is_offending_flows (set ff) G nP; set ff \<subseteq> edges G; distinct ff \<rbrakk> 
@@ -608,7 +608,7 @@ end
 
 
 section {* Monotonicity of offending flows *}
-  context NetworkModel_preliminaries
+  context TopoS_preliminaries
   begin
   
     (*todo: simplify proof*)
@@ -966,7 +966,7 @@ end
       however, then (set_offending_flows \<lparr>nodes = V, edges = E\<rparr> nP) = {} which renders the whole statement useless
      *)
 
-  context NetworkModel_preliminaries
+  context TopoS_preliminaries
   begin
 
     lemma offending_partition_subset_empty: 
@@ -999,7 +999,7 @@ end
   end
 
 
-  context NetworkModel_preliminaries
+  context TopoS_preliminaries
   begin
 
     text{* Knowing that the @{text "\<Union> offending is \<subseteq> X"}, removing something from the graphs's edges, 

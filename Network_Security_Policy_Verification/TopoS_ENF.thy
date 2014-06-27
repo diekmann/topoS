@@ -1,5 +1,5 @@
-theory NetworkModel_ENF
-imports Main NetworkModel_Interface NetworkModel_Util NetworkModel_withOffendingFlows_lemmata
+theory TopoS_ENF
+imports Main TopoS_Interface TopoS_Util TopoS_withOffendingFlows_lemmata
 begin
 
 
@@ -15,24 +15,24 @@ section {* NetworkModel theory: Often the @{term "eval_model"} function has a co
 
 
 section {* edges normal form ENF *}
-  definition (in NetworkModel_withOffendingFlows) eval_model_all_edges_normal_form :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> bool" where
+  definition (in TopoS_withOffendingFlows) eval_model_all_edges_normal_form :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> bool" where
     "eval_model_all_edges_normal_form P \<equiv> \<forall> G nP. eval_model G nP = (\<forall> (e1, e2)\<in> edges G. P (nP e1) (nP e2))"
   
 
   (* reflexivity is needed for convenience. If a network security model is not refexive, that means that all nodes with the default
     parameter \<bottom> are not allowed to communicate with each other *)
-  definition (in NetworkModel_withOffendingFlows)  ENF_refl :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> bool" where
+  definition (in TopoS_withOffendingFlows)  ENF_refl :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> bool" where
     "ENF_refl P \<equiv> eval_model_all_edges_normal_form P \<and> (\<forall> p1. P p1 p1)"
 
     
-  lemma (in NetworkModel_withOffendingFlows) monotonicity_eval_model_mono: "\<lbrakk> eval_model_all_edges_normal_form P \<rbrakk> \<Longrightarrow>
+  lemma (in TopoS_withOffendingFlows) monotonicity_eval_model_mono: "\<lbrakk> eval_model_all_edges_normal_form P \<rbrakk> \<Longrightarrow>
     eval_model_mono"
     apply(simp add: eval_model_all_edges_normal_form_def eval_model_mono_def)
     by blast
 
 section {* offending flows:*}
   
-  lemma (in NetworkModel_withOffendingFlows) ENF_is_offending_flow_ex_not_P:
+  lemma (in TopoS_withOffendingFlows) ENF_is_offending_flow_ex_not_P:
     "\<lbrakk> eval_model_all_edges_normal_form P;
     is_offending_flows f G nP \<rbrakk>
     \<Longrightarrow> (\<exists> (e1, e2) \<in> edges G. \<not> P (nP e1) (nP e2))"
@@ -40,7 +40,7 @@ section {* offending flows:*}
     unfolding is_offending_flows_def
     apply blast
     done
-  lemma (in NetworkModel_withOffendingFlows) "eval_model_all_edges_normal_form P \<Longrightarrow>
+  lemma (in TopoS_withOffendingFlows) "eval_model_all_edges_normal_form P \<Longrightarrow>
     (f \<in> set_offending_flows G nP) \<and> f \<noteq> {} 
     \<Longrightarrow> (\<exists> (e1, e2) \<in> f.  \<not> P (nP e1) (nP e2))"
     unfolding eval_model_all_edges_normal_form_def
@@ -50,7 +50,7 @@ section {* offending flows:*}
   done
   
   
-  lemma (in NetworkModel_withOffendingFlows) ENF_offending_imp_not_P: "eval_model_all_edges_normal_form P \<Longrightarrow>
+  lemma (in TopoS_withOffendingFlows) ENF_offending_imp_not_P: "eval_model_all_edges_normal_form P \<Longrightarrow>
     f \<in> set_offending_flows G nP \<Longrightarrow> (e1, e2) \<in> f 
     \<Longrightarrow> \<not> P (nP e1) (nP e2)"
     unfolding eval_model_all_edges_normal_form_def
@@ -59,7 +59,7 @@ section {* offending flows:*}
     by fastforce
   
   
-  lemma (in NetworkModel_withOffendingFlows) ENF_offending_set_P_representation: 
+  lemma (in TopoS_withOffendingFlows) ENF_offending_set_P_representation: 
     "eval_model_all_edges_normal_form P \<Longrightarrow> 
     f \<in> set_offending_flows G nP
     \<Longrightarrow> f = {(e1,e2). (e1, e2) \<in> edges G \<and> \<not> P (nP e1) (nP e2)}"
@@ -79,7 +79,7 @@ section {* offending flows:*}
   
   
   (* We can show an overapproximation already: *)
-  lemma (in NetworkModel_withOffendingFlows) ENF_offending_subseteq_lhs:
+  lemma (in TopoS_withOffendingFlows) ENF_offending_subseteq_lhs:
     "eval_model_all_edges_normal_form P \<Longrightarrow> 
     (set_offending_flows G nP) \<subseteq>
     { {(e1,e2). (e1, e2) \<in> edges G \<and> \<not> P (nP e1) (nP e2)} }"
@@ -88,7 +88,7 @@ section {* offending flows:*}
   
   
   (* if offending flows not empty, we have the other direction *)
-  lemma (in NetworkModel_withOffendingFlows) ENF_offenindg_not_empty_imp_ENF_offending_subseteq_rhs:
+  lemma (in TopoS_withOffendingFlows) ENF_offenindg_not_empty_imp_ENF_offending_subseteq_rhs:
     "eval_model_all_edges_normal_form P \<Longrightarrow> 
     set_offending_flows G nP \<noteq> {}  \<Longrightarrow>
     { {(e1,e2). (e1, e2) \<in> edges G \<and> \<not> P (nP e1) (nP e2)} } \<subseteq> set_offending_flows G nP"
@@ -100,7 +100,7 @@ section {* offending flows:*}
   
   
   
-  lemma (in NetworkModel_withOffendingFlows) ENF_notevalmodel_offending_imp_ex_offending_min:
+  lemma (in TopoS_withOffendingFlows) ENF_notevalmodel_offending_imp_ex_offending_min:
    "eval_model_all_edges_normal_form P \<Longrightarrow> 
    is_offending_flows f G nP \<Longrightarrow> f \<subseteq> edges G 
    \<Longrightarrow> \<exists>f'. f' \<subseteq> edges G \<and> is_offending_flows_min_set f' G nP"
@@ -114,7 +114,7 @@ section {* offending flows:*}
     apply force
   done
   
-  lemma (in NetworkModel_withOffendingFlows) ENF_notevalmodel_imp_ex_offending:
+  lemma (in TopoS_withOffendingFlows) ENF_notevalmodel_imp_ex_offending:
   "\<lbrakk> eval_model_all_edges_normal_form P;
     \<not> eval_model G nP \<rbrakk> \<Longrightarrow>
     \<exists>f. f \<subseteq> (edges G) \<and> is_offending_flows f G nP"
@@ -129,7 +129,7 @@ section {* offending flows:*}
     apply blast
   done
   
-  lemma (in NetworkModel_withOffendingFlows) ENF_notevalmodel_imp_ex_offending_min:
+  lemma (in TopoS_withOffendingFlows) ENF_notevalmodel_imp_ex_offending_min:
   "\<lbrakk> eval_model_all_edges_normal_form P;
     \<not> eval_model G nP \<rbrakk> \<Longrightarrow>
     \<exists>f. f \<subseteq> edges G \<and> is_offending_flows_min_set f G nP"
@@ -137,7 +137,7 @@ section {* offending flows:*}
     apply(erule exE)
     using ENF_notevalmodel_offending_imp_ex_offending_min[of P _ G nP] by fast
   
-  lemma (in NetworkModel_withOffendingFlows) ENF_notevalmodel_imp_offending_not_empty:
+  lemma (in TopoS_withOffendingFlows) ENF_notevalmodel_imp_offending_not_empty:
   "eval_model_all_edges_normal_form P \<Longrightarrow> 
     \<not> eval_model G nP \<Longrightarrow>
     set_offending_flows G nP \<noteq> {}"
@@ -145,7 +145,7 @@ section {* offending flows:*}
     apply(simp add: set_offending_flows_def)
    done
   
-  lemma (in NetworkModel_withOffendingFlows) ENF_offending_case1:
+  lemma (in TopoS_withOffendingFlows) ENF_offending_case1:
     "\<lbrakk> eval_model_all_edges_normal_form P;  \<not> eval_model G nP \<rbrakk> \<Longrightarrow>
     { {(e1,e2). (e1, e2) \<in> (edges G) \<and> \<not> P (nP e1) (nP e2)} } = set_offending_flows G nP"
     apply(rule)
@@ -156,7 +156,7 @@ section {* offending flows:*}
     apply simp
   done
   
-  lemma (in NetworkModel_withOffendingFlows) ENF_offending_case2:
+  lemma (in TopoS_withOffendingFlows) ENF_offending_case2:
     "\<lbrakk> eval_model_all_edges_normal_form P; eval_model G nP \<rbrakk> \<Longrightarrow>
     {} = set_offending_flows G nP"
     apply(drule validmodel_imp_no_offending[of G nP])
@@ -164,7 +164,7 @@ section {* offending flows:*}
   done
   
   
-  theorem (in NetworkModel_withOffendingFlows) ENF_offending_set:
+  theorem (in TopoS_withOffendingFlows) ENF_offending_set:
     "\<lbrakk> eval_model_all_edges_normal_form P \<rbrakk> \<Longrightarrow>
     set_offending_flows G nP = (if eval_model G nP then
       {}
@@ -175,7 +175,7 @@ section {* offending flows:*}
 
 section {* lemata *}
 
-  lemma (in NetworkModel_withOffendingFlows)  ENF_offending_members:
+  lemma (in TopoS_withOffendingFlows)  ENF_offending_members:
     "\<lbrakk> \<not> eval_model G nP; eval_model_all_edges_normal_form P; f \<in> set_offending_flows G nP\<rbrakk> \<Longrightarrow> 
     f \<subseteq> (edges G) \<and> (\<forall> (e1, e2)\<in> f. \<not> P (nP e1) (nP e2))"
   by(auto simp add: ENF_offending_set)
@@ -184,7 +184,7 @@ section {* lemata *}
 
 section {* instance helper *}
   
-  lemma (in NetworkModel_withOffendingFlows) ENF_refl_not_offedning:
+  lemma (in TopoS_withOffendingFlows) ENF_refl_not_offedning:
         "\<lbrakk> \<not> eval_model G nP; f \<in> set_offending_flows G nP; 
           ENF_refl P\<rbrakk> \<Longrightarrow>
           \<forall>(e1,e2) \<in> f. e1 \<noteq> e2"
@@ -202,7 +202,7 @@ section {* instance helper *}
   qed
   
   (* declare	[[show_types]] *)
-  lemma (in NetworkModel_withOffendingFlows) ENF_default_update_fst: 
+  lemma (in TopoS_withOffendingFlows) ENF_default_update_fst: 
   fixes "default_node_properties" :: "'a" ("\<bottom>")
   assumes modelInv: "\<not> eval_model G nP"
     and   ENFdef: "eval_model_all_edges_normal_form P"
@@ -221,7 +221,7 @@ section {* instance helper *}
   qed
 
   
-  lemma (in NetworkModel_withOffendingFlows) 
+  lemma (in TopoS_withOffendingFlows) 
     fixes "default_node_properties" :: "'a" ("\<bottom>")
     shows "\<not> eval_model G nP \<Longrightarrow> eval_model_all_edges_normal_form P \<Longrightarrow>
     (\<forall> (nP::'v \<Rightarrow> 'a) e1 e2. \<not> (P (nP e1) (nP e2)) \<longrightarrow>  \<not> (P \<bottom> (nP e2))) \<Longrightarrow>
@@ -262,7 +262,7 @@ section {* instance helper *}
   qed
   
   (* fsts version *)
-  lemma (in NetworkModel_withOffendingFlows)  ENF_fsts_refl_instance:
+  lemma (in TopoS_withOffendingFlows)  ENF_fsts_refl_instance:
     fixes "default_node_properties" :: "'a" ("\<bottom>")
     assumes a_enf_refl: "ENF_refl P"
     and   a3: "\<forall> (nP::'v \<Rightarrow> 'a) e1 e2. \<not> (P (nP e1) (nP e2)) \<longrightarrow> \<not> (P \<bottom> (nP e2))" (*changed \<And> to \<forall>*)
@@ -305,7 +305,7 @@ section {* instance helper *}
   qed
 
   (* snds version *)
-  lemma (in NetworkModel_withOffendingFlows)  ENF_snds_refl_instance:
+  lemma (in TopoS_withOffendingFlows)  ENF_snds_refl_instance:
     fixes "default_node_properties" :: "'a" ("\<bottom>")
     assumes a_enf_refl: "ENF_refl P"
     and   a3: "\<forall> (nP::'v \<Rightarrow> 'a) e1 e2. \<not> (P (nP e1) (nP e2)) \<longrightarrow> \<not> (P (nP e1) \<bottom>)"
@@ -353,18 +353,18 @@ section {* instance helper *}
 
 
 section {* edges normal form ENF with sender and receiver names *}
-  definition (in NetworkModel_withOffendingFlows) eval_model_all_edges_normal_form_sr :: "('a \<Rightarrow> 'v \<Rightarrow> 'a \<Rightarrow> 'v \<Rightarrow> bool) \<Rightarrow> bool" where
+  definition (in TopoS_withOffendingFlows) eval_model_all_edges_normal_form_sr :: "('a \<Rightarrow> 'v \<Rightarrow> 'a \<Rightarrow> 'v \<Rightarrow> bool) \<Rightarrow> bool" where
     "eval_model_all_edges_normal_form_sr P \<equiv> \<forall> G nP. eval_model G nP = (\<forall> (s, r)\<in> edges G. P (nP s) s (nP r) r)"
   
 
-  lemma (in NetworkModel_withOffendingFlows) ENFsr_monotonicity_eval_model_mono: "\<lbrakk> eval_model_all_edges_normal_form_sr P \<rbrakk> \<Longrightarrow>
+  lemma (in TopoS_withOffendingFlows) ENFsr_monotonicity_eval_model_mono: "\<lbrakk> eval_model_all_edges_normal_form_sr P \<rbrakk> \<Longrightarrow>
     eval_model_mono"
     apply(simp add: eval_model_all_edges_normal_form_sr_def eval_model_mono_def)
     by blast
 
 section {* offending flows:*}
   
-  theorem (in NetworkModel_withOffendingFlows) ENFsr_offending_set:
+  theorem (in TopoS_withOffendingFlows) ENFsr_offending_set:
     assumes ENFsr: "eval_model_all_edges_normal_form_sr P"
     shows "set_offending_flows G nP = (if eval_model G nP then
       {}
@@ -431,21 +431,21 @@ section {* offending flows:*}
 (*ENFnrSR*)
 
 section {* edges normal form not refl ENFnrSR *}
-  definition (in NetworkModel_withOffendingFlows) eval_model_all_edges_normal_form_not_refl_SR :: "('a \<Rightarrow> 'v \<Rightarrow> 'a \<Rightarrow> 'v \<Rightarrow> bool) \<Rightarrow> bool" where
+  definition (in TopoS_withOffendingFlows) eval_model_all_edges_normal_form_not_refl_SR :: "('a \<Rightarrow> 'v \<Rightarrow> 'a \<Rightarrow> 'v \<Rightarrow> bool) \<Rightarrow> bool" where
     "eval_model_all_edges_normal_form_not_refl_SR P \<equiv> 
     \<forall> G nP. eval_model G nP = (\<forall> (s, r) \<in> edges G. s \<noteq> r \<longrightarrow> P (nP s) s (nP r) r)"
 
 
 
   text{* we derive everything from the ENFnrSR form *}
-  lemma (in NetworkModel_withOffendingFlows) ENFnrSR_to_ENFsr: 
+  lemma (in TopoS_withOffendingFlows) ENFnrSR_to_ENFsr: 
     "eval_model_all_edges_normal_form_not_refl_SR P \<Longrightarrow> eval_model_all_edges_normal_form_sr (\<lambda> p1 v1 p2 v2. v1 \<noteq> v2 \<longrightarrow> P p1 v1 p2 v2)"
     by(simp add: eval_model_all_edges_normal_form_sr_def eval_model_all_edges_normal_form_not_refl_SR_def)
     
 
 
 section {*offending flows*}
-   theorem (in NetworkModel_withOffendingFlows) ENFnrSR_offending_set:
+   theorem (in TopoS_withOffendingFlows) ENFnrSR_offending_set:
     "\<lbrakk> eval_model_all_edges_normal_form_not_refl_SR P \<rbrakk> \<Longrightarrow>
     set_offending_flows G nP = (if eval_model G nP then
       {}
@@ -457,7 +457,7 @@ section {*offending flows*}
 section {* Instance helper*}
 
   (* fsts version *)
-  lemma (in NetworkModel_withOffendingFlows)  ENFnrSR_fsts_weakrefl_instance:
+  lemma (in TopoS_withOffendingFlows)  ENFnrSR_fsts_weakrefl_instance:
     fixes "default_node_properties" :: "'a" ("\<bottom>")
     assumes a_enf: "eval_model_all_edges_normal_form_not_refl_SR P"
     and   a_weakrefl: "\<forall> s r. P \<bottom> s \<bottom> r"
@@ -482,7 +482,7 @@ section {* Instance helper*}
       obtain e1 e2 where e1e2cond: "(e1, e2) \<in> f \<and> e1 = i" by fastforce
 
     from conjunct1[OF e1e2cond] a_offending have "(e1, e2) \<in> edges G"
-      by (metis (lifting, no_types) NetworkModel_withOffendingFlows.set_offending_flows_def mem_Collect_eq set_rev_mp)
+      by (metis (lifting, no_types) TopoS_withOffendingFlows.set_offending_flows_def mem_Collect_eq set_rev_mp)
   
     from conjunct1[OF e1e2cond] a_f_3_in_f have e1e2notP: "\<not> P (nP e1) e1 (nP e2) e2" by simp
     from e1e2notP a_weakrefl have e1ore2neqbot: "(nP e1) \<noteq> \<bottom> \<or> (nP e2) \<noteq> \<bottom>" by fastforce
@@ -509,7 +509,7 @@ section {* Instance helper*}
 
 
   (* snds version *)
-  lemma (in NetworkModel_withOffendingFlows)  ENFnrSR_snds_weakrefl_instance:
+  lemma (in TopoS_withOffendingFlows)  ENFnrSR_snds_weakrefl_instance:
     fixes "default_node_properties" :: "'a" ("\<bottom>")
     assumes a_enf: "eval_model_all_edges_normal_form_not_refl_SR P"
     and   a_weakrefl: "\<forall> s r. P \<bottom> s \<bottom> r"
@@ -534,7 +534,7 @@ section {* Instance helper*}
       obtain e1 e2 where e1e2cond: "(e1, e2)\<in>f \<and> e2 = i" by fastforce
 
     from conjunct1[OF e1e2cond] a_offending have "(e1, e2) \<in> edges G"
-      by (metis (lifting, no_types) NetworkModel_withOffendingFlows.set_offending_flows_def mem_Collect_eq set_rev_mp)
+      by (metis (lifting, no_types) TopoS_withOffendingFlows.set_offending_flows_def mem_Collect_eq set_rev_mp)
   
     from conjunct1[OF e1e2cond] a_f_3_in_f have e1e2notP: "\<not> P (nP e1) e1 (nP e2) e2" by simp
     from e1e2notP a_weakrefl have e1ore2neqbot: "(nP e1) \<noteq> \<bottom> \<or> (nP e2) \<noteq> \<bottom>" by fastforce
@@ -560,19 +560,19 @@ section {* Instance helper*}
 
 
 section {* edges normal form not refl ENFnr *}
-  definition (in NetworkModel_withOffendingFlows) eval_model_all_edges_normal_form_not_refl :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> bool" where
+  definition (in TopoS_withOffendingFlows) eval_model_all_edges_normal_form_not_refl :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> bool" where
     "eval_model_all_edges_normal_form_not_refl P \<equiv> \<forall> G nP. eval_model G nP = (\<forall> (e1, e2) \<in> edges G. e1 \<noteq> e2 \<longrightarrow> P (nP e1) (nP e2))"
   
 
   text{* we derive everything from the ENFnrSR form *}
-  lemma (in NetworkModel_withOffendingFlows) ENFnr_to_ENFnrSR: 
+  lemma (in TopoS_withOffendingFlows) ENFnr_to_ENFnrSR: 
     "eval_model_all_edges_normal_form_not_refl P \<Longrightarrow> eval_model_all_edges_normal_form_not_refl_SR (\<lambda> v1 _ v2 _. P v1 v2)"
     by(simp add: eval_model_all_edges_normal_form_not_refl_def eval_model_all_edges_normal_form_not_refl_SR_def)
 
   (*most of results are now implied from previous lemma*)
 
 section {*offending flows*}
-   theorem (in NetworkModel_withOffendingFlows) ENFnr_offending_set:
+   theorem (in TopoS_withOffendingFlows) ENFnr_offending_set:
     "\<lbrakk> eval_model_all_edges_normal_form_not_refl P \<rbrakk> \<Longrightarrow>
     set_offending_flows G nP = (if eval_model G nP then
       {}
@@ -584,7 +584,7 @@ section {*offending flows*}
 
 section {* Instance helper*}
   (* fsts version *)
-  lemma (in NetworkModel_withOffendingFlows)  ENFnr_fsts_weakrefl_instance:
+  lemma (in TopoS_withOffendingFlows)  ENFnr_fsts_weakrefl_instance:
     fixes "default_node_properties" :: "'a" ("\<bottom>")
     assumes a_enf: "eval_model_all_edges_normal_form_not_refl P"
     and   a_botdefault: "\<forall> e1 e2. e2 \<noteq> \<bottom> \<longrightarrow> \<not> P e1 e2 \<longrightarrow> \<not> P \<bottom> e2"
@@ -602,7 +602,7 @@ section {* Instance helper*}
   qed
   
   (* snds version *)
-  lemma (in NetworkModel_withOffendingFlows)  ENFnr_snds_weakrefl_instance:
+  lemma (in TopoS_withOffendingFlows)  ENFnr_snds_weakrefl_instance:
     fixes "default_node_properties" :: "'a" ("\<bottom>")
     assumes a_enf: "eval_model_all_edges_normal_form_not_refl P"
     and   a_botdefault: "\<forall> e1 e2. \<not> P e1 e2 \<longrightarrow> \<not> P e1 \<bottom>"
@@ -623,7 +623,7 @@ section {* Instance helper*}
 
 
   (* snds version DRAFT*)
-  lemma (in NetworkModel_withOffendingFlows)  ENF_weakrefl_instance_FALSE:
+  lemma (in TopoS_withOffendingFlows)  ENF_weakrefl_instance_FALSE:
     fixes "default_node_properties" :: "'a" ("\<bottom>")
     assumes a_validG: "valid_graph G"
     and   a_not_eval: "\<not> eval_model G nP"

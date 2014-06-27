@@ -1,4 +1,4 @@
-theory NetworkModel_Util
+theory TopoS_Util
 imports Main
 begin
 

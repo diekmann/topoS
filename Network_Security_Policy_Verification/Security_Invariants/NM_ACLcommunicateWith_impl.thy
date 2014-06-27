@@ -1,5 +1,5 @@
 theory NM_ACLcommunicateWith_impl
-imports NM_ACLcommunicateWith "../NetworkModel_Lists_Impl_Interface"
+imports NM_ACLcommunicateWith "../TopoS_Lists_Impl_Interface"
 begin
 
 code_identifier code_module NM_ACLcommunicateWith_impl => (Scala) NM_ACLcommunicateWith
@@ -14,7 +14,7 @@ fun verify_globals :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> 'v access_l
   "verify_globals _ _ _ = True"
 
 
-definition "NetModel_node_props (P::('v::vertex, 'v access_list, 'b) NetworkModel_Params) = 
+definition "NetModel_node_props (P::('v::vertex, 'v access_list, 'b) TopoS_Params) = 
   (\<lambda> i. (case (node_properties P) i of Some property \<Rightarrow> property | None \<Rightarrow> NM_ACLcommunicateWith.default_node_properties))"
 lemma[code_unfold]: "NetworkModel.node_props NM_ACLcommunicateWith.default_node_properties P = NetModel_node_props P"
 apply(simp add: NetModel_node_props_def)
@@ -31,7 +31,7 @@ lemma eval_model_correct: "valid_list_graph G \<Longrightarrow> NM_ACLcommunicat
 by (metis NM_ACLcommunicateWith.eval_model.simps NM_ACLcommunicateWith_impl.eval_model.simps graph.select_convs(1) list_graph_to_graph_def succ_tran_correct)
 
 
-interpretation NM_ACLcommunicateWith_impl:NetworkModel_List_Impl 
+interpretation NM_ACLcommunicateWith_impl:TopoS_List_Impl 
   where default_node_properties=NM_ACLcommunicateWith.default_node_properties
   and eval_model_spec=NM_ACLcommunicateWith.eval_model
   and eval_model_impl=eval_model
@@ -41,10 +41,10 @@ interpretation NM_ACLcommunicateWith_impl:NetworkModel_List_Impl
   and offending_flows_impl=ACLcommunicateWith_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=ACLcommunicateWith_eval
- apply(unfold NetworkModel_List_Impl_def)
+ apply(unfold TopoS_List_Impl_def)
  apply(rule conjI)
   apply(rule conjI)
-   apply(simp add: NetworkModel_ACLcommunicateWith)
+   apply(simp add: TopoS_ACLcommunicateWith)
   apply(rule conjI)
    apply(intro allI impI)
    apply(fact eval_model_correct)
@@ -62,14 +62,14 @@ interpretation NM_ACLcommunicateWith_impl:NetworkModel_List_Impl
   apply(metis ACLcommunicateWith.node_props.simps ACLcommunicateWith.node_props_eq_node_props_formaldef)
  apply(simp only: ACLcommunicateWith_eval_def)
  apply(intro allI impI)
- apply(rule NetworkModel_eval_impl_proofrule[OF NetworkModel_ACLcommunicateWith])
+ apply(rule TopoS_eval_impl_proofrule[OF TopoS_ACLcommunicateWith])
   apply(simp only: eval_model_correct)
  apply(simp)
 done
 
 
 section {* packing *}
-  definition NM_LIB_ACLcommunicateWith:: "('v::vertex, 'v access_list, unit) NetworkModel_packed" where
+  definition NM_LIB_ACLcommunicateWith:: "('v::vertex, 'v access_list, unit) TopoS_packed" where
     "NM_LIB_ACLcommunicateWith \<equiv> 
     \<lparr> nm_name = ''ACLcommunicateWith'', 
       nm_target_focus = NM_ACLcommunicateWith.target_focus,
@@ -80,9 +80,9 @@ section {* packing *}
       nm_node_props = NetModel_node_props,
       nm_eval = ACLcommunicateWith_eval
       \<rparr>"
-  interpretation NM_LIB_ACLcommunicateWith_interpretation: NetworkModel_modelLibrary NM_LIB_ACLcommunicateWith
+  interpretation NM_LIB_ACLcommunicateWith_interpretation: TopoS_modelLibrary NM_LIB_ACLcommunicateWith
       NM_ACLcommunicateWith.eval_model NM_ACLcommunicateWith.verify_globals
-    apply(unfold NetworkModel_modelLibrary_def NM_LIB_ACLcommunicateWith_def)
+    apply(unfold TopoS_modelLibrary_def NM_LIB_ACLcommunicateWith_def)
     apply(rule conjI)
      apply(simp)
     apply(simp)

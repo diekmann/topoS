@@ -5,7 +5,7 @@ begin
 
 text{*An example of our chair network [simplified]*}
 
-abbreviation "V\<equiv>NetworkModel_Vertices.V"
+abbreviation "V\<equiv>TopoS_Vertices.V"
 
 text{*Our access control view on the network*}
   definition ChairNetwork_empty :: "vString list_graph" where

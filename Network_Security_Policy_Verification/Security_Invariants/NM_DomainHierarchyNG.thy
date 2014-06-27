@@ -1,5 +1,5 @@
 theory NM_DomainHierarchyNG
-imports "../NetworkModel_Helper"
+imports "../TopoS_Helper"
   "~~/src/HOL/Lattice/CompleteLattice" (* markarius lattice *)
 begin
 
@@ -491,36 +491,36 @@ definition target_focus :: "bool" where "target_focus = False"
 
 
 
-thm NetworkModel_withOffendingFlows.eval_model_mono_def
-lemma eval_model_mono: "NetworkModel_withOffendingFlows.eval_model_mono eval_model"
-  apply(rule_tac NetworkModel_withOffendingFlows.eval_model_mono_I_proofrule)
+thm TopoS_withOffendingFlows.eval_model_mono_def
+lemma eval_model_mono: "TopoS_withOffendingFlows.eval_model_mono eval_model"
+  apply(rule_tac TopoS_withOffendingFlows.eval_model_mono_I_proofrule)
    apply(auto)
   apply(rename_tac nP e1 e2 N E' e1' e2' E)
   apply(blast)
  done
 
 
-interpretation NetworkModel_preliminaries
+interpretation TopoS_preliminaries
 where eval_model = eval_model
 and verify_globals = verify_globals
   apply unfold_locales
     apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
     apply(erule_tac exE)
     apply(rename_tac list_edges)
-    apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+    apply(rule_tac ff="list_edges" in TopoS_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
         apply(auto)[5]
-   apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops)[1]
-  apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
- apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
+   apply(auto simp add: TopoS_withOffendingFlows.is_offending_flows_def graph_ops)[1]
+  apply(fact TopoS_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
+ apply(fact TopoS_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
 done
 
 
 section {*ENF*}
-  lemma DomainHierarchyNG_ENF: "NetworkModel_withOffendingFlows.eval_model_all_edges_normal_form eval_model (\<lambda> s r. r \<sqsubseteq>\<^sub>t\<^sub>r\<^sub>u\<^sub>s\<^sub>t s)"
-    unfolding NetworkModel_withOffendingFlows.eval_model_all_edges_normal_form_def
+  lemma DomainHierarchyNG_ENF: "TopoS_withOffendingFlows.eval_model_all_edges_normal_form eval_model (\<lambda> s r. r \<sqsubseteq>\<^sub>t\<^sub>r\<^sub>u\<^sub>s\<^sub>t s)"
+    unfolding TopoS_withOffendingFlows.eval_model_all_edges_normal_form_def
     by simp
-  lemma DomainHierarchyNG_ENF_refl: "NetworkModel_withOffendingFlows.ENF_refl eval_model (\<lambda> s r. r \<sqsubseteq>\<^sub>t\<^sub>r\<^sub>u\<^sub>s\<^sub>t s)"
-    unfolding NetworkModel_withOffendingFlows.ENF_refl_def
+  lemma DomainHierarchyNG_ENF_refl: "TopoS_withOffendingFlows.ENF_refl eval_model (\<lambda> s r. r \<sqsubseteq>\<^sub>t\<^sub>r\<^sub>u\<^sub>s\<^sub>t s)"
+    unfolding TopoS_withOffendingFlows.ENF_refl_def
     apply(rule conjI)
      apply(simp add: DomainHierarchyNG_ENF)
     apply(simp add: leq_domainNameTrust_refl)
@@ -535,8 +535,8 @@ section {*ENF*}
       {}
      else 
       { {e \<in> edges G. case e of (e1,e2) \<Rightarrow> \<not> (nP e2) \<sqsubseteq>\<^sub>t\<^sub>r\<^sub>u\<^sub>s\<^sub>t (nP e1)} })"
-  lemma DomainHierarchyNG_offending_set: "NetworkModel_withOffendingFlows.set_offending_flows eval_model = DomainHierarchyNG_offending_set"
-    apply(simp only: fun_eq_iff NetworkModel_withOffendingFlows.ENF_offending_set[OF DomainHierarchyNG_ENF] DomainHierarchyNG_offending_set_def)
+  lemma DomainHierarchyNG_offending_set: "TopoS_withOffendingFlows.set_offending_flows eval_model = DomainHierarchyNG_offending_set"
+    apply(simp only: fun_eq_iff TopoS_withOffendingFlows.ENF_offending_set[OF DomainHierarchyNG_ENF] DomainHierarchyNG_offending_set_def)
     apply(rule allI)+
     apply(rename_tac G nP)
     apply(auto split:split_split_asm split_split simp add: Let_def)
@@ -547,12 +547,12 @@ section {*ENF*}
          \<exists>G nP gP i f.
             valid_graph G \<and> 
             \<not> eval_model G nP \<and>
-            f \<in> NetworkModel_withOffendingFlows.set_offending_flows eval_model G nP \<and>
+            f \<in> TopoS_withOffendingFlows.set_offending_flows eval_model G nP \<and>
             eval_model (delete_edges G f) nP \<and>
             (i \<in> fst ` f \<and> eval_model G (nP(i := otherbot)))"
-    apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
-        NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
-        NetworkModel_withOffendingFlows.is_offending_flows_def)
+    apply (simp add: TopoS_withOffendingFlows.set_offending_flows_def
+        TopoS_withOffendingFlows.is_offending_flows_min_set_def
+        TopoS_withOffendingFlows.is_offending_flows_def)
     apply (simp add:graph_ops)
     apply (simp split: split_split_asm split_split domainNameTrust.split add:prod_case_beta)
     apply(rule_tac x="\<lparr> nodes={vertex_1,vertex_2}, edges = {(vertex_1,vertex_2)} \<rparr>" in exI, simp)
@@ -583,14 +583,14 @@ section {*ENF*}
     apply(simp add: default_node_properties_def)
    done
 
-interpretation DomainHierarchyNG: NetworkModel_ACS
+interpretation DomainHierarchyNG: TopoS_ACS
 where default_node_properties = default_node_properties
 and eval_model = eval_model
 and verify_globals = verify_globals
-where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = DomainHierarchyNG_offending_set"
+where "TopoS_withOffendingFlows.set_offending_flows eval_model = DomainHierarchyNG_offending_set"
   apply unfold_locales
     apply(rule ballI)
-    apply(drule NetworkModel_withOffendingFlows.ENF_fsts_refl_instance[OF DomainHierarchyNG_ENF_refl unassigned_default_candidate], simp_all)[1]
+    apply(drule TopoS_withOffendingFlows.ENF_fsts_refl_instance[OF DomainHierarchyNG_ENF_refl unassigned_default_candidate], simp_all)[1]
    apply(erule default_uniqueness_by_counterexample_ACS)
    apply(drule Unassigned_unique_default) 
    apply(simp)
@@ -600,7 +600,7 @@ where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = DomainHi
 
 
 
-lemma NetworkModel_DomainHierarchyNG: "NetworkModel eval_model default_node_properties target_focus"
+lemma TopoS_DomainHierarchyNG: "NetworkModel eval_model default_node_properties target_focus"
   unfolding target_focus_def by(unfold_locales)
 
 

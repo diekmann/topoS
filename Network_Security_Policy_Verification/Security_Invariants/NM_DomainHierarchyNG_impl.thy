@@ -1,5 +1,5 @@
 theory NM_DomainHierarchyNG_impl
-imports NM_DomainHierarchyNG "../NetworkModel_Lists_Impl_Interface"
+imports NM_DomainHierarchyNG "../TopoS_Lists_Impl_Interface"
 begin
 
 
@@ -27,7 +27,7 @@ definition DomainHierarchyNG_offending_list:: "'v list_graph \<Rightarrow> ('v \
 
 lemma "DomainHierarchyNG.node_props P = 
   (\<lambda>i. case node_properties P i of None \<Rightarrow> NM_DomainHierarchyNG.default_node_properties | Some property \<Rightarrow> property)"
-by(fact NetworkModel.node_props.simps[OF NetworkModel_DomainHierarchyNG, of "P"])
+by(fact NetworkModel.node_props.simps[OF TopoS_DomainHierarchyNG, of "P"])
 
 definition "NetModel_node_props P = (\<lambda> i. (case (node_properties P) i of Some property \<Rightarrow> property | None \<Rightarrow> NM_DomainHierarchyNG.default_node_properties))"
 (*lemma[code_unfold]: "NetworkModel.node_props NM_DomainHierarchy.default_node_properties P = NetModel_node_props P"
@@ -43,7 +43,7 @@ definition "DomainHierarchyNG_eval G P = (valid_list_graph G \<and>
   eval_model G (NetworkModel.node_props NM_DomainHierarchyNG.default_node_properties P))"
 
 
-interpretation DomainHierarchyNG_impl:NetworkModel_List_Impl 
+interpretation DomainHierarchyNG_impl:TopoS_List_Impl 
   where default_node_properties=NM_DomainHierarchyNG.default_node_properties
   and eval_model_spec=NM_DomainHierarchyNG.eval_model
   and eval_model_impl=eval_model
@@ -53,9 +53,9 @@ interpretation DomainHierarchyNG_impl:NetworkModel_List_Impl
   and offending_flows_impl=DomainHierarchyNG_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=DomainHierarchyNG_eval
- apply(unfold NetworkModel_List_Impl_def)
+ apply(unfold TopoS_List_Impl_def)
  apply(rule conjI)
-  apply(simp add: NetworkModel_DomainHierarchyNG list_graph_to_graph_def)
+  apply(simp add: TopoS_DomainHierarchyNG list_graph_to_graph_def)
  apply(rule conjI)
   apply(simp add: list_graph_to_graph_def DomainHierarchyNG_offending_set DomainHierarchyNG_offending_set_def DomainHierarchyNG_offending_list_def)
  apply(rule conjI)
@@ -63,13 +63,13 @@ interpretation DomainHierarchyNG_impl:NetworkModel_List_Impl
   apply(metis DomainHierarchyNG.node_props.simps DomainHierarchyNG.node_props_eq_node_props_formaldef)
  apply(simp only: DomainHierarchyNG_eval_def)
  apply(intro allI)
- apply(rule NetworkModel_eval_impl_proofrule[OF NetworkModel_DomainHierarchyNG])
+ apply(rule TopoS_eval_impl_proofrule[OF TopoS_DomainHierarchyNG])
  apply(simp_all add: list_graph_to_graph_def)
 done
 
 
 section {* DomainHierarchyNG packing *}
-  definition NM_LIB_DomainHierarchyNG :: "('v::vertex, domainNameTrust, domainTree) NetworkModel_packed" where
+  definition NM_LIB_DomainHierarchyNG :: "('v::vertex, domainNameTrust, domainTree) TopoS_packed" where
     "NM_LIB_DomainHierarchyNG \<equiv> 
     \<lparr> nm_name = ''DomainHierarchyNG'', 
       nm_target_focus = NM_DomainHierarchyNG.target_focus,
@@ -80,9 +80,9 @@ section {* DomainHierarchyNG packing *}
       nm_node_props = NetModel_node_props,
       nm_eval = DomainHierarchyNG_eval
       \<rparr>"
-  interpretation NM_LIB_DomainHierarchyNG_interpretation: NetworkModel_modelLibrary NM_LIB_DomainHierarchyNG 
+  interpretation NM_LIB_DomainHierarchyNG_interpretation: TopoS_modelLibrary NM_LIB_DomainHierarchyNG 
       NM_DomainHierarchyNG.eval_model NM_DomainHierarchyNG.verify_globals
-    apply(unfold NetworkModel_modelLibrary_def NM_LIB_DomainHierarchyNG_def)
+    apply(unfold TopoS_modelLibrary_def NM_LIB_DomainHierarchyNG_def)
     apply(rule conjI)
      apply(simp)
     apply(simp)
@@ -95,19 +95,19 @@ section {* DomainHierarchyNG packing *}
 
 text {*Examples:*}
 definition example_TUM_net :: "vString list_graph" where
-  "example_TUM_net \<equiv> \<lparr> nodesL=[NetworkModel_Vertices.V ''Gateway'', NetworkModel_Vertices.V ''LowerSVR'', NetworkModel_Vertices.V ''UpperSRV''], 
+  "example_TUM_net \<equiv> \<lparr> nodesL=[TopoS_Vertices.V ''Gateway'', TopoS_Vertices.V ''LowerSVR'', TopoS_Vertices.V ''UpperSRV''], 
         edgesL=[
-          (NetworkModel_Vertices.V ''Gateway'',NetworkModel_Vertices.V ''LowerSVR''), (NetworkModel_Vertices.V ''Gateway'',NetworkModel_Vertices.V ''UpperSRV''), 
-          (NetworkModel_Vertices.V ''LowerSVR'', NetworkModel_Vertices.V ''Gateway''),
-          (NetworkModel_Vertices.V ''UpperSRV'', NetworkModel_Vertices.V ''Gateway'')
+          (TopoS_Vertices.V ''Gateway'',TopoS_Vertices.V ''LowerSVR''), (TopoS_Vertices.V ''Gateway'',TopoS_Vertices.V ''UpperSRV''), 
+          (TopoS_Vertices.V ''LowerSVR'', TopoS_Vertices.V ''Gateway''),
+          (TopoS_Vertices.V ''UpperSRV'', TopoS_Vertices.V ''Gateway'')
         ] \<rparr>"
 value[code] "valid_list_graph example_TUM_net"
 
 definition example_TUM_config :: "vString \<Rightarrow> domainNameTrust" where
   "example_TUM_config \<equiv> ((\<lambda> e. default_node_properties)
-        (NetworkModel_Vertices.V ''Gateway'':= DN (''ACD''--''AISD''--Leaf, 1),
-         NetworkModel_Vertices.V ''LowerSVR'':= DN (''ACD''--''AISD''--Leaf, 0),
-         NetworkModel_Vertices.V ''UpperSRV'':= DN (''ACD''--Leaf, 0)
+        (TopoS_Vertices.V ''Gateway'':= DN (''ACD''--''AISD''--Leaf, 1),
+         TopoS_Vertices.V ''LowerSVR'':= DN (''ACD''--''AISD''--Leaf, 0),
+         TopoS_Vertices.V ''UpperSRV'':= DN (''ACD''--Leaf, 0)
        ))"
 
 definition example_TUM_hierarchy :: "domainTree" where
@@ -120,7 +120,7 @@ value[code] "eval_model     example_TUM_net example_TUM_config"
 
 definition example_TUM_net_invalid where
 "example_TUM_net_invalid \<equiv> example_TUM_net\<lparr>edgesL :=  
-    (NetworkModel_Vertices.V ''LowerSRV'', NetworkModel_Vertices.V ''UpperSRV'')#(edgesL example_TUM_net)\<rparr>"
+    (TopoS_Vertices.V ''LowerSRV'', TopoS_Vertices.V ''UpperSRV'')#(edgesL example_TUM_net)\<rparr>"
 
 value[code] "verify_globals example_TUM_net_invalid example_TUM_config example_TUM_hierarchy"
 value[code] "eval_model     example_TUM_net_invalid example_TUM_config"

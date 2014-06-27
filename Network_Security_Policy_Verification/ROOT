@@ -11,11 +11,11 @@ session "Network_Security_Policy_Verification" = HOL +
   theories
     Network_Security_Policy_Verification
     attic
-    NetworkModel_generateCode
+    TopoS_generateCode
 
 session "Network_Security_Policy_Verification_Examples" = "Network_Security_Policy_Verification" +
   theories [document = false]
-    NetworkModel_generateCode
+    TopoS_generateCode
     "Examples/Impl_List_Playground_statefulpolicycompliance"
     "Examples/example_forte14"
     "Examples/Example"

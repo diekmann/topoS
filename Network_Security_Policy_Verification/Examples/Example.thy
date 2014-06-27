@@ -1,5 +1,5 @@
 theory Example
-imports "../NetworkModel_Interface" "../NetworkModel_Library"
+imports "../TopoS_Interface" "../TopoS_Library"
 begin
 
 section {* Network Graph and Security Requirements *}
@@ -15,7 +15,7 @@ section {* Network Graph and Security Requirements *}
 
 
   text{*We add two security requirements*}
-  definition NMParams_secgw_1 :: "(nat, secgw_member, unit) NetworkModel_Params" where
+  definition NMParams_secgw_1 :: "(nat, secgw_member, unit) TopoS_Params" where
   "NMParams_secgw_1 \<equiv> \<lparr> node_properties = [1 \<mapsto> DomainMember, 
                                      2 \<mapsto> DomainMember, 
                                      3 \<mapsto> DomainMember,
@@ -23,7 +23,7 @@ section {* Network Graph and Security Requirements *}
                                 model_global_properties = () \<rparr>"
 
 
-  definition NMParams_blptrusted_1 :: "(nat, NM_BLPtrusted.node_config, unit) NetworkModel_Params" where
+  definition NMParams_blptrusted_1 :: "(nat, NM_BLPtrusted.node_config, unit) TopoS_Params" where
   "NMParams_blptrusted_1 \<equiv> \<lparr> node_properties = [1 \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>, 
                                      2 \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>, 
                                      3 \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,

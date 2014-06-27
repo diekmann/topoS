@@ -1,4 +1,4 @@
-theory NetworkModel_Library
+theory TopoS_Library
 imports String 
   "Lib/FiniteListGraph_Impl"
   "Security_Invariants/NM_BLPbasic_impl"
@@ -33,7 +33,7 @@ term eval
 
 (*TODO TODO TODO TODO check all before export*)
 
-print_interps NetworkModel_modelLibrary
+print_interps TopoS_modelLibrary
 
 (*some check: *)
   thm NM_LIB_BLPbasic_interpretation.impl_spec
@@ -58,10 +58,10 @@ print_interps NetworkModel_modelLibrary
 
 section{*Example*}
   definition BLPexample1::"bool" where
-    "BLPexample1 \<equiv> (nm_eval NM_LIB_BLPbasic) fabNet \<lparr> node_properties = [NetworkModel_Vertices.V ''PresenceSensor'' \<mapsto> 2, 
-                                                    NetworkModel_Vertices.V ''Webcam'' \<mapsto> 3, 
-                                                    NetworkModel_Vertices.V ''SensorSink'' \<mapsto> 3,
-                                                    NetworkModel_Vertices.V ''Statistics'' \<mapsto> 3], model_global_properties = () \<rparr>"
+    "BLPexample1 \<equiv> (nm_eval NM_LIB_BLPbasic) fabNet \<lparr> node_properties = [TopoS_Vertices.V ''PresenceSensor'' \<mapsto> 2, 
+                                                    TopoS_Vertices.V ''Webcam'' \<mapsto> 3, 
+                                                    TopoS_Vertices.V ''SensorSink'' \<mapsto> 3,
+                                                    TopoS_Vertices.V ''Statistics'' \<mapsto> 3], model_global_properties = () \<rparr>"
   definition BLPexample3::"(vString \<times> vString) list list" where
     "BLPexample3 \<equiv> (nm_offending_flows NM_LIB_BLPbasic) fabNet ((nm_node_props NM_LIB_BLPbasic) sensorProps_NMParams_try3)"
 

@@ -1,17 +1,17 @@
-theory NetworkModel_Composition_Theory_ENF
-imports NetworkModel_Interface NetworkModel_Helper
+theory TopoS_Composition_Theory_ENF
+imports TopoS_Interface TopoS_Helper
 begin
 
 (*theory, do not load together with library list impl*)
 
 (*hide tpye constructor V, make it a free variable again*)
-hide_const NetworkModel_Vertices.V
+hide_const TopoS_Vertices.V
 
 
 
   (*'v should be of type ::vertex*)
   type_synonym ('v, 'a, 'b) network_security_requirement_ENF =
-   "'a \<times> (('v) graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> bool) \<times> bool         \<times> ('a \<Rightarrow> 'a \<Rightarrow> bool) \<times> ('v, 'a, 'b) NetworkModel_Params"
+   "'a \<times> (('v) graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> bool) \<times> bool         \<times> ('a \<Rightarrow> 'a \<Rightarrow> bool) \<times> ('v, 'a, 'b) TopoS_Params"
   (*\<bottom> \<times> eval_model                         \<times> target_focus \<times>  P                 \<times> scenario-specific information    *)
 
 
@@ -19,7 +19,7 @@ hide_const NetworkModel_Vertices.V
   definition valid_ENF :: "('v::vertex, 'a, 'b) network_security_requirement_ENF \<Rightarrow> bool" where
     "valid_ENF m \<equiv> (case m of (defbot, eval_model, target_focus, P, config) \<Rightarrow>
           NetworkModel eval_model defbot target_focus \<and>
-          NetworkModel_withOffendingFlows.eval_model_all_edges_normal_form eval_model P)"
+          TopoS_withOffendingFlows.eval_model_all_edges_normal_form eval_model P)"
 
   (*WARNING!! 'a and 'b are the same for the complete list. So the list of network security requirements does not model all requirements but only those of the 
               same type. The generic Composition theory does not have this problem. The generate_valid_topology_sound holds for both! 
@@ -40,7 +40,7 @@ hide_const NetworkModel_Vertices.V
 
     definition c_offending_flows :: "('v::vertex, 'a, 'b) network_security_requirement_ENF \<Rightarrow> (('v) graph \<Rightarrow> ('v \<times> 'v) set set)" where
       "c_offending_flows m = (case m of (defbot, eval_model, target_focus, P, config) \<Rightarrow> 
-        (\<lambda>G. NetworkModel_withOffendingFlows.set_offending_flows eval_model G (c_nP m)))"
+        (\<lambda>G. TopoS_withOffendingFlows.set_offending_flows eval_model G (c_nP m)))"
     
     definition c_P :: "('v::vertex, 'a, 'b) network_security_requirement_ENF \<Rightarrow> ('a \<Rightarrow> 'a \<Rightarrow> bool)" where
       "c_P m \<equiv> (case m of (defbot, eval_model, target_focus, P, config) \<Rightarrow> P)"
@@ -57,7 +57,7 @@ hide_const NetworkModel_Vertices.V
       apply(rename_tac defbot eval_model target_focus P config)
       apply(simp only: fun_eq_iff)
       apply(rule allI, rename_tac G)
-      apply(simp add: NetworkModel_withOffendingFlows.eval_model_all_edges_normal_form_def)
+      apply(simp add: TopoS_withOffendingFlows.eval_model_all_edges_normal_form_def)
       by(simp add: c_eval_model_def c_nP_def)
 
     lemma c_eval_model_simp2: 
@@ -96,9 +96,9 @@ hide_const NetworkModel_Vertices.V
       apply(simp only: fun_eq_iff)
       apply(rule allI, rename_tac G)
       apply(simp add: c_eval_model_def c_nP_def c_gP_def c_P_def c_offending_flows_def)
-      thm NetworkModel_withOffendingFlows.ENF_offending_set
+      thm TopoS_withOffendingFlows.ENF_offending_set
       apply(drule_tac G=G and P=P and nP="(NetworkModel.node_props defbot config)" 
-          in NetworkModel_withOffendingFlows.ENF_offending_set)
+          in TopoS_withOffendingFlows.ENF_offending_set)
       by simp
 
       lemma c_offending_flows_Union_simp: 
@@ -146,10 +146,10 @@ hide_const NetworkModel_Vertices.V
      apply(simp add: valid_ENF_def)
      apply(simp add: c_eval_model_def c_nP_def c_gP_def c_P_def c_offending_flows_def)
      apply clarify
-     apply(subgoal_tac "NetworkModel_preliminaries eval_model")
+     apply(subgoal_tac "TopoS_preliminaries eval_model")
       prefer 2
-      apply(simp add: NetworkModel_def)
-     apply(erule_tac NetworkModel_preliminaries.mono_eval_model)
+      apply(simp add: TopoS_def)
+     apply(erule_tac TopoS_preliminaries.mono_eval_model)
        by simp_all
 
     lemma valid_ENFs1: "valid_ENFs (m # M) \<Longrightarrow> valid_ENF m"
@@ -183,9 +183,9 @@ hide_const NetworkModel_Vertices.V
       apply(simp add: c_offending_flows_def)
       apply(simp add: c_nP_def c_gP_def)
       apply(clarify)
-      by(simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
-          NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
-          NetworkModel_withOffendingFlows.is_offending_flows_def)
+      by(simp add: TopoS_withOffendingFlows.set_offending_flows_def
+          TopoS_withOffendingFlows.is_offending_flows_min_set_def
+          TopoS_withOffendingFlows.is_offending_flows_def)
 
     lemma all_security_requirements_fulfilled_imp_no_offending_flows:
       "all_security_requirements_fulfilled M G \<Longrightarrow> (\<Union>m\<in>set M. \<Union>c_offending_flows m G) = {}"
@@ -259,7 +259,7 @@ hide_const NetworkModel_Vertices.V
           \<Longrightarrow> generate_valid_topology M G = generate_valid_topology_2 M G"
           apply(induction M arbitrary: G)
            apply(simp_all)
-          apply(rule NetworkModel_withOffendingFlows.graph_eq_intro)
+          apply(rule TopoS_withOffendingFlows.graph_eq_intro)
            by(simp add:generate_valid_topology_nodes generate_valid_topology_2_nodes delete_edges_simp2)+
     
     
@@ -345,7 +345,7 @@ hide_const NetworkModel_Vertices.V
       from this obtain defbot eval_model target_focus P config where m_components: 
           "m = (defbot, eval_model, target_focus, P, config) \<and>
           NetworkModel eval_model defbot target_focus \<and>
-          NetworkModel_withOffendingFlows.eval_model_all_edges_normal_form eval_model P"
+          TopoS_withOffendingFlows.eval_model_all_edges_normal_form eval_model P"
           apply(simp add:valid_ENF_def)
           apply(case_tac m)
           by blast

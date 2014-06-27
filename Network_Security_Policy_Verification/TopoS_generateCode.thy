@@ -1,11 +1,11 @@
-theory NetworkModel_generateCode
-imports NetworkModel_Library
+theory TopoS_generateCode
+imports TopoS_Library
 begin
 
 
 
 
-(* code_identifier code_module NetworkModel_generateCode => (Scala) NetworkModel_modelLibrary *)
+(* code_identifier code_module TopoS_generateCode => (Scala) TopoS_modelLibrary *)
 
 
 ML {*
@@ -34,7 +34,7 @@ fun scala_header thy =
         NM_LIB_DomainHierarchyNG
         NM_LIB_Subnets
         NM_LIB_BLPtrusted 
-        NM_LIB_SecurityGateway
+        (*NM_LIB_SecurityGateway*)
         NM_LIB_SecurityGatewayExtended
         NM_LIB_Sink
         NM_LIB_NonInterference
@@ -48,7 +48,7 @@ fun scala_header thy =
         nm_eval_model
         nm_default
         nm_target_focus nm_name
-    (*NetworkModel_Params*)
+    (*TopoS_Params*)
         model_global_properties node_properties
     (*Finite_Graph functions*)
         FiniteListGraph.valid_list_graph

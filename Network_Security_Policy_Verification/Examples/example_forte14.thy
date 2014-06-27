@@ -3,7 +3,7 @@ imports "../Impl_List_Interface"
 begin
 
 
-abbreviation "V\<equiv>NetworkModel_Vertices.V"
+abbreviation "V\<equiv>TopoS_Vertices.V"
 
 
 definition policy :: "vString list_graph" where

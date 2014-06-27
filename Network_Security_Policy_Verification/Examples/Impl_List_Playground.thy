@@ -5,7 +5,7 @@ begin
 
 text{*The executbale models and the composition theory. We can build examples here*}
 
-abbreviation "V\<equiv>NetworkModel_Vertices.V"
+abbreviation "V\<equiv>TopoS_Vertices.V"
 
 
 

@@ -1,9 +1,9 @@
 theory Impl_List_Composition
-imports NetworkModel_Lists_Impl_Interface NetworkModel_Composition_Theory
+imports TopoS_Lists_Impl_Interface TopoS_Composition_Theory
 begin
 
 (*the packed network model record from the list implementation*)
-term "X::('v::vertex, 'a, 'b) NetworkModel_packed"
+term "X::('v::vertex, 'a, 'b) TopoS_packed"
 
 
 section{*Generating instantiated (configured) network security models*}
@@ -17,7 +17,7 @@ section{*Generating instantiated (configured) network security models*}
 
   text{* Test if this definition is compliant with the formal definition on sets. *}
   definition NetworkSecurityModel_complies_formal_def :: 
-    "('v) NetworkSecurityModel \<Rightarrow> 'v NetworkModel_Composition_Theory.NetworkSecurityModel_configured \<Rightarrow> bool" where
+    "('v) NetworkSecurityModel \<Rightarrow> 'v TopoS_Composition_Theory.NetworkSecurityModel_configured \<Rightarrow> bool" where
     "NetworkSecurityModel_complies_formal_def impl spec \<equiv> 
       (\<forall> G. valid_list_graph G \<longrightarrow> implc_eval_model impl G = c_eval_model spec (list_graph_to_graph G)) \<and>
       (\<forall> G. valid_list_graph G \<longrightarrow> set`set (implc_offending_flows impl G) = c_offending_flows spec (list_graph_to_graph G)) \<and>
@@ -25,7 +25,7 @@ section{*Generating instantiated (configured) network security models*}
     
 
   fun new_configured_list_NetworkSecurityModel :: 
-    "('v::vertex, 'a, 'b) NetworkModel_packed \<Rightarrow> ('v::vertex, 'a, 'b) NetworkModel_Params \<Rightarrow> 
+    "('v::vertex, 'a, 'b) TopoS_packed \<Rightarrow> ('v::vertex, 'a, 'b) TopoS_Params \<Rightarrow> 
         ('v NetworkSecurityModel)" where 
       "new_configured_list_NetworkSecurityModel m C = 
         (let nP = nm_node_props m C in
@@ -35,56 +35,56 @@ section{*Generating instantiated (configured) network security models*}
             implc_isIFS = nm_target_focus m
           \<rparr>)"
 
-  text{* the @{term NetworkModel_Composition_Theory.new_configured_NetworkSecurityModel} must give a result if we have the NetworkModel modelLibrary*}
-  lemma NetworkModel_modelLibrary_yields_new_configured_NetworkSecurityModel:
-    assumes NetModelLib: "NetworkModel_modelLibrary m eval_model_spec verify_gloabls_spec"
+  text{* the @{term TopoS_Composition_Theory.new_configured_NetworkSecurityModel} must give a result if we have the NetworkModel modelLibrary*}
+  lemma TopoS_modelLibrary_yields_new_configured_NetworkSecurityModel:
+    assumes NetModelLib: "TopoS_modelLibrary m eval_model_spec verify_gloabls_spec"
     and     nPdef:       "nP = nm_node_props m C"
     and formalSpec:      "Spec = \<lparr> 
                               c_eval_model = (\<lambda>G. eval_model_spec G nP),
-                              c_offending_flows = (\<lambda>G. NetworkModel_withOffendingFlows.set_offending_flows eval_model_spec G nP),
+                              c_offending_flows = (\<lambda>G. TopoS_withOffendingFlows.set_offending_flows eval_model_spec G nP),
                               c_isIFS = nm_target_focus m
                             \<rparr>"
     shows "new_configured_NetworkSecurityModel (eval_model_spec, nm_default m, nm_target_focus m, nP) = Some Spec"
     proof -
       from NetModelLib have NetModel: "NetworkModel eval_model_spec (nm_default m) (nm_target_focus m)"
-        by(simp add: NetworkModel_modelLibrary_def NetworkModel_List_Impl_def)
+        by(simp add: TopoS_modelLibrary_def TopoS_List_Impl_def)
 
       have Spec: "\<lparr>c_eval_model = \<lambda>G. eval_model_spec G nP,
-             c_offending_flows = \<lambda>G. NetworkModel_withOffendingFlows.set_offending_flows eval_model_spec G nP,
+             c_offending_flows = \<lambda>G. TopoS_withOffendingFlows.set_offending_flows eval_model_spec G nP,
              c_isIFS = nm_target_focus m\<rparr> = Spec"
       by(simp add: formalSpec)
       show ?thesis
         unfolding new_configured_NetworkSecurityModel.simps
         by(simp add: NetModel Spec)
     qed
-    thm NetworkModel_modelLibrary_yields_new_configured_NetworkSecurityModel[simplified] (*todo fold in Spec*)
+    thm TopoS_modelLibrary_yields_new_configured_NetworkSecurityModel[simplified] (*todo fold in Spec*)
 
 
   (* The new_* functions comply, i.e. we can instance network security models that are executable. *)
   lemma new_configured_list_NetworkSecurityModel_complies:
-    assumes NetModelLib: "NetworkModel_modelLibrary m eval_model_spec verify_gloabls_spec"
+    assumes NetModelLib: "TopoS_modelLibrary m eval_model_spec verify_gloabls_spec"
     and     nPdef:       "nP = nm_node_props m C"
     and formalSpec:      "Spec = new_configured_NetworkSecurityModel (eval_model_spec, nm_default m, nm_target_focus m, nP)"
     and implSpec:        "Impl = new_configured_list_NetworkSecurityModel m C"
     shows "NetworkSecurityModel_complies_formal_def Impl (the Spec)"
     proof -
-      from NetworkModel_modelLibrary_yields_new_configured_NetworkSecurityModel[OF NetModelLib nPdef]
+      from TopoS_modelLibrary_yields_new_configured_NetworkSecurityModel[OF NetModelLib nPdef]
       have SpecUnfolded: "new_configured_NetworkSecurityModel (eval_model_spec, nm_default m, nm_target_focus m, nP) =
         Some \<lparr>c_eval_model = \<lambda>G. eval_model_spec G nP,
-             c_offending_flows = \<lambda>G. NetworkModel_withOffendingFlows.set_offending_flows eval_model_spec G nP,
+             c_offending_flows = \<lambda>G. TopoS_withOffendingFlows.set_offending_flows eval_model_spec G nP,
              c_isIFS = nm_target_focus m\<rparr>" by simp
       
       from NetModelLib show ?thesis
         apply(simp add: SpecUnfolded formalSpec implSpec Let_def)
         apply(simp add: NetworkSecurityModel_complies_formal_def_def)
-        apply(simp add: NetworkModel_modelLibrary_def NetworkModel_List_Impl_def)
+        apply(simp add: TopoS_modelLibrary_def TopoS_List_Impl_def)
         apply(simp add: nPdef)
         done
     qed
 
 
   corollary new_configured_list_NetworkSecurityModel_complies':
-    "\<lbrakk> NetworkModel_modelLibrary m eval_model_spec verify_gloabls_spec \<rbrakk> \<Longrightarrow> 
+    "\<lbrakk> TopoS_modelLibrary m eval_model_spec verify_gloabls_spec \<rbrakk> \<Longrightarrow> 
     NetworkSecurityModel_complies_formal_def (new_configured_list_NetworkSecurityModel m C) (the (new_configured_NetworkSecurityModel (eval_model_spec, nm_default m, nm_target_focus m,  nm_node_props m C)))"
     apply(drule new_configured_list_NetworkSecurityModel_complies)
     by(simp_all)
@@ -95,9 +95,9 @@ section{*Generating instantiated (configured) network security models*}
 
 section{*About valid network security requirements*}
 
-   type_synonym 'v security_models_spec_impl="('v NetworkSecurityModel \<times> 'v NetworkModel_Composition_Theory.NetworkSecurityModel_configured) list"
+   type_synonym 'v security_models_spec_impl="('v NetworkSecurityModel \<times> 'v TopoS_Composition_Theory.NetworkSecurityModel_configured) list"
    
-   definition get_spec :: "'v security_models_spec_impl \<Rightarrow> ('v NetworkModel_Composition_Theory.NetworkSecurityModel_configured) list" where
+   definition get_spec :: "'v security_models_spec_impl \<Rightarrow> ('v TopoS_Composition_Theory.NetworkSecurityModel_configured) list" where
     "get_spec M \<equiv> [snd m. m \<leftarrow> M]"
    definition get_impl :: "'v security_models_spec_impl \<Rightarrow> ('v NetworkSecurityModel) list" where
     "get_impl M \<equiv> [fst m. m \<leftarrow> M]"
@@ -153,9 +153,9 @@ section{*Accessors*}
 
   lemma get_IFS_get_ACS_complies:
   assumes a: "\<forall> (m_impl, m_spec) \<in> set M. NetworkSecurityModel_complies_formal_def m_impl m_spec"
-    shows "\<forall> (m_impl, m_spec) \<in> set (zip (get_IFS (get_impl M)) (NetworkModel_Composition_Theory.get_IFS (get_spec M))).
+    shows "\<forall> (m_impl, m_spec) \<in> set (zip (get_IFS (get_impl M)) (TopoS_Composition_Theory.get_IFS (get_spec M))).
       NetworkSecurityModel_complies_formal_def m_impl m_spec"
-    and "\<forall> (m_impl, m_spec) \<in> set (zip (get_ACS (get_impl M)) (NetworkModel_Composition_Theory.get_ACS (get_spec M))).
+    and "\<forall> (m_impl, m_spec) \<in> set (zip (get_ACS (get_impl M)) (TopoS_Composition_Theory.get_ACS (get_spec M))).
       NetworkSecurityModel_complies_formal_def m_impl m_spec"
     proof -
       from a have "\<forall> (m_impl, m_spec) \<in> set M. implc_isIFS m_impl = c_isIFS m_spec"
@@ -164,10 +164,10 @@ section{*Accessors*}
         apply(simp add: get_impl_def get_spec_def)
         apply(induction M)
         apply(simp_all) by (metis (lifting, mono_tags) prod_case_beta subset_insertI2)
-      from set_zip_IFS a show "\<forall> (m_impl, m_spec) \<in> set (zip (get_IFS (get_impl M)) (NetworkModel_Composition_Theory.get_IFS (get_spec M))).
+      from set_zip_IFS a show "\<forall> (m_impl, m_spec) \<in> set (zip (get_IFS (get_impl M)) (TopoS_Composition_Theory.get_IFS (get_spec M))).
           NetworkSecurityModel_complies_formal_def m_impl m_spec"
         apply(simp add: get_IFS_def get_ACS_def
-          NetworkModel_Composition_Theory.get_IFS_def NetworkModel_Composition_Theory.get_ACS_def) by blast
+          TopoS_Composition_Theory.get_IFS_def TopoS_Composition_Theory.get_ACS_def) by blast
       next
       from a have "\<forall> (m_impl, m_spec) \<in> set M. implc_isIFS m_impl = c_isIFS m_spec"
         apply(simp add: NetworkSecurityModel_complies_formal_def_def) by fastforce
@@ -175,28 +175,28 @@ section{*Accessors*}
         apply(simp add: get_impl_def get_spec_def)
         apply(induction M)
         apply(simp_all) by (metis (lifting, mono_tags) prod_case_beta subset_insertI2)
-      from this a show "\<forall> (m_impl, m_spec) \<in> set (zip (get_ACS (get_impl M)) (NetworkModel_Composition_Theory.get_ACS (get_spec M))).
+      from this a show "\<forall> (m_impl, m_spec) \<in> set (zip (get_ACS (get_impl M)) (TopoS_Composition_Theory.get_ACS (get_spec M))).
         NetworkSecurityModel_complies_formal_def m_impl m_spec"
         apply(simp add: get_IFS_def get_ACS_def
-          NetworkModel_Composition_Theory.get_IFS_def NetworkModel_Composition_Theory.get_ACS_def) by fast
+          TopoS_Composition_Theory.get_IFS_def TopoS_Composition_Theory.get_ACS_def) by fast
      qed
 
 
 
    lemma get_IFS_get_ACS_select_simps:
     assumes a1: "\<forall> (m_impl, m_spec) \<in> set M. NetworkSecurityModel_complies_formal_def m_impl m_spec"
-    shows "\<forall> (m_impl, m_spec) \<in> set (zip (get_IFS (get_impl M)) (NetworkModel_Composition_Theory.get_IFS (get_spec M))). NetworkSecurityModel_complies_formal_def m_impl m_spec" (is "\<forall> (m_impl, m_spec) \<in> set ?zippedIFS. NetworkSecurityModel_complies_formal_def m_impl m_spec")
-    and   "(get_impl (zip (Impl_List_Composition.get_IFS (get_impl M)) (NetworkModel_Composition_Theory.get_IFS (get_spec M)))) = Impl_List_Composition.get_IFS (get_impl M)"
-    and   "(get_spec (zip (Impl_List_Composition.get_IFS (get_impl M)) (NetworkModel_Composition_Theory.get_IFS (get_spec M)))) = NetworkModel_Composition_Theory.get_IFS (get_spec M)"
-    and   "\<forall> (m_impl, m_spec) \<in> set (zip (get_ACS (get_impl M)) (NetworkModel_Composition_Theory.get_ACS (get_spec M))). NetworkSecurityModel_complies_formal_def m_impl m_spec" (is "\<forall> (m_impl, m_spec) \<in> set ?zippedACS. NetworkSecurityModel_complies_formal_def m_impl m_spec")
-    and   "(get_impl (zip (Impl_List_Composition.get_ACS (get_impl M)) (NetworkModel_Composition_Theory.get_ACS (get_spec M)))) = Impl_List_Composition.get_ACS (get_impl M)"
-    and   "(get_spec (zip (Impl_List_Composition.get_ACS (get_impl M)) (NetworkModel_Composition_Theory.get_ACS (get_spec M)))) = NetworkModel_Composition_Theory.get_ACS (get_spec M)"
+    shows "\<forall> (m_impl, m_spec) \<in> set (zip (get_IFS (get_impl M)) (TopoS_Composition_Theory.get_IFS (get_spec M))). NetworkSecurityModel_complies_formal_def m_impl m_spec" (is "\<forall> (m_impl, m_spec) \<in> set ?zippedIFS. NetworkSecurityModel_complies_formal_def m_impl m_spec")
+    and   "(get_impl (zip (Impl_List_Composition.get_IFS (get_impl M)) (TopoS_Composition_Theory.get_IFS (get_spec M)))) = Impl_List_Composition.get_IFS (get_impl M)"
+    and   "(get_spec (zip (Impl_List_Composition.get_IFS (get_impl M)) (TopoS_Composition_Theory.get_IFS (get_spec M)))) = TopoS_Composition_Theory.get_IFS (get_spec M)"
+    and   "\<forall> (m_impl, m_spec) \<in> set (zip (get_ACS (get_impl M)) (TopoS_Composition_Theory.get_ACS (get_spec M))). NetworkSecurityModel_complies_formal_def m_impl m_spec" (is "\<forall> (m_impl, m_spec) \<in> set ?zippedACS. NetworkSecurityModel_complies_formal_def m_impl m_spec")
+    and   "(get_impl (zip (Impl_List_Composition.get_ACS (get_impl M)) (TopoS_Composition_Theory.get_ACS (get_spec M)))) = Impl_List_Composition.get_ACS (get_impl M)"
+    and   "(get_spec (zip (Impl_List_Composition.get_ACS (get_impl M)) (TopoS_Composition_Theory.get_ACS (get_spec M)))) = TopoS_Composition_Theory.get_ACS (get_spec M)"
     proof -
         from get_IFS_get_ACS_complies(1)[OF a1]
         show "\<forall> (m_impl, m_spec) \<in> set (?zippedIFS). NetworkSecurityModel_complies_formal_def m_impl m_spec" by simp
       next
         from a1 show "(get_impl ?zippedIFS) = Impl_List_Composition.get_IFS (get_impl M)"
-          apply(simp add: Impl_List_Composition.get_IFS_def get_spec_def get_impl_def NetworkModel_Composition_Theory.get_IFS_def)
+          apply(simp add: Impl_List_Composition.get_IFS_def get_spec_def get_impl_def TopoS_Composition_Theory.get_IFS_def)
           apply(induction M)
           apply(simp)
           apply(simp)
@@ -207,8 +207,8 @@ section{*Accessors*}
           using NetworkSecurityModel_complies_formal_def_def apply (auto)[1]
           done
       next
-        from a1 show "(get_spec ?zippedIFS) = NetworkModel_Composition_Theory.get_IFS (get_spec M)"
-          apply(simp add: Impl_List_Composition.get_IFS_def get_spec_def get_impl_def NetworkModel_Composition_Theory.get_IFS_def)
+        from a1 show "(get_spec ?zippedIFS) = TopoS_Composition_Theory.get_IFS (get_spec M)"
+          apply(simp add: Impl_List_Composition.get_IFS_def get_spec_def get_impl_def TopoS_Composition_Theory.get_IFS_def)
           apply(induction M)
           apply(simp)
           apply(simp)
@@ -223,7 +223,7 @@ section{*Accessors*}
         show "\<forall> (m_impl, m_spec) \<in> set (?zippedACS). NetworkSecurityModel_complies_formal_def m_impl m_spec" by simp
       next
         from a1 show "(get_impl ?zippedACS) = Impl_List_Composition.get_ACS (get_impl M)"
-          apply(simp add: Impl_List_Composition.get_ACS_def get_spec_def get_impl_def NetworkModel_Composition_Theory.get_ACS_def)
+          apply(simp add: Impl_List_Composition.get_ACS_def get_spec_def get_impl_def TopoS_Composition_Theory.get_ACS_def)
           apply(induction M)
           apply(simp)
           apply(simp)
@@ -234,8 +234,8 @@ section{*Accessors*}
           using NetworkSecurityModel_complies_formal_def_def apply (auto)[1]
           done
       next
-        from a1 show "(get_spec ?zippedACS) = NetworkModel_Composition_Theory.get_ACS (get_spec M)"
-          apply(simp add: Impl_List_Composition.get_ACS_def get_spec_def get_impl_def NetworkModel_Composition_Theory.get_ACS_def)
+        from a1 show "(get_spec ?zippedACS) = TopoS_Composition_Theory.get_ACS (get_spec M)"
+          apply(simp add: Impl_List_Composition.get_ACS_def get_spec_def get_impl_def TopoS_Composition_Theory.get_ACS_def)
           apply(induction M)
           apply(simp)
           apply(simp)
@@ -256,8 +256,8 @@ section{*All security requirements fulfilled*}
   lemma all_security_requirements_fulfilled_complies:
     "\<lbrakk> \<forall> (m_impl, m_spec) \<in> set M. NetworkSecurityModel_complies_formal_def m_impl m_spec; 
        valid_list_graph (G::('v::vertex) list_graph) \<rbrakk> \<Longrightarrow>
-    all_security_requirements_fulfilled (get_impl M) G <-> NetworkModel_Composition_Theory.all_security_requirements_fulfilled (get_spec M) (list_graph_to_graph G)"
-    apply(simp add: all_security_requirements_fulfilled_def NetworkModel_Composition_Theory.all_security_requirements_fulfilled_def)
+    all_security_requirements_fulfilled (get_impl M) G <-> TopoS_Composition_Theory.all_security_requirements_fulfilled (get_spec M) (list_graph_to_graph G)"
+    apply(simp add: all_security_requirements_fulfilled_def TopoS_Composition_Theory.all_security_requirements_fulfilled_def)
     apply(simp add: get_impl_def get_spec_def)
     using NetworkSecurityModel_complies_formal_def_def by fastforce
 
@@ -272,7 +272,7 @@ section{*generate valid topology*}
     "\<lbrakk> \<forall> (m_impl, m_spec) \<in> set M. NetworkSecurityModel_complies_formal_def m_impl m_spec;
        valid_list_graph (G::('v::vertex) list_graph) \<rbrakk> \<Longrightarrow> 
        list_graph_to_graph (generate_valid_topology (get_impl M) G) = 
-       NetworkModel_Composition_Theory.generate_valid_topology (get_spec M) (list_graph_to_graph G)"
+       TopoS_Composition_Theory.generate_valid_topology (get_spec M) (list_graph_to_graph G)"
     apply(subst generate_valid_topology_def_alt)
     apply(drule(1) implc_get_offending_flows_complies)
     apply(simp)

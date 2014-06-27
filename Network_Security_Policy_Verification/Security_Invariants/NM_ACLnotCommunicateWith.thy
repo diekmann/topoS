@@ -1,5 +1,5 @@
 theory NM_ACLnotCommunicateWith
-imports "../NetworkModel_Helper"
+imports "../TopoS_Helper"
 begin
 
 section {* NetworkModel *}
@@ -21,8 +21,8 @@ definition target_focus :: "bool" where
   "target_focus \<equiv> False"
 
 
-lemma eval_model_mono: "NetworkModel_withOffendingFlows.eval_model_mono eval_model"
-  apply(simp only: NetworkModel_withOffendingFlows.eval_model_mono_def)
+lemma eval_model_mono: "TopoS_withOffendingFlows.eval_model_mono eval_model"
+  apply(simp only: TopoS_withOffendingFlows.eval_model_mono_def)
   apply(rule)+
   apply(clarify)
   proof -
@@ -44,18 +44,18 @@ lemma False_set: "{(e1, e2). False} = {}" by blast
 lemma succ_tran_empty: "(succ_tran \<lparr>nodes = nodes G, edges = {}\<rparr> v) = {}"
   by(simp add: succ_tran_def)
 
-interpretation NetworkModel_preliminaries
+interpretation TopoS_preliminaries
 where eval_model = eval_model
 and verify_globals = verify_globals
   apply unfold_locales
     apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
     apply(erule_tac exE)
     apply(rename_tac list_edges)
-    apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+    apply(rule_tac ff="list_edges" in TopoS_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
         apply(auto)[5]
-    apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops False_set succ_tran_empty)[1]
-   apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
-  apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
+    apply(auto simp add: TopoS_withOffendingFlows.is_offending_flows_def graph_ops False_set succ_tran_empty)[1]
+   apply(fact TopoS_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
+  apply(fact TopoS_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
  done
 
 
@@ -63,7 +63,7 @@ lemma unique_default_example: "succ_tran \<lparr>nodes = {vertex_1, vertex_2}, e
 apply (simp add: succ_tran_def)
 by (metis Domain.DomainI Domain_empty Domain_insert distince_vertices12 singleton_iff trancl_domain)
 
-interpretation ACLnotCommunicateWith: NetworkModel_ACS
+interpretation ACLnotCommunicateWith: TopoS_ACS
 where default_node_properties = NM_ACLnotCommunicateWith.default_node_properties
 and eval_model = NM_ACLnotCommunicateWith.eval_model
 and verify_globals = verify_globals
@@ -71,15 +71,15 @@ and verify_globals = verify_globals
   apply unfold_locales
  
    apply simp
-   apply(subst(asm) NetworkModel_withOffendingFlows.set_offending_flows_simp, simp)
+   apply(subst(asm) TopoS_withOffendingFlows.set_offending_flows_simp, simp)
    apply(clarsimp)
    apply (metis)
 
   apply(erule default_uniqueness_by_counterexample_ACS)
   apply(simp)
-  apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
-      NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
-      NetworkModel_withOffendingFlows.is_offending_flows_def)
+  apply (simp add: TopoS_withOffendingFlows.set_offending_flows_def
+      TopoS_withOffendingFlows.is_offending_flows_min_set_def
+      TopoS_withOffendingFlows.is_offending_flows_def)
   apply (simp add:graph_ops)
   apply (simp split: split_split_asm split_split add:prod_case_beta)
   apply(case_tac "otherbot = {}")
@@ -116,7 +116,7 @@ and verify_globals = verify_globals
   apply(simp add: example_simps)
  done
 
-  lemma NetworkModel_ACLnotCommunicateWith: "NetworkModel eval_model default_node_properties target_focus"
+  lemma TopoS_ACLnotCommunicateWith: "NetworkModel eval_model default_node_properties target_focus"
   unfolding target_focus_def by unfold_locales  
 
 hide_const (open) eval_model verify_globals target_focus default_node_properties

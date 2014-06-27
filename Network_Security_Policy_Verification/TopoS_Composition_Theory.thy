@@ -1,5 +1,5 @@
-theory NetworkModel_Composition_Theory
-imports NetworkModel_Interface NetworkModel_Helper
+theory TopoS_Composition_Theory
+imports TopoS_Interface TopoS_Helper
 begin
 
 (*theory, do not load together with library list impl*)
@@ -20,7 +20,7 @@ section {* we need in instatiated model, i.e. get rid of 'a 'b*}
         if NetworkModel eval_model defbot target_focus then 
           Some \<lparr> 
             c_eval_model = (\<lambda>G. eval_model G nP),
-            c_offending_flows = (\<lambda>G. NetworkModel_withOffendingFlows.set_offending_flows eval_model G nP),
+            c_offending_flows = (\<lambda>G. TopoS_withOffendingFlows.set_offending_flows eval_model G nP),
             c_isIFS = target_focus
           \<rparr>
         else None
@@ -28,15 +28,15 @@ section {* we need in instatiated model, i.e. get rid of 'a 'b*}
 
    declare new_configured_NetworkSecurityModel.simps[simp del]
 
-   lemma new_configured_NetworkModel_eval_model_correct:
+   lemma new_configured_TopoS_eval_model_correct:
    "NetworkModel eval_model defbot target_focus \<Longrightarrow> 
    c_eval_model (the (new_configured_NetworkSecurityModel (eval_model, defbot, target_focus, nP))) = (\<lambda>G. eval_model G nP)"
    by(simp add: Let_def new_configured_NetworkSecurityModel.simps)
 
-   lemma new_configured_NetworkModel_offending_flows_correct:
+   lemma new_configured_TopoS_offending_flows_correct:
    "NetworkModel eval_model defbot target_focus \<Longrightarrow> 
    c_offending_flows (the (new_configured_NetworkSecurityModel (eval_model, defbot, target_focus, nP))) = 
-   (\<lambda>G. NetworkModel_withOffendingFlows.set_offending_flows eval_model G nP)"
+   (\<lambda>G. TopoS_withOffendingFlows.set_offending_flows eval_model G nP)"
    by(simp add: Let_def new_configured_NetworkSecurityModel.simps)
 
 
@@ -60,8 +60,8 @@ locale configured_NetworkModel =
   begin
     (*compatibility with other definitions*)
     lemma eval_model_monoI: 
-    "NetworkModel_withOffendingFlows.eval_model_mono (\<lambda> (G::('v::vertex) graph) (nP::'v \<Rightarrow> 'a). c_eval_model m G)"
-      apply(simp add: NetworkModel_withOffendingFlows.eval_model_mono_def, clarify)
+    "TopoS_withOffendingFlows.eval_model_mono (\<lambda> (G::('v::vertex) graph) (nP::'v \<Rightarrow> 'a). c_eval_model m G)"
+      apply(simp add: TopoS_withOffendingFlows.eval_model_mono_def, clarify)
       by(fact mono_eval_model)
 
     text{* if the network where nobody communicates with anyone fulfilles its security requirement,
@@ -72,39 +72,39 @@ locale configured_NetworkModel =
         assume a1: "valid_graph G"
         and    a2: "\<not> c_eval_model m G"
         have subst_set_offending_flows: 
-        "\<And>nP. NetworkModel_withOffendingFlows.set_offending_flows (\<lambda>G nP. c_eval_model m G) G nP = c_offending_flows m G"
+        "\<And>nP. TopoS_withOffendingFlows.set_offending_flows (\<lambda>G nP. c_eval_model m G) G nP = c_offending_flows m G"
         by(simp add: valid_c_offending_flows fun_eq_iff 
-            NetworkModel_withOffendingFlows.set_offending_flows_def
-            NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
-            NetworkModel_withOffendingFlows.is_offending_flows_def)
+            TopoS_withOffendingFlows.set_offending_flows_def
+            TopoS_withOffendingFlows.is_offending_flows_min_set_def
+            TopoS_withOffendingFlows.is_offending_flows_def)
 
         from a1 have validG_empty: "valid_graph \<lparr>nodes = nodes G, edges = {}\<rparr>" by(simp add:valid_graph_def)
 
-        from a1 have "\<And>nP. \<not> c_eval_model m G \<Longrightarrow> NetworkModel_withOffendingFlows.set_offending_flows (\<lambda>G nP. c_eval_model m G) G nP \<noteq> {}"
+        from a1 have "\<And>nP. \<not> c_eval_model m G \<Longrightarrow> TopoS_withOffendingFlows.set_offending_flows (\<lambda>G nP. c_eval_model m G) G nP \<noteq> {}"
           apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
           apply(erule_tac exE)
           apply(rename_tac list_edges)
-          apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_monoI])
-          by(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def delete_edges_simp2 defined_offending[OF validG_empty])
+          apply(rule_tac ff="list_edges" in TopoS_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_monoI])
+          by(auto simp add: TopoS_withOffendingFlows.is_offending_flows_def delete_edges_simp2 defined_offending[OF validG_empty])
       
           thus ?thesis by(simp add: a2 subst_set_offending_flows)
     qed
 
     (* The offending flows definitions are equal, compatibility *)
-    lemma subst_offending_flows: "\<And> nP. NetworkModel_withOffendingFlows.set_offending_flows (\<lambda>G nP. c_eval_model m G) G nP = c_offending_flows m G"
-      apply (unfold NetworkModel_withOffendingFlows.set_offending_flows_def
-            NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
-            NetworkModel_withOffendingFlows.is_offending_flows_def)
+    lemma subst_offending_flows: "\<And> nP. TopoS_withOffendingFlows.set_offending_flows (\<lambda>G nP. c_eval_model m G) G nP = c_offending_flows m G"
+      apply (unfold TopoS_withOffendingFlows.set_offending_flows_def
+            TopoS_withOffendingFlows.is_offending_flows_min_set_def
+            TopoS_withOffendingFlows.is_offending_flows_def)
       by(simp add: valid_c_offending_flows)
 
-    text{* all the @{term NetworkModel_preliminaries} stuff must hold, for an arbitrary nP *}
-    lemma NetworkModel_preliminariesD:
-      "NetworkModel_preliminaries (\<lambda> (G::('v::vertex) graph) (nP::'v \<Rightarrow> 'a). c_eval_model m G)"
+    text{* all the @{term TopoS_preliminaries} stuff must hold, for an arbitrary nP *}
+    lemma TopoS_preliminariesD:
+      "TopoS_preliminaries (\<lambda> (G::('v::vertex) graph) (nP::'v \<Rightarrow> 'a). c_eval_model m G)"
       apply(unfold_locales)
         apply(simp add: subst_offending_flows)
         apply(fact defined_offending')
        apply(fact mono_eval_model)
-      apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_monoI])
+      apply(fact TopoS_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_monoI])
       done
 
     lemma negative_mono:
@@ -117,27 +117,27 @@ locale configured_NetworkModel =
     
     section{*reusing old lemmata*}
       lemmas mono_extend_set_offending_flows =
-      NetworkModel_preliminaries.mono_extend_set_offending_flows[OF NetworkModel_preliminariesD, simplified subst_offending_flows]
+      TopoS_preliminaries.mono_extend_set_offending_flows[OF TopoS_preliminariesD, simplified subst_offending_flows]
       thm mono_extend_set_offending_flows
 
       lemmas offending_flows_union_mono =
-      NetworkModel_preliminaries.offending_flows_union_mono[OF NetworkModel_preliminariesD, simplified subst_offending_flows]
+      TopoS_preliminaries.offending_flows_union_mono[OF TopoS_preliminariesD, simplified subst_offending_flows]
       thm offending_flows_union_mono
 
       lemmas eval_model_valid_remove_flattened_offending_flows =
-      NetworkModel_preliminaries.eval_model_valid_remove_flattened_offending_flows[OF NetworkModel_preliminariesD, simplified subst_offending_flows]
+      TopoS_preliminaries.eval_model_valid_remove_flattened_offending_flows[OF TopoS_preliminariesD, simplified subst_offending_flows]
       thm eval_model_valid_remove_flattened_offending_flows
 
       lemmas empty_offending_contra =
-      NetworkModel_withOffendingFlows.empty_offending_contra[where eval_model="(\<lambda>G nP. c_eval_model m G)", simplified subst_offending_flows]
+      TopoS_withOffendingFlows.empty_offending_contra[where eval_model="(\<lambda>G nP. c_eval_model m G)", simplified subst_offending_flows]
       thm empty_offending_contra
 
       lemmas Un_set_offending_flows_bound_minus_subseteq = 
-      NetworkModel_preliminaries.Un_set_offending_flows_bound_minus_subseteq[OF NetworkModel_preliminariesD, simplified subst_offending_flows]
+      TopoS_preliminaries.Un_set_offending_flows_bound_minus_subseteq[OF TopoS_preliminariesD, simplified subst_offending_flows]
       thm Un_set_offending_flows_bound_minus_subseteq
 
       lemmas Un_set_offending_flows_bound_minus_subseteq' = 
-      NetworkModel_preliminaries.Un_set_offending_flows_bound_minus_subseteq'[OF NetworkModel_preliminariesD, simplified subst_offending_flows]
+      TopoS_preliminaries.Un_set_offending_flows_bound_minus_subseteq'[OF TopoS_preliminariesD, simplified subst_offending_flows]
       thm Un_set_offending_flows_bound_minus_subseteq'
 end
   
@@ -161,26 +161,26 @@ text{*
       assume a: "new_configured_NetworkSecurityModel (eval_model, defbot, target_focus, nP) = Some m"
       hence NetModel: "NetworkModel eval_model defbot target_focus"
         by(simp add: new_configured_NetworkSecurityModel.simps split: split_if_asm)
-      hence NetModel_p: "NetworkModel_preliminaries eval_model" by(simp add: NetworkModel_def)
+      hence NetModel_p: "TopoS_preliminaries eval_model" by(simp add: NetworkModel_def)
 
       from a have c_eval: "c_eval_model m = (\<lambda>G. eval_model G nP)"
-         and c_offending: "c_offending_flows m = (\<lambda>G. NetworkModel_withOffendingFlows.set_offending_flows eval_model G nP)"
+         and c_offending: "c_offending_flows m = (\<lambda>G. TopoS_withOffendingFlows.set_offending_flows eval_model G nP)"
          and "c_isIFS m = target_focus"
         by(auto simp add: new_configured_NetworkSecurityModel.simps NetModel split: split_if_asm)
 
-      have monoI: "NetworkModel_withOffendingFlows.eval_model_mono eval_model"
-        apply(simp add: NetworkModel_withOffendingFlows.eval_model_mono_def, clarify)
-        by(fact NetworkModel_preliminaries.mono_eval_model[OF NetModel_p])
-      from NetworkModel_withOffendingFlows.valid_empty_edges_iff_exists_offending_flows[OF monoI, symmetric]
-            NetworkModel_preliminaries.defined_offending[OF NetModel_p]
+      have monoI: "TopoS_withOffendingFlows.eval_model_mono eval_model"
+        apply(simp add: TopoS_withOffendingFlows.eval_model_mono_def, clarify)
+        by(fact TopoS_preliminaries.mono_eval_model[OF NetModel_p])
+      from TopoS_withOffendingFlows.valid_empty_edges_iff_exists_offending_flows[OF monoI, symmetric]
+            TopoS_preliminaries.defined_offending[OF NetModel_p]
       have eval_empty_graph: "\<And> N nP. valid_graph \<lparr>nodes = N, edges = {}\<rparr> \<Longrightarrow> eval_model \<lparr>nodes = N, edges = {}\<rparr> nP"
       by fastforce
 
        show ?thesis
         apply(unfold_locales)
-          apply(simp add: c_eval c_offending NetworkModel_withOffendingFlows.set_offending_flows_def NetworkModel_withOffendingFlows.is_offending_flows_min_set_def NetworkModel_withOffendingFlows.is_offending_flows_def)
+          apply(simp add: c_eval c_offending TopoS_withOffendingFlows.set_offending_flows_def TopoS_withOffendingFlows.is_offending_flows_min_set_def TopoS_withOffendingFlows.is_offending_flows_def)
          apply(simp add: c_eval eval_empty_graph)
-        apply(simp add: c_eval,drule(3) NetworkModel_preliminaries.mono_eval_model[OF NetModel_p])
+        apply(simp add: c_eval,drule(3) TopoS_preliminaries.mono_eval_model[OF NetModel_p])
         done
    qed
 

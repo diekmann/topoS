@@ -1,5 +1,5 @@
 theory Impl_List_Interface
-imports NetworkModel_Library Impl_List_Composition
+imports TopoS_Library Impl_List_Composition
     "Lib/ML_GraphViz"
     Impl_List_StatefulPolicy
 begin
@@ -100,7 +100,7 @@ fun partition_by_biflows (ctx: Proof.context) (thy: theory) (t: term) : (term * 
 
 local
   fun get_tune_node_format (edges: term) : term -> string -> string =
-    if (fastype_of edges) = @{typ "(NetworkModel_Vertices.vString \<times> NetworkModel_Vertices.vString) list"}
+    if (fastype_of edges) = @{typ "(TopoS_Vertices.vString \<times> TopoS_Vertices.vString) list"}
     then
       tune_Vstring_format
     else
@@ -162,7 +162,7 @@ in
   val _ = Pretty.writeln (Syntax.pretty_term (Config.put show_types true @{context}) uniflows);
 end;
 
-val t = fastype_of @{term "[(NetworkModel_Vertices.V ''x'', 2::nat)]"}
+val t = fastype_of @{term "[(TopoS_Vertices.V ''x'', 2::nat)]"}
 
 (*
 visualize_edges @{context} @{theory} @{term "[(1::int, 1::int), (1,2), (2, 1), (1,3)]"} []; *)

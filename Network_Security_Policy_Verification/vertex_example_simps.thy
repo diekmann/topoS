@@ -1,5 +1,5 @@
 theory vertex_example_simps
-imports "Lib/FiniteGraph" NetworkModel_Vertices
+imports "Lib/FiniteGraph" TopoS_Vertices
 begin
 
 --{*The follwoing lemmata are used in the @{text "\<exists>"}-style uniqueness proof*}

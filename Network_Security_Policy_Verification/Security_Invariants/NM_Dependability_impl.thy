@@ -1,5 +1,5 @@
 theory NM_Dependability_impl
-imports NM_Dependability "../NetworkModel_Lists_Impl_Interface"
+imports NM_Dependability "../TopoS_Lists_Impl_Interface"
 begin
 
 
@@ -70,7 +70,7 @@ done
 
 
 
-interpretation Dependability_impl:NetworkModel_List_Impl 
+interpretation Dependability_impl:TopoS_List_Impl 
   where default_node_properties=NM_Dependability.default_node_properties
   and eval_model_spec=NM_Dependability.eval_model
   and eval_model_impl=eval_model
@@ -80,10 +80,10 @@ interpretation Dependability_impl:NetworkModel_List_Impl
   and offending_flows_impl=Dependability_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=Dependability_eval
- apply(unfold NetworkModel_List_Impl_def)
+ apply(unfold TopoS_List_Impl_def)
  apply(rule conjI)
   apply(rule conjI)
-   apply(simp add: NetworkModel_Dependability)
+   apply(simp add: TopoS_Dependability)
   apply(rule conjI)
    apply(intro allI impI)
    apply(fact eval_model_correct)
@@ -101,13 +101,13 @@ interpretation Dependability_impl:NetworkModel_List_Impl
   apply(metis Dependability.node_props.simps Dependability.node_props_eq_node_props_formaldef)
  apply(simp only: Dependability_eval_def)
  apply(intro allI impI)
- apply(rule NetworkModel_eval_impl_proofrule[OF NetworkModel_Dependability])
+ apply(rule TopoS_eval_impl_proofrule[OF TopoS_Dependability])
   apply(simp only: eval_model_correct)
  apply(simp)
 done
 
 section {* Dependability packing *}
-  definition NM_LIB_Dependability :: "('v::vertex, NM_Dependability.dependability_level, unit) NetworkModel_packed" where
+  definition NM_LIB_Dependability :: "('v::vertex, NM_Dependability.dependability_level, unit) TopoS_packed" where
     "NM_LIB_Dependability \<equiv> 
     \<lparr> nm_name = ''Dependability'', 
       nm_target_focus = NM_Dependability.target_focus,
@@ -118,9 +118,9 @@ section {* Dependability packing *}
       nm_node_props = NetModel_node_props,
       nm_eval = Dependability_eval
       \<rparr>"
-  interpretation NM_LIB_Dependability_interpretation: NetworkModel_modelLibrary NM_LIB_Dependability
+  interpretation NM_LIB_Dependability_interpretation: TopoS_modelLibrary NM_LIB_Dependability
       NM_Dependability.eval_model NM_Dependability.verify_globals
-    apply(unfold NetworkModel_modelLibrary_def NM_LIB_Dependability_def)
+    apply(unfold TopoS_modelLibrary_def NM_LIB_Dependability_def)
     apply(rule conjI)
      apply(simp)
     apply(simp)

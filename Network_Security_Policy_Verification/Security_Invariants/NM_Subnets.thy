@@ -1,5 +1,5 @@
 theory NM_Subnets
-imports"../NetworkModel_Helper"
+imports"../TopoS_Helper"
 begin
 
 section {* NetworkModel Subnets *}
@@ -31,22 +31,22 @@ definition target_focus :: "bool" where "target_focus = False"
 
 
 subsubsection {*Preleminaries*}
-  lemma eval_model_mono: "NetworkModel_withOffendingFlows.eval_model_mono eval_model"
-    apply(simp only: NetworkModel_withOffendingFlows.eval_model_mono_def)
+  lemma eval_model_mono: "TopoS_withOffendingFlows.eval_model_mono eval_model"
+    apply(simp only: TopoS_withOffendingFlows.eval_model_mono_def)
     apply(clarify)
     by auto
   
-  interpretation NetworkModel_preliminaries
+  interpretation TopoS_preliminaries
   where eval_model = eval_model
   and verify_globals = verify_globals
     apply unfold_locales
     apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
     apply(erule_tac exE)
     apply(rename_tac list_edges)
-    apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+    apply(rule_tac ff="list_edges" in TopoS_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
     apply(auto)[6]
-    apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops)[1]
-    apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
+    apply(auto simp add: TopoS_withOffendingFlows.is_offending_flows_def graph_ops)[1]
+    apply(fact TopoS_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
   done
 
 
@@ -65,11 +65,11 @@ section{*ENF*}
     by(simp add: All_to_Unassigned)
   lemma allowed_subnet_flow_refl: "\<forall> e. allowed_subnet_flow e e"
     by(rule allI, case_tac e, simp_all)
-  lemma Subnets_ENF: "NetworkModel_withOffendingFlows.eval_model_all_edges_normal_form eval_model allowed_subnet_flow"
-    unfolding NetworkModel_withOffendingFlows.eval_model_all_edges_normal_form_def
+  lemma Subnets_ENF: "TopoS_withOffendingFlows.eval_model_all_edges_normal_form eval_model allowed_subnet_flow"
+    unfolding TopoS_withOffendingFlows.eval_model_all_edges_normal_form_def
     by simp
-  lemma Subnets_ENF_refl: "NetworkModel_withOffendingFlows.ENF_refl eval_model allowed_subnet_flow"
-    unfolding NetworkModel_withOffendingFlows.ENF_refl_def
+  lemma Subnets_ENF_refl: "TopoS_withOffendingFlows.ENF_refl eval_model allowed_subnet_flow"
+    unfolding TopoS_withOffendingFlows.ENF_refl_def
     apply(rule conjI)
      apply(simp add: Subnets_ENF)
      apply(simp add: allowed_subnet_flow_refl)
@@ -82,7 +82,7 @@ section{*ENF*}
      else 
       { {e \<in> edges G. case e of (e1,e2) \<Rightarrow> \<not> allowed_subnet_flow (nP e1) (nP e2)} })"
   lemma Subnets_offending_set: 
-  "NetworkModel_withOffendingFlows.set_offending_flows eval_model = Subnets_offending_set"
+  "TopoS_withOffendingFlows.set_offending_flows eval_model = Subnets_offending_set"
     apply(simp only: fun_eq_iff ENF_offending_set[OF Subnets_ENF] Subnets_offending_set_def)
     apply(rule allI)+
     apply(rename_tac G nP)
@@ -90,20 +90,20 @@ section{*ENF*}
   done
 
 
-interpretation Subnets: NetworkModel_ACS
+interpretation Subnets: TopoS_ACS
 where default_node_properties = NM_Subnets.default_node_properties
 and eval_model = NM_Subnets.eval_model
 and verify_globals = verify_globals
-where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = Subnets_offending_set"
+where "TopoS_withOffendingFlows.set_offending_flows eval_model = Subnets_offending_set"
   unfolding NM_Subnets.default_node_properties_def
   apply unfold_locales
     apply(rule ballI)
-    apply (rule NetworkModel_withOffendingFlows.ENF_fsts_refl_instance[OF Subnets_ENF_refl Unassigned_default_candidate])[1]
+    apply (rule TopoS_withOffendingFlows.ENF_fsts_refl_instance[OF Subnets_ENF_refl Unassigned_default_candidate])[1]
       apply(simp_all)[2]
    apply(erule default_uniqueness_by_counterexample_ACS)
-   apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
-      NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
-      NetworkModel_withOffendingFlows.is_offending_flows_def)
+   apply (simp add: TopoS_withOffendingFlows.set_offending_flows_def
+      TopoS_withOffendingFlows.is_offending_flows_min_set_def
+      TopoS_withOffendingFlows.is_offending_flows_def)
     apply (simp add:graph_ops)
     apply (simp split: split_split_asm split_split add:prod_case_beta)
     apply(rule_tac x="\<lparr> nodes={vertex_1,vertex_2}, edges = {(vertex_1,vertex_2)} \<rparr>" in exI, simp)
@@ -120,7 +120,7 @@ where "NetworkModel_withOffendingFlows.set_offending_flows eval_model = Subnets_
   done
 
 
-  lemma NetworkModel_Subnets: "NetworkModel eval_model default_node_properties target_focus"
+  lemma TopoS_Subnets: "NetworkModel eval_model default_node_properties target_focus"
   unfolding target_focus_def by unfold_locales
 
 subsection {* Analysis *}

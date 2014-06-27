@@ -1,5 +1,5 @@
 theory NM_NonInterference_impl
-imports NM_NonInterference "../NetworkModel_Lists_Impl_Interface"
+imports NM_NonInterference "../TopoS_Lists_Impl_Interface"
 begin
 
 
@@ -132,7 +132,7 @@ lemma eval_model_correct: "valid_list_graph G \<Longrightarrow> NM_NonInterferen
 
 
 
-interpretation NonInterference_impl:NetworkModel_List_Impl 
+interpretation NonInterference_impl:TopoS_List_Impl 
   where default_node_properties=NM_NonInterference.default_node_properties
   and eval_model_spec=NM_NonInterference.eval_model
   and eval_model_impl=eval_model
@@ -142,10 +142,10 @@ interpretation NonInterference_impl:NetworkModel_List_Impl
   and offending_flows_impl=NonInterference_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=NonInterference_eval
- apply(unfold NetworkModel_List_Impl_def)
+ apply(unfold TopoS_List_Impl_def)
  apply(rule conjI)
   apply(rule conjI)
-   apply(simp add: NetworkModel_NonInterference)
+   apply(simp add: TopoS_NonInterference)
   apply(rule conjI)
    apply(intro allI impI)
    apply(fact eval_model_correct)
@@ -163,13 +163,13 @@ interpretation NonInterference_impl:NetworkModel_List_Impl
   apply(metis NonInterference.node_props.simps NonInterference.node_props_eq_node_props_formaldef)
  apply(simp only: NonInterference_eval_def)
  apply(intro allI impI)
- apply(rule NetworkModel_eval_impl_proofrule[OF NetworkModel_NonInterference])
+ apply(rule TopoS_eval_impl_proofrule[OF TopoS_NonInterference])
   apply(simp only: eval_model_correct)
  apply(simp)
 done
 
 section {* NonInterference packing *}
-  definition NM_LIB_NonInterference :: "('v::vertex, node_config, unit) NetworkModel_packed" where
+  definition NM_LIB_NonInterference :: "('v::vertex, node_config, unit) TopoS_packed" where
     "NM_LIB_NonInterference \<equiv> 
     \<lparr> nm_name = ''NonInterference'', 
       nm_target_focus = NM_NonInterference.target_focus,
@@ -180,9 +180,9 @@ section {* NonInterference packing *}
       nm_node_props = NetModel_node_props,
       nm_eval = NonInterference_eval
       \<rparr>"
-  interpretation NM_LIB_NonInterference_interpretation: NetworkModel_modelLibrary NM_LIB_NonInterference
+  interpretation NM_LIB_NonInterference_interpretation: TopoS_modelLibrary NM_LIB_NonInterference
       NM_NonInterference.eval_model NM_NonInterference.verify_globals
-    apply(unfold NetworkModel_modelLibrary_def NM_LIB_NonInterference_def)
+    apply(unfold TopoS_modelLibrary_def NM_LIB_NonInterference_def)
     apply(rule conjI)
      apply(simp)
     apply(simp)

@@ -1,11 +1,11 @@
-theory NetworkModel_Lists_Impl_Interface
-imports "Lib/FiniteGraph" "Lib/FiniteListGraph" NetworkModel_Interface NetworkModel_Helper
+theory TopoS_Lists_Impl_Interface
+imports "Lib/FiniteGraph" "Lib/FiniteListGraph" TopoS_Interface TopoS_Helper
 begin
 
   section {*Correspondence List implementation and set Speficiation*}
   
   subsection{*Abstraction from list implementation to set specification*}
-  locale NetworkModel_List_Impl = 
+  locale TopoS_List_Impl = 
     fixes default_node_properties :: "'a" ("\<bottom>") 
     and eval_model_spec::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
     and eval_model_impl::"('v::vertex) list_graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
@@ -13,8 +13,8 @@ begin
     and verify_globals_impl::"('v::vertex) list_graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
     and target_focus :: "bool"
     and offending_flows_impl::"('v::vertex) list_graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> ('v \<times> 'v) list list"
-    and node_props_impl::"('v::vertex, 'a, 'b) NetworkModel_Params \<Rightarrow> ('v \<Rightarrow> 'a)"
-    and eval_impl::"('v::vertex) list_graph \<Rightarrow> ('v, 'a, 'b)NetworkModel_Params \<Rightarrow> bool"
+    and node_props_impl::"('v::vertex, 'a, 'b) TopoS_Params \<Rightarrow> ('v \<Rightarrow> 'a)"
+    and eval_impl::"('v::vertex) list_graph \<Rightarrow> ('v, 'a, 'b)TopoS_Params \<Rightarrow> bool"
     assumes
       spec: "NetworkModel eval_model_spec default_node_properties target_focus" --"specification is valid"
     and
@@ -25,7 +25,7 @@ begin
         (verify_globals_spec (list_graph_to_graph G) nP gP) = (verify_globals_impl G nP gP)"
     and
       offending_flows_spec_impl: "valid_list_graph G \<Longrightarrow> 
-      (NetworkModel_withOffendingFlows.set_offending_flows eval_model_spec (list_graph_to_graph G) nP) = 
+      (TopoS_withOffendingFlows.set_offending_flows eval_model_spec (list_graph_to_graph G) nP) = 
       set`set (offending_flows_impl G nP)"
     and 
       node_props_spec_impl: 
@@ -37,34 +37,34 @@ begin
      (eval_impl G P)"
     begin
     end
-    print_locale! NetworkModel_List_Impl
-    term NetworkModel_List_Impl
+    print_locale! TopoS_List_Impl
+    term TopoS_List_Impl
 
 
   text {* Models packed. *}
 
   section {* many network models together form a library *}
-  record ('v::vertex, 'a, 'b) NetworkModel_packed =
+  record ('v::vertex, 'a, 'b) TopoS_packed =
     nm_name :: "string"
     nm_target_focus :: "bool"
     nm_default :: "'a"
     nm_eval_model::"('v::vertex) list_graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> bool"
     nm_verify_globals::"('v::vertex) list_graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
     nm_offending_flows::"('v::vertex) list_graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> ('v \<times> 'v) list list"
-    nm_node_props::"('v::vertex, 'a, 'b) NetworkModel_Params \<Rightarrow> ('v \<Rightarrow> 'a)" 
-    nm_eval::"('v::vertex) list_graph \<Rightarrow> ('v, 'a, 'b)NetworkModel_Params \<Rightarrow> bool"
+    nm_node_props::"('v::vertex, 'a, 'b) TopoS_Params \<Rightarrow> ('v \<Rightarrow> 'a)" 
+    nm_eval::"('v::vertex) list_graph \<Rightarrow> ('v, 'a, 'b)TopoS_Params \<Rightarrow> bool"
     
 
 
    text{*This must be shown to prove that some packed model m complies with the formal definition!*}
-   locale NetworkModel_modelLibrary =
-    fixes m :: "('v::vertex, 'a, 'b) NetworkModel_packed" -- "concrete model implementation"
+   locale TopoS_modelLibrary =
+    fixes m :: "('v::vertex, 'a, 'b) TopoS_packed" -- "concrete model implementation"
     and eval_model_spec::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool" --"specification"
     and verify_globals_spec::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool" --"specification"
     assumes
        name_not_empty: "length (nm_name m) > 0"
      and
-       impl_spec: "NetworkModel_List_Impl 
+       impl_spec: "TopoS_List_Impl 
         (nm_default m)
         eval_model_spec
         (nm_eval_model m)
@@ -76,7 +76,7 @@ begin
         (nm_eval m)"
    begin
    end
-   print_locale! NetworkModel_modelLibrary
+   print_locale! TopoS_modelLibrary
 
 
 
@@ -89,7 +89,7 @@ subsection{*Helpfull lemmata*}
   by simp
   
   (*show that eval complies*)
-  lemma NetworkModel_eval_impl_proofrule: 
+  lemma TopoS_eval_impl_proofrule: 
     "\<lbrakk>NetworkModel eval_model_spec default_node_properties target_focus;
     (\<And> nP. valid_list_graph G \<Longrightarrow> eval_model_spec (list_graph_to_graph G) nP = eval_model_impl G nP); 
     (\<And> nP gP. valid_list_graph G \<Longrightarrow> verify_globals_spec (list_graph_to_graph G) nP gP = verify_globals_impl G nP gP) \<rbrakk> \<Longrightarrow>
@@ -145,11 +145,11 @@ section {*Helper lemmata*}
   lemma Generic_offending_list_correct: 
     "\<lbrakk> valid_list_graph G;
       \<forall> G nP. valid_list_graph G \<longrightarrow> (eval_model_spec (list_graph_to_graph G) nP) = (eval_model_impl G nP) \<rbrakk> \<Longrightarrow>
-    NetworkModel_withOffendingFlows.set_offending_flows eval_model_spec (list_graph_to_graph G) nP = 
+    TopoS_withOffendingFlows.set_offending_flows eval_model_spec (list_graph_to_graph G) nP = 
       set`set( Generic_offending_list eval_model_impl G nP )"
-  proof(unfold NetworkModel_withOffendingFlows.set_offending_flows_def 
-      NetworkModel_withOffendingFlows.is_offending_flows_min_set_def 
-      NetworkModel_withOffendingFlows.is_offending_flows_def
+  proof(unfold TopoS_withOffendingFlows.set_offending_flows_def 
+      TopoS_withOffendingFlows.is_offending_flows_min_set_def 
+      TopoS_withOffendingFlows.is_offending_flows_def
       Generic_offending_list_def)
     assume valid: "valid_list_graph G"
     and spec_impl: "\<forall>G nP. valid_list_graph G \<longrightarrow> eval_model_spec (list_graph_to_graph G) nP = eval_model_impl G nP"

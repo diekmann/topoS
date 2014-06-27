@@ -1,5 +1,5 @@
 theory NM_SecurityGateway_impl
-imports NM_SecurityGateway "../NetworkModel_Lists_Impl_Interface"
+imports NM_SecurityGateway "../TopoS_Lists_Impl_Interface"
 begin
 
 code_identifier code_module  NM_SecurityGateway_impl => (Scala) NM_SecurityGateway
@@ -32,7 +32,7 @@ definition "SecurityGateway_eval G P = (valid_list_graph G \<and>
   eval_model G (NetworkModel.node_props NM_SecurityGateway.default_node_properties P))"
 
 
-interpretation SecurityGateway_impl:NetworkModel_List_Impl 
+interpretation SecurityGateway_impl:TopoS_List_Impl 
   where default_node_properties=NM_SecurityGateway.default_node_properties
   and eval_model_spec=NM_SecurityGateway.eval_model
   and eval_model_impl=eval_model
@@ -49,7 +49,7 @@ apply(unfold_locales)
 apply(simp only: NetModel_node_props_def)
  apply(metis SecurityGateway.node_props.simps SecurityGateway.node_props_eq_node_props_formaldef)
 apply(simp only: SecurityGateway_eval_def)
-apply(rule_tac target_focus=NM_SecurityGateway.target_focus in NetworkModel_eval_impl_proofrule)
+apply(rule_tac target_focus=NM_SecurityGateway.target_focus in TopoS_eval_impl_proofrule)
  apply(unfold_locales) (*instance*)
 apply(simp_all add: list_graph_to_graph_def)
 done
@@ -57,7 +57,7 @@ done
 
 
 section {* SecurityGateway packing *}
-  definition NM_LIB_SecurityGateway :: "('v::vertex, secgw_member, unit) NetworkModel_packed" where
+  definition NM_LIB_SecurityGateway :: "('v::vertex, secgw_member, unit) TopoS_packed" where
     "NM_LIB_SecurityGateway \<equiv> 
     \<lparr> nm_name = ''SecurityGateway'', 
       nm_target_focus = NM_SecurityGateway.target_focus,
@@ -68,9 +68,9 @@ section {* SecurityGateway packing *}
       nm_node_props = NetModel_node_props,
       nm_eval = SecurityGateway_eval
       \<rparr>"
-  interpretation NM_LIB_SecurityGateway_interpretation: NetworkModel_modelLibrary NM_LIB_SecurityGateway 
+  interpretation NM_LIB_SecurityGateway_interpretation: TopoS_modelLibrary NM_LIB_SecurityGateway 
       NM_SecurityGateway.eval_model NM_SecurityGateway.verify_globals
-    apply(unfold NetworkModel_modelLibrary_def NM_LIB_SecurityGateway_def)
+    apply(unfold TopoS_modelLibrary_def NM_LIB_SecurityGateway_def)
     apply(rule conjI)
      apply(simp)
     apply(simp)

@@ -1,5 +1,5 @@
-theory NetworkModel_Interface
-imports Main "Lib/FiniteGraph" NetworkModel_Vertices NetworkModel_Util
+theory TopoS_Interface
+imports Main "Lib/FiniteGraph" TopoS_Vertices TopoS_Util
 begin
 
 
@@ -8,13 +8,13 @@ section {* NetworkModel definition: *}
   (* 'v is a graph's node type
      'a are the model specific node configuration options
      'b are additional configuration options for this model *)
-  record ('v::vertex, 'a, 'b) NetworkModel_Params =
+  record ('v::vertex, 'a, 'b) TopoS_Params =
     node_properties :: "'v::vertex \<Rightarrow> 'a option"
     model_global_properties :: "'b"
 
 
 text {* A NetworkModel where the offending flows (flows that invalidate the network graph) can be defined and calculated:*}  
-  locale NetworkModel_withOffendingFlows = 
+  locale TopoS_withOffendingFlows = 
     fixes eval_model::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool" (*Network Graph (V,E) => V to node_properties => bool*)
     fixes verify_globals::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool" (*Network Graph (V,E) => V to node_properties => model_global_properties => bool*)
    begin
@@ -72,24 +72,24 @@ text {* A NetworkModel where the offending flows (flows that invalidate the netw
 
 
 
-print_locale! NetworkModel_withOffendingFlows
+print_locale! TopoS_withOffendingFlows
 
 
 
 text {* The offending flows can be empty even for an invalid model!*}
-  lemma "NetworkModel_withOffendingFlows.set_offending_flows (\<lambda>_ _. False) 
+  lemma "TopoS_withOffendingFlows.set_offending_flows (\<lambda>_ _. False) 
     \<lparr> nodes = set [V ''v1''], edges=set [] \<rparr> id = set []"
-  by(simp add: NetworkModel_withOffendingFlows.set_offending_flows_def 
-    NetworkModel_withOffendingFlows.is_offending_flows_min_set_def NetworkModel_withOffendingFlows.is_offending_flows_def)
-  lemma "NetworkModel_withOffendingFlows.set_offending_flows (\<lambda>_ _. False) 
+  by(simp add: TopoS_withOffendingFlows.set_offending_flows_def 
+    TopoS_withOffendingFlows.is_offending_flows_min_set_def TopoS_withOffendingFlows.is_offending_flows_def)
+  lemma "TopoS_withOffendingFlows.set_offending_flows (\<lambda>_ _. False) 
     \<lparr> nodes = set [V ''v1'', V ''v2''], edges= set [(V ''v1'', V ''v2'')] \<rparr> id = set []"
-  by(simp add: NetworkModel_withOffendingFlows.set_offending_flows_def 
-    NetworkModel_withOffendingFlows.is_offending_flows_min_set_def NetworkModel_withOffendingFlows.is_offending_flows_def)
+  by(simp add: TopoS_withOffendingFlows.set_offending_flows_def 
+    TopoS_withOffendingFlows.is_offending_flows_min_set_def TopoS_withOffendingFlows.is_offending_flows_def)
 
 text {*There exists an @{term eval_model} such that the model is invalid and no offending flows exits.*}
-  lemma "\<exists>eval_model. \<not> eval_model G nP \<and> NetworkModel_withOffendingFlows.set_offending_flows eval_model G nP = {}"
-  apply(simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
-    NetworkModel_withOffendingFlows.is_offending_flows_min_set_def NetworkModel_withOffendingFlows.is_offending_flows_def)
+  lemma "\<exists>eval_model. \<not> eval_model G nP \<and> TopoS_withOffendingFlows.set_offending_flows eval_model G nP = {}"
+  apply(simp add: TopoS_withOffendingFlows.set_offending_flows_def
+    TopoS_withOffendingFlows.is_offending_flows_min_set_def TopoS_withOffendingFlows.is_offending_flows_def)
   apply(rule_tac x="(\<lambda>_ _. False)" in exI)
   apply(simp)
   done
@@ -98,7 +98,7 @@ text {*There exists an @{term eval_model} such that the model is invalid and no 
 text{*Thus, we introduce a usefullness property that prohibits such useless models.*}
 
   text{*Usefullness properties*}
-  locale NetworkModel_preliminaries = NetworkModel_withOffendingFlows eval_model verify_globals
+  locale TopoS_preliminaries = TopoS_withOffendingFlows eval_model verify_globals
     for eval_model::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
     and verify_globals::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
     +
@@ -116,19 +116,19 @@ text{*Thus, we introduce a usefullness property that prohibits such useless mode
   text {* TODO: add this to latex document *}
   (*
   For instance proofs:
-    Have a look at NetworkModel_withOffendingFlows_lemmata.thy
+    Have a look at TopoS_withOffendingFlows_lemmata.thy
     There is a definition of eval_model_mono. It impplies mono_eval_model and mono_offending
-    apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
-    apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
+    apply(fact TopoS_withOffendingFlows.eval_model_mono_imp_eval_model_mono[OF eval_model_mono])
+    apply(fact TopoS_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
   
-    In addition, NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono] gives a nice proof rule for
+    In addition, TopoS_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono] gives a nice proof rule for
     defined_offending
   
     Basically, eval_model_mono. implies almost all assumptions here and is equal to mono_eval_model.
   *)
 
   lemma offending_notevalD: "f \<in> set_offending_flows G nP \<Longrightarrow> \<not> eval_model G nP"
-    by (metis NetworkModel_withOffendingFlows.validmodel_imp_no_offending empty_iff)
+    by (metis TopoS_withOffendingFlows.validmodel_imp_no_offending empty_iff)
   end
 
 
@@ -139,7 +139,7 @@ text{*Thus, we introduce a usefullness property that prohibits such useless mode
           @{text "f = {(s,r) \<in> edges G. s=senders, r=receivers}"}, then @{text "fst ` f"}
           is the set of senders and @{text "snd ` f"} the set of receivers.*}
 
-  locale NetworkModel = NetworkModel_preliminaries eval_model verify_globals
+  locale NetworkModel = TopoS_preliminaries eval_model verify_globals
     for eval_model::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
     and verify_globals::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
     +
@@ -173,10 +173,10 @@ text{*Thus, we introduce a usefullness property that prohibits such useless mode
         (\<forall> (v\<^sub>1, v\<^sub>2) \<in> edges G. verify_globals (delete_edge v\<^sub>1 v\<^sub>2 G) nP gP)"*)
    begin
     -- "Removes option type, replaces with default node property"
-    fun node_props :: "('v, 'a, 'b) NetworkModel_Params \<Rightarrow> ('v \<Rightarrow> 'a)" where
+    fun node_props :: "('v, 'a, 'b) TopoS_Params \<Rightarrow> ('v \<Rightarrow> 'a)" where
     "node_props P = (\<lambda> i. (case (node_properties P) i of Some property \<Rightarrow> property | None \<Rightarrow> \<bottom>))"
 
-    definition node_props_formaldef :: "('v, 'a, 'b) NetworkModel_Params \<Rightarrow> ('v \<Rightarrow> 'a)" where
+    definition node_props_formaldef :: "('v, 'a, 'b) TopoS_Params \<Rightarrow> ('v \<Rightarrow> 'a)" where
     "node_props_formaldef P \<equiv>
     (\<lambda> i. (if i \<in> dom (node_properties P) then the (node_properties P i) else \<bottom>))"
 
@@ -186,7 +186,7 @@ text{*Thus, we introduce a usefullness property that prohibits such useless mode
      by (metis (lifting, mono_tags) domD domIff option.simps(4) option.simps(5) the.simps)
 
 
-    definition eval::"'v graph \<Rightarrow> ('v, 'a, 'b)NetworkModel_Params \<Rightarrow> bool" where
+    definition eval::"'v graph \<Rightarrow> ('v, 'a, 'b)TopoS_Params \<Rightarrow> bool" where
     "eval G P \<equiv> valid_graph G \<and> verify_globals G (node_props P) (model_global_properties P) \<and> 
           eval_model G (node_props P)"
 
@@ -244,7 +244,7 @@ We refine our definitions
 *}
 
 subsection {*Information flow security*}
-  locale NetworkModel_IFS = NetworkModel_preliminaries eval_model verify_globals
+  locale TopoS_IFS = TopoS_preliminaries eval_model verify_globals
       for eval_model::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
       and verify_globals::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
       +
@@ -265,11 +265,11 @@ subsection {*Information flow security*}
            (i \<in> snd` f \<and> eval_model G (nP(i := otherbot)))"
           apply(erule contrapos_pp)
           apply(simp)
-          using default_unique_IFS NetworkModel_withOffendingFlows.valid_without_offending_flows offending_notevalD
+          using default_unique_IFS TopoS_withOffendingFlows.valid_without_offending_flows offending_notevalD
           by metis
       end
   
-  sublocale NetworkModel_IFS \<subseteq> NetworkModel where target_focus=True
+  sublocale TopoS_IFS \<subseteq> NetworkModel where target_focus=True
   apply(unfold_locales)
    apply(simp add: default_secure_IFS)
   apply(simp only: HOL.simp_thms)
@@ -278,8 +278,8 @@ subsection {*Information flow security*}
   done
 
   (*other direction*)
-  locale NetworkModel_IFS_otherDirectrion = NetworkModel where target_focus=True
-  sublocale NetworkModel_IFS_otherDirectrion \<subseteq> NetworkModel_IFS
+  locale TopoS_IFS_otherDirectrion = NetworkModel where target_focus=True
+  sublocale TopoS_IFS_otherDirectrion \<subseteq> TopoS_IFS
   apply(unfold_locales)
    apply (metis default_secure offending_notevalD)
   apply(erule contrapos_pp)
@@ -291,10 +291,10 @@ subsection {*Information flow security*}
   
 
 lemma default_uniqueness_by_counterexample_IFS:
-  assumes "(\<forall>G F nP i. valid_graph G \<and> F \<in> NetworkModel_withOffendingFlows.set_offending_flows eval_model G nP \<and> i \<in> snd` F 
+  assumes "(\<forall>G F nP i. valid_graph G \<and> F \<in> TopoS_withOffendingFlows.set_offending_flows eval_model G nP \<and> i \<in> snd` F 
                 \<longrightarrow> \<not> eval_model G (nP(i := otherbot)))"
   and "otherbot \<noteq> default_value \<Longrightarrow>
-    \<exists>G nP i F. valid_graph G \<and> \<not> eval_model G nP \<and> F \<in> (NetworkModel_withOffendingFlows.set_offending_flows eval_model G nP) \<and>
+    \<exists>G nP i F. valid_graph G \<and> \<not> eval_model G nP \<and> F \<in> (TopoS_withOffendingFlows.set_offending_flows eval_model G nP) \<and>
        eval_model (delete_edges G F) nP \<and>
         i \<in> snd ` F \<and> eval_model G (nP(i := otherbot)) "
    shows "otherbot = default_value"
@@ -302,7 +302,7 @@ lemma default_uniqueness_by_counterexample_IFS:
 
 
 subsection {*Access Control Strategy*}
-  locale NetworkModel_ACS = NetworkModel_preliminaries eval_model verify_globals
+  locale TopoS_ACS = TopoS_preliminaries eval_model verify_globals
       for eval_model::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
       and verify_globals::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
       +
@@ -321,11 +321,11 @@ subsection {*Access Control Strategy*}
            (i \<in> fst` f \<and> eval_model G (nP(i := otherbot)))"
           apply(erule contrapos_pp)
           apply(simp)
-          using default_unique_ACS NetworkModel_withOffendingFlows.valid_without_offending_flows offending_notevalD
+          using default_unique_ACS TopoS_withOffendingFlows.valid_without_offending_flows offending_notevalD
           by metis
       end
   
-  sublocale NetworkModel_ACS \<subseteq> NetworkModel where target_focus=False
+  sublocale TopoS_ACS \<subseteq> NetworkModel where target_focus=False
   apply(unfold_locales)
    apply(simp add: default_secure_ACS)
   apply(simp only: HOL.simp_thms)
@@ -335,8 +335,8 @@ subsection {*Access Control Strategy*}
 
 
   (*other direction*)
-  locale NetworkModel_ACS_otherDirectrion = NetworkModel where target_focus=False
-  sublocale NetworkModel_ACS_otherDirectrion \<subseteq> NetworkModel_ACS
+  locale TopoS_ACS_otherDirectrion = NetworkModel where target_focus=False
+  sublocale TopoS_ACS_otherDirectrion \<subseteq> TopoS_ACS
   apply(unfold_locales)
    apply (metis default_secure offending_notevalD)
   apply(erule contrapos_pp)
@@ -348,17 +348,17 @@ subsection {*Access Control Strategy*}
 
 
 lemma default_uniqueness_by_counterexample_ACS:
-  assumes "(\<forall>G F nP i. valid_graph G \<and> F \<in> NetworkModel_withOffendingFlows.set_offending_flows eval_model G nP \<and> i \<in> fst ` F 
+  assumes "(\<forall>G F nP i. valid_graph G \<and> F \<in> TopoS_withOffendingFlows.set_offending_flows eval_model G nP \<and> i \<in> fst ` F 
                 \<longrightarrow> \<not> eval_model G (nP(i := otherbot)))"
   and "otherbot \<noteq> default_value \<Longrightarrow>
-    \<exists>G nP i F. valid_graph G \<and> \<not> eval_model G nP \<and> F \<in> (NetworkModel_withOffendingFlows.set_offending_flows eval_model G nP) \<and>
+    \<exists>G nP i F. valid_graph G \<and> \<not> eval_model G nP \<and> F \<in> (TopoS_withOffendingFlows.set_offending_flows eval_model G nP) \<and>
        eval_model (delete_edges G F) nP \<and>
         i \<in> fst ` F \<and> eval_model G (nP(i := otherbot))"
   shows "otherbot = default_value"
   using assms by blast
 
 
-text{* The sublocale relation ship tells that the simplified @{const NetworkModel_ACS} and @{const NetworkModel_IFS} 
+text{* The sublocale relation ship tells that the simplified @{const TopoS_ACS} and @{const TopoS_IFS} 
   assumptions suffice to do tho whole NetworkModel thing. The other direction is just for completeness.  *}
 
 end

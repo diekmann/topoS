@@ -1,4 +1,4 @@
-theory NetworkModel_Vertices
+theory TopoS_Vertices
 imports Main 
 "~~/src/HOL/Library/Char_ord" (*order on char*)
 "~~/src/HOL/Library/List_lexord" (*order on strings*)
@@ -79,8 +79,8 @@ fun tune_Vstring_format (t: term) (s: string) : string =
     (*TODO fails for different pretty printer settings
      Syntax.string_of_typ @{context} @{typ vString}  *)
     if fastype_of t = @{typ vString} then
-      if String.isPrefix "NetworkModel_Vertices.vString.V" s then
-        String.substring (s, (size "NetworkModel_Vertices.vString.V.  "), (size s - (size "NetworkModel_Vertices.vString.V.    ")))
+      if String.isPrefix "TopoS_Vertices.vString.V" s then
+        String.substring (s, (size "TopoS_Vertices.vString.V.  "), (size s - (size "TopoS_Vertices.vString.V.    ")))
       else if String.isPrefix "vString.V " s then
         String.substring (s, (size "vString.V.  "), (size s - (size "vString.V.    ")))
       else if String.isPrefix "V " s then

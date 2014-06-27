@@ -1,5 +1,5 @@
 theory NM_SecGwExt_impl
-imports NM_SecGwExt "../NetworkModel_Lists_Impl_Interface"
+imports NM_SecGwExt "../TopoS_Lists_Impl_Interface"
 begin
 
 code_identifier code_module NM_SecGwExt_impl => (Scala) NM_SecGwExt
@@ -31,7 +31,7 @@ definition "SecurityGateway_eval G P = (valid_list_graph G \<and>
   eval_model G (NetworkModel.node_props NM_SecGwExt.default_node_properties P))"
 
 
-interpretation SecurityGateway_impl:NetworkModel_List_Impl 
+interpretation SecurityGateway_impl:TopoS_List_Impl 
   where default_node_properties=NM_SecGwExt.default_node_properties
   and eval_model_spec=NM_SecGwExt.eval_model
   and eval_model_impl=eval_model
@@ -41,22 +41,22 @@ interpretation SecurityGateway_impl:NetworkModel_List_Impl
   and offending_flows_impl=SecurityGatewayExtended_offending_list
   and node_props_impl=NetModel_node_props
   and eval_impl=SecurityGateway_eval
- apply(unfold NetworkModel_List_Impl_def)
+ apply(unfold TopoS_List_Impl_def)
  apply(rule conjI)
-  apply(simp add: NetworkModel_SecurityGatewayExtended list_graph_to_graph_def)
+  apply(simp add: TopoS_SecurityGatewayExtended list_graph_to_graph_def)
  apply(rule conjI)
   apply(simp add: list_graph_to_graph_def SecurityGatewayExtended_offending_set SecurityGatewayExtended_offending_set_def SecurityGatewayExtended_offending_list_def)
  apply(rule conjI)
   apply(simp only: NetModel_node_props_def)
   apply(metis SecurityGatewayExtended.node_props.simps SecurityGatewayExtended.node_props_eq_node_props_formaldef)
  apply(simp only: SecurityGateway_eval_def)
- apply(simp add: NetworkModel_eval_impl_proofrule[OF NetworkModel_SecurityGatewayExtended])
+ apply(simp add: TopoS_eval_impl_proofrule[OF TopoS_SecurityGatewayExtended])
  apply(simp_all add: list_graph_to_graph_def)
 done
 
 
 section {* SecurityGateway packing *}
-  definition NM_LIB_SecurityGatewayExtended :: "('v::vertex, secgw_member, unit) NetworkModel_packed" where
+  definition NM_LIB_SecurityGatewayExtended :: "('v::vertex, secgw_member, unit) TopoS_packed" where
     "NM_LIB_SecurityGatewayExtended \<equiv> 
     \<lparr> nm_name = ''SecurityGatewayExtended'', 
       nm_target_focus = NM_SecGwExt.target_focus,
@@ -67,9 +67,9 @@ section {* SecurityGateway packing *}
       nm_node_props = NetModel_node_props,
       nm_eval = SecurityGateway_eval
       \<rparr>"
-  interpretation NM_LIB_SecurityGatewayExtended_interpretation: NetworkModel_modelLibrary NM_LIB_SecurityGatewayExtended 
+  interpretation NM_LIB_SecurityGatewayExtended_interpretation: TopoS_modelLibrary NM_LIB_SecurityGatewayExtended 
       NM_SecGwExt.eval_model NM_SecGwExt.verify_globals
-    apply(unfold NetworkModel_modelLibrary_def NM_LIB_SecurityGatewayExtended_def)
+    apply(unfold TopoS_modelLibrary_def NM_LIB_SecurityGatewayExtended_def)
     apply(rule conjI)
      apply(simp)
     apply(simp)

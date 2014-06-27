@@ -1,5 +1,5 @@
 theory Example_NetModel
-imports "../NetworkModel_Interface" "../NetworkModel_Helper"
+imports "../TopoS_Interface" "../TopoS_Helper"
 begin
 
 text{* A toy example that defines a valid network security requirement model *}
@@ -16,24 +16,24 @@ fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> bool) \<Rightarr
 (* we will not define target_focus!! Works for both! *)
 
 
-lemma eval_model_mono: "NetworkModel_withOffendingFlows.eval_model_mono eval_model"
-  apply(simp only: NetworkModel_withOffendingFlows.eval_model_mono_def)
+lemma eval_model_mono: "TopoS_withOffendingFlows.eval_model_mono eval_model"
+  apply(simp only: TopoS_withOffendingFlows.eval_model_mono_def)
   apply(clarify)
   by auto
 
  
 -- "The preliminaries: mostly, eval_model is monotonic"
-interpretation NetworkModel_preliminaries
+interpretation TopoS_preliminaries
 where eval_model = eval_model
 and verify_globals = verify_globals
   apply unfold_locales
   apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
   apply(erule_tac exE)
   apply(rename_tac list_edges)
-  apply(rule_tac ff="list_edges" in NetworkModel_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
+  apply(rule_tac ff="list_edges" in TopoS_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF eval_model_mono])
   apply(auto)[6]
-  apply(auto simp add: NetworkModel_withOffendingFlows.is_offending_flows_def graph_ops)[2]
-  apply(fact NetworkModel_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
+  apply(auto simp add: TopoS_withOffendingFlows.is_offending_flows_def graph_ops)[2]
+  apply(fact TopoS_withOffendingFlows.eval_model_mono_imp_is_offending_flows_mono[OF eval_model_mono])
 done
 
 
@@ -48,18 +48,18 @@ and target_focus = target_focus (*yep, that's a variable*)
 
   -- "Secure bydefault"
   apply(simp)
-  apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
-      NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
-      NetworkModel_withOffendingFlows.is_offending_flows_def)
+  apply (simp add: TopoS_withOffendingFlows.set_offending_flows_def
+      TopoS_withOffendingFlows.is_offending_flows_min_set_def
+      TopoS_withOffendingFlows.is_offending_flows_def)
   apply (simp add:delete_edges_simp2 graph_ops)
   apply (simp split: split_split_asm split_split add:prod_case_beta)
     apply blast
 
  -- "Uniqueness"
  apply(simp add:default_node_properties_def)
-  apply (simp add: NetworkModel_withOffendingFlows.set_offending_flows_def
-      NetworkModel_withOffendingFlows.is_offending_flows_min_set_def
-      NetworkModel_withOffendingFlows.is_offending_flows_def)
+  apply (simp add: TopoS_withOffendingFlows.set_offending_flows_def
+      TopoS_withOffendingFlows.is_offending_flows_min_set_def
+      TopoS_withOffendingFlows.is_offending_flows_def)
   apply (simp add:delete_edges_simp2 graph_ops)
   apply (simp split: split_split_asm split_split add:prod_case_beta)
   -- "proof by counter example: assume False is not the unique default parameter"
