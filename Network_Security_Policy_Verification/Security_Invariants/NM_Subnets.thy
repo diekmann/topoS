@@ -1,5 +1,5 @@
 theory NM_Subnets
-imports NetworkModel_Interface NetworkModel_Helper
+imports"../NetworkModel_Helper"
 begin
 
 section {* NetworkModel Subnets *}

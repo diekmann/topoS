@@ -1,5 +1,5 @@
 theory NM_ACLcommunicateWith
-imports NetworkModel_Interface NetworkModel_Helper vertex_example_simps
+imports "../NetworkModel_Helper"
 begin
 
 text{*Warning: transitive model is slow model*}

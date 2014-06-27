@@ -1,5 +1,5 @@
 theory NM_BLPbasic
-imports NetworkModel_Interface NetworkModel_Helper
+imports "../NetworkModel_Helper"
 begin
 
 section {* Basic Bell LePadula NetworkModel *}

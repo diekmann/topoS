@@ -1,5 +1,5 @@
 theory NM_DomainHierarchyNG
-imports NetworkModel_Interface NetworkModel_Helper
+imports "../NetworkModel_Helper"
   "~~/src/HOL/Lattice/CompleteLattice" (* markarius lattice *)
 begin
 

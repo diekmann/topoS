@@ -1,5 +1,5 @@
 theory NM_NonInterference_impl
-imports NM_NonInterference NetworkModel_Lists_Impl_Interface
+imports NM_NonInterference "../NetworkModel_Lists_Impl_Interface"
 begin
 
 

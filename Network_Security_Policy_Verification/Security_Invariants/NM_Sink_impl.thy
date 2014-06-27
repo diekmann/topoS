@@ -1,5 +1,5 @@
 theory NM_Sink_impl
-imports NM_Sink NetworkModel_Lists_Impl_Interface
+imports NM_Sink "../NetworkModel_Lists_Impl_Interface"
 begin
 
 code_identifier code_module NM_Sink_impl => (Scala) NM_Sink

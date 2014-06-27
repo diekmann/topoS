@@ -1,5 +1,5 @@
 theory NM_Dependability_impl
-imports NM_Dependability NetworkModel_Lists_Impl_Interface
+imports NM_Dependability "../NetworkModel_Lists_Impl_Interface"
 begin
 
 

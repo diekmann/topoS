@@ -1,5 +1,5 @@
 theory NM_NoRefl
-imports NetworkModel_Interface NetworkModel_Helper
+imports "../NetworkModel_Helper"
 begin
 
 section {* NetworkModel hosts are not allowed to communicate with themselves *}

@@ -1,5 +1,5 @@
 theory NM_ACLnotCommunicateWith
-imports NetworkModel_Interface NetworkModel_Helper vertex_example_simps
+imports "../NetworkModel_Helper"
 begin
 
 section {* NetworkModel *}

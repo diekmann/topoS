@@ -1,5 +1,5 @@
 theory NM_Dependability_norefl_impl
-imports NM_Dependability_norefl NetworkModel_Lists_Impl_Interface (*FiniteListGraph_Impl*)
+imports NM_Dependability_norefl "../NetworkModel_Lists_Impl_Interface"
 begin
 
 

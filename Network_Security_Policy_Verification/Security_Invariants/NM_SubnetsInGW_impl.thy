@@ -1,5 +1,5 @@
 theory NM_SubnetsInGW_impl
-imports NM_SubnetsInGW NetworkModel_Lists_Impl_Interface
+imports NM_SubnetsInGW "../NetworkModel_Lists_Impl_Interface"
 begin
 
 code_identifier code_module NM_SubnetsInGW_impl => (Scala) NM_SubnetsInGW

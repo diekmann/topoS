@@ -1,5 +1,5 @@
 theory NM_Dependability
-imports NetworkModel_Interface NetworkModel_Helper
+imports "../NetworkModel_Helper"
 begin
 
 section {* NetworkModel *}
@@ -41,8 +41,8 @@ text{* It does not matter whether we iterate over all edges or all nodes. We cho
 
       from a2 have g1: "\<forall> v \<in> (fst ` edges G). num_reachable G v \<le> nP v" by auto
 
-      from succ_tran_empty[OF a1] num_reachable_zero_iff[OF a1, symmetric]
-      have g2: "\<forall> v. v \<notin> (fst ` edges G) \<longrightarrow> num_reachable G v \<le> nP v" by auto
+      from FiniteGraph.succ_tran_empty[OF a1] num_reachable_zero_iff[OF a1, symmetric]
+      have g2: "\<forall> v. v \<notin> (fst ` edges G) \<longrightarrow> num_reachable G v \<le> nP v" by (metis le0)
 
       from g1 g2 show "\<forall>v\<in>nodes G. num_reachable G v \<le> nP v" by metis
   qed

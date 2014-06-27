@@ -1,5 +1,5 @@
 theory NM_ACLcommunicateWith_impl
-imports NM_ACLcommunicateWith NetworkModel_Lists_Impl_Interface
+imports NM_ACLcommunicateWith "../NetworkModel_Lists_Impl_Interface"
 begin
 
 code_identifier code_module NM_ACLcommunicateWith_impl => (Scala) NM_ACLcommunicateWith

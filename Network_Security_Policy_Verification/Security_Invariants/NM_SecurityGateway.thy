@@ -1,5 +1,5 @@
 theory NM_SecurityGateway
-imports NetworkModel_Interface NetworkModel_Helper
+imports "../NetworkModel_Helper"
 begin
 
 (*deprecated by SecurityGatewayExtended*)

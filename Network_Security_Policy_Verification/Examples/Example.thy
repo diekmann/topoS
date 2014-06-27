@@ -1,5 +1,5 @@
 theory Example
-imports "../NetworkModel_Interface" "../NM_SecurityGateway_impl" "../NM_BLPtrusted_impl"
+imports "../NetworkModel_Interface" "../NetworkModel_Library"
 begin
 
 section {* Network Graph and Security Requirements *}
@@ -42,7 +42,7 @@ text{*Add violations!*}
   text{*Security Requirement still fulfilled?*}
   value[code] "SecurityGateway_eval example_net_secgw_invalid NMParams_secgw_1"
   text{*Whom to blame?*}
-  value[code] "SecurityGateway_offending_list example_net_secgw_invalid (NM_SecurityGateway_impl.NetModel_node_props NMParams_secgw_1)"
+  value[code] "SecurityGatewayExtended_offending_list example_net_secgw_invalid (NM_SecGwExt_impl.NetModel_node_props NMParams_secgw_1)"
 
   text{*Security Requirement still fulfilled?*}
   value "NM_BLPtrusted_impl.BLP_eval example_net_secgw_invalid NMParams_blptrusted_1"

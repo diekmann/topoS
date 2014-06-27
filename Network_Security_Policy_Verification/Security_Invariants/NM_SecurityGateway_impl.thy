@@ -1,5 +1,5 @@
 theory NM_SecurityGateway_impl
-imports NM_SecurityGateway NetworkModel_Lists_Impl_Interface
+imports NM_SecurityGateway "../NetworkModel_Lists_Impl_Interface"
 begin
 
 code_identifier code_module  NM_SecurityGateway_impl => (Scala) NM_SecurityGateway

@@ -1,5 +1,5 @@
 theory NM_NonInterference
-imports NetworkModel_Interface NetworkModel_Helper
+imports "../NetworkModel_Helper"
 begin
 
 section {* NetworkModel NonInterference *}

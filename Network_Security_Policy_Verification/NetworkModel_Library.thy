@@ -1,17 +1,22 @@
 theory NetworkModel_Library
 imports String 
   "Lib/FiniteListGraph_Impl"
-  NM_BLPbasic_impl NM_Dependability_impl NM_Subnets_impl 
-  NM_DomainHierarchyNG_impl
-  NM_BLPtrusted_impl
-  NM_SecurityGateway_impl NM_SecGwExt_impl NM_Sink_impl
-  NM_NonInterference_impl
-  NM_SubnetsInGW_impl
-  NM_CommunicationPartners_impl
-  NM_NoRefl_impl
-  NM_ACLnotCommunicateWith_impl 
-  NM_ACLcommunicateWith_impl
-  NM_Dependability_norefl_impl
+  "Security_Invariants/NM_BLPbasic_impl"
+  "Security_Invariants/NM_Subnets_impl"
+  "Security_Invariants/NM_DomainHierarchyNG_impl"
+  "Security_Invariants/NM_BLPtrusted_impl"
+  (*"Security_Invariants/NM_SecurityGateway_impl"*) (*deprecated, will be removed*)
+  "Security_Invariants/NM_SecGwExt_impl"
+  "Security_Invariants/NM_Sink_impl"
+  "Security_Invariants/NM_SubnetsInGW_impl"
+  "Security_Invariants/NM_CommunicationPartners_impl"
+  "Security_Invariants/NM_NoRefl_impl"
+  (*invariants you probably don't wat to use because of exponential runtime*)
+  "Security_Invariants/NM_Dependability_impl"
+  "Security_Invariants/NM_NonInterference_impl"
+  "Security_Invariants/NM_ACLnotCommunicateWith_impl"
+  "Security_Invariants/NM_ACLcommunicateWith_impl"
+  "Security_Invariants/NM_Dependability_norefl_impl"
   "Lib/Efficient_Distinct"
   "~~/src/HOL/Library/Code_Target_Nat"
 begin
@@ -36,7 +41,7 @@ print_interps NetworkModel_modelLibrary
   thm NM_LIB_DomainHierarchyNG_interpretation.impl_spec
   thm NM_LIB_Subnets_interpretation.impl_spec
   thm NM_LIB_BLPtrusted_interpretation.impl_spec
-  thm NM_LIB_SecurityGateway_interpretation.impl_spec
+  (*thm NM_LIB_SecurityGateway_interpretation.impl_spec*)
   thm NM_LIB_SecurityGatewayExtended_interpretation.impl_spec
   thm NM_LIB_Sink_interpretation.impl_spec
   thm NM_LIB_NonInterference_interpretation.impl_spec

@@ -3,6 +3,7 @@ imports Main NetworkModel_Interface NetworkModel_Util
   NetworkModel_ENF NetworkModel_ENFnr NetworkModel_ENFnrSR
   NetworkModel_ENF_sr
   NetworkModel_withOffendingFlows_lemmata
+  vertex_example_simps
 begin
 
 text {*Imports a lot of usefull NetworkModelling lemmata.*}

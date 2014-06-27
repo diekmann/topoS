@@ -1,5 +1,5 @@
 theory NM_NoRefl_impl
-imports NM_NoRefl NetworkModel_Lists_Impl_Interface
+imports NM_NoRefl "../NetworkModel_Lists_Impl_Interface"
 begin
 
 code_identifier code_module  NM_NoRefl_impl => (Scala) NM_NoRefl
