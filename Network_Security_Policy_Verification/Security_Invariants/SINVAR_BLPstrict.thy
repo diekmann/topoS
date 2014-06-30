@@ -1,12 +1,12 @@
 theory SINVAR_BLPstrict
-imports TopoS_Interface TopoS_Helper
+imports "../TopoS_Helper"
 begin
 
-subsection {* Stricter Bell LePadula SecurityInvariant *}
-text{* All unclassified data sources must be labeled, defualt assumption: all is secret
+subsection {* Stricter Bell LaPadula SecurityInvariant *}
+text{* All unclassified data sources must be labeled, default assumption: all is secret.
 
-Warning: This is considered here an access control strategy
-By default, everything is secret and one explicitly prohibits sending to non-secret hosts*}
+Warning: This is considered here an access control strategy.
+By default, everything is secret and one explicitly prohibits sending to non-secret hosts.*}
 
 datatype security_clearance = Unclassified | Confidential | Secret
 

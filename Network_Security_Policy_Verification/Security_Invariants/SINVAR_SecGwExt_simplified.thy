@@ -1,6 +1,15 @@
 theory SINVAR_SecGwExt_simplified
-imports TopoS_Interface TopoS_Helper
+imports "../TopoS_Helper"
 begin
+
+
+(*
+
+
+Rather than maintaining this file, just delete it!
+
+
+*)
 
 subsection {* SecurityInvariant SecurityGatewayExtended simplified*}
 text {* A simplified version for demonstration purposes. Do not use in real world *}
@@ -32,7 +41,7 @@ fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> secgw_member) \<
 
 definition receiver_violation :: "bool" where "receiver_violation = False"
 
-subsubsubsection {*Preleminaries*}
+subsubsection {*Preliminaries*}
   lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
     apply(simp only: SecurityInvariant_withOffendingFlows.sinvar_mono_def)
     apply(clarify)
@@ -80,6 +89,7 @@ subsection{*ENF*}
     apply(auto)
   done
 
+(*such deprecated proof, very ugly.*)
 interpretation SecurityGatewayExtended_simplified: SecurityInvariant
 where default_node_properties = default_node_properties
 and sinvar = sinvar
@@ -96,7 +106,7 @@ where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = Securit
   (* only remove receiver_violation: *)
   apply(rule conjI) prefer 2 apply(simp) apply(simp only:HOL.not_False_eq_True HOL.simp_thms(15)) apply(rule impI)
   
-  apply (rule SecurityInvariant_withOffendingFlows.ENFnr_fsts_weakrefl_instance[OF _ SecurityGateway_ENFnr Unassigned_botdefault All_to_Unassigned])[1]
+  apply (rule SecurityInvariant_withOffendingFlows.ENFnr_fsts_weakrefl_instance[OF SecurityGateway_ENFnr Unassigned_botdefault All_to_Unassigned])[1]
   apply(simp_all)[3]
 
  apply (simp add: SecurityInvariant_withOffendingFlows.set_offending_flows_def

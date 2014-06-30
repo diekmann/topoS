@@ -3,7 +3,7 @@ imports "../TopoS_Helper"
 begin
 
 subsection {* SecurityInvariant SecurityGatewayExtended*}
-text {* like SecurityGateway but SecurityGatewayIN and AccessibleMember are accessible from outside world *}
+text {* Like SecurityGateway but SecurityGatewayIN and AccessibleMember are accessible from outside world *}
 
 datatype secgw_member = SecurityGateway | SecurityGatewayIN | DomainMember  | AccessibleMember | Unassigned
 
