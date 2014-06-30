@@ -2,7 +2,7 @@ theory SINVAR_ACLnotCommunicateWith
 imports "../TopoS_Helper"
 begin
 
-section {* SecurityInvariant ACLnotCommunicateWith*}
+subsection {* SecurityInvariant ACLnotCommunicateWith*}
 text{*An access control list strategy that says that hosts must not transitively access each other*}
 
 text{* node properties: a set of hosts this host must no access *}

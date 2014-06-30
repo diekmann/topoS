@@ -2,20 +2,24 @@ theory TopoS_Composition_Theory
 imports TopoS_Interface TopoS_Helper
 begin
 
-(*theory, do not load together with library list impl*)
+section{*Composition Theory*}
 
+text{*Several invariants may apply to one policy. *}
 
-section {* we need in instatiated model, i.e. get rid of 'a 'b*}
+text{*The security invariants are all collected in a list. 
+The list corresponds to the security requirements. 
+The list should have the type @{typ "('v graph \<Rightarrow> bool) list"}, i.e.\ a list of predicates over the policy. 
+We need in instantiated security invariant, i.e.\ get rid of @{typ "'a"} and @{typ "'b"}*}
 
- --{*An instance or configured version of a network security model. I.e. a concrete security requirement. *}
- record ('v) NetworkSecurityModel_configured =
+ --{*An instance (configured) a security invariant I.e.\ a concrete security requirement, in different terminology. *}
+ record ('v) SecurityInvariant_configured =
     c_sinvar::"('v) graph \<Rightarrow> bool"
     c_offending_flows::"('v) graph \<Rightarrow> ('v \<times> 'v) set set"
     c_isIFS::"bool"
 
   (* First parameters: (sinvar \<bottom> receiver_violation == SecurityInvariant) nP *)
-  fun new_configured_NetworkSecurityModel :: "((('v::vertex) graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> bool) \<times> 'a \<times> bool \<times> ('v \<Rightarrow> 'a)) \<Rightarrow> ('v NetworkSecurityModel_configured) option" where 
-      "new_configured_NetworkSecurityModel (sinvar, defbot, receiver_violation, nP) = 
+  fun new_configured_SecurityInvariant :: "((('v::vertex) graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> bool) \<times> 'a \<times> bool \<times> ('v \<Rightarrow> 'a)) \<Rightarrow> ('v SecurityInvariant_configured) option" where 
+      "new_configured_SecurityInvariant (sinvar, defbot, receiver_violation, nP) = 
         ( 
         if SecurityInvariant sinvar defbot receiver_violation then 
           Some \<lparr> 
@@ -26,23 +30,23 @@ section {* we need in instatiated model, i.e. get rid of 'a 'b*}
         else None
         )"
 
-   declare new_configured_NetworkSecurityModel.simps[simp del]
+   declare new_configured_SecurityInvariant.simps[simp del]
 
    lemma new_configured_TopoS_sinvar_correct:
    "SecurityInvariant sinvar defbot receiver_violation \<Longrightarrow> 
-   c_sinvar (the (new_configured_NetworkSecurityModel (sinvar, defbot, receiver_violation, nP))) = (\<lambda>G. sinvar G nP)"
-   by(simp add: Let_def new_configured_NetworkSecurityModel.simps)
+   c_sinvar (the (new_configured_SecurityInvariant (sinvar, defbot, receiver_violation, nP))) = (\<lambda>G. sinvar G nP)"
+   by(simp add: Let_def new_configured_SecurityInvariant.simps)
 
    lemma new_configured_TopoS_offending_flows_correct:
    "SecurityInvariant sinvar defbot receiver_violation \<Longrightarrow> 
-   c_offending_flows (the (new_configured_NetworkSecurityModel (sinvar, defbot, receiver_violation, nP))) = 
+   c_offending_flows (the (new_configured_SecurityInvariant (sinvar, defbot, receiver_violation, nP))) = 
    (\<lambda>G. SecurityInvariant_withOffendingFlows.set_offending_flows sinvar G nP)"
-   by(simp add: Let_def new_configured_NetworkSecurityModel.simps)
+   by(simp add: Let_def new_configured_SecurityInvariant.simps)
 
 
-text{* We now collect all the core properties of a network model, but wihtout the @{typ "'a"} @{typ "'b"} types, so it is instatiated with a configuration.  *}
+text{* We now collect all the core properties of a security invariant, but wihtout the @{typ "'a"} @{typ "'b"} types, so it is instatiated with a concrete configuration.*}
 locale configured_SecurityInvariant =
-  fixes m :: "('v::vertex) NetworkSecurityModel_configured"
+  fixes m :: "('v::vertex) SecurityInvariant_configured"
   assumes
     --"As in SecurityInvariant definition"
     valid_c_offending_flows:
@@ -97,7 +101,7 @@ locale configured_SecurityInvariant =
             SecurityInvariant_withOffendingFlows.is_offending_flows_def)
       by(simp add: valid_c_offending_flows)
 
-    text{* all the @{term SecurityInvariant_preliminaries} stuff must hold, for an arbitrary nP *}
+    text{* all the @{term SecurityInvariant_preliminaries} stuff must hold, for an arbitrary @{term nP} *}
     lemma SecurityInvariant_preliminariesD:
       "SecurityInvariant_preliminaries (\<lambda> (G::('v::vertex) graph) (nP::'v \<Rightarrow> 'a). c_sinvar m G)"
       apply(unfold_locales)
@@ -115,7 +119,7 @@ locale configured_SecurityInvariant =
      by(blast)
 
     
-    section{*reusing old lemmata*}
+    subsection{*reusing old lemmata*}
       lemmas mono_extend_set_offending_flows =
       SecurityInvariant_preliminaries.mono_extend_set_offending_flows[OF SecurityInvariant_preliminariesD, simplified subst_offending_flows]
       thm mono_extend_set_offending_flows
@@ -152,21 +156,21 @@ text{*
     M :: network security requirement list
 *}
 
-  text{* The function @{term new_configured_NetworkSecurityModel} takes some tuple and if it returns a result,
+  text{* The function @{term new_configured_SecurityInvariant} takes some tuple and if it returns a result,
          the locale assumptions are automatically fulfilled. *}
-  theorem new_configured_NetworkSecurityModel_sound: 
-  "\<lbrakk> new_configured_NetworkSecurityModel (sinvar, defbot, receiver_violation, nP) = Some m \<rbrakk> \<Longrightarrow>
+  theorem new_configured_SecurityInvariant_sound: 
+  "\<lbrakk> new_configured_SecurityInvariant (sinvar, defbot, receiver_violation, nP) = Some m \<rbrakk> \<Longrightarrow>
     configured_SecurityInvariant m"
     proof -
-      assume a: "new_configured_NetworkSecurityModel (sinvar, defbot, receiver_violation, nP) = Some m"
+      assume a: "new_configured_SecurityInvariant (sinvar, defbot, receiver_violation, nP) = Some m"
       hence NetModel: "SecurityInvariant sinvar defbot receiver_violation"
-        by(simp add: new_configured_NetworkSecurityModel.simps split: split_if_asm)
+        by(simp add: new_configured_SecurityInvariant.simps split: split_if_asm)
       hence NetModel_p: "SecurityInvariant_preliminaries sinvar" by(simp add: SecurityInvariant_def)
 
       from a have c_eval: "c_sinvar m = (\<lambda>G. sinvar G nP)"
          and c_offending: "c_offending_flows m = (\<lambda>G. SecurityInvariant_withOffendingFlows.set_offending_flows sinvar G nP)"
          and "c_isIFS m = receiver_violation"
-        by(auto simp add: new_configured_NetworkSecurityModel.simps NetModel split: split_if_asm)
+        by(auto simp add: new_configured_SecurityInvariant.simps NetModel split: split_if_asm)
 
       have monoI: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
         apply(simp add: SecurityInvariant_withOffendingFlows.sinvar_mono_def, clarify)
@@ -184,36 +188,36 @@ text{*
         done
    qed
 
-text{* All security requirements are valid according to the definition *}
-definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Rightarrow> bool" where
+text{* All security invariants are valid according to the definition *}
+definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Rightarrow> bool" where
   "valid_reqs M \<equiv> \<forall> m \<in> set M. configured_SecurityInvariant m"
 
  subsection {*Algorithms*}
-    text{*A network security model corresponds to type of security requirements.
-          A configured network security model is a security requirement in a scenario specific setting.
+    text{*A (generic) security invariant corresponds to a type of security requirements (type: @{typ "'v graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> bool"}).
+          A configured security invariant is a security requirement in a scenario specific setting (type: @{typ "'v graph \<Rightarrow> bool"}).
           I.e., it is a security requirement as listed in the requirements document.
-          All security requirements are fulfilled for a fixed network G if all security requirements are fulfilled for G. *}
+          All security requirements are fulfilled for a fixed policy @{term G} if all security requirements are fulfilled for @{term G}. *}
 
 
-    text{* get all possible offending flows from all security requirement mdoels *}
-    definition get_offending_flows :: "('v::vertex) NetworkSecurityModel_configured list \<Rightarrow> 'v graph \<Rightarrow> (('v \<times> 'v) set set)" where
+    text{*Get all possible offending flows from all security requirements *}
+    definition get_offending_flows :: "('v::vertex) SecurityInvariant_configured list \<Rightarrow> 'v graph \<Rightarrow> (('v \<times> 'v) set set)" where
       "get_offending_flows M G = (\<Union>m\<in>set M. c_offending_flows m G)"  
 
     (*Note: only checks sinvar, not eval!! No 'a 'b type variables here*)
-    definition all_security_requirements_fulfilled :: "('v::vertex) NetworkSecurityModel_configured list \<Rightarrow> 'v graph \<Rightarrow> bool" where
+    definition all_security_requirements_fulfilled :: "('v::vertex) SecurityInvariant_configured list \<Rightarrow> 'v graph \<Rightarrow> bool" where
       "all_security_requirements_fulfilled M G \<equiv> \<forall>m \<in> set M. (c_sinvar m) G"
     
     text{* Generate a valid topology from the security requirements *}
     (*constant G, remove after algorithm*)
-    fun generate_valid_topology :: "'v NetworkSecurityModel_configured list \<Rightarrow> 'v graph \<Rightarrow> 'v graph" where
+    fun generate_valid_topology :: "'v SecurityInvariant_configured list \<Rightarrow> 'v graph \<Rightarrow> 'v graph" where
       "generate_valid_topology [] G = G" |
       "generate_valid_topology (m#Ms) G = delete_edges (generate_valid_topology Ms G) (\<Union> (c_offending_flows m G))"
 
      -- "return all Access Control Strategy models from a list of models"
-    definition get_ACS :: "('v::vertex) NetworkSecurityModel_configured list \<Rightarrow> 'v NetworkSecurityModel_configured list" where
+    definition get_ACS :: "('v::vertex) SecurityInvariant_configured list \<Rightarrow> 'v SecurityInvariant_configured list" where
       "get_ACS M \<equiv> [m \<leftarrow> M. \<not> c_isIFS m]"
      -- "return all Information Flows Strategy models from a list of models"
-    definition get_IFS :: "('v::vertex) NetworkSecurityModel_configured list \<Rightarrow> 'v NetworkSecurityModel_configured list" where
+    definition get_IFS :: "('v::vertex) SecurityInvariant_configured list \<Rightarrow> 'v SecurityInvariant_configured list" where
       "get_IFS M \<equiv> [m \<leftarrow> M. c_isIFS m]"
     lemma get_ACS_union_get_IFS: "set (get_ACS M) \<union> set (get_IFS M) = set M"
       by(auto simp add: get_ACS_def get_IFS_def)
@@ -299,7 +303,7 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
         apply(simp add: delete_edges_simp2)
         by blast
 
-      text{* @{term generate_valid_topology} generates a valid topology! *}
+      text{* @{term generate_valid_topology} generates a valid topology (Policy)! *}
       theorem generate_valid_topology_sound:
       "\<lbrakk> valid_reqs M; valid_graph \<lparr>nodes = V, edges = E\<rparr> \<rbrakk> \<Longrightarrow> 
       all_security_requirements_fulfilled M (generate_valid_topology M \<lparr>nodes = V, edges = E\<rparr>)"
@@ -370,7 +374,7 @@ definition valid_reqs :: "('v::vertex) NetworkSecurityModel_configured list \<Ri
    *)
 
 
-   subsection{* Moar lemmata *}
+   subsection{* More Lemmata *}
      lemma (in configured_SecurityInvariant) c_sinvar_valid_imp_no_offending_flows: 
       "c_sinvar m G \<Longrightarrow> \<forall>x\<in>c_offending_flows m G. x = {}"
         by(simp add: valid_c_offending_flows)

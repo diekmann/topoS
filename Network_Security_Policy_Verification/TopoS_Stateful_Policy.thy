@@ -2,6 +2,12 @@ theory TopoS_Stateful_Policy
 imports TopoS_Composition_Theory
 begin
 
+section{*Stateful Policy*}
+
+
+text{*Details described in \cite{diekmann2014esss}. *}
+
+
 text{* Algorithm *}
 term TopoS_Composition_Theory.generate_valid_topology
 text{* generates a valid high-level topology. Now we discuss how to turn this into
@@ -172,7 +178,7 @@ text{* when is a stateful policy @{term "\<T>"} compliant with a high-level poli
 locale stateful_policy_compliance =  
   fixes \<T> :: "('v::vertex) stateful_policy"
   fixes G :: "'v graph"
-  fixes M :: "('v) NetworkSecurityModel_configured list"
+  fixes M :: "('v) SecurityInvariant_configured list"
   assumes
     -- "the graph must be syntactically valid"
     validG: "valid_graph G"

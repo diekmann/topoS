@@ -2,7 +2,7 @@ theory SINVAR_BLPstrict
 imports TopoS_Interface TopoS_Helper
 begin
 
-section {* Stricter Bell LePadula SecurityInvariant *}
+subsection {* Stricter Bell LePadula SecurityInvariant *}
 text{* All unclassified data sources must be labeled, defualt assumption: all is secret
 
 Warning: This is considered here an access control strategy
@@ -82,7 +82,7 @@ and verify_globals = verify_globals
 
 
 
-section {*ENF*}
+subsection {*ENF*}
   lemma secret_default_candidate: "\<And> (nP::('v \<Rightarrow> security_clearance)) e1 e2. \<not> (nP e1) \<le> (nP e2) \<Longrightarrow> \<not> Secret \<le> (nP e2)"
     apply(case_tac "nP e1")
     apply(simp_all)

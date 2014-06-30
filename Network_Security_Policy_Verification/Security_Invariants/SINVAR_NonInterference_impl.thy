@@ -6,7 +6,7 @@ begin
 code_identifier code_module SINVAR_NonInterference_impl => (Scala) SINVAR_NonInterference
 
 
-section {* SecurityInvariant NonInterference Implementation*}
+subsubsection {* SecurityInvariant NonInterference Implementation*}
 
 definition undirected_reachable :: "'v list_graph \<Rightarrow> 'v => 'v list" where
   "undirected_reachable G v = removeAll v (succ_tran (undirected G) v)"
@@ -168,7 +168,7 @@ interpretation NonInterference_impl:TopoS_List_Impl
  apply(simp)
 done
 
-section {* NonInterference packing *}
+subsubsection {* NonInterference packing *}
   definition SINVAR_LIB_NonInterference :: "('v::vertex, node_config, unit) TopoS_packed" where
     "SINVAR_LIB_NonInterference \<equiv> 
     \<lparr> nm_name = ''NonInterference'', 

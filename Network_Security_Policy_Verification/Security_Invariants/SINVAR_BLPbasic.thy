@@ -2,7 +2,7 @@ theory SINVAR_BLPbasic
 imports "../TopoS_Helper"
 begin
 
-section {* SecurityInvariant Basic Bell LaPadula  *}
+subsection {* SecurityInvariant Basic Bell LaPadula  *}
 
 type_synonym privacy_level = nat
 
@@ -81,7 +81,7 @@ done
 *)
  
 
-subsection {*ENF*}
+subsubsection {*ENF*}
   lemma zero_default_candidate: "\<And> nP e1 e2. \<not> (op \<le>::privacy_level \<Rightarrow> privacy_level \<Rightarrow> bool) (nP e1) (nP e2) \<Longrightarrow> \<not> (op \<le>) (nP e1) 0"
     by simp_all
   lemma zero_default_candidate_rule: "\<And> (nP::('v \<Rightarrow> privacy_level)) e1 e2. \<not> (nP e1) \<le> (nP e2) \<Longrightarrow> \<not> (nP e1) \<le> 0"

@@ -2,7 +2,7 @@ theory SINVAR_Sink
 imports "../TopoS_Helper"
 begin
 
-section {* SecurityInvariant Sink (IFS)*}
+subsection {* SecurityInvariant Sink (IFS)*}
 
 datatype node_config = Sink | SinkPool | Unassigned
 
@@ -28,7 +28,7 @@ definition receiver_violation :: "bool" where "receiver_violation = True" (*this
   thus, responsibility is in the one who accepts and not the one who initiates. two entities are needed for a connection! *)
 
 
-subsection {*Preliminaries*}
+subsubsection {*Preliminaries*}
   lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
     apply(simp only: SecurityInvariant_withOffendingFlows.sinvar_mono_def)
     apply(clarify)
@@ -47,7 +47,7 @@ subsection {*Preliminaries*}
     apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_mono])
    done
 
-subsection{*ENF*}
+subsubsection{*ENF*}
   lemma Sink_ENFnr: "SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form_not_refl sinvar allowed_sink_flow"
     by(simp add: SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form_not_refl_def)
   lemma Unassigned_to_All: "\<forall> e2. allowed_sink_flow Unassigned e2"

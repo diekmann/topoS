@@ -18,41 +18,41 @@ text{*Our access control view on the network*}
   lemma "valid_list_graph ChairNetwork_empty" by eval
 
 
-section{*Our security requirements*}
-  subsection{*We have a server with confidential data*}
-    definition ConfidentialChairData::"(vString NetworkSecurityModel)" where
-      "ConfidentialChairData \<equiv> new_configured_list_NetworkSecurityModel SINVAR_BLPtrusted_impl.SINVAR_LIB_BLPtrusted \<lparr> 
+subsection{*Our security requirements*}
+  subsubsection{*We have a server with confidential data*}
+    definition ConfidentialChairData::"(vString SecurityInvariant)" where
+      "ConfidentialChairData \<equiv> new_configured_list_SecurityInvariant SINVAR_BLPtrusted_impl.SINVAR_LIB_BLPtrusted \<lparr> 
           node_properties = [V ''FilesSrv'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
                              V ''Employees'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>], 
           model_global_properties = () 
           \<rparr>"
 
 
-  subsection{* accessibly by employees and students*}
-    definition "PrintingACL \<equiv> new_configured_list_NetworkSecurityModel SINVAR_LIB_CommunicationPartners \<lparr> 
+  subsubsection{* accessibly by employees and students*}
+    definition "PrintingACL \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
           node_properties = [V ''Printer'' \<mapsto> Master [V ''Employees'', V ''Students''],
                              V ''Employees'' \<mapsto> Care,
                              V ''Students'' \<mapsto> Care], 
           model_global_properties = () 
           \<rparr>"
 
-  subsection{* Printers are information sinks *}
-    definition "PrintingSink \<equiv> new_configured_list_NetworkSecurityModel SINVAR_LIB_Sink \<lparr> 
+  subsubsection{* Printers are information sinks *}
+    definition "PrintingSink \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_Sink \<lparr> 
           node_properties = [V ''Printer'' \<mapsto> Sink], 
           model_global_properties = () 
           \<rparr>"
 
 
 
-  subsection{*Students and Employees may access each other but are not accessible from the outside*}
-    definition "InternalSubnet \<equiv> new_configured_list_NetworkSecurityModel SINVAR_LIB_SubnetsInGW \<lparr> 
+  subsubsection{*Students and Employees may access each other but are not accessible from the outside*}
+    definition "InternalSubnet \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_SubnetsInGW \<lparr> 
           node_properties = [V ''Students'' \<mapsto> Member, V ''Employees'' \<mapsto> Member], 
           model_global_properties = () 
           \<rparr>"
 
 
-  subsection{* The files server is only accessibly by employees*}
-    definition "FilesSrcACL \<equiv> new_configured_list_NetworkSecurityModel SINVAR_LIB_CommunicationPartners \<lparr> 
+  subsubsection{* The files server is only accessibly by employees*}
+    definition "FilesSrcACL \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
           node_properties = [V ''FilesSrv'' \<mapsto> Master [V ''Employees''],
                              V ''Employees'' \<mapsto> Care], 
           model_global_properties = () 
@@ -134,10 +134,10 @@ visualize_edges @{context} @{theory} @{term "flows_fixL ChairNetwork_stateful_v3
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "flows_stateL ChairNetwork_stateful_v3"})]; 
 *}
 
-section{*An example of bad side-effects in access control policies*}
+subsection{*An example of bad side-effects in access control policies*}
 
-  definition ACL_not_with::"(vString NetworkSecurityModel)" where
-    "ACL_not_with \<equiv> new_configured_list_NetworkSecurityModel SINVAR_ACLnotCommunicateWith_impl.SINVAR_LIB_ACLnotCommunicateWith \<lparr> 
+  definition ACL_not_with::"(vString SecurityInvariant)" where
+    "ACL_not_with \<equiv> new_configured_list_SecurityInvariant SINVAR_ACLnotCommunicateWith_impl.SINVAR_LIB_ACLnotCommunicateWith \<lparr> 
         node_properties = [V ''A'' \<mapsto> {V ''C''},
                            V ''B'' \<mapsto> {},
                            V ''C'' \<mapsto> {}], 
@@ -170,7 +170,7 @@ value[code] "generate_valid_stateful_policy_IFSACS_2 simple_network [ACL_not_wit
 
 
 
-section{*performance test*}
+subsection{*performance test*}
 (*6 minutes , about 1.8k edges in graph, most of the times, no requirements apply, simply added some nodes, edges to the chair network. topology is valid*)
 (*value[code] "generate_valid_stateful_policy_IFSACS biggraph ChairSecurityRequirements"*)
 

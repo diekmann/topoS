@@ -5,7 +5,7 @@ begin
 code_identifier code_module SINVAR_ACLcommunicateWith_impl => (Scala) SINVAR_ACLcommunicateWith
 
 
-section {* List Implementation *}
+subsubsection {* List Implementation *}
 
 fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> 'v access_list) \<Rightarrow> bool" where
   "sinvar G nP = (\<forall> v \<in> set (nodesL G). accesses_okay (nP v) (set (succ_tran G v)))"
@@ -68,7 +68,7 @@ interpretation SINVAR_ACLcommunicateWith_impl:TopoS_List_Impl
 done
 
 
-section {* packing *}
+subsubsection {* packing *}
   definition SINVAR_LIB_ACLcommunicateWith:: "('v::vertex, 'v access_list, unit) TopoS_packed" where
     "SINVAR_LIB_ACLcommunicateWith \<equiv> 
     \<lparr> nm_name = ''ACLcommunicateWith'', 

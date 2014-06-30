@@ -15,8 +15,8 @@ definition testGraph :: "vString list_graph" where
 
 lemma "valid_list_graph testGraph" by eval
 
-definition req1 ::"(vString NetworkSecurityModel)" where
-  "req1 \<equiv> new_configured_list_NetworkSecurityModel SINVAR_SecGwExt_impl.SINVAR_LIB_SecurityGatewayExtended \<lparr> 
+definition req1 ::"(vString SecurityInvariant)" where
+  "req1 \<equiv> new_configured_list_SecurityInvariant SINVAR_SecGwExt_impl.SINVAR_LIB_SecurityGatewayExtended \<lparr> 
       node_properties = [V ''Master'' \<mapsto> SecurityGateway,
                          V ''Slave1'' \<mapsto> DomainMember,
                          V ''Slave2'' \<mapsto> DomainMember], 
@@ -24,7 +24,7 @@ definition req1 ::"(vString NetworkSecurityModel)" where
       \<rparr>"
 
 
-definition "req2 \<equiv> new_configured_list_NetworkSecurityModel SINVAR_NoRefl_impl.SINVAR_LIB_NoRefl \<lparr> 
+definition "req2 \<equiv> new_configured_list_SecurityInvariant SINVAR_NoRefl_impl.SINVAR_LIB_NoRefl \<lparr> 
       node_properties = [V ''Master'' \<mapsto> Refl,
                          V ''other1'' \<mapsto> Refl,
                          V ''other2'' \<mapsto> Refl], 

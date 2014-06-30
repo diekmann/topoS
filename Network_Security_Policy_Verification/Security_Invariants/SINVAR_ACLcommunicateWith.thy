@@ -4,7 +4,7 @@ begin
 
 text{*Warning: transitive model is slow model*}
 
-section {* SecurityInvariant ACLcommunicateWith *}
+subsection {* SecurityInvariant ACLcommunicateWith *}
 text{*An access control list strategy that says that hosts must only transitively access each other if allowed*}
 
 datatype 'v access_list = AccessList "'v list"

@@ -6,7 +6,7 @@ begin
 code_identifier code_module SINVAR_Dependability_norefl_impl => (Scala) SINVAR_Dependability_norefl
 
 
-section {* SecurityInvariant Dependability implementation *}
+subsubsection {* SecurityInvariant Dependability implementation *}
 
 
 text {* Less-equal other nodes depend on the output of a node than its dependability level. *}
@@ -91,7 +91,7 @@ interpretation Dependability_norefl_impl:TopoS_List_Impl
 done
 
 
-section {* packing *}
+subsubsection {* packing *}
   definition SINVAR_LIB_Dependability_norefl :: "('v::vertex, SINVAR_Dependability_norefl.dependability_level, unit) TopoS_packed" where
     "SINVAR_LIB_Dependability_norefl \<equiv> 
     \<lparr> nm_name = ''Dependability_norefl'', 

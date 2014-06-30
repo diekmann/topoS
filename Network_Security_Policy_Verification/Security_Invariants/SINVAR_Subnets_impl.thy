@@ -55,7 +55,7 @@ interpretation Subnets_impl:TopoS_List_Impl
 done
 
 
-section {* Subnets packing *}
+subsubsection {* Subnets packing *}
   definition SINVAR_LIB_Subnets :: "('v::vertex, SINVAR_Subnets.subnets, unit) TopoS_packed" where
     "SINVAR_LIB_Subnets \<equiv> 
     \<lparr> nm_name = ''Subnets'', 

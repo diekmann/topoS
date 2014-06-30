@@ -44,13 +44,13 @@ lemma valid_list_graph_stateful_list_policy_to_list_graph:
 
 section{*Algorithms*}
 
-   fun filter_IFS_no_violations_accu :: "'v list_graph \<Rightarrow> 'v NetworkSecurityModel list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list" where
+   fun filter_IFS_no_violations_accu :: "'v list_graph \<Rightarrow> 'v SecurityInvariant list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list" where
       "filter_IFS_no_violations_accu G M accu [] = accu" |
       "filter_IFS_no_violations_accu G M accu (e#Es) = (if
         all_security_requirements_fulfilled (Impl_List_Composition.get_IFS M) (stateful_list_policy_to_list_graph \<lparr> hostsL = nodesL G, flows_fixL = edgesL G, flows_stateL = (e#accu) \<rparr>)
         then filter_IFS_no_violations_accu G M (e#accu) Es
         else filter_IFS_no_violations_accu G M accu Es)"
-    definition filter_IFS_no_violations :: "'v list_graph \<Rightarrow> 'v NetworkSecurityModel list \<Rightarrow> ('v \<times> 'v) list" where
+    definition filter_IFS_no_violations :: "'v list_graph \<Rightarrow> 'v SecurityInvariant list \<Rightarrow> ('v \<times> 'v) list" where
       "filter_IFS_no_violations G M = filter_IFS_no_violations_accu G M [] (edgesL G)"
 
    lemma filter_IFS_no_violations_accu_distinct: "\<lbrakk> distinct (Es@accu) \<rbrakk> \<Longrightarrow> distinct (filter_IFS_no_violations_accu G M accu Es)"
@@ -58,7 +58,7 @@ section{*Algorithms*}
     by(simp_all)
 
    lemma filter_IFS_no_violations_accu_complies:
-    "\<lbrakk>\<forall> (m_impl, m_spec) \<in> set M. NetworkSecurityModel_complies_formal_def m_impl m_spec;
+    "\<lbrakk>\<forall> (m_impl, m_spec) \<in> set M. SecurityInvariant_complies_formal_def m_impl m_spec;
       valid_list_graph G; set Es \<subseteq> set (edgesL G); set accu \<subseteq> set (edgesL G); distinct (Es@accu) \<rbrakk> \<Longrightarrow>
       filter_IFS_no_violations_accu G (get_impl M) accu Es = TopoS_Stateful_Policy_Algorithm.filter_IFS_no_violations_accu (list_graph_to_graph G) (get_spec M) accu Es"
       proof(induction Es arbitrary: accu)
@@ -88,7 +88,7 @@ section{*Algorithms*}
 
 
         from get_IFS_get_ACS_select_simps(1)[OF Cons.prems(1)]
-        have "\<forall> (m_impl, m_spec) \<in> set (zip (get_IFS (get_impl M)) (TopoS_Composition_Theory.get_IFS (get_spec M))). NetworkSecurityModel_complies_formal_def m_impl m_spec" .
+        have "\<forall> (m_impl, m_spec) \<in> set (zip (get_IFS (get_impl M)) (TopoS_Composition_Theory.get_IFS (get_spec M))). SecurityInvariant_complies_formal_def m_impl m_spec" .
         from all_security_requirements_fulfilled_complies[OF this] have all_security_requirements_fulfilled_eq_rule: 
         "\<And>G. valid_list_graph G \<Longrightarrow>
             Impl_List_Composition.all_security_requirements_fulfilled (Impl_List_Composition.get_IFS (get_impl M)) G =
@@ -130,7 +130,7 @@ section{*Algorithms*}
 
 
    lemma filter_IFS_no_violations_complies:
-    "\<lbrakk> \<forall> (m_impl, m_spec) \<in> set M. NetworkSecurityModel_complies_formal_def m_impl m_spec; valid_list_graph G \<rbrakk> \<Longrightarrow>
+    "\<lbrakk> \<forall> (m_impl, m_spec) \<in> set M. SecurityInvariant_complies_formal_def m_impl m_spec; valid_list_graph G \<rbrakk> \<Longrightarrow>
        filter_IFS_no_violations G (get_impl M) = TopoS_Stateful_Policy_Algorithm.filter_IFS_no_violations (list_graph_to_graph G) (get_spec M) (edgesL G)"
     apply(unfold filter_IFS_no_violations_def TopoS_Stateful_Policy_Algorithm.filter_IFS_no_violations_def) 
     apply(rule filter_IFS_no_violations_accu_complies)
@@ -142,18 +142,18 @@ section{*Algorithms*}
 
 
 
-    fun filter_compliant_stateful_ACS_accu :: "'v list_graph \<Rightarrow> 'v NetworkSecurityModel list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list" where
+    fun filter_compliant_stateful_ACS_accu :: "'v list_graph \<Rightarrow> 'v SecurityInvariant list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list" where
       "filter_compliant_stateful_ACS_accu G M accu [] = accu" |
       "filter_compliant_stateful_ACS_accu G M accu (e#Es) = (if
         e \<notin> set (backlinks (edgesL G)) \<and> (\<forall>F \<in> set (implc_get_offending_flows (get_ACS M) (stateful_list_policy_to_list_graph \<lparr> hostsL = nodesL G, flows_fixL = edgesL G, flows_stateL = (e#accu) \<rparr>)). set F \<subseteq> set (backlinks (e#accu)))
         then filter_compliant_stateful_ACS_accu G M (e#accu) Es
         else filter_compliant_stateful_ACS_accu G M accu Es)"
-    definition filter_compliant_stateful_ACS :: "'v list_graph \<Rightarrow> 'v NetworkSecurityModel list \<Rightarrow> ('v \<times> 'v) list" where
+    definition filter_compliant_stateful_ACS :: "'v list_graph \<Rightarrow> 'v SecurityInvariant list \<Rightarrow> ('v \<times> 'v) list" where
       "filter_compliant_stateful_ACS G M = filter_compliant_stateful_ACS_accu G M [] (edgesL G)"
 
 
    lemma filter_compliant_stateful_ACS_accu_complies: 
-    "\<lbrakk>\<forall> (m_impl, m_spec) \<in> set M. NetworkSecurityModel_complies_formal_def m_impl m_spec;
+    "\<lbrakk>\<forall> (m_impl, m_spec) \<in> set M. SecurityInvariant_complies_formal_def m_impl m_spec;
       valid_list_graph G; set Es \<subseteq> set (edgesL G); set accu \<subseteq> set (edgesL G); distinct (Es@accu) \<rbrakk> \<Longrightarrow>
       filter_compliant_stateful_ACS_accu G (get_impl M) accu Es = TopoS_Stateful_Policy_Algorithm.filter_compliant_stateful_ACS_accu (list_graph_to_graph G) (get_spec M) accu Es"
       proof(induction Es arbitrary: accu)
@@ -230,7 +230,7 @@ section{*Algorithms*}
 
 
    lemma filter_compliant_stateful_ACS_cont_complies:
-    "\<lbrakk> \<forall> (m_impl, m_spec) \<in> set M. NetworkSecurityModel_complies_formal_def m_impl m_spec; valid_list_graph G; set Es \<subseteq> set (edgesL G); distinct Es \<rbrakk> \<Longrightarrow>
+    "\<lbrakk> \<forall> (m_impl, m_spec) \<in> set M. SecurityInvariant_complies_formal_def m_impl m_spec; valid_list_graph G; set Es \<subseteq> set (edgesL G); distinct Es \<rbrakk> \<Longrightarrow>
        filter_compliant_stateful_ACS_accu G (get_impl M) [] Es = TopoS_Stateful_Policy_Algorithm.filter_compliant_stateful_ACS (list_graph_to_graph G) (get_spec M) Es"
     apply(unfold filter_compliant_stateful_ACS_def TopoS_Stateful_Policy_Algorithm.filter_compliant_stateful_ACS_def) 
     apply(rule filter_compliant_stateful_ACS_accu_complies)
@@ -238,7 +238,7 @@ section{*Algorithms*}
     done
 
    lemma filter_compliant_stateful_ACS_complies:
-    "\<lbrakk> \<forall> (m_impl, m_spec) \<in> set M. NetworkSecurityModel_complies_formal_def m_impl m_spec; valid_list_graph G \<rbrakk> \<Longrightarrow>
+    "\<lbrakk> \<forall> (m_impl, m_spec) \<in> set M. SecurityInvariant_complies_formal_def m_impl m_spec; valid_list_graph G \<rbrakk> \<Longrightarrow>
        filter_compliant_stateful_ACS G (get_impl M) = TopoS_Stateful_Policy_Algorithm.filter_compliant_stateful_ACS (list_graph_to_graph G) (get_spec M) (edgesL G)"
     apply(unfold filter_compliant_stateful_ACS_def TopoS_Stateful_Policy_Algorithm.filter_compliant_stateful_ACS_def) 
     apply(rule filter_compliant_stateful_ACS_accu_complies)
@@ -250,7 +250,7 @@ section{*Algorithms*}
 (*TODO: show valid_stateful_policy and distinctness and valid_list_graph, ...*)
 
 
-   definition generate_valid_stateful_policy_IFSACS :: "'v list_graph \<Rightarrow> 'v NetworkSecurityModel list \<Rightarrow> 'v stateful_list_policy" where
+   definition generate_valid_stateful_policy_IFSACS :: "'v list_graph \<Rightarrow> 'v SecurityInvariant list \<Rightarrow> 'v stateful_list_policy" where
     "generate_valid_stateful_policy_IFSACS G M = (let filterIFS = filter_IFS_no_violations G M in
         (let filterACS = filter_compliant_stateful_ACS_accu G M [] filterIFS in \<lparr> hostsL = nodesL G, flows_fixL = edgesL G, flows_stateL = filterACS \<rparr>))"
 
@@ -263,12 +263,12 @@ section{*Algorithms*}
     apply(induction a)
     by(simp_all)
 
-  definition generate_valid_stateful_policy_IFSACS_2 :: "'v list_graph \<Rightarrow> 'v NetworkSecurityModel list \<Rightarrow>  'v stateful_list_policy" where
+  definition generate_valid_stateful_policy_IFSACS_2 :: "'v list_graph \<Rightarrow> 'v SecurityInvariant list \<Rightarrow>  'v stateful_list_policy" where
     "generate_valid_stateful_policy_IFSACS_2 G M =
     \<lparr> hostsL = nodesL G, flows_fixL = edgesL G, flows_stateL = inefficient_list_intersect (filter_IFS_no_violations G M) (filter_compliant_stateful_ACS G M) \<rparr>"
 
 
-   lemma generate_valid_stateful_policy_IFSACS_2_complies: "\<lbrakk>\<forall> (m_impl, m_spec) \<in> set M. NetworkSecurityModel_complies_formal_def m_impl m_spec;
+   lemma generate_valid_stateful_policy_IFSACS_2_complies: "\<lbrakk>\<forall> (m_impl, m_spec) \<in> set M. SecurityInvariant_complies_formal_def m_impl m_spec;
           valid_list_graph G;
           valid_reqs (get_spec M);
           TopoS_Composition_Theory.all_security_requirements_fulfilled (get_spec M) (list_graph_to_graph G);

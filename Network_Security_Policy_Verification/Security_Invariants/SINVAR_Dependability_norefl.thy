@@ -2,7 +2,7 @@ theory SINVAR_Dependability_norefl
 imports "../TopoS_Helper"
 begin
 
-section {* SecurityInvariant @{text "Dependability_norefl"}*}
+subsection {* SecurityInvariant @{text "Dependability_norefl"}*}
 
 text{*A version of the Dependability model but if a node reaches itself, it is ignored*}
 

@@ -68,7 +68,7 @@ interpretation DomainHierarchyNG_impl:TopoS_List_Impl
 done
 
 
-section {* DomainHierarchyNG packing *}
+subsubsection {* DomainHierarchyNG packing *}
   definition SINVAR_LIB_DomainHierarchyNG :: "('v::vertex, domainNameTrust, domainTree) TopoS_packed" where
     "SINVAR_LIB_DomainHierarchyNG \<equiv> 
     \<lparr> nm_name = ''DomainHierarchyNG'', 

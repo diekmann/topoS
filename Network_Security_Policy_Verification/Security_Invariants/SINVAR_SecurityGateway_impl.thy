@@ -5,7 +5,7 @@ begin
 code_identifier code_module  SINVAR_SecurityGateway_impl => (Scala) SINVAR_SecurityGateway
 
 
-section {* SecurityInvariant SecurityGateway Implementation *}
+subsubsection {* SecurityInvariant SecurityGateway Implementation *}
 
 fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> secgw_member) \<Rightarrow> bool" where
   "sinvar G nP = (\<forall> (e1,e2) \<in> set (edgesL G). e1 \<noteq> e2 \<longrightarrow> allowed_secgw_flow (nP e1) (nP e2))"
@@ -56,7 +56,7 @@ done
 
 
 
-section {* SecurityGateway packing *}
+subsubsection {* SecurityGateway packing *}
   definition SINVAR_LIB_SecurityGateway :: "('v::vertex, secgw_member, unit) TopoS_packed" where
     "SINVAR_LIB_SecurityGateway \<equiv> 
     \<lparr> nm_name = ''SecurityGateway'', 

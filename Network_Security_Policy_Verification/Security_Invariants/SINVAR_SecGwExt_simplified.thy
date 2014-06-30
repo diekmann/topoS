@@ -2,7 +2,7 @@ theory SINVAR_SecGwExt_simplified
 imports TopoS_Interface TopoS_Helper
 begin
 
-section {* SecurityInvariant SecurityGatewayExtended simplified*}
+subsection {* SecurityInvariant SecurityGatewayExtended simplified*}
 text {* A simplified version for demonstration purposes. Do not use in real world *}
 
 datatype secgw_member = SecurityGateway | SecurityGatewayIN | DomainMember | Unassigned
@@ -32,7 +32,7 @@ fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> secgw_member) \<
 
 definition receiver_violation :: "bool" where "receiver_violation = False"
 
-subsubsection {*Preleminaries*}
+subsubsubsection {*Preleminaries*}
   lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
     apply(simp only: SecurityInvariant_withOffendingFlows.sinvar_mono_def)
     apply(clarify)
@@ -51,7 +51,7 @@ subsubsection {*Preleminaries*}
     apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_mono])
   done
 
-section{*ENF*}
+subsection{*ENF*}
   lemma SecurityGateway_ENFnr: "SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form_not_refl sinvar allowed_secgw_flow"
     by(simp add: SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form_not_refl_def)
   lemma Unassigned_weakrefl: "allowed_secgw_flow Unassigned Unassigned"

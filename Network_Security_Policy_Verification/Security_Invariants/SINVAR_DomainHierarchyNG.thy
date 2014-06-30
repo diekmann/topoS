@@ -4,9 +4,9 @@ imports "../TopoS_Helper"
 begin
 
 
-section{*SecurityInvariant DomainHierarchyNG*}
+subsection{*SecurityInvariant DomainHierarchyNG*}
 
-subsection {* Datatype Domain Hierarchy *}
+subsubsection {* Datatype Domain Hierarchy *}
 text{* Replacement for the old Domain Hiararchy! Better typing! *}
 
   text{* A fully qualified domain name for an entity in a tree-like hierarchy *}
@@ -334,7 +334,7 @@ text{* Replacement for the old Domain Hiararchy! Better typing! *}
   datatype domainName = DN domainNameDept | Unassigned
 
 
-  subsubsection {*Make it a complete Lattice*}
+  subsubsection {*Makeing it a complete Lattice*}
     instantiation domainName :: partial_order
     begin
       (* adding trust here would violate transitivity or antsymmetry *)
@@ -464,7 +464,7 @@ text{* Replacement for the old Domain Hiararchy! Better typing! *}
     apply(simp)
     done
 
-subsection{*The network security invariant *}
+subsubsection{*The network security invariant *}
 
 definition default_node_properties :: "domainNameTrust"
   where  "default_node_properties = Unassigned"

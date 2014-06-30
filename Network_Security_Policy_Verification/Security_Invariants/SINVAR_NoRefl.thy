@@ -2,7 +2,7 @@ theory SINVAR_NoRefl
 imports "../TopoS_Helper"
 begin
 
-section {* SecurityInvariant NoRefl *}
+subsection {* SecurityInvariant NoRefl *}
 
 text{*Hosts are not allowed to communicate with themselves-*}
 
@@ -28,7 +28,7 @@ definition receiver_violation :: "bool" where "receiver_violation = False"
 
 
 
-subsection {*Preliminaries*}
+subsubsection {*Preliminaries*}
   lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
     apply(simp only: SecurityInvariant_withOffendingFlows.sinvar_mono_def)
     apply(clarify)

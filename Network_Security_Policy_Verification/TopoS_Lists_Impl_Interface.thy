@@ -2,7 +2,8 @@ theory TopoS_Lists_Impl_Interface
 imports "Lib/FiniteGraph" "Lib/FiniteListGraph" TopoS_Interface TopoS_Helper
 begin
 
-  section {*Correspondence List implementation and set Speficiation*}
+section{*Executable Implementation with Lists*}
+  text {*Correspondence List Implementation and set Specification*}
   
   subsection{*Abstraction from list implementation to set specification*}
   locale TopoS_List_Impl = 
@@ -41,9 +42,9 @@ begin
     term TopoS_List_Impl
 
 
-  text {* Models packed. *}
+  subsection {* security invariants packed. *}
 
-  section {* many network models together form a library *}
+  text {* We pack all necessary functions and properties of a security invariant in a struct-like data structure.*}
   record ('v::vertex, 'a, 'b) TopoS_packed =
     nm_name :: "string"
     nm_receiver_violation :: "bool"
@@ -56,7 +57,7 @@ begin
     
 
 
-   text{*This must be shown to prove that some packed model m complies with the formal definition!*}
+   text{*The packed list implementation must comply with the formal definition. *}
    locale TopoS_modelLibrary =
     fixes m :: "('v::vertex, 'a, 'b) TopoS_packed" -- "concrete model implementation"
     and sinvar_spec::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool" --"specification"
@@ -129,7 +130,7 @@ subsection{*Helpfull lemmata*}
   
 
 
-section {*Helper lemmata*}
+subsection {*Helper lemmata*}
 
   text{* Provide @{term sinvar} function and get back a function that computes the list of offending flows
   
@@ -204,5 +205,14 @@ section {*Helper lemmata*}
   lemma all_nodes_list_I: "P (list_graph_to_graph G) = Pl G \<Longrightarrow> 
     (\<forall>n \<in> (nodes (list_graph_to_graph G)). P (list_graph_to_graph G) n) = (\<forall> n \<in>set (nodesL G). Pl G n)"
    by(simp add:list_graph_to_graph_def)
+
+
+
+section{*Security Invariant Library*}
+(*Now include the SINVAR_* theory files
+they all use the "subsection" command.
+Here is to top-section!
+*)
+
 
 end

@@ -22,7 +22,9 @@ imports String
 begin
 (*TODO some have exponentaial runtime*)
 (* possibly include: "~~/src/HOL/Library/Code_Char_chr" "~~/src/HOL/Library/Efficient_Nat" *)
-  
+
+
+section{*Summarizing the Security Invariant Library*}
   
 (*none of those should be defined or a hide_const is missing at the end of a SINVAR_*.thy file*)
 term sinvar
@@ -56,7 +58,7 @@ print_interps TopoS_modelLibrary
 
 
 
-section{*Example*}
+subsection{*Example*}
   definition BLPexample1::"bool" where
     "BLPexample1 \<equiv> (nm_eval SINVAR_LIB_BLPbasic) fabNet \<lparr> node_properties = [TopoS_Vertices.V ''PresenceSensor'' \<mapsto> 2, 
                                                     TopoS_Vertices.V ''Webcam'' \<mapsto> 3, 

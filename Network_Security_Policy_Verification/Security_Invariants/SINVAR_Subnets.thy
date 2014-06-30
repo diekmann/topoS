@@ -2,7 +2,7 @@ theory SINVAR_Subnets
 imports"../TopoS_Helper"
 begin
 
-section {* SecurityInvariant Subnets *}
+subsection {* SecurityInvariant Subnets *}
 
 datatype subnets = Subnet nat | BorderRouter nat | Unassigned
 
@@ -30,7 +30,7 @@ definition receiver_violation :: "bool" where "receiver_violation = False"
 
 
 
-subsection {*Preliminaries*}
+subsubsection {*Preliminaries*}
   lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
     apply(simp only: SecurityInvariant_withOffendingFlows.sinvar_mono_def)
     apply(clarify)
@@ -52,7 +52,7 @@ subsection {*Preliminaries*}
 
 
 
-subsection{*ENF*}
+subsubsection{*ENF*}
   lemma Unassigned_only_to_Unassigned: "allowed_subnet_flow Unassigned e2 \<longleftrightarrow> e2 = Unassigned"
     by(case_tac e2, simp_all)
   lemma All_to_Unassigned: "\<forall> e1. allowed_subnet_flow e1 Unassigned"
@@ -123,7 +123,7 @@ where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = Subnets
   lemma TopoS_Subnets: "SecurityInvariant sinvar default_node_properties receiver_violation"
   unfolding receiver_violation_def by unfold_locales
 
-subsection {* Analysis *}
+subsubsection {* Analysis *}
 
 lemma violating_configurations: "\<not> sinvar G nP \<Longrightarrow> 
     \<exists> (e1, e2) \<in> edges G. nP e1 = Unassigned \<or> (\<exists> s1. nP e1 = Subnet s1) \<or> (\<exists> s1. nP e1 = BorderRouter s1)"

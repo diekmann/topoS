@@ -2,7 +2,7 @@ theory SINVAR_CommunicationPartners
 imports "../TopoS_Helper"
 begin
 
-section {* SecurityInvariant CommunicationPartners *}
+subsection {* SecurityInvariant CommunicationPartners *}
 
 
 text{*
@@ -45,7 +45,7 @@ definition receiver_violation :: "bool" where "receiver_violation = False"
 
 
 
-subsection {*Preliminaries*}
+subsubsection {*Preliminaries*}
   lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
     apply(simp only: SecurityInvariant_withOffendingFlows.sinvar_mono_def)
     apply(clarify)
@@ -65,7 +65,7 @@ subsection {*Preliminaries*}
    done
 
 
-subsection {*ENRnr*}
+subsubsection {*ENRnr*}
   lemma CommunicationPartners_ENRnrSR: "SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form_not_refl_SR sinvar allowed_flow"
     by(simp add: SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form_not_refl_SR_def)
   lemma Unassigned_weakrefl: "\<forall> s r. allowed_flow DontCare s DontCare r"

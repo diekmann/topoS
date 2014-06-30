@@ -2,7 +2,7 @@ theory SINVAR_SubnetsInGW
 imports"../TopoS_Helper"
 begin
 
-section {* SecurityInvariant SubnetsInGW *}
+subsection {* SecurityInvariant SubnetsInGW *}
 
 datatype subnets = Member | InboundGateway | Unassigned
 
@@ -25,7 +25,7 @@ fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> subnets) \<Right
 definition receiver_violation :: "bool" where "receiver_violation = False"
 
 
-subsection {*Preliminaries*}
+subsubsection {*Preliminaries*}
   lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
     apply(simp only: SecurityInvariant_withOffendingFlows.sinvar_mono_def)
     apply(clarify)
@@ -44,7 +44,7 @@ subsection {*Preliminaries*}
     apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_mono])
    done
 
-subsection{*ENF*}
+subsubsection{*ENF*}
   lemma Unassigned_not_to_Member: "\<not> allowed_subnet_flow Unassigned Member"
     by(simp)
   lemma All_to_Unassigned: "allowed_subnet_flow e1 Unassigned"

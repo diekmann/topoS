@@ -4,7 +4,7 @@ begin
 
 code_identifier code_module SINVAR_SubnetsInGW_impl => (Scala) SINVAR_SubnetsInGW
 
-section {* SecurityInvariant SubnetsInGw List Implementation *}
+subsubsection {* SecurityInvariant SubnetsInGw List Implementation *}
 
 fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> subnets) \<Rightarrow> bool" where
   "sinvar G nP = (\<forall> (e1,e2) \<in> set (edgesL G). SINVAR_SubnetsInGW.allowed_subnet_flow (nP e1) (nP e2))"
@@ -56,7 +56,7 @@ done
 
 
 
-section {* SubnetsInGW packing *}
+subsubsection {* SubnetsInGW packing *}
   definition SINVAR_LIB_SubnetsInGW :: "('v::vertex, subnets, unit) TopoS_packed" where
     "SINVAR_LIB_SubnetsInGW \<equiv> 
     \<lparr> nm_name = ''SubnetsInGW'', 

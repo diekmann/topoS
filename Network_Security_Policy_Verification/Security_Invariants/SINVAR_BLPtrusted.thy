@@ -2,7 +2,7 @@ theory SINVAR_BLPtrusted
 imports "../TopoS_Helper"
 begin
 
-section {* SecurityInvariant Basic Bell LePadula with trusted entities *}
+subsection {* SecurityInvariant Basic Bell LePadula with trusted entities *}
 
 type_synonym privacy_level = nat
 
@@ -70,7 +70,7 @@ lemma BLP_def_unique: "otherbot \<noteq> default_node_properties \<Longrightarro
   done
 
 
-subsection {*ENF*}
+subsubsection {*ENF*}
   definition BLP_P where "BLP_P \<equiv> (\<lambda>n1 n2.(if trusted n2 then True else privacy_level n1 \<le> privacy_level n2 ))"
   lemma zero_default_candidate: "\<forall>nP e1 e2. \<not> BLP_P (nP e1) (nP e2) \<longrightarrow> \<not> BLP_P (nP e1) default_node_properties"
     apply(rule allI)+

@@ -55,7 +55,7 @@ done
 
 
 
-section {* BLPtrusted packing *}
+subsubsection {* BLPtrusted packing *}
   definition SINVAR_LIB_BLPtrusted :: "('v::vertex, SINVAR_BLPtrusted.node_config, unit) TopoS_packed" where
     "SINVAR_LIB_BLPtrusted \<equiv> 
     \<lparr> nm_name = ''BLPtrusted'', 
@@ -75,7 +75,7 @@ section {* BLPtrusted packing *}
     apply(simp)
     by(unfold_locales)
 
-section{* Example *}
+subsubsection{* Example *}
  (*TODO*)
 
 

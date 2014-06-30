@@ -5,7 +5,7 @@ begin
 code_identifier code_module  SINVAR_NoRefl_impl => (Scala) SINVAR_NoRefl
 
 
-section {* SecurityInvariant NoRefl Implementation *}
+subsubsection {* SecurityInvariant NoRefl Implementation *}
 
 fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> bool" where
   "sinvar G nP = (\<forall> (s,r) \<in> set (edgesL G). s = r \<longrightarrow> nP s = Refl)"
@@ -56,7 +56,7 @@ interpretation NoRefl_impl:TopoS_List_Impl
 done
 
 
-section {* SecurityGateway packing *}
+subsubsection {* SecurityGateway packing *}
   definition SINVAR_LIB_NoRefl :: "('v::vertex, node_config, unit) TopoS_packed" where
     "SINVAR_LIB_NoRefl \<equiv> 
     \<lparr> nm_name = ''NoRefl'', 

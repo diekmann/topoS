@@ -55,7 +55,7 @@ interpretation BLPbasic_impl:TopoS_List_Impl
 
 
 
-section {* BLPbasic packing *}
+subsubsection {* BLPbasic packing *}
   definition SINVAR_LIB_BLPbasic :: "('v::vertex, privacy_level, unit) TopoS_packed" where
     "SINVAR_LIB_BLPbasic \<equiv> 
     \<lparr> nm_name = ''BLPbasic'', 
@@ -75,7 +75,7 @@ section {* BLPbasic packing *}
     apply(simp)
     by(unfold_locales)
 
-section{* Example *}
+subsubsection{* Example *}
   definition fabNet :: "vString list_graph" where
   "fabNet \<equiv> \<lparr> nodesL = [TopoS_Vertices.V ''Statistics'', TopoS_Vertices.V ''SensorSink'', TopoS_Vertices.V ''PresenceSensor'', TopoS_Vertices.V ''Webcam'', TopoS_Vertices.V ''TempSensor'', TopoS_Vertices.V ''FireSesnsor'',
                      TopoS_Vertices.V ''MissionControl1'', TopoS_Vertices.V ''MissionControl2'', TopoS_Vertices.V ''Watchdog'', TopoS_Vertices.V ''Bot1'', TopoS_Vertices.V ''Bot2''], 

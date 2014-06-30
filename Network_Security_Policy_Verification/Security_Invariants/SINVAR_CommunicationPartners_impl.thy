@@ -5,7 +5,7 @@ begin
 code_identifier code_module SINVAR_CommunicationPartners_impl => (Scala) SINVAR_CommunicationPartners
 
 
-section {* SecurityInvariant CommunicationPartners List Implementation *}
+subsubsection {* SecurityInvariant CommunicationPartners List Implementation *}
 
 
 fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> 'v node_config) \<Rightarrow> bool" where
@@ -59,7 +59,7 @@ interpretation CommunicationPartners_impl:TopoS_List_Impl
 done
 
 
-section {* CommunicationPartners packing *}
+subsubsection {* CommunicationPartners packing *}
   definition SINVAR_LIB_CommunicationPartners :: "('v::vertex, 'v SINVAR_CommunicationPartners.node_config, unit) TopoS_packed" where
     "SINVAR_LIB_CommunicationPartners \<equiv> 
     \<lparr> nm_name = ''CommunicationPartners'', 

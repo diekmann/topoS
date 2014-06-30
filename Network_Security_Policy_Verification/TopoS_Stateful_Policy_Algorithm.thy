@@ -51,13 +51,13 @@ section {* Sketch for generating a stateful policy from a simple directed policy
 
     text{*First, filtering flows that cause no IFS violations*}
     (*the edges front of the lsit are more likely to be kept*)
-    fun filter_IFS_no_violations_accu :: "'v::vertex graph \<Rightarrow> 'v NetworkSecurityModel_configured list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list" where
+    fun filter_IFS_no_violations_accu :: "'v::vertex graph \<Rightarrow> 'v SecurityInvariant_configured list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list" where
       "filter_IFS_no_violations_accu G M accu [] = accu" |
       "filter_IFS_no_violations_accu G M accu (e#Es) = (if
         all_security_requirements_fulfilled (get_IFS M) (stateful_policy_to_network_graph \<lparr> hosts = nodes G, flows_fix = edges G, flows_state = set (e#accu) \<rparr>)
         then filter_IFS_no_violations_accu G M (e#accu) Es
         else filter_IFS_no_violations_accu G M accu Es)"
-    definition filter_IFS_no_violations :: "'v::vertex graph \<Rightarrow> 'v NetworkSecurityModel_configured list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list" where
+    definition filter_IFS_no_violations :: "'v::vertex graph \<Rightarrow> 'v SecurityInvariant_configured list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list" where
       "filter_IFS_no_violations G M Es = filter_IFS_no_violations_accu G M [] Es"
 
 
@@ -247,13 +247,13 @@ section {* Sketch for generating a stateful policy from a simple directed policy
   text{*Next *}
     (*"\<forall>F \<in> get_offending_flows (get_ACS M) (stateful_policy_to_network_graph \<T> ). F \<subseteq> backflows (filternew_flows_state \<T>)"*)
     (*first in list are more likely to be kept*)
-    fun filter_compliant_stateful_ACS_accu :: "'v::vertex graph \<Rightarrow> 'v NetworkSecurityModel_configured list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list" where
+    fun filter_compliant_stateful_ACS_accu :: "'v::vertex graph \<Rightarrow> 'v SecurityInvariant_configured list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list" where
       "filter_compliant_stateful_ACS_accu G M accu [] = accu" |
       "filter_compliant_stateful_ACS_accu G M accu (e#Es) = (if
         e \<notin> backflows (edges G) \<and> (\<forall>F \<in> get_offending_flows (get_ACS M) (stateful_policy_to_network_graph \<lparr> hosts = nodes G, flows_fix = edges G, flows_state = set (e#accu) \<rparr>). F \<subseteq> backflows (set (e#accu)))
         then filter_compliant_stateful_ACS_accu G M (e#accu) Es
         else filter_compliant_stateful_ACS_accu G M accu Es)"
-    definition filter_compliant_stateful_ACS :: "'v::vertex graph \<Rightarrow> 'v NetworkSecurityModel_configured list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list" where
+    definition filter_compliant_stateful_ACS :: "'v::vertex graph \<Rightarrow> 'v SecurityInvariant_configured list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list" where
       "filter_compliant_stateful_ACS G M Es = filter_compliant_stateful_ACS_accu G M [] Es"
 
 
@@ -631,7 +631,7 @@ section {* Sketch for generating a stateful policy from a simple directed policy
 
 
 
-  definition generate_valid_stateful_policy_IFSACS :: "'v::vertex graph \<Rightarrow> 'v NetworkSecurityModel_configured list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> 'v stateful_policy" where
+  definition generate_valid_stateful_policy_IFSACS :: "'v::vertex graph \<Rightarrow> 'v SecurityInvariant_configured list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> 'v stateful_policy" where
     "generate_valid_stateful_policy_IFSACS G M edgesList \<equiv> (let filterIFS = filter_IFS_no_violations G M edgesList in
         (let filterACS = filter_compliant_stateful_ACS G M filterIFS in \<lparr> hosts = nodes G, flows_fix = edges G, flows_state = set filterACS \<rparr>))"
 
@@ -737,7 +737,7 @@ section {* Sketch for generating a stateful policy from a simple directed policy
 
 
 
-  definition generate_valid_stateful_policy_IFSACS_2 :: "'v::vertex graph \<Rightarrow> 'v NetworkSecurityModel_configured list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> 'v stateful_policy" where
+  definition generate_valid_stateful_policy_IFSACS_2 :: "'v::vertex graph \<Rightarrow> 'v SecurityInvariant_configured list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> 'v stateful_policy" where
     "generate_valid_stateful_policy_IFSACS_2 G M edgesList \<equiv> 
     \<lparr> hosts = nodes G, flows_fix = edges G, flows_state = set (filter_IFS_no_violations G M edgesList) \<inter> set (filter_compliant_stateful_ACS G M edgesList) \<rparr>"
 
@@ -976,7 +976,7 @@ text{* In the following, we see failed attempts which try to prove that under co
 
 (*Scratch*)
 (*
-  definition is_max_stateful_flows :: "'v::vertex graph \<Rightarrow> 'v NetworkSecurityModel_configured list \<Rightarrow> ('v \<times> 'v) set \<Rightarrow> ('v \<times> 'v) set \<Rightarrow> bool" where
+  definition is_max_stateful_flows :: "'v::vertex graph \<Rightarrow> 'v SecurityInvariant_configured list \<Rightarrow> ('v \<times> 'v) set \<Rightarrow> ('v \<times> 'v) set \<Rightarrow> bool" where
     "is_max_stateful_flows G M Base S \<equiv> \<forall> e \<in> Base - S. \<not> stateful_policy_compliance \<lparr> hosts = nodes G, flows_fix = edges G, flows_state = S \<union> {e} \<rparr> G M"
 
 
@@ -1115,7 +1115,7 @@ oops
 
 
 
-  definition generate_valid_stateful_policy_IFSACS_3 :: "'v::vertex set \<Rightarrow> 'v NetworkSecurityModel_configured list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> 'v stateful_policy" where
+  definition generate_valid_stateful_policy_IFSACS_3 :: "'v::vertex set \<Rightarrow> 'v SecurityInvariant_configured list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> 'v stateful_policy" where
     "generate_valid_stateful_policy_IFSACS_3 V M edgesList \<equiv> (let filterIFS = filter_IFS_no_violations \<lparr>nodes = V, edges = set edgesList\<rparr> M edgesList in
         (let G' = \<lparr> nodes = V, edges = set edgesList \<union> set filterIFS \<rparr> in 
         (let filterACS = filter_compliant_stateful_ACS G' M (edgesList @ filterIFS) in \<lparr> hosts = V, flows_fix = edges G', flows_state = set filterACS \<rparr>)))"

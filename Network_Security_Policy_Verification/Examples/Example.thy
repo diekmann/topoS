@@ -2,7 +2,7 @@ theory Example
 imports "../TopoS_Interface" "../TopoS_Library"
 begin
 
-section {* Network Graph and Security Requirements *}
+subsection {* Network Graph and Security Requirements *}
 
   text{*We define the network*}
   definition example_net_secgw :: "nat list_graph" where

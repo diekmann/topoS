@@ -22,8 +22,8 @@ lemma "valid_list_graph policy" by eval
 lemma "length (edgesL policy) = 21" by eval
 
 
-definition DomainHierarchy_m::"(vString NetworkSecurityModel)" where
-      "DomainHierarchy_m \<equiv> new_configured_list_NetworkSecurityModel SINVAR_DomainHierarchyNG_impl.SINVAR_LIB_DomainHierarchyNG \<lparr> 
+definition DomainHierarchy_m::"(vString SecurityInvariant)" where
+      "DomainHierarchy_m \<equiv> new_configured_list_SecurityInvariant SINVAR_DomainHierarchyNG_impl.SINVAR_LIB_DomainHierarchyNG \<lparr> 
           node_properties = [
             V ''CC'' \<mapsto> DN (''aircraft''--''crew''--Leaf, 1),
             V ''C1'' \<mapsto> DN (''aircraft''--''crew''--Leaf, 0),
@@ -47,8 +47,8 @@ definition DomainHierarchy_m::"(vString NetworkSecurityModel)" where
           \<rparr>"
 
 
-definition SecurityGateway_m::"(vString NetworkSecurityModel)" where
-  "SecurityGateway_m \<equiv> new_configured_list_NetworkSecurityModel SINVAR_LIB_SecurityGatewayExtended \<lparr> 
+definition SecurityGateway_m::"(vString SecurityInvariant)" where
+  "SecurityGateway_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_SecurityGatewayExtended \<lparr> 
           node_properties = [V ''IFEsrv'' \<mapsto> SINVAR_SecGwExt.SecurityGatewayIN,
                              V ''IFE1'' \<mapsto> SINVAR_SecGwExt.DomainMember,
                              V ''IFE2'' \<mapsto> SINVAR_SecGwExt.DomainMember], 
@@ -62,8 +62,8 @@ definition SecurityGateway_m::"(vString NetworkSecurityModel)" where
 2 - secret
 3 - topsecret
 *)
-definition BLP_m::"(vString NetworkSecurityModel)" where
-    "BLP_m \<equiv> new_configured_list_NetworkSecurityModel SINVAR_LIB_BLPtrusted \<lparr> 
+definition BLP_m::"(vString SecurityInvariant)" where
+    "BLP_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr> 
           node_properties = [V ''CC'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
                              V ''C1'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
                              V ''C2'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
@@ -119,7 +119,7 @@ lemma "all_security_requirements_fulfilled security_invariants policy" by eval
 lemma "all_security_requirements_fulfilled security_invariants max_policy" by eval
 
 
-section{*A stateful implementation*}
+subsection{*A stateful implementation*}
 definition "stateful_policy = generate_valid_stateful_policy_IFSACS policy security_invariants"
 value[code] "stateful_policy"
 

@@ -18,10 +18,10 @@ text{*Our access control view on the network*}
   lemma "valid_list_graph ChairNetwork_empty" by eval
 
 
-section{*Our security requirements*}
-  subsection{*We have a server with confidential data*}
-    definition ConfidentialChairData::"(vString NetworkSecurityModel)" where
-      "ConfidentialChairData \<equiv> new_configured_list_NetworkSecurityModel SINVAR_BLPtrusted_impl.SINVAR_LIB_BLPtrusted \<lparr> 
+subsection{*Our security requirements*}
+  subsubsection{*We have a server with confidential data*}
+    definition ConfidentialChairData::"(vString SecurityInvariant)" where
+      "ConfidentialChairData \<equiv> new_configured_list_SecurityInvariant SINVAR_BLPtrusted_impl.SINVAR_LIB_BLPtrusted \<lparr> 
           node_properties = [V ''FilesSrv'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
                              V ''Employees'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>,
                              V ''EReachable'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>], 
@@ -30,7 +30,7 @@ section{*Our security requirements*}
 
 
   (*
-  subsection{*We have a hierarchical printing policy*}
+  subsubsection{*We have a hierarchical printing policy*}
     definition "PrintingHierarchy_nodes=[V ''Employees''\<mapsto> DN (''ColorPrinting''--Leaf, 0),
                            V ''PrinterColor''\<mapsto> DN (''ColorPrinting''--''Printer''--Leaf, 0),
                            V ''Students''\<mapsto> DN (''ColorPrinting''--''BwPrinting''--Leaf, 0),
@@ -39,8 +39,8 @@ section{*Our security requirements*}
               Department ''Printer'' [], 
               Department ''BwPrinting'' [
                   Department ''Printer'' []]]"
-    definition PrintingHierarchy::"vString NetworkSecurityModel" where
-      "PrintingHierarchy \<equiv> new_configured_list_NetworkSecurityModel SINVAR_DomainHierarchyNG_impl.SINVAR_LIB_DomainHierarchyNG \<lparr> 
+    definition PrintingHierarchy::"vString SecurityInvariant" where
+      "PrintingHierarchy \<equiv> new_configured_list_SecurityInvariant SINVAR_DomainHierarchyNG_impl.SINVAR_LIB_DomainHierarchyNG \<lparr> 
         node_properties = PrintingHierarchy_nodes,
         model_global_properties = PrintingHierarchy_tree
         \<rparr>"
@@ -49,8 +49,8 @@ section{*Our security requirements*}
     lemma "nm_verify_globals SINVAR_DomainHierarchyNG_impl.SINVAR_LIB_DomainHierarchyNG ChairNetwork_empty 
           (nm_node_props SINVAR_DomainHierarchyNG_impl.SINVAR_LIB_DomainHierarchyNG \<lparr> node_properties = PrintingHierarchy_nodes, model_global_properties = PrintingHierarchy_tree \<rparr>) PrintingHierarchy_tree" by eval
   *)
-  subsection{* The color printer is only accessibly by employees, The black.white printer by employees and students*}
-    definition "PrintingACL \<equiv> new_configured_list_NetworkSecurityModel SINVAR_LIB_CommunicationPartners \<lparr> 
+  subsubsection{* The color printer is only accessibly by employees, The black.white printer by employees and students*}
+    definition "PrintingACL \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
           node_properties = [V ''PrinterColor'' \<mapsto> Master [V ''Employees'', V ''EReachable''],
                              V ''PrinterBW'' \<mapsto> Master [V ''Employees'', V ''EReachable'', V ''Students''],
                              V ''Employees'' \<mapsto> Care,
@@ -59,8 +59,8 @@ section{*Our security requirements*}
           model_global_properties = () 
           \<rparr>"
 
-  subsection{* Printers are information sinks *}
-    definition "PrintingSink \<equiv> new_configured_list_NetworkSecurityModel SINVAR_LIB_Sink \<lparr> 
+  subsubsection{* Printers are information sinks *}
+    definition "PrintingSink \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_Sink \<lparr> 
           node_properties = [V ''PrinterColor'' \<mapsto> Sink,
                              V ''PrinterBW'' \<mapsto> Sink], 
           model_global_properties = () 
@@ -68,15 +68,15 @@ section{*Our security requirements*}
 
 
 
-  subsection{*Students may access each other but are not accessible from the outside*}
-    definition "StudentSubnet \<equiv> new_configured_list_NetworkSecurityModel SINVAR_LIB_SubnetsInGW \<lparr> 
+  subsubsection{*Students may access each other but are not accessible from the outside*}
+    definition "StudentSubnet \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_SubnetsInGW \<lparr> 
           node_properties = [V ''Students'' \<mapsto> Member, V ''Employees'' \<mapsto> Member, V ''EReachable'' \<mapsto> InboundGateway], 
           model_global_properties = () 
           \<rparr>"
 
 
-  subsection{* The files server is only accessibly by employees*}
-    definition "FilesSrcACL \<equiv> new_configured_list_NetworkSecurityModel SINVAR_LIB_CommunicationPartners \<lparr> 
+  subsubsection{* The files server is only accessibly by employees*}
+    definition "FilesSrcACL \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
           node_properties = [V ''FilesSrv'' \<mapsto> Master [V ''Employees'', V ''EReachable''],
                              V ''Employees'' \<mapsto> Care,
                              V ''EReachable'' \<mapsto> Care], 
@@ -84,7 +84,7 @@ section{*Our security requirements*}
           \<rparr>"
 
 
-  subsection{*emplyees are reachable from the Internet*}
+  subsubsection{*emplyees are reachable from the Internet*}
     (*nothing to do here*)
 
 lemma "implc_sinvar ConfidentialChairData ChairNetwork_empty" by eval

@@ -2,7 +2,7 @@ theory SINVAR_NonInterference
 imports "../TopoS_Helper"
 begin
 
-section {* SecurityInvariant NonInterference *}
+subsection {* SecurityInvariant NonInterference *}
 
 datatype node_config = Interfering | Unrelated
 
@@ -88,7 +88,7 @@ text{*simplifications for sets we need in the uniqueness proof*}
     apply(subst tmp3)
     by fastforce
 
-subsection{*monotonic and preliminaries*}
+subsubsection{*monotonic and preliminaries*}
   lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
   unfolding SecurityInvariant_withOffendingFlows.sinvar_mono_def
     apply(clarsimp)

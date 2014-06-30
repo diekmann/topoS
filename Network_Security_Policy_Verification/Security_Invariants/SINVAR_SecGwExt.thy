@@ -2,7 +2,7 @@ theory SINVAR_SecGwExt
 imports "../TopoS_Helper"
 begin
 
-section {* SecurityInvariant SecurityGatewayExtended*}
+subsection {* SecurityInvariant SecurityGatewayExtended*}
 text {* like SecurityGateway but SecurityGatewayIN and AccessibleMember are accessible from outside world *}
 
 datatype secgw_member = SecurityGateway | SecurityGatewayIN | DomainMember  | AccessibleMember | Unassigned
@@ -32,7 +32,7 @@ fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> secgw_member) \<
 
 definition receiver_violation :: "bool" where "receiver_violation = False"
 
-subsection {*Preliminaries*}
+subsubsection {*Preliminaries*}
   lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
     apply(simp only: SecurityInvariant_withOffendingFlows.sinvar_mono_def)
     apply(clarify)
@@ -51,7 +51,7 @@ subsection {*Preliminaries*}
     apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_mono])
    done
 
-subsection{*ENF*}
+subsubsection{*ENF*}
   lemma SecurityGateway_ENFnr: "SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form_not_refl sinvar allowed_secgw_flow"
     by(simp add: SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form_not_refl_def)
   lemma Unassigned_botdefault: "\<forall> e1 e2. e2 \<noteq> Unassigned \<longrightarrow> \<not> allowed_secgw_flow e1 e2 \<longrightarrow> \<not> allowed_secgw_flow Unassigned e2"

@@ -2,7 +2,7 @@ theory SINVAR_Dependability
 imports "../TopoS_Helper"
 begin
 
-section {* SecurityInvariant Dependability *}
+subsection {* SecurityInvariant Dependability *}
 
 
 type_synonym dependability_level = nat

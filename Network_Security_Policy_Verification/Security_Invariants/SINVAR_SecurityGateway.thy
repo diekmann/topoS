@@ -4,7 +4,7 @@ begin
 
 (*deprecated by SecurityGatewayExtended*)
 
-section {* SecurityInvariant SecurityGateway *}
+subsection {* SecurityInvariant SecurityGateway *}
 
 datatype secgw_member = SecurityGateway | DomainMember | Unassigned
 
@@ -32,7 +32,7 @@ definition receiver_violation :: "bool" where "receiver_violation = False"
 
 
 
-subsubsection {*Preleminaries*}
+subsubsubsection {*Preleminaries*}
   lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
     apply(simp only: SecurityInvariant_withOffendingFlows.sinvar_mono_def)
     apply(clarify)
@@ -52,7 +52,7 @@ subsubsection {*Preleminaries*}
    done
 
 
-subsection {*ENRnr*}
+subsubsection {*ENRnr*}
   lemma SecurityGateway_ENRnr: "SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form_not_refl sinvar allowed_secgw_flow"
     by(simp add: SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form_not_refl_def)
   lemma Unassigned_botdefault: "\<forall> e1 e2. e2 \<noteq> Unassigned \<longrightarrow> \<not> allowed_secgw_flow e1 e2 \<longrightarrow> \<not> allowed_secgw_flow Unassigned e2"
