@@ -6,6 +6,10 @@ begin
 
 section {* Security Invariants *}
   text{*
+    A good documentation of this formalization is available in \cite{diekmann2014forte}. 
+  *}
+
+  text{*
     We define security invariants over a graph.
     The graph corresponds to the network's access control structure.
   *}
@@ -103,14 +107,14 @@ Undesirable things may happen:
 The offending flows can be empty, even for a violated invariant.
 
 We provide an example, the security invariant @{term "(\<lambda>_ _. False)"}.
-As host attributes, we simpley use the identity function @{const id}.
+As host attributes, we simply use the identity function @{const id}.
 *}
 lemma "SecurityInvariant_withOffendingFlows.set_offending_flows (\<lambda>_ _. False) \<lparr> nodes = {V ''v1''}, edges={} \<rparr> id = {}"
-by(simp add: SecurityInvariant_withOffendingFlows.set_offending_flows_def 
+by %invisible (simp add: SecurityInvariant_withOffendingFlows.set_offending_flows_def 
   SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def SecurityInvariant_withOffendingFlows.is_offending_flows_def)
 lemma "SecurityInvariant_withOffendingFlows.set_offending_flows (\<lambda>_ _. False) 
   \<lparr> nodes = {V ''v1'', V ''v2''}, edges = {(V ''v1'', V ''v2'')} \<rparr> id = {}"
-by(simp add: SecurityInvariant_withOffendingFlows.set_offending_flows_def 
+by %invisible (simp add: SecurityInvariant_withOffendingFlows.set_offending_flows_def 
   SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def SecurityInvariant_withOffendingFlows.is_offending_flows_def)
 
 text {*In general, there exists a @{term sinvar} such that the invariant does not hold and no offending flows exits.*}
@@ -122,13 +126,14 @@ text {*In general, there exists a @{term sinvar} such that the invariant does no
   done
 
 
-text{*Thus, we introduce a usefulness property that prohibits such useless invariants.*}
-text{*We capsulate them in an invariant.
-Ir requires the following: 
-1) The offending flows are always defined.
-2) The invariant is monotonic, i.e. prohibiting more is more secure.
-3) And, the (non-minimal) offending flows are monotonic, i.e. prohibiting more solves more security issues.
-
+text{*Thus, we introduce usefulness properties that prohibits such useless invariants.*}
+text{*We summarize them in an invariant.
+It requires the following: 
+\begin{enumerate}
+  \item The offending flows are always defined.
+  \item The invariant is monotonic, i.e. prohibiting more is more secure.
+  \item And, the (non-minimal) offending flows are monotonic, i.e. prohibiting more solves more security issues.
+\end{enumerate}
 
 Later, we will show that is suffices to show that the invariant is monotonic. The other two properties can be derived.
 *}
@@ -148,18 +153,23 @@ Later, we will show that is suffices to show that the invariant is monotonic. Th
       "\<lbrakk> valid_graph G; is_offending_flows ff G nP \<rbrakk> \<Longrightarrow> is_offending_flows (ff \<union> f') G nP"
   begin
 
-  text {* TODO: add this to latex document *}
+  text {*
+    \begin{small}
+    To instantiate a @{const SecurityInvariant_preliminaries}, here are some hints: 
+    Have a look at the @{text "TopoS_withOffendingFlows_lemmata.thy"} file.
+    \mbox{TODO: check file still has this name}
+    There is a definition of @{prop sinvar_mono}. It impplies @{prop mono_sinvar} and @{prop mono_offending}
+    @{text "apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_sinvar_mono[OF sinvar_mono])
+    apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_mono])"}
+  
+    In addition, @{text "SecurityInvariant_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF sinvar_mono]"} gives a nice proof rule for
+    @{prop defined_offending}
+  
+    Basically, @{text "sinvar_mono."} implies almost all assumptions here and is equal to @{prop mono_sinvar}.
+    \end{small}
+  *}
   (*
-  For instance proofs of SecurityInvariant_preliminaries:
-    Have a look at SecurityInvariant_withOffendingFlows_lemmata.thy
-    There is a definition of sinvar_mono. It impplies mono_sinvar and mono_offending
-    apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_sinvar_mono[OF sinvar_mono])
-    apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_mono])
-  
-    In addition, SecurityInvariant_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF sinvar_mono] gives a nice proof rule for
-    defined_offending
-  
-    Basically, sinvar_mono. implies almost all assumptions here and is equal to mono_sinvar.
+
   *)
   end
 
@@ -171,6 +181,8 @@ We will now add a new artifact to the Security Invariant.
 It is a secure default host attribute, we will use the symbol @{text "\<bottom>"}.
 
 The newly introduced Boolean @{text "receiver_violation"} tells whether a security violation happens at the sender's or the receiver's side.
+
+The details can be looked up in \cite{diekmann2014forte}. 
 *}
 
   -- {* Some notes about the notation:
@@ -187,11 +199,15 @@ The newly introduced Boolean @{text "receiver_violation"} tells whether a securi
     and receiver_violation :: "bool"
     assumes 
       -- "default value can never fix a security violation."
-      -- {*Idea: Giving an offending host, the default attribute does not change whether the invariant holds.
-        I.e this reconfiguration does not remove information, thus preserves all security critical information.
+      -- {*Idea: Assume there is a violation, then there is some offending flow. 
+        @{text receiver_violation} defines whether the violation happens at the sender's or the receiver's side. 
+        We call the place of the violation the \emph{offending host}. 
+        We replace the host attribute of the offending host with the default attribute. 
+        Giving an offending host, a \emph{secure} default attribute does not change whether the invariant holds.
+        I.e.\ this reconfiguration does not remove information, thus preserves all security critical information.
         Thought experiment preliminaries: Can a default configuration ever solve an existing security violation? NO!
-        Thought experiment 1: admin forgot to configure host, hence it is handled by default configuration value ..
-        Thought experiment 2: new node (attacker) is added to the network. What is its default configuration value ..*}
+        Thought experiment 1: admin forgot to configure host, hence it is handled by default configuration value ...
+        Thought experiment 2: new node (attacker) is added to the network. What is its default configuration value ...*}
       default_secure:
       "\<lbrakk> valid_graph G; \<not> sinvar G nP; F \<in> set_offending_flows G nP \<rbrakk> \<Longrightarrow>
         (\<not> receiver_violation \<longrightarrow> i \<in> fst ` F \<longrightarrow> \<not> sinvar G (nP(i := \<bottom>))) \<and>
@@ -199,7 +215,7 @@ The newly introduced Boolean @{text "receiver_violation"} tells whether a securi
       and
       default_unique:
       "otherbot \<noteq> \<bottom> \<Longrightarrow> 
-        \<exists> G nP i F. valid_graph (G::('v::vertex) graph) \<and> \<not> sinvar G nP \<and> F \<in> set_offending_flows G nP \<and> 
+        \<exists> (G::('v::vertex) graph) nP i F. valid_graph G \<and> \<not> sinvar G nP \<and> F \<in> set_offending_flows G nP \<and> 
          sinvar (delete_edges G F) nP \<and>
          (\<not> receiver_violation \<longrightarrow> i \<in> fst ` F \<and> sinvar G (nP(i := otherbot))) \<and>
          (receiver_violation \<longrightarrow> i \<in> snd ` F \<and> sinvar G (nP(i := otherbot))) "
@@ -212,7 +228,7 @@ The newly introduced Boolean @{text "receiver_violation"} tells whether a securi
         (\<forall> v\<^sub>1 v\<^sub>2. verify_globals (add_edge v\<^sub>1 v\<^sub>2 G) nP gP) \<and> 
         (\<forall> (v\<^sub>1, v\<^sub>2) \<in> edges G. verify_globals (delete_edge v\<^sub>1 v\<^sub>2 G) nP gP)"*)
    begin
-    -- "Removes option type, replaces with default node property"
+    -- "Removes option type, replaces with default host attribute"
     fun node_props :: "('v, 'a, 'b) TopoS_Params \<Rightarrow> ('v \<Rightarrow> 'a)" where
     "node_props P = (\<lambda> i. (case (node_properties P) i of Some property \<Rightarrow> property | None \<Rightarrow> \<bottom>))"
 
@@ -225,7 +241,14 @@ The newly introduced Boolean @{text "receiver_violation"} tells whether a securi
      apply(rule allI)+
      by (metis (lifting, mono_tags) domD domIff option.simps(4) option.simps(5) the.simps)
 
-
+    text{*
+      Checking whether a security invariant holds.
+      \begin{enumerate}
+        \item check that the policy @{term G} is syntactically valid
+        \item check that some optional properties hold, specified by @{term verify_globals}
+        \item check the security invariant @{term sinvar}
+      \end{enumerate}
+    *}
     definition eval::"'v graph \<Rightarrow> ('v, 'a, 'b)TopoS_Params \<Rightarrow> bool" where
     "eval G P \<equiv> valid_graph G \<and> verify_globals G (node_props P) (model_global_properties P) \<and> 
           sinvar G (node_props P)"
@@ -247,20 +270,25 @@ print_locale! SecurityInvariant
 
 
 subsection{*Information Flow Security and Access Control*}
-text{*@{term receiver_violation} defines the offending host. Thus, it defines when the violation happens. 
+text{*
 
-If the violation happes when the sender sends, we have an access control model. I.e. 
-the sender does not have the appropriate rights ro initiate the connection.
+@{term receiver_violation} defines the offending host. Thus, it defines when the violation happens. 
 
-If the violation happens at the receiver, we have an information flow security model. I.e. 
-the reciever lacks the appropiate security clearance to retrieve the (confidential) information. 
+We found that this coincides with the invariant's security strategy. 
+
+\begin{description}
+\item[ACS] If the violation happens at the sender, we have an access control strategy (\emph{ACS}). 
+I.e.\ the sender does not have the appropriate rights to initiate the connection.
+
+\item[IFS] If the violation happens at the receiver, we have an information flow security strategy (\emph{IFS})
+I.e.\ the receiver lacks the appropriate security clearance to retrieve the (confidential) information. 
 The violations happens only when the receiver reads the data.
+\end{description}
 
-
-We refine our definitions
+We refine our @{term SecurityInvariant} locale.
 *}
 
-subsection {*Information flow security*}
+subsection {*Information Flow Security Strategy (IFS)*}
   locale SecurityInvariant_IFS = SecurityInvariant_preliminaries sinvar verify_globals
       for sinvar::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
       and verify_globals::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
@@ -318,7 +346,7 @@ lemma default_uniqueness_by_counterexample_IFS:
    using assms by blast
 
 
-subsection {*Access Control Strategy*}
+subsection {*Access Control Strategy (ACS)*}
   locale SecurityInvariant_ACS = SecurityInvariant_preliminaries sinvar verify_globals
       for sinvar::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
       and verify_globals::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
@@ -375,7 +403,7 @@ lemma default_uniqueness_by_counterexample_ACS:
   using assms by blast
 
 
-text{* The sublocale relation ship tells that the simplified @{const SecurityInvariant_ACS} and @{const SecurityInvariant_IFS} 
-  assumptions suffice to do tho whole SecurityInvariant thing. The other direction is just for completeness.  *}
+text{* The sublocale relationships tell that the simplified @{const SecurityInvariant_ACS} and @{const SecurityInvariant_IFS} 
+  assumptions suffice to do tho generic SecurityInvariant assumptions. *}
 
 end

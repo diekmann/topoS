@@ -4,7 +4,9 @@ imports Main TopoS_Interface TopoS_Util
   vertex_example_simps
 begin
 
-text {*Imports a lot of usefull SecurityInvariantling lemmata.*}
+
+
+text {*Imports a lot of usefull SecurityInvariant lemmata.*}
 
 
 

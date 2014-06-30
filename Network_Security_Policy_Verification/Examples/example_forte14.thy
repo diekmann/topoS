@@ -23,7 +23,7 @@ lemma "length (edgesL policy) = 21" by eval
 
 
 definition DomainHierarchy_m::"(vString NetworkSecurityModel)" where
-      "DomainHierarchy_m \<equiv> new_configured_list_NetworkSecurityModel NM_DomainHierarchyNG_impl.NM_LIB_DomainHierarchyNG \<lparr> 
+      "DomainHierarchy_m \<equiv> new_configured_list_NetworkSecurityModel SINVAR_DomainHierarchyNG_impl.SINVAR_LIB_DomainHierarchyNG \<lparr> 
           node_properties = [
             V ''CC'' \<mapsto> DN (''aircraft''--''crew''--Leaf, 1),
             V ''C1'' \<mapsto> DN (''aircraft''--''crew''--Leaf, 0),
@@ -48,10 +48,10 @@ definition DomainHierarchy_m::"(vString NetworkSecurityModel)" where
 
 
 definition SecurityGateway_m::"(vString NetworkSecurityModel)" where
-  "SecurityGateway_m \<equiv> new_configured_list_NetworkSecurityModel NM_LIB_SecurityGatewayExtended \<lparr> 
-          node_properties = [V ''IFEsrv'' \<mapsto> NM_SecGwExt.SecurityGatewayIN,
-                             V ''IFE1'' \<mapsto> NM_SecGwExt.DomainMember,
-                             V ''IFE2'' \<mapsto> NM_SecGwExt.DomainMember], 
+  "SecurityGateway_m \<equiv> new_configured_list_NetworkSecurityModel SINVAR_LIB_SecurityGatewayExtended \<lparr> 
+          node_properties = [V ''IFEsrv'' \<mapsto> SINVAR_SecGwExt.SecurityGatewayIN,
+                             V ''IFE1'' \<mapsto> SINVAR_SecGwExt.DomainMember,
+                             V ''IFE2'' \<mapsto> SINVAR_SecGwExt.DomainMember], 
           model_global_properties = () 
           \<rparr>"
 
@@ -63,7 +63,7 @@ definition SecurityGateway_m::"(vString NetworkSecurityModel)" where
 3 - topsecret
 *)
 definition BLP_m::"(vString NetworkSecurityModel)" where
-    "BLP_m \<equiv> new_configured_list_NetworkSecurityModel NM_LIB_BLPtrusted \<lparr> 
+    "BLP_m \<equiv> new_configured_list_NetworkSecurityModel SINVAR_LIB_BLPtrusted \<lparr> 
           node_properties = [V ''CC'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
                              V ''C1'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
                              V ''C2'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,

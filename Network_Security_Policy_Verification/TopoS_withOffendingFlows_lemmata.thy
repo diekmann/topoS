@@ -3,14 +3,21 @@ imports TopoS_Interface
 begin
 
 
-section {*Monotonicity helper lemmata*}
+section {*@{term SecurityInvariant} Instantiation Helpers*}
+
+text{*
+  The security invariant locales are set up hierarchically to ease instantiation proofs.
+  The first locale, @{term SecurityInvariant_withOffendingFlows} has no assumptions, thus instantiations is for free. 
+  The first step focuses on monotonicity,
+*}
+
 context SecurityInvariant_withOffendingFlows
 begin
   text{*We define the monotonicity of @{text "sinvar"}:
   
   @{term "(\<And> nP N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr>  \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E \<rparr> nP \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E' \<rparr> nP )"}
   
-  Having a valid model, removing edges retains the validity
+  Having a valid invariant, removing edges retains the validity. I.e.\ prohibiting more, is more or equally secure.
   *}
 
   definition sinvar_mono :: "bool" where
@@ -19,6 +26,9 @@ begin
       E' \<subseteq> E \<and> 
       sinvar \<lparr> nodes = N, edges = E \<rparr> nP \<longrightarrow> sinvar \<lparr> nodes = N, edges = E' \<rparr> nP )"
 
+  text{*
+    If one can show @{const sinvar_mono}, then the instantiation of the @{term SecurityInvariant_preliminaries} locale is tremendously simplified. 
+  *}
 
   lemma sinvar_mono_I_proofrule_simple: 
   "\<lbrakk> (\<forall> G nP. sinvar G nP = (\<forall> (e1, e2) \<in> edges G. P e1 e2 nP) ) \<rbrakk> \<Longrightarrow> sinvar_mono"
@@ -124,7 +134,7 @@ end
 
 
 
-section {*offending flows not empty helper lemmata*}
+subsection {*offending flows not empty helper lemmata*}
 context SecurityInvariant_withOffendingFlows
 begin
   text {* Give an overapproximation of offending flows (e.g. all edges) and get back a
@@ -150,9 +160,9 @@ begin
   lemma graph_eq_intro: "(nodes (G::'a graph) = nodes G') \<Longrightarrow> (edges G = edges G') \<Longrightarrow> G = G'"
   by simp
 
-  text{* The Graph we check in @{term minimalize_offending_overapprox},
-  @{term "G minus (fs \<union> keep)"} is the graph from the @{term offending_flows_min_set} condition.
-  We add f and remove it.*}
+  text{* The graph we check in @{const minimalize_offending_overapprox},
+  @{term "G minus (fs \<union> keep)"} is the graph from the @{text offending_flows_min_set} condition.
+  We add @{term f} and remove it.*}
   lemma delete_edges_list_add_add_iff: 
   "valid_graph G \<Longrightarrow> f \<in> edges G \<Longrightarrow> f \<notin> set fs \<Longrightarrow> f \<notin> set keep \<Longrightarrow>
     (add_edge (fst f) (snd f) (delete_edges_list G (f#fs@keep))) = (delete_edges_list G (fs@keep))"
@@ -390,7 +400,7 @@ begin
 
    text{*
    If there exists a security violations,
-   there a means to fix it if and only if the network in which nobody comunicates with anyone fulfills the security requirement
+   there a means to fix it if and only if the network in which nobody communicates with anyone fulfills the security requirement
    *}
    theorem valid_empty_edges_iff_exists_offending_flows: 
     assumes mono: "sinvar_mono" and validG: "valid_graph G" and noteval: "\<not> sinvar G nP"
@@ -510,7 +520,7 @@ begin
 
     lemma mono_imp_emptyoffending_eq_nevervalid:
        "\<lbrakk> sinvar_mono; valid_graph G; \<not> sinvar G nP; set_offending_flows G nP = {}\<rbrakk> \<Longrightarrow> 
-        \<not> (\<exists> f \<subseteq> edges G. sinvar (delete_edges G f) nP)"
+        \<not> (\<exists> F \<subseteq> edges G. sinvar (delete_edges G F) nP)"
     proof -
       assume mono: "sinvar_mono"
       and validG: "valid_graph G"
@@ -582,14 +592,13 @@ end
  
 
 
-text{* Old version of network security requirement modelling also gave 
-  @{text "f \<in> set_offending_flows G nP; sinvar (delete_edges G f) nP"}
+text{* Old version of security invariant gave @{term "F \<in> set_offending_flows G nP"} and @{term "sinvar (delete_edges G F) nP"}
   as assumption for @{text "default_secure"}. We can conclude this from mono. *}
 context SecurityInvariant_withOffendingFlows
 begin
   lemma mono_exists_offending_flows:
   "\<lbrakk> sinvar_mono; valid_graph G; is_offending_flows (set ff) G nP; set ff \<subseteq> edges G; distinct ff \<rbrakk> 
-    \<Longrightarrow> \<exists>f. f \<in> set_offending_flows G nP \<and> sinvar (delete_edges G f) nP"
+    \<Longrightarrow> \<exists>F. F \<in> set_offending_flows G nP \<and> sinvar (delete_edges G F) nP"
     apply(frule mono_imp_set_offending_flows_not_empty[of G nP ff])
          apply(simp_all add:is_offending_flows_def)
     apply(simp add: set_offending_flows_def)
@@ -607,12 +616,13 @@ end
 
 
 
-section {* Monotonicity of offending flows *}
+subsection {* Monotonicity of offending flows *}
   context SecurityInvariant_preliminaries
   begin
   
     (*todo: simplify proof*)
-    text{*If there is some F' in the offending flows of a small graph and you have a bigger graph, you can extend F' by some Fadd and minimality in F is preserved *}
+    text{*If there is some @{term "F'"} in the offending flows of a small graph and you have a bigger graph, 
+          you can extend @{term "F'"} by some @{term "Fadd"} and minimality in @{term F} is preserved *}
     lemma minimality_offending_flows_mono_edges_graph_extend:
     "\<lbrakk> valid_graph \<lparr> nodes = V, edges = E \<rparr>; E' \<subseteq> E; Fadd \<inter> E' = {}; F' \<in> set_offending_flows \<lparr>nodes = V, edges = E'\<rparr> nP \<rbrakk> \<Longrightarrow> 
             (\<forall>(e1, e2)\<in>F'. \<not> sinvar (add_edge e1 e2 (delete_edges \<lparr>nodes = V, edges = E \<rparr> (F' \<union> Fadd))) nP)"
@@ -696,7 +706,7 @@ section {* Monotonicity of offending flows *}
         from this[OF a3] show ?thesis .
     qed
 
-    text{* The minimality condition of the offending flows also holds if we increase the graph!!  *}
+    text{* The minimality condition of the offending flows also holds if we increase the graph.  *}
     corollary minimality_offending_flows_mono_edges_graph: 
       "\<lbrakk> valid_graph \<lparr> nodes = V, edges = E \<rparr>; 
          E' \<subseteq> E;
@@ -847,7 +857,7 @@ section {* Monotonicity of offending flows *}
     qed
 
 
-    text{* The offending flows are monotonic!! *}
+    text{* The offending flows are monotonic. *}
     corollary offending_flows_union_mono: "\<lbrakk> valid_graph \<lparr> nodes = V, edges = E \<rparr>; E' \<subseteq> E \<rbrakk> \<Longrightarrow> 
       (\<Union> set_offending_flows \<lparr> nodes = V, edges = E' \<rparr> nP) \<subseteq> (\<Union> set_offending_flows \<lparr> nodes = V, edges = E \<rparr> nP)"
       apply(clarify)
@@ -856,7 +866,7 @@ section {* Monotonicity of offending flows *}
 
 
 
-   (* I guess set_offending_flows = {{e}} does not hold. Consider the Dependability model:
+   (* I guess set_offending_flows = {{e}} does not hold. Consider the Dependability invariant:
       having a valid graph.
       Add an edge s.t. a dependability violation occurs.
       The offending flows now contains the new edge ans all edges on the path from the node with the violation to the end of the new edge. *)
@@ -906,7 +916,7 @@ section {* Monotonicity of offending flows *}
     qed
      
 end
-    (*Test*)
+
     value "Pow {1::int, 2, 3} \<union> {{8}, {9}}"
     value "\<Union> x\<in>Pow {1::int, 2, 3}. \<Union> y \<in> {{8::int}, {9}}. {x \<union> y}"
     

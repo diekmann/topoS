@@ -23,7 +23,7 @@ section {* Network Graph and Security Requirements *}
                                 model_global_properties = () \<rparr>"
 
 
-  definition NMParams_blptrusted_1 :: "(nat, NM_BLPtrusted.node_config, unit) TopoS_Params" where
+  definition NMParams_blptrusted_1 :: "(nat, SINVAR_BLPtrusted.node_config, unit) TopoS_Params" where
   "NMParams_blptrusted_1 \<equiv> \<lparr> node_properties = [1 \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>, 
                                      2 \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>, 
                                      3 \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
@@ -32,7 +32,7 @@ section {* Network Graph and Security Requirements *}
 
   text{*Both security requirements fulfilled?*}
   value[code] "SecurityGateway_eval example_net_secgw NMParams_secgw_1"
-  value[code] "NM_BLPtrusted_impl.BLP_eval example_net_secgw NMParams_blptrusted_1"
+  value[code] "SINVAR_BLPtrusted_impl.BLP_eval example_net_secgw NMParams_blptrusted_1"
 
 
 text{*Add violations!*}
@@ -42,12 +42,12 @@ text{*Add violations!*}
   text{*Security Requirement still fulfilled?*}
   value[code] "SecurityGateway_eval example_net_secgw_invalid NMParams_secgw_1"
   text{*Whom to blame?*}
-  value[code] "SecurityGatewayExtended_offending_list example_net_secgw_invalid (NM_SecGwExt_impl.NetModel_node_props NMParams_secgw_1)"
+  value[code] "SecurityGatewayExtended_offending_list example_net_secgw_invalid (SINVAR_SecGwExt_impl.NetModel_node_props NMParams_secgw_1)"
 
   text{*Security Requirement still fulfilled?*}
-  value "NM_BLPtrusted_impl.BLP_eval example_net_secgw_invalid NMParams_blptrusted_1"
+  value "SINVAR_BLPtrusted_impl.BLP_eval example_net_secgw_invalid NMParams_blptrusted_1"
   text{*Whom to blame?*}
-  value "NM_BLPtrusted_impl.BLP_offending_list example_net_secgw_invalid (NM_BLPtrusted_impl.NetModel_node_props  NMParams_blptrusted_1)"
+  value "SINVAR_BLPtrusted_impl.BLP_offending_list example_net_secgw_invalid (SINVAR_BLPtrusted_impl.NetModel_node_props  NMParams_blptrusted_1)"
 
 
 end

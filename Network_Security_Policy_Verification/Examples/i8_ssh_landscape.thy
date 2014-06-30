@@ -41,7 +41,7 @@ value[code] "[(s,r) \<leftarrow> (edgesL I8SSHgraph). r = 2]"
   lemma "valid_list_graph I8SSHgraph" by eval
 
 definition Confidentiality1::"(nat NetworkSecurityModel)" where
-      "Confidentiality1 \<equiv> new_configured_list_NetworkSecurityModel NM_BLPtrusted_impl.NM_LIB_BLPtrusted \<lparr> 
+      "Confidentiality1 \<equiv> new_configured_list_NetworkSecurityModel SINVAR_BLPtrusted_impl.SINVAR_LIB_BLPtrusted \<lparr> 
           node_properties = [0 \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
          1 \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
          2 \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
@@ -69,7 +69,7 @@ definition Confidentiality1::"(nat NetworkSecurityModel)" where
           model_global_properties = () 
           \<rparr>"
 
-definition "Subnet1 \<equiv> new_configured_list_NetworkSecurityModel NM_LIB_SubnetsInGW \<lparr> 
+definition "Subnet1 \<equiv> new_configured_list_NetworkSecurityModel SINVAR_LIB_SubnetsInGW \<lparr> 
           node_properties = [0 \<mapsto> Unassigned,
          1 \<mapsto> Unassigned,
          2 \<mapsto> Member,
@@ -98,7 +98,7 @@ definition "Subnet1 \<equiv> new_configured_list_NetworkSecurityModel NM_LIB_Sub
           \<rparr>"
 
 
-    definition "PrintingSink \<equiv> new_configured_list_NetworkSecurityModel NM_LIB_Sink \<lparr> 
+    definition "PrintingSink \<equiv> new_configured_list_NetworkSecurityModel SINVAR_LIB_Sink \<lparr> 
           node_properties = [3 \<mapsto> Sink], 
           model_global_properties = () 
           \<rparr>"

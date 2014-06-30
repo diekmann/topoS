@@ -28,18 +28,18 @@ fun scala_header thy =
   setup {* scala_header *}
   export_code 
     (*network security requirement models*)
-        NM_LIB_BLPbasic
-        NM_LIB_Dependability
-        (*NM_LIB_DomainHierarchy*)
-        NM_LIB_DomainHierarchyNG
-        NM_LIB_Subnets
-        NM_LIB_BLPtrusted 
-        (*NM_LIB_SecurityGateway*)
-        NM_LIB_SecurityGatewayExtended
-        NM_LIB_Sink
-        NM_LIB_NonInterference
-        NM_LIB_SubnetsInGW
-        NM_LIB_CommunicationPartners
+        SINVAR_LIB_BLPbasic
+        SINVAR_LIB_Dependability
+        (*SINVAR_LIB_DomainHierarchy*)
+        SINVAR_LIB_DomainHierarchyNG
+        SINVAR_LIB_Subnets
+        SINVAR_LIB_BLPtrusted 
+        (*SINVAR_LIB_SecurityGateway*)
+        SINVAR_LIB_SecurityGatewayExtended
+        SINVAR_LIB_Sink
+        SINVAR_LIB_NonInterference
+        SINVAR_LIB_SubnetsInGW
+        SINVAR_LIB_CommunicationPartners
     (* packed model library access*)
         nm_eval
         nm_node_props

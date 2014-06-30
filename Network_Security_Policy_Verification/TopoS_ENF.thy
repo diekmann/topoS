@@ -3,36 +3,39 @@ imports Main TopoS_Interface TopoS_Util TopoS_withOffendingFlows_lemmata
 begin
 
 
+section{*Special Structures of Security Invariants*}
 
-section {* SecurityInvariant theory: Often the @{term "sinvar"} function has a common structure.
-  We call this the ll edges normal form (ENF). This file provides some theory for 
-  @{term "sinvar"} functions in ENF. Helps instantiation of new models in ENF.*}
-
-
-(*TODO most could be inherited from ENF_sr*)
-
-
+text {* Security Invariants may have a common structure: 
+  If the function @{term "sinvar"} is predicate which starts with @{text "\<forall> (v\<^sub>1, v\<^sub>2) \<in> edges G. \<dots>"},
+  we call this the all edges normal form (ENF).
+  We found that this form has some nice properties.
+  Also, locale instantiation is easier in ENF with the help of the following lemmata.*}
 
 
-section {* edges normal form ENF *}
-  definition (in SecurityInvariant_withOffendingFlows) sinvar_all_edges_normal_form :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> bool" where
+
+subsection {* Simple Edges Normal Form (ENF) *}
+context SecurityInvariant_withOffendingFlows
+begin 
+  definition sinvar_all_edges_normal_form :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> bool" where
     "sinvar_all_edges_normal_form P \<equiv> \<forall> G nP. sinvar G nP = (\<forall> (e1, e2)\<in> edges G. P (nP e1) (nP e2))"
   
 
   (* reflexivity is needed for convenience. If a network security model is not refexive, that means that all nodes with the default
     parameter \<bottom> are not allowed to communicate with each other *)
-  definition (in SecurityInvariant_withOffendingFlows)  ENF_refl :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> bool" where
+  definition ENF_refl :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> bool" where
     "ENF_refl P \<equiv> sinvar_all_edges_normal_form P \<and> (\<forall> p1. P p1 p1)"
 
     
-  lemma (in SecurityInvariant_withOffendingFlows) monotonicity_sinvar_mono: "\<lbrakk> sinvar_all_edges_normal_form P \<rbrakk> \<Longrightarrow>
+  lemma monotonicity_sinvar_mono: "\<lbrakk> sinvar_all_edges_normal_form P \<rbrakk> \<Longrightarrow>
     sinvar_mono"
     apply(simp add: sinvar_all_edges_normal_form_def sinvar_mono_def)
     by blast
+end 
 
-section {* offending flows:*}
-  
-  lemma (in SecurityInvariant_withOffendingFlows) ENF_is_offending_flow_ex_not_P:
+subsubsection {* Offending Flows*}
+context SecurityInvariant_withOffendingFlows
+begin
+  lemma ENF_is_offending_flow_ex_not_P:
     "\<lbrakk> sinvar_all_edges_normal_form P;
     is_offending_flows f G nP \<rbrakk>
     \<Longrightarrow> (\<exists> (e1, e2) \<in> edges G. \<not> P (nP e1) (nP e2))"
@@ -40,7 +43,7 @@ section {* offending flows:*}
     unfolding is_offending_flows_def
     apply blast
     done
-  lemma (in SecurityInvariant_withOffendingFlows) "sinvar_all_edges_normal_form P \<Longrightarrow>
+  lemma  "sinvar_all_edges_normal_form P \<Longrightarrow>
     (f \<in> set_offending_flows G nP) \<and> f \<noteq> {} 
     \<Longrightarrow> (\<exists> (e1, e2) \<in> f.  \<not> P (nP e1) (nP e2))"
     unfolding sinvar_all_edges_normal_form_def
@@ -50,7 +53,7 @@ section {* offending flows:*}
   done
   
   
-  lemma (in SecurityInvariant_withOffendingFlows) ENF_offending_imp_not_P: "sinvar_all_edges_normal_form P \<Longrightarrow>
+  lemma ENF_offending_imp_not_P: "sinvar_all_edges_normal_form P \<Longrightarrow>
     f \<in> set_offending_flows G nP \<Longrightarrow> (e1, e2) \<in> f 
     \<Longrightarrow> \<not> P (nP e1) (nP e2)"
     unfolding sinvar_all_edges_normal_form_def
@@ -59,7 +62,7 @@ section {* offending flows:*}
     by fastforce
   
   
-  lemma (in SecurityInvariant_withOffendingFlows) ENF_offending_set_P_representation: 
+  lemma ENF_offending_set_P_representation: 
     "sinvar_all_edges_normal_form P \<Longrightarrow> 
     f \<in> set_offending_flows G nP
     \<Longrightarrow> f = {(e1,e2). (e1, e2) \<in> edges G \<and> \<not> P (nP e1) (nP e2)}"
@@ -79,7 +82,7 @@ section {* offending flows:*}
   
   
   (* We can show an overapproximation already: *)
-  lemma (in SecurityInvariant_withOffendingFlows) ENF_offending_subseteq_lhs:
+  lemma ENF_offending_subseteq_lhs:
     "sinvar_all_edges_normal_form P \<Longrightarrow> 
     (set_offending_flows G nP) \<subseteq>
     { {(e1,e2). (e1, e2) \<in> edges G \<and> \<not> P (nP e1) (nP e2)} }"
@@ -88,7 +91,7 @@ section {* offending flows:*}
   
   
   (* if offending flows not empty, we have the other direction *)
-  lemma (in SecurityInvariant_withOffendingFlows) ENF_offenindg_not_empty_imp_ENF_offending_subseteq_rhs:
+  lemma ENF_offenindg_not_empty_imp_ENF_offending_subseteq_rhs:
     "sinvar_all_edges_normal_form P \<Longrightarrow> 
     set_offending_flows G nP \<noteq> {}  \<Longrightarrow>
     { {(e1,e2). (e1, e2) \<in> edges G \<and> \<not> P (nP e1) (nP e2)} } \<subseteq> set_offending_flows G nP"
@@ -100,7 +103,7 @@ section {* offending flows:*}
   
   
   
-  lemma (in SecurityInvariant_withOffendingFlows) ENF_notevalmodel_offending_imp_ex_offending_min:
+  lemma ENF_notevalmodel_offending_imp_ex_offending_min:
    "sinvar_all_edges_normal_form P \<Longrightarrow> 
    is_offending_flows f G nP \<Longrightarrow> f \<subseteq> edges G 
    \<Longrightarrow> \<exists>f'. f' \<subseteq> edges G \<and> is_offending_flows_min_set f' G nP"
@@ -114,7 +117,7 @@ section {* offending flows:*}
     apply force
   done
   
-  lemma (in SecurityInvariant_withOffendingFlows) ENF_notevalmodel_imp_ex_offending:
+  lemma ENF_notevalmodel_imp_ex_offending:
   "\<lbrakk> sinvar_all_edges_normal_form P;
     \<not> sinvar G nP \<rbrakk> \<Longrightarrow>
     \<exists>f. f \<subseteq> (edges G) \<and> is_offending_flows f G nP"
@@ -129,7 +132,7 @@ section {* offending flows:*}
     apply blast
   done
   
-  lemma (in SecurityInvariant_withOffendingFlows) ENF_notevalmodel_imp_ex_offending_min:
+  lemma ENF_notevalmodel_imp_ex_offending_min:
   "\<lbrakk> sinvar_all_edges_normal_form P;
     \<not> sinvar G nP \<rbrakk> \<Longrightarrow>
     \<exists>f. f \<subseteq> edges G \<and> is_offending_flows_min_set f G nP"
@@ -137,7 +140,7 @@ section {* offending flows:*}
     apply(erule exE)
     using ENF_notevalmodel_offending_imp_ex_offending_min[of P _ G nP] by fast
   
-  lemma (in SecurityInvariant_withOffendingFlows) ENF_notevalmodel_imp_offending_not_empty:
+  lemma ENF_notevalmodel_imp_offending_not_empty:
   "sinvar_all_edges_normal_form P \<Longrightarrow> 
     \<not> sinvar G nP \<Longrightarrow>
     set_offending_flows G nP \<noteq> {}"
@@ -145,7 +148,7 @@ section {* offending flows:*}
     apply(simp add: set_offending_flows_def)
    done
   
-  lemma (in SecurityInvariant_withOffendingFlows) ENF_offending_case1:
+  lemma ENF_offending_case1:
     "\<lbrakk> sinvar_all_edges_normal_form P;  \<not> sinvar G nP \<rbrakk> \<Longrightarrow>
     { {(e1,e2). (e1, e2) \<in> (edges G) \<and> \<not> P (nP e1) (nP e2)} } = set_offending_flows G nP"
     apply(rule)
@@ -156,7 +159,7 @@ section {* offending flows:*}
     apply simp
   done
   
-  lemma (in SecurityInvariant_withOffendingFlows) ENF_offending_case2:
+  lemma ENF_offending_case2:
     "\<lbrakk> sinvar_all_edges_normal_form P; sinvar G nP \<rbrakk> \<Longrightarrow>
     {} = set_offending_flows G nP"
     apply(drule sinvar_no_offending[of G nP])
@@ -164,16 +167,16 @@ section {* offending flows:*}
   done
   
   
-  theorem (in SecurityInvariant_withOffendingFlows) ENF_offending_set:
+  theorem ENF_offending_set:
     "\<lbrakk> sinvar_all_edges_normal_form P \<rbrakk> \<Longrightarrow>
     set_offending_flows G nP = (if sinvar G nP then
       {}
      else 
       { {(e1,e2). (e1, e2) \<in> edges G \<and> \<not> P (nP e1) (nP e2)} })"
   by(simp add: ENF_offending_case1 ENF_offending_case2)
+end
 
-
-section {* lemata *}
+subsubsection {* Lemmata *}
 
   lemma (in SecurityInvariant_withOffendingFlows)  ENF_offending_members:
     "\<lbrakk> \<not> sinvar G nP; sinvar_all_edges_normal_form P; f \<in> set_offending_flows G nP\<rbrakk> \<Longrightarrow> 
@@ -182,7 +185,7 @@ section {* lemata *}
  
 
 
-section {* instance helper *}
+subsubsection {* Instance Helper *}
   
   lemma (in SecurityInvariant_withOffendingFlows) ENF_refl_not_offedning:
         "\<lbrakk> \<not> sinvar G nP; f \<in> set_offending_flows G nP; 
@@ -352,7 +355,7 @@ section {* instance helper *}
 (*ENF_sr*)
 
 
-section {* edges normal form ENF with sender and receiver names *}
+subsection {* edges normal form ENF with sender and receiver names *}
   definition (in SecurityInvariant_withOffendingFlows) sinvar_all_edges_normal_form_sr :: "('a \<Rightarrow> 'v \<Rightarrow> 'a \<Rightarrow> 'v \<Rightarrow> bool) \<Rightarrow> bool" where
     "sinvar_all_edges_normal_form_sr P \<equiv> \<forall> G nP. sinvar G nP = (\<forall> (s, r)\<in> edges G. P (nP s) s (nP r) r)"
   
@@ -362,7 +365,7 @@ section {* edges normal form ENF with sender and receiver names *}
     apply(simp add: sinvar_all_edges_normal_form_sr_def sinvar_mono_def)
     by blast
 
-section {* offending flows:*}
+subsubsection {*Offending Flows:*}
   
   theorem (in SecurityInvariant_withOffendingFlows) ENFsr_offending_set:
     assumes ENFsr: "sinvar_all_edges_normal_form_sr P"
@@ -430,7 +433,7 @@ section {* offending flows:*}
 
 (*ENFnrSR*)
 
-section {* edges normal form not refl ENFnrSR *}
+subsection {* edges normal form not refl ENFnrSR *}
   definition (in SecurityInvariant_withOffendingFlows) sinvar_all_edges_normal_form_not_refl_SR :: "('a \<Rightarrow> 'v \<Rightarrow> 'a \<Rightarrow> 'v \<Rightarrow> bool) \<Rightarrow> bool" where
     "sinvar_all_edges_normal_form_not_refl_SR P \<equiv> 
     \<forall> G nP. sinvar G nP = (\<forall> (s, r) \<in> edges G. s \<noteq> r \<longrightarrow> P (nP s) s (nP r) r)"
@@ -444,7 +447,7 @@ section {* edges normal form not refl ENFnrSR *}
     
 
 
-section {*offending flows*}
+subsubsection {*Offending Flows*}
    theorem (in SecurityInvariant_withOffendingFlows) ENFnrSR_offending_set:
     "\<lbrakk> sinvar_all_edges_normal_form_not_refl_SR P \<rbrakk> \<Longrightarrow>
     set_offending_flows G nP = (if sinvar G nP then
@@ -454,7 +457,7 @@ section {*offending flows*}
     by(auto dest: ENFnrSR_to_ENFsr simp: ENFsr_offending_set)
 
 
-section {* Instance helper*}
+subsubsection {* Instance helper*}
 
   (* fsts version *)
   lemma (in SecurityInvariant_withOffendingFlows)  ENFnrSR_fsts_weakrefl_instance:
@@ -559,7 +562,7 @@ section {* Instance helper*}
 
 
 
-section {* edges normal form not refl ENFnr *}
+subsection {* edges normal form not refl ENFnr *}
   definition (in SecurityInvariant_withOffendingFlows) sinvar_all_edges_normal_form_not_refl :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> bool" where
     "sinvar_all_edges_normal_form_not_refl P \<equiv> \<forall> G nP. sinvar G nP = (\<forall> (e1, e2) \<in> edges G. e1 \<noteq> e2 \<longrightarrow> P (nP e1) (nP e2))"
   
@@ -571,7 +574,7 @@ section {* edges normal form not refl ENFnr *}
 
   (*most of results are now implied from previous lemma*)
 
-section {*offending flows*}
+subsubsection {*Offending Flows*}
    theorem (in SecurityInvariant_withOffendingFlows) ENFnr_offending_set:
     "\<lbrakk> sinvar_all_edges_normal_form_not_refl P \<rbrakk> \<Longrightarrow>
     set_offending_flows G nP = (if sinvar G nP then
@@ -582,7 +585,7 @@ section {*offending flows*}
     by(drule(1) ENFnrSR_offending_set)
 
 
-section {* Instance helper*}
+subsubsection {* Instance helper*}
   (* fsts version *)
   lemma (in SecurityInvariant_withOffendingFlows)  ENFnr_fsts_weakrefl_instance:
     fixes "default_node_properties" :: "'a" ("\<bottom>")

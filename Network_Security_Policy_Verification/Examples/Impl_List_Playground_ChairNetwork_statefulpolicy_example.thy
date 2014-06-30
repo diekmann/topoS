@@ -21,7 +21,7 @@ text{*Our access control view on the network*}
 section{*Our security requirements*}
   subsection{*We have a server with confidential data*}
     definition ConfidentialChairData::"(vString NetworkSecurityModel)" where
-      "ConfidentialChairData \<equiv> new_configured_list_NetworkSecurityModel NM_BLPtrusted_impl.NM_LIB_BLPtrusted \<lparr> 
+      "ConfidentialChairData \<equiv> new_configured_list_NetworkSecurityModel SINVAR_BLPtrusted_impl.SINVAR_LIB_BLPtrusted \<lparr> 
           node_properties = [V ''FilesSrv'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
                              V ''Employees'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>], 
           model_global_properties = () 
@@ -29,7 +29,7 @@ section{*Our security requirements*}
 
 
   subsection{* accessibly by employees and students*}
-    definition "PrintingACL \<equiv> new_configured_list_NetworkSecurityModel NM_LIB_CommunicationPartners \<lparr> 
+    definition "PrintingACL \<equiv> new_configured_list_NetworkSecurityModel SINVAR_LIB_CommunicationPartners \<lparr> 
           node_properties = [V ''Printer'' \<mapsto> Master [V ''Employees'', V ''Students''],
                              V ''Employees'' \<mapsto> Care,
                              V ''Students'' \<mapsto> Care], 
@@ -37,7 +37,7 @@ section{*Our security requirements*}
           \<rparr>"
 
   subsection{* Printers are information sinks *}
-    definition "PrintingSink \<equiv> new_configured_list_NetworkSecurityModel NM_LIB_Sink \<lparr> 
+    definition "PrintingSink \<equiv> new_configured_list_NetworkSecurityModel SINVAR_LIB_Sink \<lparr> 
           node_properties = [V ''Printer'' \<mapsto> Sink], 
           model_global_properties = () 
           \<rparr>"
@@ -45,14 +45,14 @@ section{*Our security requirements*}
 
 
   subsection{*Students and Employees may access each other but are not accessible from the outside*}
-    definition "InternalSubnet \<equiv> new_configured_list_NetworkSecurityModel NM_LIB_SubnetsInGW \<lparr> 
+    definition "InternalSubnet \<equiv> new_configured_list_NetworkSecurityModel SINVAR_LIB_SubnetsInGW \<lparr> 
           node_properties = [V ''Students'' \<mapsto> Member, V ''Employees'' \<mapsto> Member], 
           model_global_properties = () 
           \<rparr>"
 
 
   subsection{* The files server is only accessibly by employees*}
-    definition "FilesSrcACL \<equiv> new_configured_list_NetworkSecurityModel NM_LIB_CommunicationPartners \<lparr> 
+    definition "FilesSrcACL \<equiv> new_configured_list_NetworkSecurityModel SINVAR_LIB_CommunicationPartners \<lparr> 
           node_properties = [V ''FilesSrv'' \<mapsto> Master [V ''Employees''],
                              V ''Employees'' \<mapsto> Care], 
           model_global_properties = () 
@@ -137,7 +137,7 @@ visualize_edges @{context} @{theory} @{term "flows_fixL ChairNetwork_stateful_v3
 section{*An example of bad side-effects in access control policies*}
 
   definition ACL_not_with::"(vString NetworkSecurityModel)" where
-    "ACL_not_with \<equiv> new_configured_list_NetworkSecurityModel NM_ACLnotCommunicateWith_impl.NM_LIB_ACLnotCommunicateWith \<lparr> 
+    "ACL_not_with \<equiv> new_configured_list_NetworkSecurityModel SINVAR_ACLnotCommunicateWith_impl.SINVAR_LIB_ACLnotCommunicateWith \<lparr> 
         node_properties = [V ''A'' \<mapsto> {V ''C''},
                            V ''B'' \<mapsto> {},
                            V ''C'' \<mapsto> {}], 
