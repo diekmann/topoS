@@ -2,6 +2,8 @@ theory TopoS_Stateful_Policy_Algorithm
 imports TopoS_Stateful_Policy TopoS_Composition_Theory
 begin
 
+section{*Stateful Policy -- Algorithm*}
+
 subsection{* Some unimportant lemmata *}
   lemma False_set: "{(r, s). False} = {}" by simp
   lemma valid_reqs_ACS_D: "valid_reqs M \<Longrightarrow> valid_reqs (get_ACS M)"
@@ -32,7 +34,7 @@ subsection{* Some unimportant lemmata *}
     by(simp_all)
 
 
-section {* Sketch for generating a stateful policy from a simple directed policy *}
+subsection {* Sketch for generating a stateful policy from a simple directed policy *}
   text{* Having no stateful flows, we trivially get a valid stateful policy. *}
     lemma trivial_stateful_policy_compliance:
     "\<lbrakk> valid_graph \<lparr> nodes = V, edges = E \<rparr>; valid_reqs M; all_security_requirements_fulfilled M \<lparr> nodes = V, edges = E \<rparr> \<rbrakk> \<Longrightarrow> 
@@ -969,11 +971,13 @@ section {* Sketch for generating a stateful policy from a simple directed policy
     qed
 
 
+(*
+
 
 text{* In the following, we see failed attempts which try to prove that under composition, the IFS and ACS filtering is also maximal.
        I guess this does not hold in general. Need a counter example. *}
 
-
+*)
 (*Scratch*)
 (*
   definition is_max_stateful_flows :: "'v::vertex graph \<Rightarrow> 'v SecurityInvariant_configured list \<Rightarrow> ('v \<times> 'v) set \<Rightarrow> ('v \<times> 'v) set \<Rightarrow> bool" where

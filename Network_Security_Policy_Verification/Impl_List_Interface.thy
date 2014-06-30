@@ -4,7 +4,11 @@ imports TopoS_Library Impl_List_Composition
     Impl_List_StatefulPolicy
 begin
 
-section{*Util*}
+
+section {* ML Visualization Interface *}
+
+
+subsection{*Utility Functions*}
 
   fun rembiflowdups :: "('a \<times> 'a) list \<Rightarrow> ('a \<times> 'a) list" where
     "rembiflowdups [] = []" |
@@ -76,7 +80,6 @@ section{*Util*}
   lemma "partition_by_biflows [(1::int, 1::int), (1,2), (2, 1), (1,3)] = ([(1, 1), (2, 1)], [(1, 3)])" by eval
 
 
-section {* ML Interface *}
 
 ML{*
 (*apply args to f. f ist best supplied using @{const_name "name_of_function"} *)

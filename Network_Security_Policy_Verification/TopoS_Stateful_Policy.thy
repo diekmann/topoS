@@ -106,7 +106,8 @@ begin
 
 end
 
-subsection{*minimizing stateful flows such that only newly added backflows remain*}
+
+text{*Minimizing stateful flows such that only newly added backflows remain*}
   definition filternew_flows_state :: "'v stateful_policy \<Rightarrow> ('v \<times> 'v) set" where
     "filternew_flows_state \<T> \<equiv> {(s, r) \<in> flows_state \<T>. (r, s) \<notin> flows_fix \<T>}"
 
@@ -422,7 +423,7 @@ locale stateful_policy_compliance =
   end
 
 
-section{* Summarizing the important theorems *}
+subsection{* Summarizing the important theorems *}
 
   text{* No information flow security requirements are violated (including all added stateful flows)*}
   thm stateful_policy_compliance.compliant_stateful_IFS

@@ -98,8 +98,9 @@ subsection{*Generating instantiated (configured) network security invariants*}
   thm new_configured_SecurityInvariant_sound
   --"we get that @{const new_configured_list_SecurityInvariant} has all the necessary properties (modulo @{const SecurityInvariant_complies_formal_def})"
 
-section{*About valid network security requirements*}
+subsection{*About security invariants*}
 
+   text{*specification and implementation comply. *}
    type_synonym 'v security_models_spec_impl="('v SecurityInvariant \<times> 'v TopoS_Composition_Theory.SecurityInvariant_configured) list"
    
    definition get_spec :: "'v security_models_spec_impl \<Rightarrow> ('v TopoS_Composition_Theory.SecurityInvariant_configured) list" where
@@ -107,7 +108,7 @@ section{*About valid network security requirements*}
    definition get_impl :: "'v security_models_spec_impl \<Rightarrow> ('v SecurityInvariant) list" where
     "get_impl M \<equiv> [fst m. m \<leftarrow> M]"
 
-section{*Calculating offending flows*}
+subsection{*Calculating offending flows*}
   fun implc_get_offending_flows :: "('v) SecurityInvariant list \<Rightarrow> 'v list_graph \<Rightarrow> (('v \<times> 'v) list list)" where
     "implc_get_offending_flows [] G = []"  |
     "implc_get_offending_flows (m#Ms) G = (implc_offending_flows m G)@(implc_get_offending_flows Ms G)"  
@@ -150,7 +151,7 @@ section{*Calculating offending flows*}
 
 
 
-section{*Accessors*}
+subsection{*Accessors*}
   definition get_IFS :: "'v SecurityInvariant list \<Rightarrow> 'v SecurityInvariant list" where
     "get_IFS M \<equiv> [m \<leftarrow> M. implc_isIFS m]"
   definition get_ACS :: "'v SecurityInvariant list \<Rightarrow> 'v SecurityInvariant list" where
@@ -254,7 +255,7 @@ section{*Accessors*}
  
    thm get_IFS_get_ACS_select_simps
 
-section{*All security requirements fulfilled*}
+subsection{*All security requirements fulfilled*}
    definition all_security_requirements_fulfilled :: "'v SecurityInvariant list \<Rightarrow> 'v list_graph \<Rightarrow> bool" where
       "all_security_requirements_fulfilled M G \<equiv> \<forall>m \<in> set M. (implc_sinvar m) G"
 
@@ -266,7 +267,7 @@ section{*All security requirements fulfilled*}
     apply(simp add: get_impl_def get_spec_def)
     using SecurityInvariant_complies_formal_def_def by fastforce
 
-section{*generate valid topology*}
+subsection{*generate valid topology*}
   value "concat [[1::int,2,3], [4,6,5]]"
 
   fun generate_valid_topology :: "('v) SecurityInvariant list \<Rightarrow> 'v list_graph \<Rightarrow> ('v list_graph)" where

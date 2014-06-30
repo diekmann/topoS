@@ -5,7 +5,6 @@ imports String
   "Security_Invariants/SINVAR_Subnets_impl"
   "Security_Invariants/SINVAR_DomainHierarchyNG_impl"
   "Security_Invariants/SINVAR_BLPtrusted_impl"
-  (*"Security_Invariants/SINVAR_SecurityGateway_impl"*) (*deprecated, will be removed*)
   "Security_Invariants/SINVAR_SecGwExt_impl"
   "Security_Invariants/SINVAR_Sink_impl"
   "Security_Invariants/SINVAR_SubnetsInGW_impl"
@@ -43,7 +42,6 @@ print_interps TopoS_modelLibrary
   thm SINVAR_LIB_DomainHierarchyNG_interpretation.impl_spec
   thm SINVAR_LIB_Subnets_interpretation.impl_spec
   thm SINVAR_LIB_BLPtrusted_interpretation.impl_spec
-  (*thm SINVAR_LIB_SecurityGateway_interpretation.impl_spec*)
   thm SINVAR_LIB_SecurityGatewayExtended_interpretation.impl_spec
   thm SINVAR_LIB_Sink_interpretation.impl_spec
   thm SINVAR_LIB_NonInterference_interpretation.impl_spec

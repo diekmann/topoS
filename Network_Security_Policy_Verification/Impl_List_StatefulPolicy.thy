@@ -2,6 +2,7 @@ theory Impl_List_StatefulPolicy
 imports Impl_List_Composition TopoS_Stateful_Policy_Algorithm
 begin
 
+section{*Stateful Policy -- List Implementaion*}
 
 record 'v stateful_list_policy =
     hostsL :: "'v list"
@@ -42,7 +43,7 @@ lemma valid_list_graph_stateful_list_policy_to_list_graph:
   
 
 
-section{*Algorithms*}
+subsection{*Algorithms*}
 
    fun filter_IFS_no_violations_accu :: "'v list_graph \<Rightarrow> 'v SecurityInvariant list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list" where
       "filter_IFS_no_violations_accu G M accu [] = accu" |

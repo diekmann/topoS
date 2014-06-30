@@ -4,6 +4,7 @@ begin
 
 
 
+section {* Export ALL the Code *}
 
 (* code_identifier code_module TopoS_generateCode => (Scala) TopoS_modelLibrary *)
 
@@ -23,18 +24,15 @@ fun scala_header thy =
 
 
 
-  section {* export ALL the code *}
 
   setup {* scala_header *}
   export_code 
     (*network security requirement models*)
         SINVAR_LIB_BLPbasic
         SINVAR_LIB_Dependability
-        (*SINVAR_LIB_DomainHierarchy*)
         SINVAR_LIB_DomainHierarchyNG
         SINVAR_LIB_Subnets
         SINVAR_LIB_BLPtrusted 
-        (*SINVAR_LIB_SecurityGateway*)
         SINVAR_LIB_SecurityGatewayExtended
         SINVAR_LIB_Sink
         SINVAR_LIB_NonInterference
@@ -57,6 +55,7 @@ fun scala_header thy =
         FiniteListGraph.add_edge
         FiniteListGraph.delete_edge
         FiniteListGraph.delete_edges
+    (*Examples*)
     BLPexample1 BLPexample3 
     in Scala
     (*file "code/isabelle_generated.scala"*)
