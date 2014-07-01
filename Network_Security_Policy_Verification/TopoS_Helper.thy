@@ -1,12 +1,12 @@
 theory TopoS_Helper
-imports Main TopoS_Interface TopoS_Util 
+imports Main TopoS_Interface "Lib/TopoS_Util"
   TopoS_ENF
   vertex_example_simps
 begin
 
 
 
-text {*Imports a lot of usefull SecurityInvariant lemmata.*}
+text {*Imports a lot of useful SecurityInvariant lemmata.*}
 
 
 

@@ -1,5 +1,5 @@
 theory TopoS_Interface
-imports Main "Lib/FiniteGraph" TopoS_Vertices TopoS_Util
+imports Main "Lib/FiniteGraph" TopoS_Vertices "Lib/TopoS_Util"
 begin
 
 
