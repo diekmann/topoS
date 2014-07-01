@@ -2,9 +2,6 @@ theory TopoS_Util
 imports Main
 begin
 
-(*Utility lemmata go gere*)
-
-
 lemma finite_ne_subset_induct [case_names singleton insert, consumes 2]:
   assumes "finite F" and "F \<noteq> {}" and "F \<subseteq> A"
   assumes "\<And>x. x \<in> A \<Longrightarrow> P {x}"
