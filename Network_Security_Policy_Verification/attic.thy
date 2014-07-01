@@ -57,5 +57,168 @@ lemma exCasePairNotSimp: "(\<exists>x. x \<in> A \<and> \<not> (case x of (e1, e
   by auto
 
 
+subsection {* Paths *}
+  text {* A path is represented by a list of adjacent edges. *}
+  type_synonym 'v path = "('v \<times> 'v) list"
+
+  context valid_graph
+  begin
+    text {* The following predicate describes a valid path:*}
+    (* is-path src [src, ...., dst] dst *)
+    fun is_path :: "'v \<Rightarrow> 'v path \<Rightarrow> 'v \<Rightarrow> bool" where
+      "is_path v [] v' \<longleftrightarrow> v=v' \<and> v'\<in>V" |
+      "is_path v ((v1,v2)#p) v' \<longleftrightarrow> v=v1 \<and> (v1,v2)\<in>E \<and> is_path v2 p v'"
+  
+    lemma is_path_simps[simp, intro!]:
+      "is_path v [] v \<longleftrightarrow> v\<in>V"
+      "is_path v [(v,v')] v' \<longleftrightarrow> (v,v')\<in>E"
+      by (auto dest: E_validD)
+    
+    lemma is_path_memb[simp]:
+      "is_path v p v' \<Longrightarrow> v\<in>V \<and> v'\<in>V"
+      apply (induction p arbitrary: v) 
+       apply (auto dest: E_validD)
+      done
+
+    lemma is_path_split:
+      "is_path v (p1@p2) v' \<longleftrightarrow> (\<exists>u. is_path v p1 u \<and> is_path u p2 v')"
+      by (induct p1 arbitrary: v) auto
+
+    lemma is_path_split'[simp]: 
+      "is_path v (p1@(u,u')#p2) v' 
+        \<longleftrightarrow> is_path v p1 u \<and> (u,u')\<in>E \<and> is_path u' p2 v'"
+      by (auto simp add: is_path_split)
+  end
+
+  text {* Set of intermediate vertices of a path. These are all vertices but
+    the last one. Note that, if the last vertex also occurs earlier on the path,
+    it is contained in @{text "int_vertices"}. *}
+  definition int_vertices :: "'v path \<Rightarrow> 'v set" where
+    "int_vertices p \<equiv> set (map fst p)"
+
+  lemma int_vertices_simps[simp]:
+    "int_vertices [] = {}"
+    "int_vertices (vv#p) = insert (fst vv) (int_vertices p)"
+    "int_vertices (p1@p2) = int_vertices p1 \<union> int_vertices p2"
+    by (auto simp add: int_vertices_def)
+  
+  lemma (in valid_graph) int_vertices_subset: 
+    "is_path v p v' \<Longrightarrow> int_vertices p \<subseteq> V"
+    apply (induct p arbitrary: v)
+    apply (simp) 
+    apply (force dest: E_validD)
+    done
+
+  lemma int_vertices_empty[simp]: "int_vertices p = {} \<longleftrightarrow> p=[]"
+    by (cases p) auto
+
+subsubsection {* Splitting Paths *}
+  text {*Split a path at the point where it first leaves the set @{text W}: *}
+  lemma (in valid_graph) path_split_set:
+    assumes "is_path v p v'" and "v\<in>W" and "v'\<notin>W"
+    obtains p1 p2 u w u' where
+    "p=p1@(u,u')#p2" and
+    "int_vertices p1 \<subseteq> W" and "u\<in>W" and "u'\<notin>W"
+    using assms
+  proof (induct p arbitrary: v thesis)
+    case Nil thus ?case by auto
+  next
+    case (Cons vv p)
+    note [simp, intro!] = `v\<in>W` `v'\<notin>W`
+    from Cons.prems obtain u' where 
+      [simp]: "vv=(v,u')" and
+        REST: "is_path u' p v'"
+      by (cases vv) auto
+    
+    txt {* Distinguish wether the second node @{text u'} of the path is 
+      in @{text W}. If yes, the proposition follows by the 
+      induction hypothesis, otherwise it is straightforward, as
+      the split takes place at the first edge of the path. *}
+    {
+      assume A [simp, intro!]: "u'\<in>W"
+      from Cons.hyps[OF _ REST] obtain p1 uu uu' p2 where
+        "p=p1@(uu,uu')#p2" "int_vertices p1 \<subseteq> W" "uu \<in> W" "uu' \<notin> W"
+        by blast
+      with Cons.prems(1)[of "vv#p1" uu uu' p2] have thesis by auto
+    } moreover {
+      assume "u'\<notin>W"
+      with Cons.prems(1)[of "[]" v u' p] have thesis by auto
+    } ultimately show thesis by blast
+  qed
+  
+  text {*Split a path at the point where it first enters the set @{text W}:*}
+  lemma (in valid_graph) path_split_set':
+    assumes "is_path v p v'" and "v'\<in>W"
+    obtains p1 p2 u where
+    "p=p1@p2" and
+    "is_path v p1 u" and
+    "is_path u p2 v'" and
+    "int_vertices p1 \<subseteq> -W" and "u\<in>W"
+    using assms
+  proof (cases "v\<in>W")
+    case True with that[of "[]" p] assms show ?thesis
+      by auto
+  next
+    case False with assms that show ?thesis
+    proof (induct p arbitrary: v thesis)
+      case Nil thus ?case by auto
+    next
+      case (Cons vv p)
+      note [simp, intro!] = `v'\<in>W` `v\<notin>W`
+      from Cons.prems obtain u' where 
+        [simp]: "vv=(v,u')" and [simp]: "(v,u')\<in>E" and
+          REST: "is_path u' p v'"
+        by (cases vv) auto
+    
+      txt {* Distinguish wether the second node @{text u'} of the path is 
+        in @{text W}. If yes, the proposition is straightforward, otherwise,
+        it follows by the induction hypothesis.
+        *}
+      {
+        assume A [simp, intro!]: "u'\<in>W"
+        from Cons.prems(3)[of "[vv]" p u'] REST have ?case by auto
+      } moreover {
+        assume [simp, intro!]: "u'\<notin>W"
+        from Cons.hyps[OF REST] obtain p1 p2 u'' where
+          [simp]: "p=p1@p2" and 
+            "is_path u' p1 u''" and 
+            "is_path u'' p2 v'" and
+            "int_vertices p1 \<subseteq> -W" and
+            "u''\<in>W" by blast
+        with Cons.prems(3)[of "vv#p1"] have ?case by auto
+      } ultimately show ?case by blast
+    qed
+  qed
+
+  text {* Split a path at the point where a given vertex is first visited: *}
+  lemma (in valid_graph) path_split_vertex:
+    assumes "is_path v p v'" and "u\<in>int_vertices p"
+    obtains p1 p2 where
+    "p=p1@p2" and
+    "is_path v p1 u" and
+    "u \<notin> int_vertices p1"
+    using assms
+  proof (induct p arbitrary: v thesis)
+    case Nil thus ?case by auto
+  next
+    case (Cons vv p)
+    from Cons.prems obtain u' where 
+      [simp]: "vv=(v,u')" "v\<in>V" "(v,u')\<in>E" and
+        REST: "is_path u' p v'"
+      by (cases vv) auto
+    
+    {
+      assume "u=v"
+      with Cons.prems(1)[of "[]" "vv#p"] have thesis by auto
+    } moreover {
+      assume [simp]: "u\<noteq>v"
+      with Cons.hyps(1)[OF _ REST] Cons.prems(3) obtain p1 p2 where
+        "p=p1@p2" "is_path u' p1 u" "u\<notin>int_vertices p1"
+        by auto
+      with Cons.prems(1)[of "vv#p1" p2] have thesis
+        by auto
+    } ultimately show ?case by blast
+  qed
+
 
 end
