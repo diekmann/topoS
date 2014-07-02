@@ -375,10 +375,9 @@ begin
     from mono_imp_minimalize_offending_overapprox_minimal[OF negmono vG _ _ dF, where keeps="[]"] sF have 2:
       "\<forall>(e1, e2)\<in>?minset. \<not> sinvar (add_edge e1 e2 (delete_edges G ?minset)) nP"
     by auto
-    thm is_offending_flows_def is_offending_flows_min_set_def
     from 1 2 show ?thesis
       by(simp add: is_offending_flows_def is_offending_flows_min_set_def)
-    qed
+  qed
 
   (*use this corollary to show that set_offending_flows is not empty*)
   corollary mono_imp_set_offending_flows_not_empty:
@@ -391,7 +390,7 @@ begin
     from sinvar_mono_imp_negative_delete_edge_mono[OF mono_sinvar] have negative_delete_edge_mono: 
       "\<forall> G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP" by simp
       
-    from is_offending_flows_min_set_minimalize_offending_overapprox[OF negative_delete_edge_mono vG iO sS dF] 
+    from is_offending_flows_min_set_minimalize_offending_overapprox[OF mono_sinvar vG iO sS dF] 
      have "is_offending_flows_min_set (set (minimalize_offending_overapprox ff [] G nP)) G nP" by simp
     from this set_offending_flows_def sS have
     "(set (minimalize_offending_overapprox ff [] G nP)) \<in> set_offending_flows G nP"
@@ -581,7 +580,7 @@ begin
             from this listf have c1: "is_offending_flows (set listf) G nP" by(simp add: is_offending_flows_def)
             from listf `f \<subseteq> edges G` have c2: "set listf \<subseteq> edges G" by simp
 
-            from mono_imp_set_offending_flows_not_empty[OF mono validG a1 c1 c2 conjunct2[OF listf]] have 
+            from mono_imp_set_offending_flows_not_empty[OF mono validG c1 c2 conjunct2[OF listf]] have 
               "set_offending_flows G nP \<noteq> {}" .
             from this a2 have "False" by simp
             (*I knew this can't be!*)
@@ -594,7 +593,7 @@ begin
 end
  
 
-
+(*
 text{* Old version of security invariant gave @{term "F \<in> set_offending_flows G nP"} and @{term "sinvar (delete_edges G F) nP"}
   as assumption for @{text "default_secure"}. We can conclude this from mono. *}
 context SecurityInvariant_withOffendingFlows
@@ -616,7 +615,7 @@ begin
     apply(simp add:is_offending_flows_min_set_def is_offending_flows_def)
   done
 end
-
+*)
 
 
 subsection {* Monotonicity of offending flows *}
