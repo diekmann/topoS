@@ -778,7 +778,7 @@ subsection {* Sketch for generating a stateful policy from a simple directed pol
 
     from validG filter_IFS_no_violations_subseteq_input edgesList
     have validG': "valid_graph \<lparr>nodes = nodes G, edges = edges G \<union> set (filter_IFS_no_violations G M edgesList)\<rparr>" 
-      by (metis SecurityInvariant_withOffendingFlows.graph_eq_intro Un_absorb2 graph.select_convs(1) graph.select_convs(2) order.trans)
+      by (metis graph_eq_intro Un_absorb2 graph.select_convs(1) graph.select_convs(2) order.trans)
 
     from high_level_policy_valid have "all_security_requirements_fulfilled (get_IFS M) G" by(simp add: all_security_requirements_fulfilled_def get_IFS_def)
     from filter_IFS_no_violations_correct[OF valid_reqs_IFS_D[OF validReqs] validG this edgesList] have 

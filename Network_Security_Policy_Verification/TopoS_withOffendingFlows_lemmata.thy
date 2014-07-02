@@ -475,7 +475,7 @@ context SecurityInvariant_preliminaries
     apply(insert sinvar_monoI)
     apply(unfold sinvar_mono_def)
     using is_offending_flows_min_set_minimalize_offending_overapprox
-    by (metis (full_types) sinvar_monoI sinvar_mono_imp_negative_delete_edge_mono)
+    by (metis (full_types) sinvar_monoI)
 
     text{* 
       If @{term "\<not> sinvar G nP"}
