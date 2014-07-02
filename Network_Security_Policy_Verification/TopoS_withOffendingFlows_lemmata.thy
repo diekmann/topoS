@@ -343,7 +343,7 @@ begin
     qed
   qed
   
-  lemma "\<lbrakk> (\<forall> G nP X Y. X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP );
+  (*lemma "\<lbrakk> (\<forall> G nP X Y. X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP );
       valid_graph G; is_offending_flows (set ff) G nP; set ff \<subseteq> edges G; distinct ff \<rbrakk> \<Longrightarrow> 
     \<exists> f \<subseteq> (set ff). is_offending_flows_min_set f G nP"
   apply(simp add: is_offending_flows_def is_offending_flows_min_set_def)
@@ -358,35 +358,42 @@ begin
   apply(rule mono_imp_minimalize_offending_overapprox_minimal) 
         apply(simp_all)
   apply(simp add: in_mono)
-  done
+  done*)
+
 
   theorem is_offending_flows_min_set_minimalize_offending_overapprox:
-  "\<lbrakk> (\<forall> G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP );
-      valid_graph G; is_offending_flows (set ff) G nP; set ff \<subseteq> edges G; distinct ff \<rbrakk> \<Longrightarrow> 
-    is_offending_flows_min_set (set (minimalize_offending_overapprox ff [] G nP)) G nP"
-  apply(simp add: is_offending_flows_def is_offending_flows_min_set_def)
-  apply(clarify)
-  apply(rule conjI)
-   apply(simp add:minimalize_offending_overapprox_maintains_evalmodel)
-  apply(rule mono_imp_minimalize_offending_overapprox_minimal)
-       apply(simp_all)
-  apply(simp add: in_mono)
-  done
-
+      assumes mono: "sinvar_mono"
+      and vG: "valid_graph G" and iO: "is_offending_flows (set ff) G nP" and sF: "set ff \<subseteq> edges G" and dF: "distinct ff"
+      shows "is_offending_flows_min_set (set (minimalize_offending_overapprox ff [] G nP)) G nP" (is "is_offending_flows_min_set ?minset G nP")
+  proof -
+    from mono sinvar_mono_imp_negative_delete_edge_mono have negmono: 
+      "\<forall>G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G Y) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP" by simp
+    from iO have "sinvar (delete_edges G (set ff)) nP" by (metis is_offending_flows_def)
+    from this minimalize_offending_overapprox_maintains_evalmodel[OF vG, where keeps="[]"] have
+      "sinvar (delete_edges G ?minset) nP" by simp
+    hence 1: "is_offending_flows ?minset G nP" by (metis iO is_offending_flows_def)
+    from mono_imp_minimalize_offending_overapprox_minimal[OF negmono vG _ _ dF, where keeps="[]"] sF have 2:
+      "\<forall>(e1, e2)\<in>?minset. \<not> sinvar (add_edge e1 e2 (delete_edges G ?minset)) nP"
+    by auto
+    thm is_offending_flows_def is_offending_flows_min_set_def
+    from 1 2 show ?thesis
+      by(simp add: is_offending_flows_def is_offending_flows_min_set_def)
+    qed
 
   (*use this corollary to show that set_offending_flows is not empty*)
   corollary mono_imp_set_offending_flows_not_empty:
   assumes mono_sinvar: "sinvar_mono"
-  and other_assms: "valid_graph G" "\<not> sinvar G nP" "is_offending_flows (set ff) G nP" "set ff \<subseteq> edges G" "distinct ff"
+  and vG: "valid_graph G" and iO: "is_offending_flows (set ff) G nP" and sS: "set ff \<subseteq> edges G" and dF: "distinct ff"
   shows
     "set_offending_flows G nP \<noteq> {}"
   proof -
+    from iO SecurityInvariant_withOffendingFlows.is_offending_flows_def have nS: "\<not> sinvar G nP" by metis
     from sinvar_mono_imp_negative_delete_edge_mono[OF mono_sinvar] have negative_delete_edge_mono: 
       "\<forall> G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP" by simp
       
-    from is_offending_flows_min_set_minimalize_offending_overapprox[OF _ other_assms(1) other_assms(3) other_assms(4) other_assms(5)] 
-    negative_delete_edge_mono have "is_offending_flows_min_set (set (minimalize_offending_overapprox ff [] G nP)) G nP" by simp
-    from this set_offending_flows_def other_assms(4) have
+    from is_offending_flows_min_set_minimalize_offending_overapprox[OF negative_delete_edge_mono vG iO sS dF] 
+     have "is_offending_flows_min_set (set (minimalize_offending_overapprox ff [] G nP)) G nP" by simp
+    from this set_offending_flows_def sS have
     "(set (minimalize_offending_overapprox ff [] G nP)) \<in> set_offending_flows G nP"
       by (metis (lifting, no_types) List.set_empty Un_empty_right mem_Collect_eq minimalize_offending_overapprox_subset subset_code(1))
     thus ?thesis by blast 
@@ -413,7 +420,7 @@ begin
         have overapprox: "is_offending_flows (set list_edges) G nP" by auto
   
       from SecurityInvariant_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF 
-          mono validG noteval overapprox listedges_subseteq_edges] list_edges_props 
+          mono validG overapprox listedges_subseteq_edges] list_edges_props 
       show "set_offending_flows G nP \<noteq> {}" by simp
     next
       assume a: "set_offending_flows G nP \<noteq> {}"
