@@ -20,6 +20,6 @@ session "Network_Security_Policy_Verification_Examples" = "Network_Security_Poli
     "Examples/Example"
     "Examples/Example_NetModel"
     "Examples/Example_Forte14"
-    "Examples/i8_ssh_landscape"
+    "Examples/I8_ssh_landscape"
     "Examples/Impl_List_Playground"
     "Examples/Impl_List_Playground_ChairNetwork_statefulpolicy_example"
