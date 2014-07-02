@@ -1,16 +1,10 @@
 theory TopoS_generateCode
-imports TopoS_Library
+imports
+  TopoS_Library
+  Example_BLP
 begin
 
-
-
-section {* Export ALL the Code *}
-
-(* code_identifier code_module TopoS_generateCode => (Scala) TopoS_modelLibrary *)
-
-
-ML {*
-fun scala_header thy =
+setup {* fn thy =>
   let
     val package = "package tum.in.net.psn.log_topo.SecurityInvariants.GENERATED";   
     val date = Date.toString (Date.fromTimeLocal (Time.now ()));
@@ -22,41 +16,38 @@ fun scala_header thy =
 *}
 
 
+export_code 
+  (*network security requirement models*)
+      SINVAR_LIB_BLPbasic
+      SINVAR_LIB_Dependability
+      SINVAR_LIB_DomainHierarchyNG
+      SINVAR_LIB_Subnets
+      SINVAR_LIB_BLPtrusted 
+      SINVAR_LIB_SecurityGatewayExtended
+      SINVAR_LIB_Sink
+      SINVAR_LIB_NonInterference
+      SINVAR_LIB_SubnetsInGW
+      SINVAR_LIB_CommunicationPartners
+  (* packed model library access*)
+      nm_eval
+      nm_node_props
+      nm_offending_flows
+      nm_verify_globals
+      nm_sinvar
+      nm_default
+      nm_receiver_violation nm_name
+  (*TopoS_Params*)
+      model_global_properties node_properties
+  (*Finite_Graph functions*)
+      FiniteListGraph.valid_list_graph
+      FiniteListGraph.add_node 
+      FiniteListGraph.delete_node
+      FiniteListGraph.add_edge
+      FiniteListGraph.delete_edge
+      FiniteListGraph.delete_edges
+  (*Examples*)
+  BLPexample1 BLPexample3 
+  in Scala
+  (*file "code/isabelle_generated.scala"*)
 
-
-
-  setup {* scala_header *}
-  export_code 
-    (*network security requirement models*)
-        SINVAR_LIB_BLPbasic
-        SINVAR_LIB_Dependability
-        SINVAR_LIB_DomainHierarchyNG
-        SINVAR_LIB_Subnets
-        SINVAR_LIB_BLPtrusted 
-        SINVAR_LIB_SecurityGatewayExtended
-        SINVAR_LIB_Sink
-        SINVAR_LIB_NonInterference
-        SINVAR_LIB_SubnetsInGW
-        SINVAR_LIB_CommunicationPartners
-    (* packed model library access*)
-        nm_eval
-        nm_node_props
-        nm_offending_flows
-        nm_verify_globals
-        nm_sinvar
-        nm_default
-        nm_receiver_violation nm_name
-    (*TopoS_Params*)
-        model_global_properties node_properties
-    (*Finite_Graph functions*)
-        FiniteListGraph.valid_list_graph
-        FiniteListGraph.add_node 
-        FiniteListGraph.delete_node
-        FiniteListGraph.add_edge
-        FiniteListGraph.delete_edge
-        FiniteListGraph.delete_edges
-    (*Examples*)
-    BLPexample1 BLPexample3 
-    in Scala
-    (*file "code/isabelle_generated.scala"*)
 end

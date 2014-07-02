@@ -11,15 +11,15 @@ session "Network_Security_Policy_Verification" = HOL +
   theories
     Network_Security_Policy_Verification
     attic
+  theories [document = false]
     TopoS_generateCode
 
 session "Network_Security_Policy_Verification_Examples" = "Network_Security_Policy_Verification" +
   theories [document = false]
-    TopoS_generateCode
     "Examples/Impl_List_Playground_statefulpolicycompliance"
-    "Examples/example_forte14"
     "Examples/Example"
     "Examples/Example_NetModel"
+    "Examples/Example_Forte14"
     "Examples/i8_ssh_landscape"
     "Examples/Impl_List_Playground"
     "Examples/Impl_List_Playground_ChairNetwork_statefulpolicy_example"

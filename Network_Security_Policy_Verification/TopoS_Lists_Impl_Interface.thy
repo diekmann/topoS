@@ -36,11 +36,6 @@ section{*Executable Implementation with Lists*}
      "(distinct (nodesL G) \<and> distinct (edgesL G) \<and> 
      SecurityInvariant.eval sinvar_spec verify_globals_spec default_node_properties (list_graph_to_graph G) P ) = 
      (eval_impl G P)"
-    begin
-    end
-    print_locale! TopoS_List_Impl
-    term TopoS_List_Impl
-
 
   subsection {* security invariants packed. *}
 
@@ -75,66 +70,46 @@ section{*Executable Implementation with Lists*}
         (nm_offending_flows m)
         (nm_node_props m)
         (nm_eval m)"
-   begin
-   end
-   print_locale! TopoS_modelLibrary
 
 
 
-subsection{*Helpfull lemmata*}
-  
-  lemma distinct_rm: "P G = Q G \<Longrightarrow> (distinct (nodesL G) \<and> distinct (edgesL G) \<and> P G) = (distinct (nodesL G) \<and> distinct (edgesL G) \<and> Q G)"
-  by simp
-  
-  lemma valid_list_graph_axioms_rm: "P G = Q G \<Longrightarrow> (valid_list_graph_axioms G \<and> P G) = (valid_list_graph_axioms G \<and> Q G)"
-  by simp
-  
+  subsection{*Helpful lemmata*}
+
   (*show that eval complies*)
   lemma TopoS_eval_impl_proofrule: 
-    "\<lbrakk>SecurityInvariant sinvar_spec default_node_properties receiver_violation;
-    (\<And> nP. valid_list_graph G \<Longrightarrow> sinvar_spec (list_graph_to_graph G) nP = sinvar_impl G nP); 
-    (\<And> nP gP. valid_list_graph G \<Longrightarrow> verify_globals_spec (list_graph_to_graph G) nP gP = verify_globals_impl G nP gP) \<rbrakk> \<Longrightarrow>
+    assumes inst: "SecurityInvariant sinvar_spec default_node_properties receiver_violation"
+    assumes ev: "\<And>nP. valid_list_graph G \<Longrightarrow> sinvar_spec (list_graph_to_graph G) nP = sinvar_impl G nP"
+    assumes ver: "\<And> nP gP. valid_list_graph G \<Longrightarrow> verify_globals_spec (list_graph_to_graph G) nP gP = verify_globals_impl G nP gP"
+    shows "
       (distinct (nodesL G) \<and> distinct (edgesL G) \<and> SecurityInvariant.eval sinvar_spec verify_globals_spec default_node_properties (list_graph_to_graph G) P) =
       (valid_list_graph G \<and> verify_globals_impl G (SecurityInvariant.node_props default_node_properties P) (model_global_properties P) \<and>
        sinvar_impl G (SecurityInvariant.node_props default_node_properties P))"
-    proof -
-    assume inst: "SecurityInvariant sinvar_spec default_node_properties receiver_violation"
-    assume ev: "\<And> nP. valid_list_graph G \<Longrightarrow> sinvar_spec (list_graph_to_graph G) nP = sinvar_impl G nP"
-    assume ver: "\<And> nP gP. valid_list_graph G \<Longrightarrow> verify_globals_spec (list_graph_to_graph G) nP gP = verify_globals_impl G nP gP"
-  
-    have case_valid: "valid_list_graph G \<Longrightarrow> (verify_globals_spec (list_graph_to_graph G) (SecurityInvariant.node_props default_node_properties P) (model_global_properties P) \<and>
+  proof (cases "valid_list_graph G")
+    case True
+    hence "(verify_globals_spec (list_graph_to_graph G) (SecurityInvariant.node_props default_node_properties P) (model_global_properties P) \<and>
        sinvar_spec (list_graph_to_graph G) (SecurityInvariant.node_props default_node_properties P)) =
       (verify_globals_impl G (SecurityInvariant.node_props default_node_properties P) (model_global_properties P) \<and>
-       sinvar_impl G (SecurityInvariant.node_props default_node_properties P))" using
-       ev[of "(SecurityInvariant.node_props default_node_properties P)"]
-       ver[of "(SecurityInvariant.node_props default_node_properties P)" "(model_global_properties P)"] by blast
+       sinvar_impl G (SecurityInvariant.node_props default_node_properties P))"
+      using ev ver by blast
 
-    show "?thesis"
-      proof(cases "valid_list_graph G")
-      case True
-        from inst case_valid[OF True] show ?thesis
-        apply(simp add: valid_list_graph_def)
-        apply(rule distinct_rm)
-        apply(unfold SecurityInvariant.eval_def)
-        apply(simp only: valid_list_graph_iff_valid_graph)
-        done
-      next
-      case False
-        from False valid_list_graph_def have "(distinct (nodesL G) \<and> distinct (edgesL G) \<and> valid_list_graph_axioms G) = False" by blast
-        from this SecurityInvariant.eval_def[OF inst, of verify_globals_spec "(list_graph_to_graph G)"] 
-        valid_list_graph_iff_valid_graph  have "(distinct (nodesL G) \<and> distinct (edgesL G) \<and> 
-          SecurityInvariant.eval sinvar_spec verify_globals_spec default_node_properties (list_graph_to_graph G) P) = False" by blast
-        from False this show ?thesis by blast
-      qed
-    qed
-  
+    with inst show ?thesis
+      unfolding valid_list_graph_def 
+      by (simp add: valid_list_graph_iff_valid_graph SecurityInvariant.eval_def)
+  next
+    case False
+    hence "(distinct (nodesL G) \<and> distinct (edgesL G) \<and> valid_list_graph_axioms G) = False"
+      unfolding valid_list_graph_def by blast
+    with False show ?thesis
+      unfolding SecurityInvariant.eval_def[OF inst]
+      by (fastforce simp: valid_list_graph_iff_valid_graph)
+  qed
 
 
 subsection {*Helper lemmata*}
 
   text{* Provide @{term sinvar} function and get back a function that computes the list of offending flows
   
-  Exponential time!!
+  Exponential time!
   *}
   definition Generic_offending_list:: "('v list_graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> bool )\<Rightarrow> 'v list_graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> ('v \<times> 'v) list list" where
     "Generic_offending_list sinvar G nP = [f \<leftarrow> (sublists (edgesL G)). 
@@ -144,68 +119,56 @@ subsection {*Helper lemmata*}
   
   (*proof rule: if sinvar is correct, Generic_offending_list is correct *)
   lemma Generic_offending_list_correct: 
-    "\<lbrakk> valid_list_graph G;
-      \<forall> G nP. valid_list_graph G \<longrightarrow> (sinvar_spec (list_graph_to_graph G) nP) = (sinvar_impl G nP) \<rbrakk> \<Longrightarrow>
-    SecurityInvariant_withOffendingFlows.set_offending_flows sinvar_spec (list_graph_to_graph G) nP = 
+    assumes valid: "valid_list_graph G"
+    assumes spec_impl: "\<And>G nP. valid_list_graph G \<Longrightarrow> sinvar_spec (list_graph_to_graph G) nP = sinvar_impl G nP"
+    shows "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar_spec (list_graph_to_graph G) nP = 
       set`set( Generic_offending_list sinvar_impl G nP )"
-  proof(unfold SecurityInvariant_withOffendingFlows.set_offending_flows_def 
-      SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def 
-      SecurityInvariant_withOffendingFlows.is_offending_flows_def
-      Generic_offending_list_def)
-    assume valid: "valid_list_graph G"
-    and spec_impl: "\<forall>G nP. valid_list_graph G \<longrightarrow> sinvar_spec (list_graph_to_graph G) nP = sinvar_impl G nP"
-      hence spec_impl1: "\<And> G nP. valid_list_graph G \<Longrightarrow> sinvar_spec (list_graph_to_graph G) nP = sinvar_impl G nP" by simp
-    
-    have set_reinziehen: "\<And> P G. set ` {x \<in> set (sublists (edgesL G)). P G (set x)} = {x \<in> set ` set (sublists (edgesL G)). P G (x)}"
+  proof -
+    have "\<And> P G. set ` {x \<in> set (sublists (edgesL G)). P G (set x)} = {x \<in> set ` set (sublists (edgesL G)). P G (x)}"
       by fastforce
-    have subset_sublists_filter: "\<And> G P. {f. f \<subseteq> edges (list_graph_to_graph G) \<and> P G f} 
+    hence subset_sublists_filter: "\<And> G P. {f. f \<subseteq> edges (list_graph_to_graph G) \<and> P G f} 
     = set ` set [f\<leftarrow>sublists (edgesL G) . P G (set f)]"
-      by(simp add: list_graph_to_graph_def set_reinziehen sublists_powset)
-  
-  
-    from valid delete_edges_valid have valid_delete: "\<forall>f. valid_list_graph(FiniteListGraph.delete_edges G f)" by fast
-    from spec_impl1[symmetric] valid_delete FiniteListGraph.delete_edges_correct[of "G"] have impl_spec_delete:
+      unfolding list_graph_to_graph_def
+      by (auto simp: sublists_powset)
+
+    from valid delete_edges_valid have "\<forall>f. valid_list_graph(FiniteListGraph.delete_edges G f)" by fast
+    with spec_impl[symmetric] FiniteListGraph.delete_edges_correct[of "G"] have impl_spec_delete:
       "\<forall>f. sinvar_impl (FiniteListGraph.delete_edges G f) nP = 
           sinvar_spec (FiniteGraph.delete_edges (list_graph_to_graph G) (set f)) nP" by simp
-  
-    from spec_impl1[OF valid, symmetric] have impl_spec_not:
+
+    from spec_impl[OF valid, symmetric] have impl_spec_not:
       "(\<not> sinvar_impl G nP) = (\<not> sinvar_spec (list_graph_to_graph G) nP)" by auto
-  
-    from spec_impl1[symmetric, OF FiniteListGraph.add_edge_valid[OF FiniteListGraph.delete_edges_valid[OF valid]]] have impl_spec_allE:
+
+    from spec_impl[symmetric, OF FiniteListGraph.add_edge_valid[OF FiniteListGraph.delete_edges_valid[OF valid]]] have impl_spec_allE:
     "\<forall> e1 e2 E. sinvar_impl (FiniteListGraph.add_edge e1 e2 (FiniteListGraph.delete_edges G E)) nP =
     sinvar_spec (list_graph_to_graph (FiniteListGraph.add_edge e1 e2 (FiniteListGraph.delete_edges G E))) nP" by simp
-  
-  
-    have substListGraph: "\<And> e1 e2 G f. (list_graph_to_graph (FiniteListGraph.add_edge e1 e2 (FiniteListGraph.delete_edges G f))) = 
+
+    have list_graph: "\<And> e1 e2 G f. (list_graph_to_graph (FiniteListGraph.add_edge e1 e2 (FiniteListGraph.delete_edges G f))) = 
       (FiniteGraph.add_edge e1 e2 (FiniteGraph.delete_edges (list_graph_to_graph G) (set f)))"
     by(simp add: FiniteListGraph.add_edge_correct FiniteListGraph.delete_edges_correct)
     
-    show "{f. f \<subseteq> edges (list_graph_to_graph G) \<and>
-            (\<not> sinvar_spec (list_graph_to_graph G) nP \<and> sinvar_spec (FiniteGraph.delete_edges (list_graph_to_graph G) f) nP) \<and>
-            (\<forall>(e1, e2)\<in>f. \<not> sinvar_spec (FiniteGraph.add_edge e1 e2 (FiniteGraph.delete_edges (list_graph_to_graph G) f)) nP)} =
-        set ` set [f\<leftarrow>sublists (edgesL G) .
-                   (\<not> sinvar_impl G nP \<and> sinvar_impl (FiniteListGraph.delete_edges G f) nP) \<and>
-                   (\<forall>(e1, e2)\<in>set f. \<not> sinvar_impl (FiniteListGraph.add_edge e1 e2 (FiniteListGraph.delete_edges G f)) nP)]"
+    show ?thesis 
+      unfolding SecurityInvariant_withOffendingFlows.set_offending_flows_def 
+      SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def 
+      SecurityInvariant_withOffendingFlows.is_offending_flows_def
+      Generic_offending_list_def
         apply(subst impl_spec_delete)
         apply(subst impl_spec_not)
         apply(subst impl_spec_allE)
-        apply(subst substListGraph)
+        apply(subst list_graph)
         apply(rule subset_sublists_filter)
         done
   qed
-  
-  
-  
-  
+
   lemma all_edges_list_I: "P (list_graph_to_graph G) = Pl G \<Longrightarrow> 
     (\<forall>(e1, e2)\<in> (edges (list_graph_to_graph G)). P (list_graph_to_graph G) e1 e2) = (\<forall>(e1, e2)\<in>set (edgesL G). Pl G e1 e2)"
-   by(simp add:list_graph_to_graph_def)
+  unfolding list_graph_to_graph_def
+  by simp
 
-  
   lemma all_nodes_list_I: "P (list_graph_to_graph G) = Pl G \<Longrightarrow> 
     (\<forall>n \<in> (nodes (list_graph_to_graph G)). P (list_graph_to_graph G) n) = (\<forall> n \<in>set (nodesL G). Pl G n)"
-   by(simp add:list_graph_to_graph_def)
-
+  unfolding list_graph_to_graph_def
+  by simp
 
 
 section{*Security Invariant Library*}
