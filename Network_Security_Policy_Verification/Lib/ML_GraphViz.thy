@@ -75,16 +75,16 @@ local
       fun format_dot_edge (t1, t2) = format_node t1 ^ " -> " ^ format_node t2 ^ ";\n"
     in
       writeln "TODO: name clashes?"; map format_dot_edge trm
-    end;
+    end
 
   fun apply_dot_header es =
-    "digraph graphname {\n" ^ implode es ^ "}";
+    "digraph graphname {\n" ^ implode es ^ "}"
 in
   fun visualize_graph_pretty thy tune_node_format Es =
     let 
       val evaluated_edges = map (fn (str, t) => (str, evaluate_term thy t)) Es
       val edge_to_string = HOLogic.dest_list #> map HOLogic.dest_prod #> format_dot_edges tune_node_format #> implode
-      val formatted_edges = map (fn (str, t) => str ^ "\n" ^ (edge_to_string t)) evaluated_edges
+      val formatted_edges = map (fn (str, t) => str ^ "\n" ^ edge_to_string t) evaluated_edges
     in
       apply_dot_header formatted_edges 
       |> write_to_tmpfile

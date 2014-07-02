@@ -139,8 +139,8 @@ Later, we will show that is suffices to show that the invariant is monotonic. Th
 *}
 
   locale SecurityInvariant_preliminaries = SecurityInvariant_withOffendingFlows sinvar verify_globals
-    for sinvar::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
-    and verify_globals::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> 'b \<Rightarrow> bool"
+    for sinvar
+    and verify_globals
     +
     assumes 
       defined_offending:

@@ -77,7 +77,6 @@ interpretation Dependability_norefl_impl:TopoS_List_Impl
   apply(intro allI impI)
   apply(rule Generic_offending_list_correct)
    apply(assumption)
-  apply(intro allI impI)
   apply(simp only: sinvar_correct)
  apply(rule conjI)
   apply(intro allI)

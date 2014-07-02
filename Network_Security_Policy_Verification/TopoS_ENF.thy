@@ -11,131 +11,105 @@ text {* Security Invariants may have a common structure:
   We found that this form has some nice properties.
   Also, locale instantiation is easier in ENF with the help of the following lemmata.*}
 
-
-
 subsection {* Simple Edges Normal Form (ENF) *}
+
 context SecurityInvariant_withOffendingFlows
 begin 
-  definition sinvar_all_edges_normal_form :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> bool" where
-    "sinvar_all_edges_normal_form P \<equiv> \<forall> G nP. sinvar G nP = (\<forall> (e1, e2)\<in> edges G. P (nP e1) (nP e2))"
-  
 
+  definition sinvar_all_edges_normal_form :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> bool" where
+  "sinvar_all_edges_normal_form P \<equiv> \<forall> G nP. sinvar G nP = (\<forall> (e1, e2)\<in> edges G. P (nP e1) (nP e2))"
+  
   (* reflexivity is needed for convenience. If a network security model is not refexive, that means that all nodes with the default
     parameter \<bottom> are not allowed to communicate with each other *)
   definition ENF_refl :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> bool" where
-    "ENF_refl P \<equiv> sinvar_all_edges_normal_form P \<and> (\<forall> p1. P p1 p1)"
+  "ENF_refl P \<equiv> sinvar_all_edges_normal_form P \<and> (\<forall> p1. P p1 p1)"
 
-    
-  lemma monotonicity_sinvar_mono: "\<lbrakk> sinvar_all_edges_normal_form P \<rbrakk> \<Longrightarrow>
-    sinvar_mono"
-    apply(simp add: sinvar_all_edges_normal_form_def sinvar_mono_def)
-    by blast
+  lemma monotonicity_sinvar_mono: "sinvar_all_edges_normal_form P \<Longrightarrow> sinvar_mono"
+  unfolding sinvar_all_edges_normal_form_def sinvar_mono_def
+  by auto
+
 end 
 
 subsubsection {* Offending Flows*}
+
 context SecurityInvariant_withOffendingFlows
 begin
+
   lemma ENF_is_offending_flow_ex_not_P:
-    "\<lbrakk> sinvar_all_edges_normal_form P;
-    is_offending_flows f G nP \<rbrakk>
-    \<Longrightarrow> (\<exists> (e1, e2) \<in> edges G. \<not> P (nP e1) (nP e2))"
-    unfolding sinvar_all_edges_normal_form_def
-    unfolding is_offending_flows_def
-    apply blast
-    done
-  lemma  "sinvar_all_edges_normal_form P \<Longrightarrow>
-    (f \<in> set_offending_flows G nP) \<and> f \<noteq> {} 
-    \<Longrightarrow> (\<exists> (e1, e2) \<in> f.  \<not> P (nP e1) (nP e2))"
-    unfolding sinvar_all_edges_normal_form_def
-    apply(simp add: set_offending_flows_def is_offending_flows_def is_offending_flows_min_set_def graph_ops)
-    apply clarify
-    apply(blast)
-  done
-  
-  
-  lemma ENF_offending_imp_not_P: "sinvar_all_edges_normal_form P \<Longrightarrow>
-    f \<in> set_offending_flows G nP \<Longrightarrow> (e1, e2) \<in> f 
-    \<Longrightarrow> \<not> P (nP e1) (nP e2)"
-    unfolding sinvar_all_edges_normal_form_def
-    apply(simp add: set_offending_flows_def is_offending_flows_def is_offending_flows_min_set_def graph_ops)
-    apply clarify
-    by fastforce
-  
-  
+    assumes "sinvar_all_edges_normal_form P" "is_offending_flows f G nP"
+    obtains e1 e2 where "(e1, e2) \<in> edges G" "\<not> P (nP e1) (nP e2)"
+  using assms
+  unfolding sinvar_all_edges_normal_form_def is_offending_flows_def
+  by blast
+
+  lemma ENF_set_offending_flow_ex_not_P:
+    assumes "sinvar_all_edges_normal_form P" "f \<in> set_offending_flows G nP" "f \<noteq> {}"
+    obtains e1 e2 where "(e1, e2) \<in> f" "\<not> P (nP e1) (nP e2)"
+  using assms
+  unfolding sinvar_all_edges_normal_form_def set_offending_flows_def is_offending_flows_min_set_def
+  by (fastforce simp: is_offending_flows_def graph_ops)
+
+  lemma ENF_offending_imp_not_P:
+    assumes "sinvar_all_edges_normal_form P" "f \<in> set_offending_flows G nP" "(e1, e2) \<in> f"
+    shows "\<not> P (nP e1) (nP e2)"
+  using assms
+  unfolding sinvar_all_edges_normal_form_def set_offending_flows_def is_offending_flows_min_set_def
+  by (fastforce simp: is_offending_flows_def graph_ops)
+
   lemma ENF_offending_set_P_representation: 
-    "sinvar_all_edges_normal_form P \<Longrightarrow> 
-    f \<in> set_offending_flows G nP
-    \<Longrightarrow> f = {(e1,e2). (e1, e2) \<in> edges G \<and> \<not> P (nP e1) (nP e2)}"
-    apply rule
-     apply rule
-     apply clarify
-     apply(rename_tac a b)
-     apply rule
-      apply(auto simp add:set_offending_flows_def)[1]
-     apply(simp add: ENF_offending_imp_not_P[of P f G nP])
-    unfolding sinvar_all_edges_normal_form_def
-    apply(simp add:set_offending_flows_def is_offending_flows_def is_offending_flows_min_set_def graph_ops)
-    apply clarify
-    apply(rename_tac a b a1 b1)
-    apply(blast)
-  done
-  
-  
+    assumes "sinvar_all_edges_normal_form P" "f \<in> set_offending_flows G nP"
+    shows "f = {(e1,e2). (e1, e2) \<in> edges G \<and> \<not> P (nP e1) (nP e2)}" (is "_ = ?E")
+  proof -
+    { fix a b
+      assume "(a, b) \<in> f"
+      hence "(a, b) \<in> ?E"
+        using assms
+        by (auto simp: set_offending_flows_def ENF_offending_imp_not_P)
+    }
+    moreover
+    { fix x
+      assume "x \<in> ?E"
+      hence "x \<in> f"
+        using assms
+        unfolding sinvar_all_edges_normal_form_def set_offending_flows_def is_offending_flows_min_set_def
+        by (fastforce simp: is_offending_flows_def graph_ops)
+    }
+    ultimately show ?thesis
+      by blast
+  qed
+
   (* We can show an overapproximation already: *)
   lemma ENF_offending_subseteq_lhs:
-    "sinvar_all_edges_normal_form P \<Longrightarrow> 
-    (set_offending_flows G nP) \<subseteq>
-    { {(e1,e2). (e1, e2) \<in> edges G \<and> \<not> P (nP e1) (nP e2)} }"
-    apply rule
-    by(simp add: ENF_offending_set_P_representation[of P _ G nP])
-  
-  
+    assumes "sinvar_all_edges_normal_form P"
+    shows "set_offending_flows G nP \<subseteq> { {(e1,e2). (e1, e2) \<in> edges G \<and> \<not> P (nP e1) (nP e2)} }"
+  using assms
+  by (force simp: ENF_offending_set_P_representation)
+
   (* if offending flows not empty, we have the other direction *)
-  lemma ENF_offenindg_not_empty_imp_ENF_offending_subseteq_rhs:
-    "sinvar_all_edges_normal_form P \<Longrightarrow> 
-    set_offending_flows G nP \<noteq> {}  \<Longrightarrow>
-    { {(e1,e2). (e1, e2) \<in> edges G \<and> \<not> P (nP e1) (nP e2)} } \<subseteq> set_offending_flows G nP"
-    apply rule
-    apply(insert ENF_offending_set_P_representation[of P _ G nP],simp)[1]
-    apply blast
-   done
-  
-  
-  
-  
+  lemma ENF_offending_not_empty_imp_ENF_offending_subseteq_rhs:
+    assumes "sinvar_all_edges_normal_form P" "set_offending_flows G nP \<noteq> {}"
+    shows "{ {(e1,e2). (e1, e2) \<in> edges G \<and> \<not> P (nP e1) (nP e2)} } \<subseteq> set_offending_flows G nP"
+  using assms ENF_offending_set_P_representation
+  by blast
+
   lemma ENF_notevalmodel_offending_imp_ex_offending_min:
-   "sinvar_all_edges_normal_form P \<Longrightarrow> 
-   is_offending_flows f G nP \<Longrightarrow> f \<subseteq> edges G 
-   \<Longrightarrow> \<exists>f'. f' \<subseteq> edges G \<and> is_offending_flows_min_set f' G nP"
-    unfolding sinvar_all_edges_normal_form_def
-    apply(simp only:is_offending_flows_def is_offending_flows_min_set_def)
-    apply(simp only:graph_ops)
-    apply simp
-    (* select f' as the list of all edges of f which violate P *)
-    apply(rule_tac x="{(e1,e2). (e1,e2) \<in> (edges G) \<and> \<not>P (nP e1) (nP e2)}" in exI) (* f better than edges G but proof harder *)
-    apply simp
-    apply force
-  done
-  
+    "\<lbrakk> sinvar_all_edges_normal_form P; is_offending_flows f G nP; f \<subseteq> edges G \<rbrakk> \<Longrightarrow>
+     \<exists>f'. f' \<subseteq> edges G \<and> is_offending_flows_min_set f' G nP"
+  unfolding sinvar_all_edges_normal_form_def is_offending_flows_min_set_def is_offending_flows_def
+  (* select f' as the list of all edges of f which violate P *)
+  by (rule exI[where x="{(e1,e2). (e1,e2) \<in> (edges G) \<and> \<not>P (nP e1) (nP e2)}"]) (* f better than edges G but proof harder *)
+     (fastforce simp: graph_ops)
+
   lemma ENF_notevalmodel_imp_ex_offending:
-  "\<lbrakk> sinvar_all_edges_normal_form P;
-    \<not> sinvar G nP \<rbrakk> \<Longrightarrow>
-    \<exists>f. f \<subseteq> (edges G) \<and> is_offending_flows f G nP"
-    unfolding sinvar_all_edges_normal_form_def
-    apply(simp add: Set.Ball_def)
-    apply(simp only:is_offending_flows_def)
-    apply(simp only:graph_ops)
-    apply simp
-    apply(rule_tac x="{(e1,e2). (e1,e2) \<in> (edges G) \<and> \<not>P (nP e1) (nP e2)}" in exI)
-    apply(rule conjI)
-     apply blast
-    apply blast
-  done
+    "\<lbrakk> sinvar_all_edges_normal_form P; \<not> sinvar G nP \<rbrakk> \<Longrightarrow>
+     \<exists>f. f \<subseteq> (edges G) \<and> is_offending_flows f G nP"
+  unfolding sinvar_all_edges_normal_form_def is_offending_flows_def
+  by (rule exI[where x="{(e1,e2). (e1,e2) \<in> (edges G) \<and> \<not>P (nP e1) (nP e2)}"])
+     (fastforce simp: graph_ops)
   
   lemma ENF_notevalmodel_imp_ex_offending_min:
-  "\<lbrakk> sinvar_all_edges_normal_form P;
-    \<not> sinvar G nP \<rbrakk> \<Longrightarrow>
-    \<exists>f. f \<subseteq> edges G \<and> is_offending_flows_min_set f G nP"
+    "\<lbrakk> sinvar_all_edges_normal_form P; \<not> sinvar G nP \<rbrakk> \<Longrightarrow>
+     \<exists>f. f \<subseteq> edges G \<and> is_offending_flows_min_set f G nP"
     apply(frule ENF_notevalmodel_imp_ex_offending[of P G nP], simp)
     apply(erule exE)
     using ENF_notevalmodel_offending_imp_ex_offending_min[of P _ G nP] by fast
@@ -153,7 +127,7 @@ begin
     { {(e1,e2). (e1, e2) \<in> (edges G) \<and> \<not> P (nP e1) (nP e2)} } = set_offending_flows G nP"
     apply(rule)
      apply(frule ENF_notevalmodel_imp_offending_not_empty, simp)
-     apply(rule ENF_offenindg_not_empty_imp_ENF_offending_subseteq_rhs, simp)
+     apply(rule ENF_offending_not_empty_imp_ENF_offending_subseteq_rhs, simp)
      apply simp
     apply(rule ENF_offending_subseteq_lhs)
     apply simp

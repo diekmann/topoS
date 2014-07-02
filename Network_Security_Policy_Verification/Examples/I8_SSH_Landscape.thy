@@ -1,4 +1,4 @@
-theory i8_ssh_landscape
+theory I8_SSH_Landscape
 imports "../Impl_List_Interface"
 begin
 

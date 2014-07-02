@@ -1,4 +1,4 @@
-theory example_forte14
+theory Example_Forte14
 imports "../Impl_List_Interface"
 begin
 
