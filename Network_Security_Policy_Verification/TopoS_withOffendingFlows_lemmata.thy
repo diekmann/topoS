@@ -220,25 +220,28 @@ begin
 
 
 
-  lemma valid_graph_add_delete_edge_simp:
-  "valid_graph G \<Longrightarrow> (a1,a2) \<in> edges G \<Longrightarrow> add_edge a1 a2 (delete_edges G Y) = (delete_edges G (Y - {(a1,a2)}))"
-  apply(simp add: graph_ops)
-  apply(rule conjI)
-   apply(simp add: valid_graph_def)
-   apply(auto)
-  done
+
   lemma not_model_mono_imp_addedge_mono: 
-  "(\<forall> G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP ) \<Longrightarrow>
-   valid_graph G \<Longrightarrow> (a1,a2) \<in> edges G \<Longrightarrow> X \<subseteq> Y \<Longrightarrow> \<not> sinvar (add_edge a1 a2 (delete_edges G (Y))) nP \<Longrightarrow>  
-      \<not> sinvar (add_edge a1 a2 (delete_edges G X)) nP"
-   apply(simp add: valid_graph_add_delete_edge_simp)
-   apply(subgoal_tac "X - {(a1, a2)} \<subseteq> Y - {(a1, a2)}")
-    apply(blast)
-   apply(blast)
-  done
+  assumes mono: "sinvar_mono"
+   and vG: "valid_graph G" and ain: "(a1,a2) \<in> edges G" and xy: "X \<subseteq> Y" and ns: "\<not> sinvar (add_edge a1 a2 (delete_edges G (Y))) nP"  
+  shows "\<not> sinvar (add_edge a1 a2 (delete_edges G X)) nP"
+   proof -
+      have valid_graph_add_delete_edge_simp: "\<And>Y. add_edge a1 a2 (delete_edges G Y) = (delete_edges G (Y - {(a1,a2)}))"
+        apply(simp add: delete_edges_simp2 add_edge_def)
+        apply(rule conjI)
+         using ain apply (metis insert_absorb vG valid_graph.E_validD(1) valid_graph.E_validD(2))
+         apply(auto simp add: ain)
+        done
+      from this ns have 1: "\<not> sinvar (delete_edges G (Y - {(a1, a2)})) nP" by simp
+      have 2: "X - {(a1, a2)} \<subseteq> Y - {(a1, a2)}" by (metis Diff_mono subset_refl xy)
+      from sinvar_mono_imp_negative_delete_edge_mono[OF mono] vG have
+        "\<And>X Y. X \<subseteq> Y \<Longrightarrow> \<not> sinvar (delete_edges G Y) nP \<Longrightarrow> \<not> sinvar (delete_edges G X) nP" by blast
+      from this[OF 2 1] have "\<not> sinvar (delete_edges G (X - {(a1, a2)})) nP" by simp
+      from this valid_graph_add_delete_edge_simp[symmetric] show ?thesis by simp
+   qed
 
   lemma not_model_mono_imp_addedge_mono_minimalize_offending_overapprox: "
-  (\<forall> G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP ) \<Longrightarrow>
+  sinvar_mono \<Longrightarrow>
     valid_graph G \<Longrightarrow>
     a \<notin> set keeps \<Longrightarrow>
     a \<notin> set ff \<Longrightarrow>
@@ -255,24 +258,16 @@ begin
     done
 
 
-  lemma minimalize_offending_overapprox_maintains_evalmodel: "valid_graph G \<Longrightarrow>
-    sinvar (delete_edges G (set ff \<union> set keeps)) nP \<Longrightarrow> 
-    sinvar (delete_edges G (set (minimalize_offending_overapprox ff keeps G nP))) nP"
-   apply(induction ff arbitrary: keeps)
-    apply(simp) 
-   apply(simp)
-   apply(rule impI)
-   apply(simp add:delete_edges_list_union)
-   done
 
-  lemma add_delete_insert_helper: "valid_graph G \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow> (a,b)\<notin>F \<Longrightarrow> 
+
+  (*lemma add_delete_insert_helper: "valid_graph G \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow> (a,b)\<notin>F \<Longrightarrow> 
     (add_edge a b (delete_edges G (insert (a, b) F))) = delete_edges G F"
     apply(simp add: graph_ops)
     apply(rule conjI)
      apply(simp add: valid_graph_def)
      apply (auto)[1]
-    by fastforce
-  lemma a_is_in_offending_flows_min: "valid_graph G \<Longrightarrow> a \<in> edges G \<Longrightarrow>  a \<notin> F \<Longrightarrow>
+    by fastforce*)
+  (*lemma a_is_in_offending_flows_min: "valid_graph G \<Longrightarrow> a \<in> edges G \<Longrightarrow>  a \<notin> F \<Longrightarrow>
       \<not> sinvar G nP \<Longrightarrow>
        sinvar (delete_edges G (insert a F)) nP \<Longrightarrow>
        \<not> sinvar (delete_edges G F) nP \<Longrightarrow> 
@@ -284,11 +279,11 @@ begin
   apply(simp)
   apply(clarify)
   apply(simp add: add_delete_insert_helper)
-  done
+  done*)
 
 
   lemma mono_imp_minimalize_offending_overapprox_minimal: "
-   (\<forall> G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP ) \<Longrightarrow>
+   sinvar_mono \<Longrightarrow>
     valid_graph G \<Longrightarrow>
     \<forall> x \<in> set ff. x \<notin> set keeps \<Longrightarrow>
     \<forall> x \<in> set ff. x \<in> edges G \<Longrightarrow>
@@ -366,20 +361,31 @@ begin
       and vG: "valid_graph G" and iO: "is_offending_flows (set ff) G nP" and sF: "set ff \<subseteq> edges G" and dF: "distinct ff"
       shows "is_offending_flows_min_set (set (minimalize_offending_overapprox ff [] G nP)) G nP" (is "is_offending_flows_min_set ?minset G nP")
   proof -
-    from mono sinvar_mono_imp_negative_delete_edge_mono have negmono: 
-      "\<forall>G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G Y) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP" by simp
+    { fix keeps
+        have "sinvar (delete_edges G (set ff \<union> set keeps)) nP \<Longrightarrow> 
+          sinvar (delete_edges G (set (minimalize_offending_overapprox ff keeps G nP))) nP"
+         apply(induction ff arbitrary: keeps)
+          apply(simp)
+         apply(simp)
+         apply(rule impI)
+         apply(simp add:delete_edges_list_union)
+         done
+    } note minimalize_offending_overapprox_maintains_evalmodel=this
+    (*from mono sinvar_mono_imp_negative_delete_edge_mono have negmono: 
+      "\<forall>G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G Y) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP" by simp*)
     from iO have "sinvar (delete_edges G (set ff)) nP" by (metis is_offending_flows_def)
-    from this minimalize_offending_overapprox_maintains_evalmodel[OF vG, where keeps="[]"] have
+
+    --{*@{term "keeps = []"}*}
+    from this minimalize_offending_overapprox_maintains_evalmodel have
       "sinvar (delete_edges G ?minset) nP" by simp
     hence 1: "is_offending_flows ?minset G nP" by (metis iO is_offending_flows_def)
-    from mono_imp_minimalize_offending_overapprox_minimal[OF negmono vG _ _ dF, where keeps="[]"] sF have 2:
+    from mono_imp_minimalize_offending_overapprox_minimal[OF mono vG _ _ dF, where keeps="[]"] sF have 2:
       "\<forall>(e1, e2)\<in>?minset. \<not> sinvar (add_edge e1 e2 (delete_edges G ?minset)) nP"
     by auto
     from 1 2 show ?thesis
       by(simp add: is_offending_flows_def is_offending_flows_min_set_def)
   qed
 
-  (*use this corollary to show that set_offending_flows is not empty*)
   corollary mono_imp_set_offending_flows_not_empty:
   assumes mono_sinvar: "sinvar_mono"
   and vG: "valid_graph G" and iO: "is_offending_flows (set ff) G nP" and sS: "set ff \<subseteq> edges G" and dF: "distinct ff"
@@ -397,6 +403,10 @@ begin
       by (metis (lifting, no_types) List.set_empty Un_empty_right mem_Collect_eq minimalize_offending_overapprox_subset subset_code(1))
     thus ?thesis by blast 
    qed
+   text{*
+   To show that @{const set_offending_flows} is not empty, the previous corollary @{thm mono_imp_set_offending_flows_not_empty} is very useful.
+   Just select @{term "set ff = edges G"}.
+   *}
 
 
 
@@ -492,7 +502,7 @@ context SecurityInvariant_preliminaries
 
 
     (*TODO better minimality condition for keeps*)
-    lemma  minimalize_offending_overapprox_sound_fixKeep:
+    (*lemma  minimalize_offending_overapprox_sound_fixKeep:
       "\<lbrakk> valid_graph G; is_offending_flows (set (ff @ keeps)) G nP; \<forall> x \<in> set ff. x \<notin> set keeps; \<forall> x \<in> set ff. x \<in> edges G; distinct ff; 
         \<forall>(e1, e2)\<in> set keeps. \<not> sinvar (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox ff keeps G nP)))) nP \<rbrakk>
         \<Longrightarrow>
@@ -513,7 +523,7 @@ context SecurityInvariant_preliminaries
        apply(thin_tac "?x")+
        apply(induction ff keeps G nP rule: minimalize_offending_overapprox.induct)
         apply(simp_all)
-      done
+      done*)
  end
 
 
