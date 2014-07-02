@@ -11,6 +11,7 @@ text{*
   The first step focuses on monotonicity,
 *}
 
+
 context SecurityInvariant_withOffendingFlows
 begin
   text{*We define the monotonicity of @{text "sinvar"}:
@@ -30,13 +31,19 @@ begin
     If one can show @{const sinvar_mono}, then the instantiation of the @{term SecurityInvariant_preliminaries} locale is tremendously simplified. 
   *}
 
+
+  lemma sinvarE: "
+  sinvar_mono \<Longrightarrow>
+  (\<And> nP N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E \<rparr> nP \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E' \<rparr> nP )"
+  unfolding sinvar_mono_def
+  by metis
+
   lemma sinvar_mono_I_proofrule_simple: 
   "\<lbrakk> (\<forall> G nP. sinvar G nP = (\<forall> (e1, e2) \<in> edges G. P e1 e2 nP) ) \<rbrakk> \<Longrightarrow> sinvar_mono"
   apply(simp add: sinvar_mono_def)
   apply(clarify)
   apply(fast)
   done
-
 
   lemma sinvar_mono_I_proofrule:
   "\<lbrakk> (\<forall> nP (G:: 'v graph). sinvar G nP = (\<forall> (e1, e2) \<in> edges G. P e1 e2 nP G) ); 
@@ -65,20 +72,9 @@ begin
     from this have "\<forall>(e1, e2) \<in> (edges \<lparr>nodes = N, edges = E'\<rparr>). P e1 e2 nP \<lparr>nodes = N, edges = E'\<rparr>" by simp
     from this AllForm show "sinvar \<lparr>nodes = N, edges = E'\<rparr> nP" by presburger
   qed
-
-  lemma sinvar_mono_pure_imp_fol: "
-  (\<And> nP N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E \<rparr> nP \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E' \<rparr> nP) \<Longrightarrow>
-  sinvar_mono"
-  unfolding sinvar_mono_def
-  by force
-  lemma sinvar_mono_fol_imp_pure: "
-  sinvar_mono \<Longrightarrow>
-  (\<And> nP N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E \<rparr> nP \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E' \<rparr> nP )"
-  unfolding sinvar_mono_def
-  by metis
  
 
-    (*helper_reverse_implication*) lemma "(Q \<longrightarrow> P) = (\<not> P \<longrightarrow> \<not> Q)" by fastforce
+   text{*Invariant violations do not disappear if we add more flows. *}
    lemma sinvar_mono_imp_negative_mono:
    "sinvar_mono
    \<Longrightarrow> 
@@ -87,7 +83,7 @@ begin
    apply (unfold sinvar_mono_def)
    by(blast)
 
-  lemma sinvar_mono_imp_negative_delete_edge_mono:
+  corollary sinvar_mono_imp_negative_delete_edge_mono:
    "sinvar_mono
    \<Longrightarrow> 
    (\<forall> (G:: 'v graph) nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP )"
@@ -118,7 +114,7 @@ begin
       by (metis delete_edges_def delete_edges_valid)
     have "\<And> G FF F. {(e1, e2). (e1, e2) \<in> edges G \<and> (e1, e2) \<notin> FF \<and> (e1, e2) \<notin> F} \<subseteq> {(e1, e2). (e1, e2) \<in> edges G \<and> (e1, e2) \<notin> FF} "
       apply(rule Collect_mono) by(simp)
-    from sinvar_mono_fol_imp_pure[OF mono validG' this]
+    from sinvarE[OF mono validG' this]
     show "is_offending_flows FF G nP \<Longrightarrow> is_offending_flows (FF \<union> F) G nP"
       by(simp add: is_offending_flows_def graph_ops)
   qed
@@ -564,7 +560,7 @@ begin
 
             from this[symmetric] add_edge_valid[OF delete_edges_valid[OF validG]] have 
               "valid_graph \<lparr>nodes = nodes G, edges = edges G - f \<union> {(e1, e2)}\<rparr>" by simp
-            from sinvar_mono_fol_imp_pure[OF mono this] have mono'':
+            from sinvarE[OF mono this] have mono'':
               "\<And> E'. E' \<subseteq> edges G - f \<union> {(e1, e2)} \<Longrightarrow>
                 sinvar \<lparr>nodes = nodes G, edges = edges G - f \<union> {(e1, e2)}\<rparr> nP \<Longrightarrow> 
                 sinvar \<lparr>nodes = nodes G, edges = E'\<rparr> nP" by simp
