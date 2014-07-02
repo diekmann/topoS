@@ -152,7 +152,10 @@ subsection{*undirected graph simulation*}
   definition undirected :: "'v graph \<Rightarrow> 'v graph"
     where "undirected G = \<lparr> nodes = nodes G, edges = (edges G) \<union> {(b,a). (a,b) \<in> edges G} \<rparr>"
 
-section {*Lemmata*} 
+section {*Lemmata*}
+
+  lemma graph_eq_intro: "(nodes (G::'a graph) = nodes G') \<Longrightarrow> (edges G = edges G') \<Longrightarrow> G = G'"
+  by simp
 
   -- "finite"
   lemma valid_graph_finite_filterE: "valid_graph G \<Longrightarrow> finite {(e1, e2). (e1, e2) \<in> edges G \<and> P e1 e2}"
@@ -208,6 +211,21 @@ section {*Lemmata*}
    by(simp add: delete_edges_simp2)
   lemma delete_edges_edges_mono: "E' \<subseteq> E \<Longrightarrow> edges (delete_edges G E) \<subseteq> edges (delete_edges G E')"
     by(simp add: delete_edges_def, fast)
+
+ --"add delete"
+  lemma add_delete_edge: "valid_graph (G::'a graph) \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow> 
+  add_edge a b (delete_edge a b G) = G"
+   apply(simp add: delete_edge_def add_edge_def valid_graph_def)
+   apply(clarify)
+   apply(rule graph_eq_intro)
+   by (auto)
+
+  lemma add_delete_edges: "valid_graph (G::'v graph) \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow> (a,b) \<notin> fs \<Longrightarrow>
+  add_edge a b (delete_edges G (insert (a, b) fs)) = (delete_edges G fs)"
+  apply(simp add: delete_edges_simp2 add_edge_def valid_graph_def)
+  apply(clarify)
+  apply(auto)
+  done
 
  --"fully_connected"
   lemma fully_connected_simp: "fully_connected \<lparr>nodes = N, edges = ignore \<rparr>\<equiv> \<lparr>nodes = N, edges = N \<times> N \<rparr>"

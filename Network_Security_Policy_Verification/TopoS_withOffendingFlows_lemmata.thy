@@ -153,8 +153,7 @@ begin
   lemma delete_edges_list_union_insert: "delete_edges_list G (f#fs@keep) = delete_edges G ({f} \<union> set fs \<union> set keep)"
   by (metis List.set.simps(2) Un_assoc delete_edges_list_set insert_is_Un set_union_code)
 
-  lemma graph_eq_intro: "(nodes (G::'a graph) = nodes G') \<Longrightarrow> (edges G = edges G') \<Longrightarrow> G = G'"
-  by simp
+
 
   text{* The graph we check in @{const minimalize_offending_overapprox},
   @{term "G minus (fs \<union> keep)"} is the graph from the @{text offending_flows_min_set} condition.
@@ -176,21 +175,9 @@ begin
     by(simp_all)
 
 
-  lemma add_delete_edge: "valid_graph (G::'a graph) \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow> 
-  add_edge a b (delete_edge a b G) = G"
-   apply(simp add: graph_ops valid_graph_def)
-   apply(clarify)
-   apply(rule graph_eq_intro)
-   by (auto)
 
-  lemma add_delete_edges: "valid_graph (G::'v graph) \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow> (a,b) \<notin> fs \<Longrightarrow>
-  add_edge a b (delete_edges G (insert (a, b) fs)) = (delete_edges G fs)"
-  apply(simp add: graph_ops valid_graph_def)
-  apply(clarify)
-  apply(auto)
-  done
 
-  lemma offending_min_set_ab_in_fs: "valid_graph (G::'v graph) \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow>
+  (*lemma offending_min_set_ab_in_fs: "valid_graph (G::'v graph) \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow>
        is_offending_flows_min_set ({(a, b)} \<union> fs) G nP \<Longrightarrow>
        sinvar (delete_edges G fs) nP \<Longrightarrow>
        (a,b) \<in> fs"
@@ -198,7 +185,7 @@ begin
   apply(simp add: is_offending_flows_min_set_def)
   apply(clarify)
   apply(simp add: add_delete_edges)
-  done
+  done*)
 
 
   lemma minimalize_offending_overapprox_subset:
@@ -403,6 +390,8 @@ begin
       by (metis (lifting, no_types) List.set_empty Un_empty_right mem_Collect_eq minimalize_offending_overapprox_subset subset_code(1))
     thus ?thesis by blast 
    qed
+
+
    text{*
    To show that @{const set_offending_flows} is not empty, the previous corollary @{thm mono_imp_set_offending_flows_not_empty} is very useful.
    Just select @{term "set ff = edges G"}.
@@ -428,8 +417,7 @@ begin
       from a is_offending_flows_def noteval list_edges_props empty_edge_graph_simp 
         have overapprox: "is_offending_flows (set list_edges) G nP" by auto
   
-      from SecurityInvariant_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF 
-          mono validG overapprox listedges_subseteq_edges] list_edges_props 
+      from mono_imp_set_offending_flows_not_empty[OF mono validG overapprox listedges_subseteq_edges] list_edges_props 
       show "set_offending_flows G nP \<noteq> {}" by simp
     next
       assume a: "set_offending_flows G nP \<noteq> {}"
@@ -447,13 +435,17 @@ begin
   qed
 
 
-lemma  minimalize_offending_overapprox_keeps_keeps:
+
+  text{*
+  @{const minimalize_offending_overapprox} not only computes a set where @{const is_offending_flows_min_set} holds, but it also returns a subset of the input.
+  *}
+  lemma  minimalize_offending_overapprox_keeps_keeps:
       "(set keeps) \<subseteq> set (minimalize_offending_overapprox ff keeps G nP)"
       apply(induction ff keeps G nP rule: minimalize_offending_overapprox.induct)
        apply(simp_all)
       done
 
-lemma  minimalize_offending_overapprox_subseteq_input:
+  lemma  minimalize_offending_overapprox_subseteq_input:
       "set (minimalize_offending_overapprox ff keeps G nP) \<subseteq> (set ff) \<union> (set keeps)"
       apply(induction ff keeps G nP rule: minimalize_offending_overapprox.induct)
        apply(simp_all)
