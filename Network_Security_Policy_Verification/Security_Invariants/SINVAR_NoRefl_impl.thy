@@ -1,5 +1,5 @@
 theory SINVAR_NoRefl_impl
-imports SINVAR_NoRefl "../TopoS_Lists_Impl_Interface"
+imports SINVAR_NoRefl "../TopoS_Interface_impl"
 begin
 
 code_identifier code_module  SINVAR_NoRefl_impl => (Scala) SINVAR_NoRefl

@@ -17,7 +17,7 @@ setup {* fn thy =>
 
 
 export_code 
-  (*network security requirement models*)
+  --"generic network security invariants"
       SINVAR_LIB_BLPbasic
       SINVAR_LIB_Dependability
       SINVAR_LIB_DomainHierarchyNG
@@ -28,7 +28,7 @@ export_code
       SINVAR_LIB_NonInterference
       SINVAR_LIB_SubnetsInGW
       SINVAR_LIB_CommunicationPartners
-  (* packed model library access*)
+  --"accessors to the packed invariants"
       nm_eval
       nm_node_props
       nm_offending_flows
@@ -36,16 +36,16 @@ export_code
       nm_sinvar
       nm_default
       nm_receiver_violation nm_name
-  (*TopoS_Params*)
+  --"TopoS Params"
       model_global_properties node_properties
-  (*Finite_Graph functions*)
+  --"Finite Graph functions"
       FiniteListGraph.valid_list_graph
       FiniteListGraph.add_node 
       FiniteListGraph.delete_node
       FiniteListGraph.add_edge
       FiniteListGraph.delete_edge
       FiniteListGraph.delete_edges
-  (*Examples*)
+  --"Examples"
   BLPexample1 BLPexample3 
   in Scala
   (*file "code/isabelle_generated.scala"*)

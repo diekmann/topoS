@@ -1,5 +1,5 @@
 theory Impl_List_Playground
-imports "../Impl_List_Interface"
+imports "../TopoS_Impl"
 begin
 
 

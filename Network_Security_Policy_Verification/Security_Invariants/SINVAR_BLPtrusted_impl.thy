@@ -1,5 +1,5 @@
 theory SINVAR_BLPtrusted_impl
-imports SINVAR_BLPtrusted "../TopoS_Lists_Impl_Interface"
+imports SINVAR_BLPtrusted "../TopoS_Interface_impl"
 begin
 
 code_identifier code_module SINVAR_BLPtrusted_impl => (Scala) SINVAR_BLPtrusted

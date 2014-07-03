@@ -10,9 +10,9 @@ session "Network_Security_Policy_Verification" = HOL +
     "~~/src/HOL/Lattice/CompleteLattice"
   theories
     Network_Security_Policy_Verification
-    attic
-  theories [document = false]
     TopoS_generateCode
+  theories [document = false]
+    attic
 
 session "Network_Security_Policy_Verification_Examples" = "Network_Security_Policy_Verification" +
   theories [document = false]

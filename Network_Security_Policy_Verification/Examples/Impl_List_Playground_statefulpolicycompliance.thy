@@ -1,5 +1,5 @@
 theory Impl_List_Playground_statefulpolicycompliance
-imports "../Impl_List_Interface"
+imports "../TopoS_Impl"
     Impl_List_Playground_ChairNetwork
 begin
 

@@ -1,5 +1,5 @@
 theory SINVAR_Sink_impl
-imports SINVAR_Sink "../TopoS_Lists_Impl_Interface"
+imports SINVAR_Sink "../TopoS_Interface_impl"
 begin
 
 code_identifier code_module SINVAR_Sink_impl => (Scala) SINVAR_Sink

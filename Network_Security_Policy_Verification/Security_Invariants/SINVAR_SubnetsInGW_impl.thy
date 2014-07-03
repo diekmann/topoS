@@ -1,5 +1,5 @@
 theory SINVAR_SubnetsInGW_impl
-imports SINVAR_SubnetsInGW "../TopoS_Lists_Impl_Interface"
+imports SINVAR_SubnetsInGW "../TopoS_Interface_impl"
 begin
 
 code_identifier code_module SINVAR_SubnetsInGW_impl => (Scala) SINVAR_SubnetsInGW

@@ -1,5 +1,5 @@
 theory SINVAR_Subnets_impl
-imports SINVAR_Subnets "../TopoS_Lists_Impl_Interface"
+imports SINVAR_Subnets "../TopoS_Interface_impl"
 begin
 
 

@@ -1,5 +1,5 @@
-theory Impl_List_StatefulPolicy
-imports Impl_List_Composition TopoS_Stateful_Policy_Algorithm
+theory TopoS_Stateful_Policy_impl
+imports TopoS_Composition_Theory_impl TopoS_Stateful_Policy_Algorithm
 begin
 
 section{*Stateful Policy -- List Implementaion*}
@@ -48,7 +48,7 @@ subsection{*Algorithms*}
    fun filter_IFS_no_violations_accu :: "'v list_graph \<Rightarrow> 'v SecurityInvariant list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list" where
       "filter_IFS_no_violations_accu G M accu [] = accu" |
       "filter_IFS_no_violations_accu G M accu (e#Es) = (if
-        all_security_requirements_fulfilled (Impl_List_Composition.get_IFS M) (stateful_list_policy_to_list_graph \<lparr> hostsL = nodesL G, flows_fixL = edgesL G, flows_stateL = (e#accu) \<rparr>)
+        all_security_requirements_fulfilled (TopoS_Composition_Theory_impl.get_IFS M) (stateful_list_policy_to_list_graph \<lparr> hostsL = nodesL G, flows_fixL = edgesL G, flows_stateL = (e#accu) \<rparr>)
         then filter_IFS_no_violations_accu G M (e#accu) Es
         else filter_IFS_no_violations_accu G M accu Es)"
     definition filter_IFS_no_violations :: "'v list_graph \<Rightarrow> 'v SecurityInvariant list \<Rightarrow> ('v \<times> 'v) list" where
@@ -68,11 +68,11 @@ subsection{*Algorithms*}
       next
       case (Cons e Es)
         -- "@{thm Cons.IH[OF Cons.prems(1) Cons.prems(2)]}"
-        let ?caseDistinction = "all_security_requirements_fulfilled (Impl_List_Composition.get_IFS (get_impl M)) (stateful_list_policy_to_list_graph \<lparr> hostsL = nodesL G, flows_fixL = edgesL G, flows_stateL = (e#accu) \<rparr>)"
+        let ?caseDistinction = "all_security_requirements_fulfilled (TopoS_Composition_Theory_impl.get_IFS (get_impl M)) (stateful_list_policy_to_list_graph \<lparr> hostsL = nodesL G, flows_fixL = edgesL G, flows_stateL = (e#accu) \<rparr>)"
 
-        from get_IFS_get_ACS_select_simps(2)[OF Cons.prems(1)] have get_impl_zip_simp: "(get_impl (zip (Impl_List_Composition.get_IFS (get_impl M)) (TopoS_Composition_Theory.get_IFS (get_spec M)))) = Impl_List_Composition.get_IFS (get_impl M)" by simp
+        from get_IFS_get_ACS_select_simps(2)[OF Cons.prems(1)] have get_impl_zip_simp: "(get_impl (zip (TopoS_Composition_Theory_impl.get_IFS (get_impl M)) (TopoS_Composition_Theory.get_IFS (get_spec M)))) = TopoS_Composition_Theory_impl.get_IFS (get_impl M)" by simp
           
-        from get_IFS_get_ACS_select_simps(3)[OF Cons.prems(1)] have get_spec_zip_simp: "(get_spec (zip (Impl_List_Composition.get_IFS (get_impl M)) (TopoS_Composition_Theory.get_IFS (get_spec M)))) = TopoS_Composition_Theory.get_IFS (get_spec M)" by simp
+        from get_IFS_get_ACS_select_simps(3)[OF Cons.prems(1)] have get_spec_zip_simp: "(get_spec (zip (TopoS_Composition_Theory_impl.get_IFS (get_impl M)) (TopoS_Composition_Theory.get_IFS (get_spec M)))) = TopoS_Composition_Theory.get_IFS (get_spec M)" by simp
      
         from Cons.prems(3) Cons.prems(4) have "set (e # accu) \<subseteq> set (edgesL G)" by simp
         from Cons.prems(4) have "set (accu) \<subseteq> set (edgesL G)" by simp
@@ -92,7 +92,7 @@ subsection{*Algorithms*}
         have "\<forall> (m_impl, m_spec) \<in> set (zip (get_IFS (get_impl M)) (TopoS_Composition_Theory.get_IFS (get_spec M))). SecurityInvariant_complies_formal_def m_impl m_spec" .
         from all_security_requirements_fulfilled_complies[OF this] have all_security_requirements_fulfilled_eq_rule: 
         "\<And>G. valid_list_graph G \<Longrightarrow>
-            Impl_List_Composition.all_security_requirements_fulfilled (Impl_List_Composition.get_IFS (get_impl M)) G =
+            TopoS_Composition_Theory_impl.all_security_requirements_fulfilled (TopoS_Composition_Theory_impl.get_IFS (get_impl M)) G =
             TopoS_Composition_Theory.all_security_requirements_fulfilled (TopoS_Composition_Theory.get_IFS (get_spec M)) (list_graph_to_graph G)"
             by(simp add: get_impl_zip_simp get_spec_zip_simp)
 
@@ -104,7 +104,7 @@ subsection{*Algorithms*}
           proof(case_tac ?caseDistinction)
           assume cTrue: ?caseDistinction
           
-          from cTrue have g1: "Impl_List_StatefulPolicy.filter_IFS_no_violations_accu G (get_impl M) accu (e # Es) = Impl_List_StatefulPolicy.filter_IFS_no_violations_accu G (get_impl M) (e # accu) Es" by simp
+          from cTrue have g1: "TopoS_Stateful_Policy_impl.filter_IFS_no_violations_accu G (get_impl M) accu (e # Es) = TopoS_Stateful_Policy_impl.filter_IFS_no_violations_accu G (get_impl M) (e # accu) Es" by simp
 
           from cTrue[simplified case_impl_spec] have g2: "TopoS_Stateful_Policy_Algorithm.filter_IFS_no_violations_accu (list_graph_to_graph G) (get_spec M) accu (e # Es) =
             TopoS_Stateful_Policy_Algorithm.filter_IFS_no_violations_accu (list_graph_to_graph G) (get_spec M) (e#accu)Es"
@@ -116,7 +116,7 @@ subsection{*Algorithms*}
         next
           assume cFalse: "\<not> ?caseDistinction"
 
-          from cFalse have g1: "Impl_List_StatefulPolicy.filter_IFS_no_violations_accu G (get_impl M) accu (e # Es) = Impl_List_StatefulPolicy.filter_IFS_no_violations_accu G (get_impl M) accu Es" by simp
+          from cFalse have g1: "TopoS_Stateful_Policy_impl.filter_IFS_no_violations_accu G (get_impl M) accu (e # Es) = TopoS_Stateful_Policy_impl.filter_IFS_no_violations_accu G (get_impl M) accu Es" by simp
 
           from cFalse[simplified case_impl_spec] have g2: "TopoS_Stateful_Policy_Algorithm.filter_IFS_no_violations_accu (list_graph_to_graph G) (get_spec M) accu (e # Es) =
             TopoS_Stateful_Policy_Algorithm.filter_IFS_no_violations_accu (list_graph_to_graph G) (get_spec M) accu Es"
@@ -168,13 +168,13 @@ subsection{*Algorithms*}
         have backlinks_simp: "(e \<notin> set (backlinks (edgesL G))) <-> (e \<notin> backflows (set (edgesL G)))"
           by(simp add: backlinks_correct)
 
-        have "\<And> G X. (\<forall>F\<in>set (implc_get_offending_flows (Impl_List_Composition.get_ACS (get_impl M)) G). set F \<subseteq> X) =
-              (\<forall>F\<in>set ` set (implc_get_offending_flows (Impl_List_Composition.get_ACS (get_impl M)) G). F \<subseteq> X)" by blast
-        also have "\<And> G X. valid_list_graph G \<Longrightarrow> (\<forall>F\<in>set ` set (implc_get_offending_flows (Impl_List_Composition.get_ACS (get_impl M)) G). F \<subseteq> X) =
+        have "\<And> G X. (\<forall>F\<in>set (implc_get_offending_flows (TopoS_Composition_Theory_impl.get_ACS (get_impl M)) G). set F \<subseteq> X) =
+              (\<forall>F\<in>set ` set (implc_get_offending_flows (TopoS_Composition_Theory_impl.get_ACS (get_impl M)) G). F \<subseteq> X)" by blast
+        also have "\<And> G X. valid_list_graph G \<Longrightarrow> (\<forall>F\<in>set ` set (implc_get_offending_flows (TopoS_Composition_Theory_impl.get_ACS (get_impl M)) G). F \<subseteq> X) =
           (\<forall>F\<in>get_offending_flows (TopoS_Composition_Theory.get_ACS (get_spec M)) (list_graph_to_graph G). F \<subseteq> X)"
             using implc_get_offending_flows_complies[OF get_IFS_get_ACS_select_simps(4)[OF Cons.prems(1)], simplified get_IFS_get_ACS_select_simps[OF Cons.prems(1)]] by simp
         finally have implc_get_offending_flows_simp_rule: "\<And>G X. valid_list_graph G \<Longrightarrow> 
-          (\<forall>F\<in>set (implc_get_offending_flows (Impl_List_Composition.get_ACS (get_impl M)) G). set F \<subseteq> X) = (\<forall>F\<in>get_offending_flows (TopoS_Composition_Theory.get_ACS (get_spec M)) (list_graph_to_graph G). F \<subseteq> X)" .
+          (\<forall>F\<in>set (implc_get_offending_flows (TopoS_Composition_Theory_impl.get_ACS (get_impl M)) G). set F \<subseteq> X) = (\<forall>F\<in>get_offending_flows (TopoS_Composition_Theory.get_ACS (get_spec M)) (list_graph_to_graph G). F \<subseteq> X)" .
 
 
         from Cons.prems(3) Cons.prems(4) have "set (e # accu) \<subseteq> set (edgesL G)" by simp
@@ -205,7 +205,7 @@ subsection{*Algorithms*}
           proof(case_tac ?caseDistinction)
           assume cTrue: ?caseDistinction
           
-          from cTrue have g1: "Impl_List_StatefulPolicy.filter_compliant_stateful_ACS_accu G (get_impl M) accu (e # Es) =  Impl_List_StatefulPolicy.filter_compliant_stateful_ACS_accu G (get_impl M) (e#accu) Es" by simp
+          from cTrue have g1: "TopoS_Stateful_Policy_impl.filter_compliant_stateful_ACS_accu G (get_impl M) accu (e # Es) =  TopoS_Stateful_Policy_impl.filter_compliant_stateful_ACS_accu G (get_impl M) (e#accu) Es" by simp
 
           from cTrue[simplified case_impl_spec] have g2: "TopoS_Stateful_Policy_Algorithm.filter_compliant_stateful_ACS_accu (list_graph_to_graph G) (get_spec M) accu (e # Es) =
             TopoS_Stateful_Policy_Algorithm.filter_compliant_stateful_ACS_accu (list_graph_to_graph G) (get_spec M) (e#accu) Es"
@@ -217,7 +217,7 @@ subsection{*Algorithms*}
         next
           assume cFalse: "\<not> (?caseDistinction)"
 
-          from cFalse have g1: "Impl_List_StatefulPolicy.filter_compliant_stateful_ACS_accu G (get_impl M) accu (e # Es)  = Impl_List_StatefulPolicy.filter_compliant_stateful_ACS_accu G (get_impl M) accu Es" by force
+          from cFalse have g1: "TopoS_Stateful_Policy_impl.filter_compliant_stateful_ACS_accu G (get_impl M) accu (e # Es)  = TopoS_Stateful_Policy_impl.filter_compliant_stateful_ACS_accu G (get_impl M) accu Es" by force
 
           from cFalse[simplified case_impl_spec] have g2: "TopoS_Stateful_Policy_Algorithm.filter_compliant_stateful_ACS_accu (list_graph_to_graph G) (get_spec M) accu (e # Es) =
             TopoS_Stateful_Policy_Algorithm.filter_compliant_stateful_ACS_accu (list_graph_to_graph G) (get_spec M) accu Es"
@@ -280,7 +280,7 @@ subsection{*Algorithms*}
        apply (metis valid_list_graph_def valid_list_graph_iff_valid_graph)
       apply(simp)
      apply(simp add: list_graph_to_graph_def)
-    apply(simp add: TopoS_Stateful_Policy_Algorithm.generate_valid_stateful_policy_IFSACS_2_def Impl_List_StatefulPolicy.generate_valid_stateful_policy_IFSACS_2_def)
+    apply(simp add: TopoS_Stateful_Policy_Algorithm.generate_valid_stateful_policy_IFSACS_2_def TopoS_Stateful_Policy_impl.generate_valid_stateful_policy_IFSACS_2_def)
     apply(simp add: list_graph_to_graph_def inefficient_list_intersect_correct)
     apply(thin_tac "\<T> = ?x")
     apply(frule(1) filter_compliant_stateful_ACS_complies)

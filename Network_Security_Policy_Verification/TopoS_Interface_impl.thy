@@ -1,4 +1,4 @@
-theory TopoS_Lists_Impl_Interface
+theory TopoS_Interface_impl
 imports "Lib/FiniteGraph" "Lib/FiniteListGraph" TopoS_Interface TopoS_Helper
 begin
 
@@ -73,9 +73,9 @@ section{*Executable Implementation with Lists*}
 
 
 
-  subsection{*Helpful lemmata*}
+  subsection{*Helpful Lemmata*}
 
-  (*show that eval complies*)
+  text{*show that @{term "sinvar"} complies*}
   lemma TopoS_eval_impl_proofrule: 
     assumes inst: "SecurityInvariant sinvar_spec default_node_properties receiver_violation"
     assumes ev: "\<And>nP. valid_list_graph G \<Longrightarrow> sinvar_spec (list_graph_to_graph G) nP = sinvar_impl G nP"
@@ -117,7 +117,7 @@ subsection {*Helper lemmata*}
       (\<forall>(e1, e2)\<in>set f. \<not> sinvar (add_edge e1 e2 (FiniteListGraph.delete_edges G f)) nP)]"
   
   
-  (*proof rule: if sinvar is correct, Generic_offending_list is correct *)
+  text{*proof rule: if @{term sinvar} complies, @{const Generic_offending_list} complies *}
   lemma Generic_offending_list_correct: 
     assumes valid: "valid_list_graph G"
     assumes spec_impl: "\<And>G nP. valid_list_graph G \<Longrightarrow> sinvar_spec (list_graph_to_graph G) nP = sinvar_impl G nP"

@@ -1,5 +1,5 @@
-theory Impl_List_Composition
-imports TopoS_Lists_Impl_Interface TopoS_Composition_Theory
+theory TopoS_Composition_Theory_impl
+imports TopoS_Interface_impl TopoS_Composition_Theory
 begin
 
 section{*Composition Theory -- List Implementation*}
@@ -192,17 +192,17 @@ subsection{*Accessors*}
    lemma get_IFS_get_ACS_select_simps:
     assumes a1: "\<forall> (m_impl, m_spec) \<in> set M. SecurityInvariant_complies_formal_def m_impl m_spec"
     shows "\<forall> (m_impl, m_spec) \<in> set (zip (get_IFS (get_impl M)) (TopoS_Composition_Theory.get_IFS (get_spec M))). SecurityInvariant_complies_formal_def m_impl m_spec" (is "\<forall> (m_impl, m_spec) \<in> set ?zippedIFS. SecurityInvariant_complies_formal_def m_impl m_spec")
-    and   "(get_impl (zip (Impl_List_Composition.get_IFS (get_impl M)) (TopoS_Composition_Theory.get_IFS (get_spec M)))) = Impl_List_Composition.get_IFS (get_impl M)"
-    and   "(get_spec (zip (Impl_List_Composition.get_IFS (get_impl M)) (TopoS_Composition_Theory.get_IFS (get_spec M)))) = TopoS_Composition_Theory.get_IFS (get_spec M)"
+    and   "(get_impl (zip (TopoS_Composition_Theory_impl.get_IFS (get_impl M)) (TopoS_Composition_Theory.get_IFS (get_spec M)))) = TopoS_Composition_Theory_impl.get_IFS (get_impl M)"
+    and   "(get_spec (zip (TopoS_Composition_Theory_impl.get_IFS (get_impl M)) (TopoS_Composition_Theory.get_IFS (get_spec M)))) = TopoS_Composition_Theory.get_IFS (get_spec M)"
     and   "\<forall> (m_impl, m_spec) \<in> set (zip (get_ACS (get_impl M)) (TopoS_Composition_Theory.get_ACS (get_spec M))). SecurityInvariant_complies_formal_def m_impl m_spec" (is "\<forall> (m_impl, m_spec) \<in> set ?zippedACS. SecurityInvariant_complies_formal_def m_impl m_spec")
-    and   "(get_impl (zip (Impl_List_Composition.get_ACS (get_impl M)) (TopoS_Composition_Theory.get_ACS (get_spec M)))) = Impl_List_Composition.get_ACS (get_impl M)"
-    and   "(get_spec (zip (Impl_List_Composition.get_ACS (get_impl M)) (TopoS_Composition_Theory.get_ACS (get_spec M)))) = TopoS_Composition_Theory.get_ACS (get_spec M)"
+    and   "(get_impl (zip (TopoS_Composition_Theory_impl.get_ACS (get_impl M)) (TopoS_Composition_Theory.get_ACS (get_spec M)))) = TopoS_Composition_Theory_impl.get_ACS (get_impl M)"
+    and   "(get_spec (zip (TopoS_Composition_Theory_impl.get_ACS (get_impl M)) (TopoS_Composition_Theory.get_ACS (get_spec M)))) = TopoS_Composition_Theory.get_ACS (get_spec M)"
     proof -
         from get_IFS_get_ACS_complies(1)[OF a1]
         show "\<forall> (m_impl, m_spec) \<in> set (?zippedIFS). SecurityInvariant_complies_formal_def m_impl m_spec" by simp
       next
-        from a1 show "(get_impl ?zippedIFS) = Impl_List_Composition.get_IFS (get_impl M)"
-          apply(simp add: Impl_List_Composition.get_IFS_def get_spec_def get_impl_def TopoS_Composition_Theory.get_IFS_def)
+        from a1 show "(get_impl ?zippedIFS) = TopoS_Composition_Theory_impl.get_IFS (get_impl M)"
+          apply(simp add: TopoS_Composition_Theory_impl.get_IFS_def get_spec_def get_impl_def TopoS_Composition_Theory.get_IFS_def)
           apply(induction M)
           apply(simp)
           apply(simp)
@@ -214,7 +214,7 @@ subsection{*Accessors*}
           done
       next
         from a1 show "(get_spec ?zippedIFS) = TopoS_Composition_Theory.get_IFS (get_spec M)"
-          apply(simp add: Impl_List_Composition.get_IFS_def get_spec_def get_impl_def TopoS_Composition_Theory.get_IFS_def)
+          apply(simp add: TopoS_Composition_Theory_impl.get_IFS_def get_spec_def get_impl_def TopoS_Composition_Theory.get_IFS_def)
           apply(induction M)
           apply(simp)
           apply(simp)
@@ -228,8 +228,8 @@ subsection{*Accessors*}
         from get_IFS_get_ACS_complies(2)[OF a1]
         show "\<forall> (m_impl, m_spec) \<in> set (?zippedACS). SecurityInvariant_complies_formal_def m_impl m_spec" by simp
       next
-        from a1 show "(get_impl ?zippedACS) = Impl_List_Composition.get_ACS (get_impl M)"
-          apply(simp add: Impl_List_Composition.get_ACS_def get_spec_def get_impl_def TopoS_Composition_Theory.get_ACS_def)
+        from a1 show "(get_impl ?zippedACS) = TopoS_Composition_Theory_impl.get_ACS (get_impl M)"
+          apply(simp add: TopoS_Composition_Theory_impl.get_ACS_def get_spec_def get_impl_def TopoS_Composition_Theory.get_ACS_def)
           apply(induction M)
           apply(simp)
           apply(simp)
@@ -241,7 +241,7 @@ subsection{*Accessors*}
           done
       next
         from a1 show "(get_spec ?zippedACS) = TopoS_Composition_Theory.get_ACS (get_spec M)"
-          apply(simp add: Impl_List_Composition.get_ACS_def get_spec_def get_impl_def TopoS_Composition_Theory.get_ACS_def)
+          apply(simp add: TopoS_Composition_Theory_impl.get_ACS_def get_spec_def get_impl_def TopoS_Composition_Theory.get_ACS_def)
           apply(induction M)
           apply(simp)
           apply(simp)

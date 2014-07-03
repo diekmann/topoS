@@ -1,5 +1,5 @@
 theory SINVAR_SecGwExt_impl
-imports SINVAR_SecGwExt "../TopoS_Lists_Impl_Interface"
+imports SINVAR_SecGwExt "../TopoS_Interface_impl"
 begin
 
 code_identifier code_module SINVAR_SecGwExt_impl => (Scala) SINVAR_SecGwExt

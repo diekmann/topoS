@@ -1,5 +1,5 @@
 theory SINVAR_DomainHierarchyNG_impl
-imports SINVAR_DomainHierarchyNG "../TopoS_Lists_Impl_Interface"
+imports SINVAR_DomainHierarchyNG "../TopoS_Interface_impl"
 begin
 
 

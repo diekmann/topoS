@@ -1,5 +1,5 @@
 theory SINVAR_BLPbasic_impl
-imports SINVAR_BLPbasic "../TopoS_Lists_Impl_Interface"
+imports SINVAR_BLPbasic "../TopoS_Interface_impl"
 begin
 
 code_identifier code_module SINVAR_BLPbasic_impl => (Scala) SINVAR_BLPbasic

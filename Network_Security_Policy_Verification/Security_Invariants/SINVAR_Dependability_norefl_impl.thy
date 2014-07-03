@@ -1,5 +1,5 @@
 theory SINVAR_Dependability_norefl_impl
-imports SINVAR_Dependability_norefl "../TopoS_Lists_Impl_Interface"
+imports SINVAR_Dependability_norefl "../TopoS_Interface_impl"
 begin
 
 

@@ -1,7 +1,7 @@
-theory Impl_List_Interface
-imports TopoS_Library Impl_List_Composition
+theory TopoS_Impl
+imports TopoS_Library TopoS_Composition_Theory_impl
     "Lib/ML_GraphViz"
-    Impl_List_StatefulPolicy
+    TopoS_Stateful_Policy_impl
 begin
 
 

@@ -1,5 +1,5 @@
 theory SINVAR_NonInterference_impl
-imports SINVAR_NonInterference "../TopoS_Lists_Impl_Interface"
+imports SINVAR_NonInterference "../TopoS_Interface_impl"
 begin
 
 

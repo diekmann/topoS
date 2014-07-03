@@ -20,14 +20,14 @@ Example:
   SensorNode -> SensorSink, but not the other way round.
   Implementation: UDP in one direction
 
-  Alice is in internal protected subnet. Goolge can not arbitrarily access Alice.
+  Alice is in internal protected subnet. Google can not arbitrarily access Alice.
   Alice sends requests to google.
-  It is no desirable that alice gets the response back
-  Implementation: TCP and stateful packet filter that allows, one Alice establishes a connection to get a response back via this connection.
+  It is desirable that alice gets the response back
+  Implementation: TCP and stateful packet filter that allows, once Alice establishes a connection, to get a response back via this connection.
 
 Result:
-  IFS violations undesirable
-  ACS violations may be okay under certain conditions
+  IFS violations undesirable.
+  ACS violations may be okay under certain conditions.
 *}
 
 term all_security_requirements_fulfilled
@@ -39,7 +39,7 @@ record 'v stateful_policy =
     flows_state :: "('v \<times>'v) set" --"edges that can have stateful flows, i.e. backflows"
 
 text{* All the possible ways packets can travel in a @{typ "'v stateful_policy"}.
-        They can either choose the fixed links-
+        They can either choose the fixed links;
         Or use a stateful link, i.e. establish state.
         Once state is established, packets can flow back via the established link.*}
 definition all_flows :: "'v stateful_policy \<Rightarrow> ('v \<times> 'v) set" where
@@ -148,7 +148,7 @@ text{*Minimizing stateful flows such that only newly added backflows remain*}
 
 
 
-text{* given a high-level policy, we can construct a pretty large syntactically valid low level policy. however, the stateful policy will
+text{* Given a high-level policy, we can construct a pretty large syntactically valid low level policy. However, the stateful policy will
        almost certainly violate security requirements! *}
   lemma "valid_graph G \<Longrightarrow> valid_stateful_policy \<lparr> hosts = nodes G, flows_fix = nodes G \<times> nodes G, flows_state = nodes G \<times> nodes G \<rparr>"
     by(simp add: valid_stateful_policy_def valid_graph_def)
@@ -175,7 +175,7 @@ lemma "(\<forall>F \<in> get_offending_flows (get_ACS M) (stateful_policy_to_net
     by(simp add: filternew_flows_state_alt backflows_minus_backflows, blast)
 
 
-text{* when is a stateful policy @{term "\<T>"} compliant with a high-level policy @{term "G"} and the security requirements @{term "M"}? *}
+text{* When is a stateful policy @{term "\<T>"} compliant with a high-level policy @{term "G"} and the security requirements @{term "M"}? *}
 locale stateful_policy_compliance =  
   fixes \<T> :: "('v::vertex) stateful_policy"
   fixes G :: "'v graph"
@@ -194,7 +194,7 @@ locale stateful_policy_compliance =
     stateful_policy_valid:
     "valid_stateful_policy \<T>"
     and
-    -- "the stateful poliy must talk about the same nodes as the high-level policy"
+    -- "the stateful policy must talk about the same nodes as the high-level policy"
     hosts_nodes:
     "hosts \<T> = nodes G"
     and
@@ -207,17 +207,9 @@ locale stateful_policy_compliance =
       compliant_stateful_IFS: 
         "all_security_requirements_fulfilled (get_IFS M) (stateful_policy_to_network_graph \<T>)"
       and
-      (*Those are not enough. we need sth for all subsets. Example?*)
-      (*-- "If there are violations, those must only be induced by the backflows that may appear in established connections! "
-      compliant_stateful_ACS_only_state_violations:  (* Is this implied by compliant_stateful_ACS_no_state_side_effect? No, I guess*)
-        "\<forall>F \<in> get_offending_flows (get_ACS M) (stateful_policy_to_network_graph \<T>). F \<subseteq> backflows (flows_state \<T>)"
-      and (*compliant_stateful_ACS_only_state_violations does not imply this*)
-      -- "No side effects when allowig a backflow "
-      compliant_stateful_ACS_no_state_side_effect:
-        "\<forall> (v\<^sub>1, v\<^sub>2) \<in> backflows (flows_state \<T>). (\<Union> get_offending_flows(get_ACS M) \<lparr> nodes = hosts \<T>, edges = flows_fix \<T> \<union> flows_state \<T> \<union> {(v\<^sub>1, v\<^sub>2)} \<rparr>) \<subseteq> {(v\<^sub>1, v\<^sub>2)}"
-      *)
+      -- "No Access Control side effects must occur"
       compliant_stateful_ACS: 
-        "\<forall>F \<in> get_offending_flows (get_ACS M) (stateful_policy_to_network_graph \<T> ). F \<subseteq> backflows (filternew_flows_state \<T>)"(*implies the previous*)
+        "\<forall>F \<in> get_offending_flows (get_ACS M) (stateful_policy_to_network_graph \<T> ). F \<subseteq> backflows (filternew_flows_state \<T>)"
         
   begin
     lemma compliant_stateful_ACS_no_side_effects_filternew_helper: 
@@ -342,14 +334,13 @@ locale stateful_policy_compliance =
       using compliant_stateful_ACS_no_side_effects valid_stateful_policy.E_state_fix[OF stateful_policy_valid] by (metis Un_absorb2)
 
 
-    text{* the high level graph generated from the low level policy is a valid graph*}
+    text{* The high level graph generated from the low level policy is a valid graph*}
     lemma valid_stateful_policy: "valid_graph \<lparr>nodes = hosts \<T>, edges = all_flows \<T>\<rparr>"
       by(rule valid_stateful_policy_is_valid_graph,fact stateful_policy_valid)
 
     text{* The security requirements are definitely fulfilled if we consider only the fixed flows and the
            normal direction of the stateful flows (i.e. no backflows).
            I.e. considering no states, everything must be fulfilled *}
-    -- "considering no states, all Access Control Requirements must be fulfilled" 
     lemma compliant_stateful_ACS_static_valid: "all_security_requirements_fulfilled (get_ACS M) \<lparr> nodes = hosts \<T>, edges = flows_fix \<T>  \<rparr>"
     proof -
       from validReqs have valid_ReqsACS: "valid_reqs (get_ACS M)" by(simp add: get_ACS_def valid_reqs_def)
@@ -436,7 +427,7 @@ subsection{* Summarizing the important theorems *}
     text{* Also, considering all backflows individually, they cause no side effect, i.e. the only violation added is the backflow itself *}
     thm stateful_policy_compliance.compliant_stateful_ACS_no_state_singleflow_side_effect
   
-    text{* In particular, all introduced offending flows for access control startegies are at most the stateful backflows *}
+    text{* In particular, all introduced offending flows for access control strategies are at most the stateful backflows *}
     thm stateful_policy_compliance.compliant_stateful_ACS_only_state_violations_union
     text{* Which implies: all introduced offending flows are at most the stateful backflows *}
     thm stateful_policy_compliance.compliant_stateful_ACS_only_state_violations_union'

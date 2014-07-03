@@ -1,5 +1,5 @@
 theory SINVAR_ACLnotCommunicateWith_impl
-imports SINVAR_ACLnotCommunicateWith "../TopoS_Lists_Impl_Interface"
+imports SINVAR_ACLnotCommunicateWith "../TopoS_Interface_impl"
 begin
 
 code_identifier code_module SINVAR_ACLnotCommunicateWith_impl => (Scala) SINVAR_ACLnotCommunicateWith

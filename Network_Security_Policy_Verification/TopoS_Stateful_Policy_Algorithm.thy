@@ -622,7 +622,7 @@ subsection {* Sketch for generating a stateful policy from a simple directed pol
     thm filter_compliant_stateful_ACS_correct filter_compliant_stateful_ACS_maximal
 
 
-    text{*get those together. We cannot say @{text "edgesList = E"} here because one filters first. I guess filtering ACS first is easier, ...*}
+    text{*Getting those together. We cannot say @{text "edgesList = E"} here because one filters first. I guess filtering ACS first is easier, ...*}
 
 
 
@@ -907,7 +907,7 @@ subsection {* Sketch for generating a stateful policy from a simple directed pol
 
   text{*
     If there are no IFS requirements and the ACS requirements cause no side effects,
-    effectively, the graph can be considered as unidrected graph! 
+    effectively, the graph can be considered as undirected graph! 
   *}
   lemma generate_valid_stateful_policy_IFSACS_2_noIFS_noACSsideeffects_imp_fullgraph:
   assumes validReqs: "valid_reqs M"

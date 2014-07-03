@@ -1,5 +1,5 @@
 theory Impl_List_Playground_ChairNetwork
-imports "../Impl_List_Interface"
+imports "../TopoS_Impl"
 begin
 
 

@@ -1,5 +1,5 @@
 theory SINVAR_CommunicationPartners_impl
-imports SINVAR_CommunicationPartners "../TopoS_Lists_Impl_Interface"
+imports SINVAR_CommunicationPartners "../TopoS_Interface_impl"
 begin
 
 code_identifier code_module SINVAR_CommunicationPartners_impl => (Scala) SINVAR_CommunicationPartners

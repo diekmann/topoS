@@ -1,5 +1,5 @@
 theory SINVAR_Dependability_impl
-imports SINVAR_Dependability "../TopoS_Lists_Impl_Interface"
+imports SINVAR_Dependability "../TopoS_Interface_impl"
 begin
 
 

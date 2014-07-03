@@ -130,10 +130,10 @@ end
 
 
 
-subsection {*offending flows not empty helper lemmata*}
+subsection {*Offending Flows Not Empty Helper Lemmata*}
 context SecurityInvariant_withOffendingFlows
 begin
-  text {* Give an overapproximation of offending flows (e.g. all edges) and get back a
+  text {* Give an over-approximation of offending flows (e.g. all edges) and get back a
           minimal set *}
   (*offending_overapproximation keepingInOffendingApproximation G nP*)
   fun minimalize_offending_overapprox :: "('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> 
@@ -1041,9 +1041,9 @@ end
 
 
   text{*
-    If the offending flows are bound by some X,
-    the we can remove alle finite E' from the graph's edges
-    and the offending flows from the smaller graph are bound by X - E'
+    If the offending flows are bound by some @{term X},
+    the we can remove all finite @{term "E'"}from the graph's edges
+    and the offending flows from the smaller graph are bound by @{term "X - E'"}.
   *}
     lemma Un_set_offending_flows_bound_minus_subseteq:
     assumes validG: "valid_graph \<lparr> nodes = V, edges = E \<rparr>"
@@ -1066,48 +1066,12 @@ end
       show ?thesis by blast
     qed
 
-  lemma Un_set_offending_flows_bound_minus_subseteq_legacy_proof: 
-    assumes validG: "valid_graph \<lparr> nodes = V, edges = E \<rparr>"
-    and      a1: "\<Union> set_offending_flows \<lparr>nodes = V, edges = E \<rparr> nP \<subseteq> X"
-    and  finiteE': "finite E'"
-    shows "\<forall> F \<in> set_offending_flows \<lparr> nodes = V, edges = E - E' \<rparr> nP.  F \<subseteq> X - E'"
-    proof -
-      from validG have validG': "\<And> A. valid_graph \<lparr> nodes = V, edges = E - A\<rparr>"
-        by(auto simp add: valid_graph_def finite_subset)
-        
-      from Un_set_offending_flows_bound_minus[OF validG'] have 
-        "\<And> A f. \<Union>set_offending_flows \<lparr>nodes = V, edges = E - A\<rparr> nP \<subseteq> X - A \<Longrightarrow>
-          \<Union>set_offending_flows \<lparr>nodes = V, edges = E - A - {f}\<rparr> nP \<subseteq> X - A - {f}" by presburger
-      hence generic: "\<And> A f. \<forall> F \<in> set_offending_flows \<lparr>nodes = V, edges = E - A\<rparr> nP. F \<subseteq> X - A \<Longrightarrow>
-          \<forall> F \<in> set_offending_flows \<lparr>nodes = V, edges = E - A - {f}\<rparr> nP. F \<subseteq> X - A - {f}" by blast
-
-      from a1 have a1': "\<forall>F\<in>set_offending_flows \<lparr>nodes = V, edges = E\<rparr> nP. F \<subseteq> X" by blast
-
-      have EFa_simp: "\<And>E F a. E - F - {a} = E - (insert a F)" by fastforce
-
-      find_theorems name:"Set" name:"finite" name:"induct"
-
-      -- "@{thm Finite_Set.finite_subset_induct[OF finiteE']}"
-      from this finiteE' show ?thesis
-      apply -
-      apply(erule Finite_Set.finite_subset_induct[where A="UNIV"])
-        apply(simp)
-       apply(simp add: a1')
-      apply(simp)
-      apply(drule_tac f="a" in generic) 
-      apply(simp add: EFa_simp)
-     done
-    qed
-
   corollary Un_set_offending_flows_bound_minus_subseteq': 
     "\<lbrakk> valid_graph \<lparr> nodes = V, edges = E \<rparr>;
     \<Union> set_offending_flows \<lparr>nodes = V, edges = E \<rparr> nP \<subseteq> X \<rbrakk> \<Longrightarrow>
     \<Union>set_offending_flows \<lparr> nodes = V, edges = E - E' \<rparr> nP \<subseteq> X - E'"
     apply(drule(1) Un_set_offending_flows_bound_minus_subseteq) by blast
 
-
-(*TEST:*)
-  (*stateful policy compliance*)
 
   end
 
