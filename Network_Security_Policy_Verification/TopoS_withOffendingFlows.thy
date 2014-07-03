@@ -92,16 +92,16 @@ begin
    by (metis delete_edges_simp2 delete_edges_valid sinvar_mono_imp_negative_mono graph.select_convs(2))
 
 
-  lemma mono_offending_flows_min_set:
-  assumes mono: "(\<forall> ff f' G nP. is_offending_flows ff G nP \<longrightarrow> is_offending_flows (f' \<union> ff) G nP)"
+  (*lemma mono_offending_flows_min_set:
+  assumes mono_isoffending: "(\<forall> ff f' G nP. is_offending_flows ff G nP \<longrightarrow> is_offending_flows (f' \<union> ff) G nP)"
   and offending: "is_offending_flows_min_set As G nP"
   shows "sinvar (delete_edges G (As \<union> Bs)) nP"
   proof -
     from offending have "is_offending_flows As G nP" using is_offending_flows_min_set_def by simp
-    from mono this have "is_offending_flows (Bs \<union> As) G nP" by simp
+    from mono_isoffending this have "is_offending_flows (Bs \<union> As) G nP" by simp
     hence "is_offending_flows (As \<union> Bs) G nP" by (metis Un_commute)
     from this is_offending_flows_def show ?thesis by simp
-  qed
+  qed*)
 
 
   (*use this to show locale preliminaries from mono*)
@@ -158,21 +158,12 @@ begin
   text{* The graph we check in @{const minimalize_offending_overapprox},
   @{term "G minus (fs \<union> keep)"} is the graph from the @{text offending_flows_min_set} condition.
   We add @{term f} and remove it.*}
-  lemma delete_edges_list_add_add_iff: 
-  "valid_graph G \<Longrightarrow> f \<in> edges G \<Longrightarrow> f \<notin> set fs \<Longrightarrow> f \<notin> set keep \<Longrightarrow>
-    (add_edge (fst f) (snd f) (delete_edges_list G (f#fs@keep))) = (delete_edges_list G (fs@keep))"
-  apply(simp add:delete_edges_list_union delete_edges_list_union_insert)
-  apply(simp add: graph_ops)
-  apply(rule conjI)
-   apply(simp add: valid_graph_def)
-   apply blast
-  apply(simp add: valid_graph_def)
-  by fastforce
+ 
 
-  lemma minimalize_offending_overapprox_not_in: 
+  (*lemma minimalize_offending_overapprox_not_in: 
   "f \<notin> set fs \<Longrightarrow> f \<notin> set keep \<Longrightarrow> f \<notin> set (minimalize_offending_overapprox fs keep G nP)"
    apply(induction fs arbitrary: keep)
-    by(simp_all)
+    by(simp_all)*)
 
 
 
@@ -227,22 +218,40 @@ begin
       from this valid_graph_add_delete_edge_simp[symmetric] show ?thesis by simp
    qed
 
-  lemma not_model_mono_imp_addedge_mono_minimalize_offending_overapprox: "
-  sinvar_mono \<Longrightarrow>
-    valid_graph G \<Longrightarrow>
-    a \<notin> set keeps \<Longrightarrow>
-    a \<notin> set ff \<Longrightarrow>
-    a \<in> edges G \<Longrightarrow>
-    \<not> sinvar (delete_edges_list G (ff @ keeps)) nP \<Longrightarrow>
-    \<not> sinvar (add_edge (fst a) (snd a) (delete_edges G (set (minimalize_offending_overapprox (a # ff) keeps G nP)))) nP"
-    apply(frule delete_edges_list_add_add_iff[of G a ff keeps, symmetric])
-       apply(simp_all)
-    apply(simp add: delete_edges_list_union delete_edges_list_union_insert)
-    apply(insert minimalize_offending_overapprox_subset[of "ff" "a#keeps" G nP])
-    apply(simp)
-    apply(drule not_model_mono_imp_addedge_mono[simplified])
-        apply(simp_all)
-    done
+
+lemma not_model_mono_imp_addedge_mono_minimalize_offending_overapprox:
+  assumes mono: "sinvar_mono" and vG: "valid_graph G" and ankeeps: "a \<notin> set keeps"
+  and anff: "a \<notin> set ff" and aE: "a \<in> edges G"
+  and nsinvar: "\<not> sinvar (delete_edges_list G (ff @ keeps)) nP"
+  shows "\<not> sinvar (add_edge (fst a) (snd a) (delete_edges G (set (minimalize_offending_overapprox (a # ff) keeps G nP)))) nP"
+  proof -
+    { fix F Fs keep
+      have "F \<in> edges G \<Longrightarrow> F \<notin> set Fs \<Longrightarrow> F \<notin> set keep \<Longrightarrow>
+        (add_edge (fst F) (snd F) (delete_edges_list G (F#Fs@keep))) = (delete_edges_list G (Fs@keep))"
+      apply(insert vG)
+      apply(simp add:delete_edges_list_union delete_edges_list_union_insert)
+      apply(simp add: graph_ops)
+      apply(rule conjI)
+       apply(simp add: valid_graph_def)
+       apply blast
+      apply(simp add: valid_graph_def)
+      by fastforce
+    } note delete_edges_list_add_add_iff=this
+    from aE have "(fst a, snd a) \<in> edges G" by simp
+    from delete_edges_list_add_add_iff[of a ff keeps] have
+      "delete_edges_list G (ff @ keeps) = add_edge (fst a) (snd a) (delete_edges_list G (a # ff @ keeps))"
+      by (metis aE anff ankeeps)
+    from this nsinvar have "\<not> sinvar (add_edge (fst a) (snd a) (delete_edges_list G (a # ff @ keeps))) nP" by simp
+    from this delete_edges_list_union_insert have 1:
+      "\<not> sinvar (add_edge (fst a) (snd a) (delete_edges G (insert a (set ff \<union> set keeps)))) nP" by (metis insert_is_Un sup_assoc)
+
+    from minimalize_offending_overapprox_subset[of "ff" "a#keeps" G nP] have
+      "set (minimalize_offending_overapprox ff (a # keeps) G nP) \<subseteq> insert a (set ff \<union> set keeps)" by simp
+
+
+    from not_model_mono_imp_addedge_mono[OF mono vG `(fst a, snd a) \<in> edges G` this 1] show ?thesis
+      by (metis minimalize_offending_overapprox.simps(2) nsinvar)
+  qed
 
 
 
