@@ -1,8 +1,9 @@
+header{*Attic*}
 theory attic
 imports Main "Lib/FiniteGraph"
 begin
 
-(*old lemma, unused. *)
+text{*old lemma, mainly unused. *}
 
 lemma exists_x1x2_x1notoffending_natLeq: 
   fixes 

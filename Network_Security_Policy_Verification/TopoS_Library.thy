@@ -19,16 +19,16 @@ imports String
   "Lib/Efficient_Distinct"
   "~~/src/HOL/Library/Code_Target_Nat"
 begin
-(*TODO some have exponential runtime*)
+
+(*<*)
 
 section{*Summarizing the Security Invariant Library*}
-  
+
 (*none of those should be defined or a hide_const is missing at the end of a SINVAR_*.thy file*)
 term sinvar
 term receiver_violation
 term verify_globals
 term eval
-
 
 (*TODO check all before export*)
 
@@ -47,5 +47,9 @@ thm SINVAR_LIB_SubnetsInGW_interpretation.impl_spec
 thm SINVAR_LIB_CommunicationPartners_interpretation.impl_spec
 thm SINVAR_LIB_Dependability_interpretation.impl_spec
 thm SINVAR_LIB_ACLcommunicateWith_interpretation.impl_spec
+
+
+(*>*)
+
 
 end

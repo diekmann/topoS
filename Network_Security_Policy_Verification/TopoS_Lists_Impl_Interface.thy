@@ -171,11 +171,10 @@ subsection {*Helper lemmata*}
   by simp
 
 
-section{*Security Invariant Library*}
-(*Now include the SINVAR_* theory files
-they all use the "subsection" command.
-Here is to top-section!
-*)
 
+
+(*TODO: this should be a header of TopoS_Libary. The header should be printed BEFORE the imports are processed. *)
+section{*Security Invariant Library*}
+(*The SINVAR_* theory files all use the "subsection" command. Here is the top-section.*)
 
 end
