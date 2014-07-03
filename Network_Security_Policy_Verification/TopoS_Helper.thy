@@ -1,5 +1,5 @@
 theory TopoS_Helper
-imports Main TopoS_Interface "Lib/TopoS_Util"
+imports Main TopoS_Interface 
   TopoS_ENF
   vertex_example_simps
 begin

@@ -1,4 +1,4 @@
-theory TopoS_withOffendingFlows_lemmata
+theory TopoS_withOffendingFlows
 imports TopoS_Interface
 begin
 

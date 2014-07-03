@@ -156,7 +156,7 @@ Later, we will show that is suffices to show that the invariant is monotonic. Th
   text {*
     \begin{small}
     To instantiate a @{const SecurityInvariant_preliminaries}, here are some hints: 
-    Have a look at the @{text "TopoS_withOffendingFlows_lemmata.thy"} file.
+    Have a look at the @{text "TopoS_withOffendingFlows.thy"} file.
     \mbox{TODO: check file still has this name}
     There is a definition of @{prop sinvar_mono}. It impplies @{prop mono_sinvar} and @{prop mono_offending}
     @{text "apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_sinvar_mono[OF sinvar_mono])
