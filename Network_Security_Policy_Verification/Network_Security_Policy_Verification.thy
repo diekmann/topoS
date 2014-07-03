@@ -62,7 +62,7 @@ vizualize_graph @{context} @{theory} @{term "security_invariants"} @{term "polic
 
 
 text{*
-The policy has a flow. We throw it away and generate a new one which fulfills the invariants.
+The policy has a flaw. We throw it away and generate a new one which fulfills the invariants.
 *}
 definition "max_policy = generate_valid_topology security_invariants \<lparr>nodesL = nodesL policy, edgesL = List.product (nodesL policy) (nodesL policy) \<rparr>"
 
