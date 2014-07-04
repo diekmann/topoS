@@ -17,7 +17,14 @@ We need in instantiated security invariant, i.e.\ get rid of @{typ "'a"} and @{t
     c_offending_flows::"('v) graph \<Rightarrow> ('v \<times> 'v) set set"
     c_isIFS::"bool"
 
-  (* First parameters: (sinvar \<bottom> receiver_violation == SecurityInvariant) nP *)
+  --{* First three parameters are the @{text "SecurityInvariant"}:
+      @{text sinvar} @{text "\<bottom>"} @{text "receiver_violation"}
+
+      Fourth parameter is the host attribute mapping @{text nP}
+
+      
+      TODO: probably check @{text "verify_globals"} and @{text "valid_graph"} here.
+      *}
   fun new_configured_SecurityInvariant :: "((('v::vertex) graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> bool) \<times> 'a \<times> bool \<times> ('v \<Rightarrow> 'a)) \<Rightarrow> ('v SecurityInvariant_configured) option" where 
       "new_configured_SecurityInvariant (sinvar, defbot, receiver_violation, nP) = 
         ( 
@@ -44,7 +51,8 @@ We need in instantiated security invariant, i.e.\ get rid of @{typ "'a"} and @{t
    by(simp add: Let_def new_configured_SecurityInvariant.simps)
 
 
-text{* We now collect all the core properties of a security invariant, but wihtout the @{typ "'a"} @{typ "'b"} types, so it is instatiated with a concrete configuration.*}
+text{* We now collect all the core properties of a security invariant, but without the @{typ "'a"} @{typ "'b"} 
+      types, so it is instantiated with a concrete configuration.*}
 locale configured_SecurityInvariant =
   fixes m :: "('v::vertex) SecurityInvariant_configured"
   assumes
