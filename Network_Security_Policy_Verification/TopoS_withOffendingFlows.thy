@@ -290,9 +290,7 @@ begin
     hence 1: "is_offending_flows ?minset G nP" by (metis iO is_offending_flows_def)
 
     txt{*We need to show minimality of @{term "minimalize_offending_overapprox ff []"}.
-      Minimality means @{term "\<forall>(e1, e2)\<in>set (minimalize_offending_overapprox ff [] G nP). 
-        \<not> sinvar (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox ff [] G nP)))) nP"}.
-
+      Minimality means @{term "\<forall>(e1, e2)\<in>?minset. \<not> sinvar (add_edge e1 e2 (delete_edges G ?minset)) nP"}.
       We show the following generalized fact.
       *}
     {
@@ -539,6 +537,8 @@ context SecurityInvariant_preliminaries
 context SecurityInvariant_withOffendingFlows
 begin
 
+    text{*If there is a violation and there are no offending flows, there does not exist a possibility to fix the violation by 
+          tightening the policy. @{thm valid_empty_edges_iff_exists_offending_flows} already hints this. *}
     lemma mono_imp_emptyoffending_eq_nevervalid:
        "\<lbrakk> sinvar_mono; valid_graph G; \<not> sinvar G nP; set_offending_flows G nP = {}\<rbrakk> \<Longrightarrow> 
         \<not> (\<exists> F \<subseteq> edges G. sinvar (delete_edges G F) nP)"
