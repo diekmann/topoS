@@ -181,6 +181,7 @@ and verify_globals = verify_globals
 
 hide_const (open) sinvar verify_globals receiver_violation default_node_properties
 
+--{*Hide all the helper lemmas.*}
 hide_fact tmp1 tmp2 tmp3 tmp4 tmp5 tmp6 unique_default_example 
           unique_default_example_2 unique_default_example_3 unique_default_example_4
           unique_default_example_5 empty_undirected_reachable_false

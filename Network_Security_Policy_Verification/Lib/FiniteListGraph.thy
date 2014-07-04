@@ -6,8 +6,8 @@ begin
 
 section {*Specification of a finite graph, implemented by lists*}
 
-text{* A graph G=(V,E) consits of a list of vertices V, also called nodes, 
-       and a list of edges E. The edges are tuples of vertices.
+text{* A graph @{text "G=(V,E)"} consits of a list of vertices @{term V}, also called nodes, 
+       and a list of edges @{term E}. The edges are tuples of vertices.
        Using lists instead of sets, code can be easily created. *}
 
   record 'v list_graph =
