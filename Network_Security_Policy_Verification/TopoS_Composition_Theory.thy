@@ -127,34 +127,37 @@ locale configured_SecurityInvariant =
      by(blast)
 
     
-    subsection{*reusing old lemmata*}
+    subsection{*Reusing Lemmata*}
       lemmas mono_extend_set_offending_flows =
       SecurityInvariant_preliminaries.mono_extend_set_offending_flows[OF SecurityInvariant_preliminariesD, simplified subst_offending_flows]
-      thm mono_extend_set_offending_flows
+      text{*@{thm mono_extend_set_offending_flows [no_vars]}*}
 
       lemmas offending_flows_union_mono =
       SecurityInvariant_preliminaries.offending_flows_union_mono[OF SecurityInvariant_preliminariesD, simplified subst_offending_flows]
-      thm offending_flows_union_mono
+      text{*@{thm offending_flows_union_mono [no_vars]}*}
 
       lemmas sinvar_valid_remove_flattened_offending_flows =
       SecurityInvariant_preliminaries.sinvar_valid_remove_flattened_offending_flows[OF SecurityInvariant_preliminariesD, simplified subst_offending_flows]
-      thm sinvar_valid_remove_flattened_offending_flows
+      text{*@{thm sinvar_valid_remove_flattened_offending_flows [no_vars]}*}
 
       lemmas empty_offending_contra =
       SecurityInvariant_withOffendingFlows.empty_offending_contra[where sinvar="(\<lambda>G nP. c_sinvar m G)", simplified subst_offending_flows]
-      thm empty_offending_contra
+      text{*@{thm empty_offending_contra [no_vars]}*}
 
       lemmas Un_set_offending_flows_bound_minus_subseteq = 
       SecurityInvariant_preliminaries.Un_set_offending_flows_bound_minus_subseteq[OF SecurityInvariant_preliminariesD, simplified subst_offending_flows]
-      thm Un_set_offending_flows_bound_minus_subseteq
+      text{*@{thm Un_set_offending_flows_bound_minus_subseteq [no_vars]}*}
 
       lemmas Un_set_offending_flows_bound_minus_subseteq' = 
       SecurityInvariant_preliminaries.Un_set_offending_flows_bound_minus_subseteq'[OF SecurityInvariant_preliminariesD, simplified subst_offending_flows]
-      thm Un_set_offending_flows_bound_minus_subseteq'
+      text{*@{thm Un_set_offending_flows_bound_minus_subseteq' [no_vars]}*}
 end
-  
+
 thm configured_SecurityInvariant_def
+text{*@{thm configured_SecurityInvariant_def [no_vars]}*}
+
 thm configured_SecurityInvariant.mono_sinvar
+text{*@{thm configured_SecurityInvariant.mono_sinvar [no_vars]}*}
 
 
 
