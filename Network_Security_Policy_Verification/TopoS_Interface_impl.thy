@@ -6,6 +6,14 @@ section{*Executable Implementation with Lists*}
   text {*Correspondence List Implementation and set Specification*}
   
   subsection{*Abstraction from list implementation to set specification*}
+  text{*Nomenclature: @{text "_spec"} is the specification, @{text "_impl"} the corresponding implementation.*}
+
+  text{*@{text "_spec"} and @{text "_impl"} only need to comply for @{const valid_graph}s. 
+   We will always require the stricter @{const valid_list_graph}, which implies @{const valid_graph}.
+  *}
+  lemma "valid_list_graph G \<Longrightarrow> valid_graph (list_graph_to_graph G)"
+    by %invisible (metis valid_list_graph_def valid_list_graph_iff_valid_graph)
+
   locale TopoS_List_Impl = 
     fixes default_node_properties :: "'a" ("\<bottom>") 
     and sinvar_spec::"('v::vertex) graph \<Rightarrow> ('v::vertex \<Rightarrow> 'a) \<Rightarrow> bool"
@@ -37,7 +45,7 @@ section{*Executable Implementation with Lists*}
      SecurityInvariant.eval sinvar_spec verify_globals_spec default_node_properties (list_graph_to_graph G) P ) = 
      (eval_impl G P)"
 
-  subsection {* security invariants packed. *}
+  subsection {* Security Invariants Packed*}
 
   text {* We pack all necessary functions and properties of a security invariant in a struct-like data structure.*}
   record ('v::vertex, 'a, 'b) TopoS_packed =

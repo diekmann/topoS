@@ -116,7 +116,7 @@ begin
       apply(rule Collect_mono) by(simp)
     from sinvarE[OF mono validG' this]
     show "is_offending_flows FF G nP \<Longrightarrow> is_offending_flows (FF \<union> F) G nP"
-      by(simp add: is_offending_flows_def graph_ops)
+      by(simp add: is_offending_flows_def delete_edges_def)
   qed
 
   (*use this to show locale sinvar_mono*)
@@ -440,7 +440,7 @@ begin
       from a obtain f where f_props: "f \<subseteq> edges G \<and> is_offending_flows_min_set f G nP" using set_offending_flows_def by fastforce
   
       from f_props have "sinvar (delete_edges G f) nP" using is_offending_flows_min_set_def is_offending_flows_def by simp
-        hence evalGf: "sinvar \<lparr>nodes = nodes G, edges = {(e1, e2). (e1, e2) \<in> edges G \<and> (e1, e2) \<notin> f}\<rparr> nP" by(simp add: graph_ops)
+        hence evalGf: "sinvar \<lparr>nodes = nodes G, edges = {(e1, e2). (e1, e2) \<in> edges G \<and> (e1, e2) \<notin> f}\<rparr> nP" by(simp add: delete_edges_def)
       from delete_edges_valid[OF validG, unfolded delete_edges_def] 
         have validGf: "valid_graph \<lparr>nodes = nodes G, edges = {(e1, e2). (e1, e2) \<in> edges G \<and> (e1, e2) \<notin> f}\<rparr>" by simp
       have emptyseqGf: "{} \<subseteq>  {(e1, e2). (e1, e2) \<in> edges G \<and> (e1, e2) \<notin> f}" by simp
@@ -576,11 +576,9 @@ begin
 
             from e1e2cond `f \<subseteq> edges G` have Geq:
             "(add_edge e1 e2 (delete_edges G f)) = \<lparr> nodes = nodes G, edges = edges G - f \<union> {(e1,e2)}\<rparr>"
-              apply(simp add: graph_ops  validG')
+              apply(simp add: graph_ops validG')
               apply(clarify)
-              apply(rule conjI)
-               using validG[unfolded valid_graph_def] apply force
-              by fastforce
+               using validG[unfolded valid_graph_def] by force
 
 
             from this[symmetric] add_edge_valid[OF delete_edges_valid[OF validG]] have 

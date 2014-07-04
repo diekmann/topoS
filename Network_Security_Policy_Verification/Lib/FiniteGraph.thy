@@ -211,6 +211,8 @@ section {*Lemmata*}
    by(simp add: delete_edges_simp2)
   lemma delete_edges_edges_mono: "E' \<subseteq> E \<Longrightarrow> edges (delete_edges G E) \<subseteq> edges (delete_edges G E')"
     by(simp add: delete_edges_def, fast)
+  lemma delete_edges_edges_empty: "(delete_edges G (edges G)) = G\<lparr>edges := {}\<rparr>"
+    by(simp add: delete_edges_simp2)
 
  --"add delete"
   lemma add_delete_edge: "valid_graph (G::'a graph) \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow> 
@@ -288,7 +290,7 @@ section {*Lemmata*}
 
 
 
-lemmas graph_ops=add_node_def delete_node_def add_edge_def delete_edge_def delete_edges_def
+lemmas graph_ops=add_node_def delete_node_def add_edge_def delete_edge_def delete_edges_simp2
 
 
   --"valid_graph"

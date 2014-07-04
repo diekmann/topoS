@@ -83,8 +83,13 @@ text{*simplifications for sets we need in the uniqueness proof*}
     by force
 
 
-  lemma empty_undirected_reachable_false: "xb \<in> undirected_reachable \<lparr>nodes = nodes G, edges = {(e1, e2). False}\<rparr> na \<longleftrightarrow> False"
+  (*lemma empty_undirected_reachable_false: "xb \<in> undirected_reachable \<lparr>nodes = nodes G, edges = {(e1, e2). False}\<rparr> na \<longleftrightarrow> False"
     apply(simp add: undirected_reachable_def succ_tran_def undirected_def)
+    apply(subst tmp3)
+    by fastforce*)
+
+  lemma empty_undirected_reachable_false: "xb \<in> undirected_reachable (delete_edges G (edges G)) na \<longleftrightarrow> False"
+    apply(simp add: undirected_reachable_def succ_tran_def undirected_def delete_edges_edges_empty)
     apply(subst tmp3)
     by fastforce
 
@@ -111,7 +116,7 @@ subsubsection{*monotonic and preliminaries*}
       apply(rename_tac list_edges)
       apply(rule_tac ff="list_edges" in SecurityInvariant_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF sinvar_mono])
           apply(auto)[4]
-      apply(auto simp add: SecurityInvariant_withOffendingFlows.is_offending_flows_def graph_ops empty_undirected_reachable_false)[1]
+      apply(auto simp add: SecurityInvariant_withOffendingFlows.is_offending_flows_def empty_undirected_reachable_false)[1]
      apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_sinvar_mono[OF sinvar_mono])
     apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_mono])
   done
