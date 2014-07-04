@@ -58,6 +58,7 @@ lemma exCasePairNotSimp: "(\<exists>x. x \<in> A \<and> \<not> (case x of (e1, e
   by auto
 
 
+(* moved here from FiniteGraph.thy. Currently unused *)
 subsection {* Paths *}
   text {* A path is represented by a list of adjacent edges. *}
   type_synonym 'v path = "('v \<times> 'v) list"
