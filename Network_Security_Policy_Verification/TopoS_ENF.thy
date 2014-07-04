@@ -43,7 +43,7 @@ begin
   unfolding sinvar_all_edges_normal_form_def set_offending_flows_def is_offending_flows_min_set_def is_offending_flows_def
   by (fastforce simp: graph_ops)
 
-  text{*Hence, the members of @{const set_offending_flows} must looks as follows. *}
+  text{*Hence, the members of @{const set_offending_flows} must look as follows. *}
   lemma ENF_offending_set_P_representation: 
     assumes "sinvar_all_edges_normal_form P" "F \<in> set_offending_flows G nP"
     shows "F = {(e1,e2). (e1, e2) \<in> edges G \<and> \<not> P (nP e1) (nP e2)}" (is "F = ?E")
@@ -79,28 +79,6 @@ begin
     shows "{ {(e1,e2) \<in> edges G. \<not> P (nP e1) (nP e2)} } \<subseteq> set_offending_flows G nP"
   using assms ENF_offending_set_P_representation
   by blast
-
-  (*lemma ENF_notevalmodel_offending_imp_ex_offending_min:
-    "\<lbrakk> sinvar_all_edges_normal_form P; is_offending_flows F G nP; F \<subseteq> edges G \<rbrakk> \<Longrightarrow>
-     \<exists>F'. F' \<subseteq> edges G \<and> is_offending_flows_min_set F' G nP"
-  unfolding sinvar_all_edges_normal_form_def is_offending_flows_min_set_def is_offending_flows_def
-  -- {* select @{term "F'"} as the list of all edges of @{term F} which violate @{term "P"} *}
-  by (rule exI[where x="{(e1,e2) \<in> (edges G). \<not>P (nP e1) (nP e2)}"])
-     (fastforce simp: graph_ops)
-
-  lemma ENF_notevalmodel_imp_ex_offending:
-    "\<lbrakk> sinvar_all_edges_normal_form P; \<not> sinvar G nP \<rbrakk> \<Longrightarrow>
-     \<exists>F. F \<subseteq> (edges G) \<and> is_offending_flows F G nP"
-  unfolding sinvar_all_edges_normal_form_def is_offending_flows_def
-  by (rule exI[where x="{(e1,e2) \<in> (edges G). \<not>P (nP e1) (nP e2)}"])
-     (fastforce simp: graph_ops)
-  
-  lemma ENF_notevalmodel_imp_ex_offending_min:
-    "\<lbrakk> sinvar_all_edges_normal_form P; \<not> sinvar G nP \<rbrakk> \<Longrightarrow>
-     \<exists>F. F \<subseteq> edges G \<and> is_offending_flows_min_set F G nP"
-    apply(frule ENF_notevalmodel_imp_ex_offending[of P G nP], simp)
-    apply(erule exE)
-    using ENF_notevalmodel_offending_imp_ex_offending_min[of P _ G nP] by fast *)
   
   lemma ENF_notevalmodel_imp_offending_not_empty:
   "sinvar_all_edges_normal_form P \<Longrightarrow> \<not> sinvar G nP \<Longrightarrow> set_offending_flows G nP \<noteq> {}"
