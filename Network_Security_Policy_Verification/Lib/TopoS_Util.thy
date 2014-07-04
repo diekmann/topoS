@@ -14,4 +14,10 @@ next
   case (insert x F) then show ?case by cases auto
 qed
 
+
+(*lemma from afp collections Misc*)
+lemma set_union_code:
+  "set xs \<union> set ys = set (xs @ ys)"
+  by auto
+
 end

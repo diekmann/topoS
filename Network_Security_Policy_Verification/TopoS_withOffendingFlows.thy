@@ -145,10 +145,6 @@ begin
       minimalize_offending_overapprox fs (f#keep) G nP
     )"
 
-  (*lemma from afp collections Misc*)
-  lemma set_union_code:
-    "set xs \<union> set ys = set (xs @ ys)"
-    by auto
 
   lemma delete_edges_list_union_insert: "delete_edges_list G (f#fs@keep) = delete_edges G ({f} \<union> set fs \<union> set keep)"
   by (metis List.set.simps(2) Un_assoc delete_edges_list_set insert_is_Un set_union_code)
@@ -204,7 +200,8 @@ begin
    and vG: "valid_graph G" and ain: "(a1,a2) \<in> edges G" and xy: "X \<subseteq> Y" and ns: "\<not> sinvar (add_edge a1 a2 (delete_edges G (Y))) nP"  
   shows "\<not> sinvar (add_edge a1 a2 (delete_edges G X)) nP"
    proof -
-      have valid_graph_add_delete_edge_simp: "\<And>Y. add_edge a1 a2 (delete_edges G Y) = (delete_edges G (Y - {(a1,a2)}))"
+      have valid_graph_add_delete_edge_simp: 
+        "\<And>Y. add_edge a1 a2 (delete_edges G Y) = (delete_edges G (Y - {(a1,a2)}))"
         apply(simp add: delete_edges_simp2 add_edge_def)
         apply(rule conjI)
          using ain apply (metis insert_absorb vG valid_graph.E_validD(1) valid_graph.E_validD(2))
@@ -219,39 +216,6 @@ begin
    qed
 
 
-lemma not_model_mono_imp_addedge_mono_minimalize_offending_overapprox:
-  assumes mono: "sinvar_mono" and vG: "valid_graph G" and ankeeps: "a \<notin> set keeps"
-  and anff: "a \<notin> set ff" and aE: "a \<in> edges G"
-  and nsinvar: "\<not> sinvar (delete_edges_list G (ff @ keeps)) nP"
-  shows "\<not> sinvar (add_edge (fst a) (snd a) (delete_edges G (set (minimalize_offending_overapprox (a # ff) keeps G nP)))) nP"
-  proof -
-    { fix F Fs keep
-      have "F \<in> edges G \<Longrightarrow> F \<notin> set Fs \<Longrightarrow> F \<notin> set keep \<Longrightarrow>
-        (add_edge (fst F) (snd F) (delete_edges_list G (F#Fs@keep))) = (delete_edges_list G (Fs@keep))"
-      apply(insert vG)
-      apply(simp add:delete_edges_list_union delete_edges_list_union_insert)
-      apply(simp add: graph_ops)
-      apply(rule conjI)
-       apply(simp add: valid_graph_def)
-       apply blast
-      apply(simp add: valid_graph_def)
-      by fastforce
-    } note delete_edges_list_add_add_iff=this
-    from aE have "(fst a, snd a) \<in> edges G" by simp
-    from delete_edges_list_add_add_iff[of a ff keeps] have
-      "delete_edges_list G (ff @ keeps) = add_edge (fst a) (snd a) (delete_edges_list G (a # ff @ keeps))"
-      by (metis aE anff ankeeps)
-    from this nsinvar have "\<not> sinvar (add_edge (fst a) (snd a) (delete_edges_list G (a # ff @ keeps))) nP" by simp
-    from this delete_edges_list_union_insert have 1:
-      "\<not> sinvar (add_edge (fst a) (snd a) (delete_edges G (insert a (set ff \<union> set keeps)))) nP" by (metis insert_is_Un sup_assoc)
-
-    from minimalize_offending_overapprox_subset[of "ff" "a#keeps" G nP] have
-      "set (minimalize_offending_overapprox ff (a # keeps) G nP) \<subseteq> insert a (set ff \<union> set keeps)" by simp
-
-
-    from not_model_mono_imp_addedge_mono[OF mono vG `(fst a, snd a) \<in> edges G` this 1] show ?thesis
-      by (metis minimalize_offending_overapprox.simps(2) nsinvar)
-  qed
 
 
 
@@ -312,8 +276,41 @@ lemma not_model_mono_imp_addedge_mono_minimalize_offending_overapprox:
     next
     case False
       (*MONO=Cons.prems(1)"*)
-      thm not_model_mono_imp_addedge_mono_minimalize_offending_overapprox
-      from not_model_mono_imp_addedge_mono_minimalize_offending_overapprox[OF Cons.prems(1) valid_graph a_not_in_keeps a_not_in_ff a_in_edges False] have a_minimal: "
+       { --"a lemma we only need once here"
+          fix a ff keeps
+          assume mono: "sinvar_mono" and ankeeps: "a \<notin> set keeps"
+          and anff: "a \<notin> set ff" and aE: "a \<in> edges G"
+          and nsinvar: "\<not> sinvar (delete_edges_list G (ff @ keeps)) nP"
+          have "\<not> sinvar (add_edge (fst a) (snd a) (delete_edges G (set (minimalize_offending_overapprox (a # ff) keeps G nP)))) nP"
+          proof -
+            { fix F Fs keep
+              from valid_graph have "F \<in> edges G \<Longrightarrow> F \<notin> set Fs \<Longrightarrow> F \<notin> set keep \<Longrightarrow>
+                (add_edge (fst F) (snd F) (delete_edges_list G (F#Fs@keep))) = (delete_edges_list G (Fs@keep))"
+              apply(simp add:delete_edges_list_union delete_edges_list_union_insert)
+              apply(simp add: graph_ops)
+              apply(rule conjI)
+               apply(simp add: valid_graph_def)
+               apply blast
+              apply(simp add: valid_graph_def)
+              by fastforce
+            } note delete_edges_list_add_add_iff=this
+            from aE have "(fst a, snd a) \<in> edges G" by simp
+            from delete_edges_list_add_add_iff[of a ff keeps] have
+              "delete_edges_list G (ff @ keeps) = add_edge (fst a) (snd a) (delete_edges_list G (a # ff @ keeps))"
+              by (metis aE anff ankeeps)
+            from this nsinvar have "\<not> sinvar (add_edge (fst a) (snd a) (delete_edges_list G (a # ff @ keeps))) nP" by simp
+            from this delete_edges_list_union_insert have 1:
+              "\<not> sinvar (add_edge (fst a) (snd a) (delete_edges G (insert a (set ff \<union> set keeps)))) nP" by (metis insert_is_Un sup_assoc)
+        
+            from minimalize_offending_overapprox_subset[of "ff" "a#keeps" G nP] have
+              "set (minimalize_offending_overapprox ff (a # keeps) G nP) \<subseteq> insert a (set ff \<union> set keeps)" by simp
+        
+            from not_model_mono_imp_addedge_mono[OF mono valid_graph `(fst a, snd a) \<in> edges G` this 1] show ?thesis
+              by (metis minimalize_offending_overapprox.simps(2) nsinvar)
+          qed
+       } note not_model_mono_imp_addedge_mono_minimalize_offending_overapprox=this
+
+      from not_model_mono_imp_addedge_mono_minimalize_offending_overapprox[OF Cons.prems(1) a_not_in_keeps a_not_in_ff a_in_edges False] have a_minimal: "
       \<not> sinvar (add_edge (fst a) (snd a) (delete_edges G (set (minimalize_offending_overapprox (a # ff) keeps G nP)))) nP"
       by simp
       from minimal a_minimal
