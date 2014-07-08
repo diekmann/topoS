@@ -5,7 +5,7 @@ begin
 code_identifier code_module  SINVAR_NoRefl_impl => (Scala) SINVAR_NoRefl
 
 
-subsubsection {* SecurityInvariant NoRefl Implementation *}
+subsubsection {* SecurityInvariant NoRefl List Implementation *}
 
 fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> bool" where
   "sinvar G nP = (\<forall> (s,r) \<in> set (edgesL G). s = r \<longrightarrow> nP s = Refl)"

@@ -2,6 +2,8 @@ theory SINVAR_BLPtrusted_impl
 imports SINVAR_BLPtrusted "../TopoS_Interface_impl"
 begin
 
+subsubsection {* SecurityInvariant List Implementation *}
+
 code_identifier code_module SINVAR_BLPtrusted_impl => (Scala) SINVAR_BLPtrusted
 
 fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> SINVAR_BLPtrusted.node_config) \<Rightarrow> bool" where

@@ -83,7 +83,7 @@ subsection{*Algorithms*}
 
         from Cons.prems(2) have validLG: "valid_list_graph (stateful_list_policy_to_list_graph \<lparr>hostsL = nodesL G, flows_fixL = edgesL G, flows_stateL = e # accu\<rparr>)"
           apply(rule valid_list_graph_stateful_list_policy_to_list_graph)
-          apply(fact `distinct (e # accu)`)
+           apply(fact `distinct (e # accu)`)
           apply(fact `set (e # accu) \<subseteq> set (edgesL G)`)
           done
 
@@ -135,7 +135,7 @@ subsection{*Algorithms*}
        filter_IFS_no_violations G (get_impl M) = TopoS_Stateful_Policy_Algorithm.filter_IFS_no_violations (list_graph_to_graph G) (get_spec M) (edgesL G)"
     apply(unfold filter_IFS_no_violations_def TopoS_Stateful_Policy_Algorithm.filter_IFS_no_violations_def) 
     apply(rule filter_IFS_no_violations_accu_complies)
-    apply(simp_all)
+        apply(simp_all)
     apply(simp add: valid_list_graph_def)
     done
 
@@ -185,7 +185,7 @@ subsection{*Algorithms*}
         from Cons.prems(5) have "distinct (Es @ (e # accu))" by simp
         from Cons.prems(2) have validLG: "valid_list_graph (stateful_list_policy_to_list_graph \<lparr>hostsL = nodesL G, flows_fixL = edgesL G, flows_stateL = e # accu\<rparr>)"
           apply(rule valid_list_graph_stateful_list_policy_to_list_graph)
-          apply(fact `distinct (e # accu)`)
+           apply(fact `distinct (e # accu)`)
           apply(fact `set (e # accu) \<subseteq> set (edgesL G)`)
           done
 
@@ -243,7 +243,7 @@ subsection{*Algorithms*}
        filter_compliant_stateful_ACS G (get_impl M) = TopoS_Stateful_Policy_Algorithm.filter_compliant_stateful_ACS (list_graph_to_graph G) (get_spec M) (edgesL G)"
     apply(unfold filter_compliant_stateful_ACS_def TopoS_Stateful_Policy_Algorithm.filter_compliant_stateful_ACS_def) 
     apply(rule filter_compliant_stateful_ACS_accu_complies)
-    apply(simp_all)
+        apply(simp_all)
     apply(simp add: valid_list_graph_def)
     done
 
@@ -262,7 +262,7 @@ subsection{*Algorithms*}
     "inefficient_list_intersect (a#as) bs = (if a \<in> set bs then a#(inefficient_list_intersect as bs) else inefficient_list_intersect as bs)"
   lemma inefficient_list_intersect_correct: "set (inefficient_list_intersect a b) = (set a) \<inter> (set b)"
     apply(induction a)
-    by(simp_all)
+     by(simp_all)
 
   definition generate_valid_stateful_policy_IFSACS_2 :: "'v list_graph \<Rightarrow> 'v SecurityInvariant list \<Rightarrow>  'v stateful_list_policy" where
     "generate_valid_stateful_policy_IFSACS_2 G M =

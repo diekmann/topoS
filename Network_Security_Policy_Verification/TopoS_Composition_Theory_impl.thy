@@ -120,20 +120,20 @@ subsection{*Calculating offending flows*}
     { fix accu
       have "accu@(implc_get_offending_flows M G) = fold (\<lambda>m accu. accu@(implc_offending_flows m G)) M accu"
       apply(induction M arbitrary: accu)
-      apply(simp_all)
+       apply(simp_all)
       by(metis append_eq_appendI) }
     from this[where accu2="[]"] show ?thesis by simp
   qed
 
   lemma implc_get_offending_flows_Un: "set`set (implc_get_offending_flows M G) = (\<Union>m\<in>set M. set`set (implc_offending_flows m G))"
     apply(induction M)
-    apply(simp_all)
+     apply(simp_all)
     by (metis image_Un)
 
 
   lemma implc_get_offending_flows_map_concat: "(implc_get_offending_flows M G) = concat [implc_offending_flows m G. m \<leftarrow> M]"
     apply(induction M)
-    by(simp_all)
+     by(simp_all)
 
   
   theorem implc_get_offending_flows_complies:
@@ -169,7 +169,8 @@ subsection{*Accessors*}
       hence set_zip_IFS: "set (zip (filter implc_isIFS (get_impl M)) (filter c_isIFS (get_spec M))) \<subseteq> set M"
         apply(simp add: get_impl_def get_spec_def)
         apply(induction M)
-        apply(simp_all) by (metis (lifting, mono_tags) prod_case_beta subset_insertI2)
+         apply(simp_all)
+        by (metis (lifting, mono_tags) prod_case_beta subset_insertI2)
       from set_zip_IFS a show "\<forall> (m_impl, m_spec) \<in> set (zip (get_IFS (get_impl M)) (TopoS_Composition_Theory.get_IFS (get_spec M))).
           SecurityInvariant_complies_formal_def m_impl m_spec"
         apply(simp add: get_IFS_def get_ACS_def
@@ -180,7 +181,8 @@ subsection{*Accessors*}
       hence set_zip_ACS: "set (zip [m\<leftarrow>get_impl M . \<not> implc_isIFS m] [m\<leftarrow>get_spec M . \<not> c_isIFS m]) \<subseteq> set M"
         apply(simp add: get_impl_def get_spec_def)
         apply(induction M)
-        apply(simp_all) by (metis (lifting, mono_tags) prod_case_beta subset_insertI2)
+         apply(simp_all)
+        by (metis (lifting, mono_tags) prod_case_beta subset_insertI2)
       from this a show "\<forall> (m_impl, m_spec) \<in> set (zip (get_ACS (get_impl M)) (TopoS_Composition_Theory.get_ACS (get_spec M))).
         SecurityInvariant_complies_formal_def m_impl m_spec"
         apply(simp add: get_IFS_def get_ACS_def
@@ -204,11 +206,11 @@ subsection{*Accessors*}
         from a1 show "(get_impl ?zippedIFS) = TopoS_Composition_Theory_impl.get_IFS (get_impl M)"
           apply(simp add: TopoS_Composition_Theory_impl.get_IFS_def get_spec_def get_impl_def TopoS_Composition_Theory.get_IFS_def)
           apply(induction M)
-          apply(simp)
+           apply(simp)
           apply(simp)
           apply(rule conjI)
-          apply(clarify)
-          using SecurityInvariant_complies_formal_def_def apply (auto)[1]
+           apply(clarify)
+           using SecurityInvariant_complies_formal_def_def apply (auto)[1]
           apply(clarify)
           using SecurityInvariant_complies_formal_def_def apply (auto)[1]
           done
@@ -216,11 +218,11 @@ subsection{*Accessors*}
         from a1 show "(get_spec ?zippedIFS) = TopoS_Composition_Theory.get_IFS (get_spec M)"
           apply(simp add: TopoS_Composition_Theory_impl.get_IFS_def get_spec_def get_impl_def TopoS_Composition_Theory.get_IFS_def)
           apply(induction M)
-          apply(simp)
+           apply(simp)
           apply(simp)
           apply(rule conjI)
-          apply(clarify)
-          using SecurityInvariant_complies_formal_def_def apply (auto)[1]
+           apply(clarify)
+           using SecurityInvariant_complies_formal_def_def apply (auto)[1]
           apply(clarify)
           using SecurityInvariant_complies_formal_def_def apply (auto)[1]
           done
@@ -231,11 +233,11 @@ subsection{*Accessors*}
         from a1 show "(get_impl ?zippedACS) = TopoS_Composition_Theory_impl.get_ACS (get_impl M)"
           apply(simp add: TopoS_Composition_Theory_impl.get_ACS_def get_spec_def get_impl_def TopoS_Composition_Theory.get_ACS_def)
           apply(induction M)
-          apply(simp)
+           apply(simp)
           apply(simp)
           apply(rule conjI)
-          apply(clarify)
-          using SecurityInvariant_complies_formal_def_def apply (auto)[1]
+           apply(clarify)
+           using SecurityInvariant_complies_formal_def_def apply (auto)[1]
           apply(clarify)
           using SecurityInvariant_complies_formal_def_def apply (auto)[1]
           done
@@ -243,11 +245,11 @@ subsection{*Accessors*}
         from a1 show "(get_spec ?zippedACS) = TopoS_Composition_Theory.get_ACS (get_spec M)"
           apply(simp add: TopoS_Composition_Theory_impl.get_ACS_def get_spec_def get_impl_def TopoS_Composition_Theory.get_ACS_def)
           apply(induction M)
-          apply(simp)
+           apply(simp)
           apply(simp)
           apply(rule conjI)
-          apply(clarify)
-          using SecurityInvariant_complies_formal_def_def apply (auto)[1]
+           apply(clarify)
+           using SecurityInvariant_complies_formal_def_def apply (auto)[1]
           apply(clarify)
           using SecurityInvariant_complies_formal_def_def apply (auto)[1]
           done

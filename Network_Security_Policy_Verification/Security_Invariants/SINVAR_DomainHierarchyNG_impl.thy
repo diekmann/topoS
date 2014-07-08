@@ -3,6 +3,8 @@ imports SINVAR_DomainHierarchyNG "../TopoS_Interface_impl"
 begin
 
 
+subsubsection {* SecurityInvariant DomainHierarchy List Implementation *}
+
 code_identifier code_module SINVAR_DomainHierarchyNG_impl => (Scala) SINVAR_DomainHierarchyNG
 
 fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> domainNameTrust) \<Rightarrow> bool" where

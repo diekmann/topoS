@@ -6,7 +6,7 @@ begin
 code_identifier code_module SINVAR_NonInterference_impl => (Scala) SINVAR_NonInterference
 
 
-subsubsection {* SecurityInvariant NonInterference Implementation*}
+subsubsection {* SecurityInvariant NonInterference List Implementation*}
 
 definition undirected_reachable :: "'v list_graph \<Rightarrow> 'v => 'v list" where
   "undirected_reachable G v = removeAll v (succ_tran (undirected G) v)"
@@ -36,22 +36,22 @@ lemma sinvar_eq_help2: "set l = {Unrelated} \<Longrightarrow> remdups l = [Unrel
 lemma sinvar_eq_help3: "(let result = remdups (map nP (undirected_reachable G n)) in result = [] \<or> result = [Unrelated]) = (set (map nP (undirected_reachable G n)) \<subseteq> {Unrelated})"
   apply simp
   apply(rule iffI)
-  apply(erule disjE)
+   apply(erule disjE)
     apply simp
-  apply (metis List.set.simps(2) empty_set set_eq_subset set_map set_remdups)
+   apply (metis List.set.simps(2) empty_set set_eq_subset set_map set_remdups)
   apply(case_tac " nP ` set (undirected_reachable G n) = {}")
    apply fast
   apply(case_tac " nP ` set (undirected_reachable G n) = {Unrelated}")
-  defer
-  apply(subgoal_tac "nP ` set (undirected_reachable G n) \<subseteq> {Unrelated} \<Longrightarrow>
+   defer
+   apply(subgoal_tac "nP ` set (undirected_reachable G n) \<subseteq> {Unrelated} \<Longrightarrow>
     nP ` set (undirected_reachable G n) \<noteq> {} \<Longrightarrow>
     nP ` set (undirected_reachable G n) \<noteq> {Unrelated} \<Longrightarrow> False")
-   apply fast
+    apply fast
    apply (metis subset_singletonD)
   apply simp
   apply(rule disjI2)
   apply(simp only: sinvar_eq_help1)
-   apply(simp add:sinvar_eq_help2)
+  apply(simp add:sinvar_eq_help2)
   done
 
 lemma sinvar_list_eq_set: "sinvar = sinvar_set"

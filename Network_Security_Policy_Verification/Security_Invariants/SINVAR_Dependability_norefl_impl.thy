@@ -6,10 +6,9 @@ begin
 code_identifier code_module SINVAR_Dependability_norefl_impl => (Scala) SINVAR_Dependability_norefl
 
 
-subsubsection {* SecurityInvariant Dependability implementation *}
+subsubsection {* SecurityInvariant Dependability norefl List Implementation *}
 
 
-text {* Less-equal other nodes depend on the output of a node than its dependability level. *}
 fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> dependability_level) \<Rightarrow> bool" where
   "sinvar G nP = (\<forall> (e1,e2) \<in> set (edgesL G). (num_reachable_norefl G e1) \<le> (nP e1))"
 

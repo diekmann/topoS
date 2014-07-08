@@ -410,7 +410,8 @@ section{*Legacy: Composition of ENF-Structured Security Invariants *}
   lemma generate_valid_topology_2_as_set: 
   "generate_valid_topology_2 M G = delete_edges G (\<Union>m \<in> set M. (\<Union> (c_offending_flows m G)))"
    apply(induction M arbitrary: G)
-    apply(simp_all add: delete_edges_simp2 generate_valid_topology_2_nodes) by fastforce
+    apply(simp_all add: delete_edges_simp2 generate_valid_topology_2_nodes)
+   by fastforce
 
 
 

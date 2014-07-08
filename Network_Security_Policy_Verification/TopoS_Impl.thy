@@ -20,14 +20,14 @@ subsection{*Utility Functions*}
       assume a: "\<forall>(s,r) \<in> set x. (r,s) \<in> set x"
       have subset1: "set (rembiflowdups x) \<subseteq> set x"
         apply(induction x)
-        apply(simp)
+         apply(simp)
         apply(clarsimp)
         apply(simp split: split_if_asm)
-        by(blast)+
+         by(blast)+
       have set_backlinks_simp: "\<And> x. \<forall>(s,r) \<in> set x. (r,s) \<in> set x \<Longrightarrow> set (backlinks x) = set x"
         apply(simp add: backlinks_set)
         apply(rule)
-        by fast+
+         by fast+
       have subset2: "set (backlinks (rembiflowdups x)) \<subseteq> set x"
         apply(subst set_backlinks_simp[OF a, symmetric])
         by(simp add: backlinks_subset subset1)
@@ -38,17 +38,17 @@ subsection{*Utility Functions*}
       show "set x \<subseteq> set (rembiflowdups x) \<union> set (backlinks (rembiflowdups x))"
         apply(rule)
         apply(induction x)
-        apply(simp)
+         apply(simp)
         apply(rename_tac a as e)
         apply(simp)
         apply(erule disjE)
-        apply(simp)
-        defer
-        apply fastforce
+         apply(simp)
+         defer
+         apply fastforce
         apply(case_tac a)
         apply(rename_tac s r)
         apply(case_tac "(s,r) \<notin> set as \<and> (r,s) \<notin> set as")
-        apply(simp)
+         apply(simp)
         apply(simp add: backlinks_set)
         by blast
       qed

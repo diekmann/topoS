@@ -3,6 +3,8 @@ imports SINVAR_Subnets "../TopoS_Interface_impl"
 begin
 
 
+subsubsection {* SecurityInvariant Subnets List Implementation *}
+
 code_identifier code_module SINVAR_Subnets_impl => (Scala) SINVAR_Subnets
 
 fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> subnets) \<Rightarrow> bool" where

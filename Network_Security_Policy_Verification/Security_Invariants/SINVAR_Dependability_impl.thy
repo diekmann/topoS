@@ -6,7 +6,7 @@ begin
 code_identifier code_module SINVAR_Dependability_impl => (Scala) SINVAR_Dependability
 
 
-subsubsection {* SecurityInvariant Dependability implementation *}
+subsubsection {* SecurityInvariant Dependability List Implementation *}
 
 
 text {* Less-equal other nodes depend on the output of a node than its dependability level. *}

@@ -2,6 +2,9 @@ theory SINVAR_BLPbasic_impl
 imports SINVAR_BLPbasic "../TopoS_Interface_impl"
 begin
 
+
+subsubsection {* SecurityInvariant BLPbasic List Implementation *}
+
 code_identifier code_module SINVAR_BLPbasic_impl => (Scala) SINVAR_BLPbasic
 
 fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> privacy_level) \<Rightarrow> bool" where
