@@ -56,7 +56,7 @@ subsection{*Algorithms*}
 
    lemma filter_IFS_no_violations_accu_distinct: "\<lbrakk> distinct (Es@accu) \<rbrakk> \<Longrightarrow> distinct (filter_IFS_no_violations_accu G M accu Es)"
     apply(induction Es arbitrary: accu)
-    by(simp_all)
+     by(simp_all)
 
    lemma filter_IFS_no_violations_accu_complies:
     "\<lbrakk>\<forall> (m_impl, m_spec) \<in> set M. SecurityInvariant_complies_formal_def m_impl m_spec;
@@ -235,7 +235,7 @@ subsection{*Algorithms*}
        filter_compliant_stateful_ACS_accu G (get_impl M) [] Es = TopoS_Stateful_Policy_Algorithm.filter_compliant_stateful_ACS (list_graph_to_graph G) (get_spec M) Es"
     apply(unfold filter_compliant_stateful_ACS_def TopoS_Stateful_Policy_Algorithm.filter_compliant_stateful_ACS_def) 
     apply(rule filter_compliant_stateful_ACS_accu_complies)
-    apply(simp_all)
+        apply(simp_all)
     done
 
    lemma filter_compliant_stateful_ACS_complies:
