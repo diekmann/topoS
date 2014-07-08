@@ -657,15 +657,15 @@ subsection {* Monotonicity of offending flows *}
 
       have Fadd_notinE': "\<And>Fadd. Fadd \<inter> E' = {} \<Longrightarrow>  E' - (F' \<union> Fadd) =  E' - F'" by blast
       from `F' \<subseteq> E'` a1[simplified valid_graph_def] a2 have FinV1: "fst ` F' \<subseteq> V" and FinV2: "snd ` F' \<subseteq> V" 
-        apply (simp_all)
-       apply(erule conjE)+
-       apply(drule image_mono[of _ _ "fst"])+
-       apply(drule dual_order.trans[of "fst ` E" "V" "fst ` E'"])
-        apply(simp_all)
-      apply(erule conjE)+
-      apply(drule image_mono[of _ _ "snd"])+
-      apply(drule dual_order.trans[of "snd ` E" "V" "snd ` E'"])
-       by(simp_all)
+          apply (simp_all)
+         apply(erule conjE)+
+         apply(drule image_mono[of _ _ "fst"])+
+         apply(drule dual_order.trans[of "fst ` E" "V" "fst ` E'"])
+          apply(simp_all)
+        apply(erule conjE)+
+        apply(drule image_mono[of _ _ "snd"])+
+        apply(drule dual_order.trans[of "snd ` E" "V" "snd ` E'"])
+         by(simp_all)
       hence "\<forall> (e1, e2) \<in> F'. add_edge e1 e2 \<lparr>nodes = V, edges = E'\<rparr> = \<lparr>nodes = V, edges = E' \<union> {(e1, e2)}\<rparr>"
         by(auto simp add: add_edge_def)
       hence add_edge_F: "\<forall> (e1, e2) \<in> F'. add_edge e1 e2 \<lparr>nodes = V, edges = E' - F' \<rparr> =  \<lparr>nodes = V, edges = (E' - F') \<union> {(e1, e2)}\<rparr>"
@@ -970,8 +970,7 @@ end
 
     lemma rule_pow_combine_fixfst_Union: "\<Union> B \<subseteq> \<Union> C \<Longrightarrow> \<Union> pow_combine A B \<subseteq> \<Union> pow_combine A C"
       apply(rule)
-      apply(auto simp add: pow_combine_def)[1]
-      apply fast
+      apply(fastforce simp: pow_combine_def)
     done
 
     (*does the following hold?

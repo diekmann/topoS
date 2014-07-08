@@ -107,7 +107,7 @@ subsection {* Paths *}
   lemma (in valid_graph) int_vertices_subset: 
     "is_path v p v' \<Longrightarrow> int_vertices p \<subseteq> V"
     apply (induct p arbitrary: v)
-    apply (simp) 
+     apply (simp) 
     apply (force dest: E_validD)
     done
 

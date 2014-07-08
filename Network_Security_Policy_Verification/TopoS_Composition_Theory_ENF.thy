@@ -2,11 +2,18 @@ theory TopoS_Composition_Theory_ENF
 imports TopoS_Interface TopoS_Helper
 begin
 
-(*theory, do not load together with library list impl*)
 
-(*hide tpye constructor V, make it a free variable again*)
-hide_const TopoS_Vertices.V
 
+section{*Legacy: Composition of ENF-Structured Security Invariants *}
+  text{*Composition theory for security invariants which look as follows: 
+        @{term "\<forall> G nP. sinvar G nP = (\<forall> (e1, e2)\<in> edges G. P (nP e1) (nP e2))"}
+
+  This theory only works for security invariants of the same type and is superseded by @{file "TopoS_Composition_Theory.thy"}.
+
+  It still provides the @{text "generate_valid_topology_max_topo"} theorem at the end, which does not hold in the generic version.
+
+  If you want executable code, you should not load this thy.
+  *}
 
 
   (*'v should be of type ::vertex*)
@@ -21,10 +28,11 @@ hide_const TopoS_Vertices.V
           SecurityInvariant sinvar defbot receiver_violation \<and>
           SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form sinvar P)"
 
-  (*WARNING!! 'a and 'b are the same for the complete list. So the list of network security requirements does not model all requirements but only those of the 
-              same type. The generic Composition theory does not have this problem. The generate_valid_topology_sound holds for both! 
-              However, the generic comosition theory has no knowledge of the ('a \<Rightarrow> 'a \<Rightarrow> bool) predicate and hence cannot show maximality. 
-              Following the proof here, it should however be sufficient to have uniquely defined offending flows to get maximality. *)
+  text{*WARNING!! @{typ "'a"} and @{typ "'b"} are the same for the complete list. 
+              So the list of network security requirements does not model all requirements but only those of the 
+              same type. The generic Composition theory does not have this problem. The @{text "generate_valid_topology_sound"} theorem holds for both!.
+              However, the generic composition theory has no knowledge of the @{typ "('a \<Rightarrow> 'a \<Rightarrow> bool)"} predicate and hence cannot show maximality (so far). 
+              Following the proof here, it should however be sufficient to have uniquely defined offending flows to get maximality. *}
   definition valid_ENFs :: "('v::vertex, 'a, 'b) network_security_requirement_ENF list \<Rightarrow> bool" where
     "valid_ENFs M \<equiv> \<forall> m \<in> set M. valid_ENF m"
 
@@ -148,7 +156,7 @@ hide_const TopoS_Vertices.V
      apply clarify
      apply(subgoal_tac "SecurityInvariant_preliminaries sinvar")
       prefer 2
-      apply(simp add: TopoS_def)
+      apply(simp add: SecurityInvariant_def)
      apply(erule_tac SecurityInvariant_preliminaries.mono_sinvar)
        by simp_all
 
@@ -211,7 +219,7 @@ hide_const TopoS_Vertices.V
       edges (generate_valid_topology M \<lparr> nodes = V, edges = E' \<rparr>) \<subseteq> edges (generate_valid_topology M \<lparr> nodes = V, edges = E \<rparr>)"
       apply(induction M arbitrary: E' E)
        apply(simp_all)
-      apply(simp add: graph_ops)
+      apply(simp add: delete_edges_def)
       apply(simp add: valid_ENFs_def)
       apply(rename_tac m M E' E)
       apply(simp add: remove_offending_subseteq)
@@ -259,7 +267,7 @@ hide_const TopoS_Vertices.V
           \<Longrightarrow> generate_valid_topology M G = generate_valid_topology_2 M G"
           apply(induction M arbitrary: G)
            apply(simp_all)
-          apply(rule SecurityInvariant_withOffendingFlows.graph_eq_intro)
+          apply(rule graph_eq_intro)
            by(simp add:generate_valid_topology_nodes generate_valid_topology_2_nodes delete_edges_simp2)+
     
     
@@ -279,7 +287,6 @@ hide_const TopoS_Vertices.V
         apply(drule valid_ENFs1)
         apply(simp add: delete_edges_simp2)
         using helper_union_offending_different_models by blast
-        (*BAM*)
     
         lemma generate_valid_topology_1_2_eq: "\<lbrakk> valid_ENFs M\<rbrakk> \<Longrightarrow>
           generate_valid_topology M G = generate_valid_topology_2 M G"
@@ -399,7 +406,7 @@ hide_const TopoS_Vertices.V
       qed
 
 
-  text{* We can also wrtite @{term generate_valid_topology_2} as simply removing all offending flows *}  
+  text{* We can also write @{term generate_valid_topology_2} as simply removing all offending flows *}  
   lemma generate_valid_topology_2_as_set: 
   "generate_valid_topology_2 M G = delete_edges G (\<Union>m \<in> set M. (\<Union> (c_offending_flows m G)))"
    apply(induction M arbitrary: G)

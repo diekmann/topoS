@@ -40,14 +40,14 @@ subsubsection {*Preliminaries*}
   where sinvar = sinvar
   and verify_globals = verify_globals
     apply unfold_locales
-    apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
-    apply(erule_tac exE)
-    apply(rename_tac list_edges)
-    apply(rule_tac ff="list_edges" in SecurityInvariant_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF sinvar_mono])
-    apply(auto)[6]
-    apply(auto simp add: SecurityInvariant_withOffendingFlows.is_offending_flows_def graph_ops)[1]
+      apply(frule_tac finite_distinct_list[OF valid_graph.finiteE])
+      apply(erule_tac exE)
+      apply(rename_tac list_edges)
+      apply(rule_tac ff="list_edges" in SecurityInvariant_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF sinvar_mono])
+         apply(auto)[6]
+     apply(auto simp add: SecurityInvariant_withOffendingFlows.is_offending_flows_def graph_ops)[1]
     apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_mono])
-  done
+   done
 
 
 
@@ -60,8 +60,8 @@ subsubsection{*ENF*}
   lemma Unassigned_default_candidate: "\<forall> nP e1 e2. \<not> allowed_subnet_flow (nP e1) (nP e2) \<longrightarrow> \<not> allowed_subnet_flow Unassigned (nP e2)"
     apply(rule allI)+
     apply(case_tac "nP e2")
-    apply simp
-    apply simp
+      apply simp
+     apply simp
     by(simp add: All_to_Unassigned)
   lemma allowed_subnet_flow_refl: "\<forall> e. allowed_subnet_flow e e"
     by(rule allI, case_tac e, simp_all)
@@ -72,7 +72,7 @@ subsubsection{*ENF*}
     unfolding SecurityInvariant_withOffendingFlows.ENF_refl_def
     apply(rule conjI)
      apply(simp add: Subnets_ENF)
-     apply(simp add: allowed_subnet_flow_refl)
+    apply(simp add: allowed_subnet_flow_refl)
   done
 
 
@@ -131,13 +131,13 @@ lemma violating_configurations: "\<not> sinvar G nP \<Longrightarrow>
   apply clarify
   apply(rename_tac a b)
   apply(case_tac "nP b", simp_all)
-  apply(case_tac "nP a", simp_all)
-  apply blast
-  apply blast
-  apply blast
-  apply(case_tac "nP a", simp_all)
-  apply blast
-  apply blast
+    apply(case_tac "nP a", simp_all)
+      apply blast
+     apply blast
+    apply blast
+   apply(case_tac "nP a", simp_all)
+    apply blast
+   apply blast
   apply(simp add: All_to_Unassigned)
 done
 
@@ -145,21 +145,21 @@ lemma violating_configurations_exhaust_Unassigned: "\<And>n1 n2. (n1, n2) \<in> 
     \<exists> (e1, e2) \<in> (edges G).  nP e1 = Unassigned \<and> nP e2 \<noteq> Unassigned "
   apply simp
   apply(case_tac "nP n2", simp_all)
+   apply force
   apply force
-  apply force
-done
+ done
 lemma violating_configurations_exhaust_Subnet: "\<And>n1 n2. (n1, n2) \<in> (edges G) \<Longrightarrow> nP n1 = Subnet s1' \<Longrightarrow> \<not> allowed_subnet_flow (nP n1) (nP n2) \<Longrightarrow>
   \<exists> (e1, e2) \<in> (edges G). \<exists> s1 s2. nP e1 = Subnet s1 \<and> s1 \<noteq> s2 \<and> (nP e2 = Subnet s2 \<or> nP e2 = BorderRouter s2)"
   apply simp
   apply(case_tac "nP n2", simp_all)
-  apply blast
+   apply blast
   apply blast
 done
 lemma violating_configurations_exhaust_BorderRouter: "\<And>n1 n2. (n1, n2) \<in> (edges G) \<Longrightarrow> nP n1 = BorderRouter s1' \<Longrightarrow> \<not> allowed_subnet_flow (nP n1) (nP n2) \<Longrightarrow>
   \<exists> (e1, e2) \<in> (edges G). \<exists> s1 s2. nP e1 = BorderRouter s1 \<and> nP e2 = Subnet s2"
   apply simp
   apply(case_tac "nP n2")
-  apply simp_all
+    apply simp_all
   apply blast
 done
 
@@ -173,12 +173,12 @@ theorem violating_configurations_exhaust: "\<not> sinvar G nP \<Longrightarrow>
   apply clarify
   apply(rename_tac n1 n2)
   apply(case_tac "nP n1", simp_all)
-  apply(rename_tac s1)
-  apply(drule_tac nP="nP" and s1'="s1" in violating_configurations_exhaust_Subnet, simp_all)
-  apply blast
-  apply(rename_tac s1)
-  apply(drule_tac nP="nP" and s1'="s1" in violating_configurations_exhaust_BorderRouter, simp_all)
-  apply blast
+    apply(rename_tac s1)
+    apply(drule_tac nP="nP" and s1'="s1" in violating_configurations_exhaust_Subnet, simp_all)
+    apply blast
+   apply(rename_tac s1)
+   apply(drule_tac nP="nP" and s1'="s1" in violating_configurations_exhaust_BorderRouter, simp_all)
+   apply blast
   apply(drule_tac nP="nP" in violating_configurations_exhaust_Unassigned, simp_all)
   apply blast
 done

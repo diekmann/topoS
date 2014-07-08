@@ -6,12 +6,12 @@ subsection {* SecurityInvariant CommunicationPartners *}
 
 
 text{*
-Idea of this security requirement model:
+Idea of this securityinvariant:
   Only some nodes can communicate with Master nodes.
-    It constraints who may access master nodes, Master nodes cann access the world (except other prohibited master nodes).
+    It constraints who may access master nodes, Master nodes can access the world (except other prohibited master nodes).
   A node configured as Master has a list of nodes that can access it.
   Also, in order to be able to access a Master node, the sender must be denoted as a node we Care about.
-  By default, all nodes are set to DonTCare, thus they can no access Master nodes. But they can access 
+  By default, all nodes are set to DonTCare, thus they can not access Master nodes. But they can access 
   all other DontCare nodes and Care nodes.
 
   TL;DR: An access control list determines who can access a master node.

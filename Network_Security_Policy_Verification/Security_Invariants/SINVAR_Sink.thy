@@ -23,9 +23,7 @@ fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarro
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> 'b \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
 
-definition receiver_violation :: "bool" where "receiver_violation = True" (*this is odd. 
-  philosophical: default is less restrictive rule. 
-  thus, responsibility is in the one who accepts and not the one who initiates. two entities are needed for a connection! *)
+definition receiver_violation :: "bool" where "receiver_violation = True"
 
 
 subsubsection {*Preliminaries*}

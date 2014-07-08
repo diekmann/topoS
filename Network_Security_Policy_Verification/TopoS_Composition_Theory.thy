@@ -383,6 +383,21 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
    (*TODO
     all offending flows uniquely defined \<Longrightarrow> generate_valid_topology is maximum topology
    *)
+   (*
+    add generate_valid_topology_max_topo from Composition_Theory_ENF to here!
+   *)
+  lemma generate_valid_topology_as_set: 
+  "generate_valid_topology M G = delete_edges G (\<Union>m \<in> set M. (\<Union> (c_offending_flows m G)))"
+   apply(induction M arbitrary: G)
+    apply(simp_all add: delete_edges_simp2 generate_valid_topology_nodes) by fastforce
+
+  (*text{*Does it also generate a maximum topology?*}
+  definition max_topo :: "('v::vertex) SecurityInvariant_configured list \<Rightarrow> 'v graph \<Rightarrow> bool" where
+    "max_topo M G \<equiv> all_security_requirements_fulfilled M G \<and> (
+      \<forall> (v1, v2) \<in> (nodes G \<times> nodes G) - (edges G). \<not> all_security_requirements_fulfilled M (add_edge v1 v2 G))"*)
+
+  (*end TODO*)
+
 
 
    subsection{* More Lemmata *}
@@ -409,7 +424,11 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
       apply(clarify)
       using configured_SecurityInvariant.empty_offending_contra
       by fastforce
-
+  
+    corollary generate_valid_topology_does_nothing_if_valid:
+      "\<lbrakk> valid_reqs M; all_security_requirements_fulfilled M G\<rbrakk> \<Longrightarrow> 
+          generate_valid_topology M G = G"
+      by(simp add: generate_valid_topology_as_set graph_ops all_security_requirements_fulfilled_imp_no_offending_flows)
 
 
     lemma mono_extend_get_offending_flows: "\<lbrakk> valid_reqs M;

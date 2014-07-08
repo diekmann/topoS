@@ -111,7 +111,7 @@ by (metis (lifting) Range_iff finite_Range mem_Collect_eq rev_finite_subset subs
 
 lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
   apply(rule_tac SecurityInvariant_withOffendingFlows.sinvar_mono_I_proofrule)
-   apply(auto)
+   apply(auto) (*TODO: auto in the midddle*)
   apply(rename_tac nP e1 e2 N E' e1' e2' E)
   apply(drule_tac E'="E'" and v="e1'" in num_reachable_mono)
    apply simp
@@ -140,7 +140,6 @@ interpretation Dependability: SecurityInvariant_ACS
 where default_node_properties = SINVAR_Dependability.default_node_properties
 and sinvar = SINVAR_Dependability.sinvar
 and verify_globals = verify_globals
-  unfolding receiver_violation_def
   unfolding SINVAR_Dependability.default_node_properties_def
   apply unfold_locales
    apply simp

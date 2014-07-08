@@ -7,7 +7,6 @@ begin
 subsection{*SecurityInvariant DomainHierarchyNG*}
 
 subsubsection {* Datatype Domain Hierarchy *}
-text{* Replacement for the old Domain Hiararchy! Better typing! *}
 
   text{* A fully qualified domain name for an entity in a tree-like hierarchy *}
     datatype domainNameDept =  Dept "string" domainNameDept (infixr "--" 65) |
@@ -43,7 +42,7 @@ text{* Replacement for the old Domain Hiararchy! Better typing! *}
         (''i0''--Leaf)
         = None" by eval
 
-  text {* Does a given domainNameDept match the specified tree structure? *}
+  text {* Does a given @{typ domainNameDept} match the specified tree structure? *}
     fun valid_hierarchy_pos :: "domainTree \<Rightarrow> domainNameDept \<Rightarrow> bool" where
       "valid_hierarchy_pos (Department d ds) Leaf = True" |
       "valid_hierarchy_pos (Department d ds) (Dept n Leaf) = (d=n)" |
@@ -254,9 +253,7 @@ text{* Replacement for the old Domain Hiararchy! Better typing! *}
         apply (simp_all)
       apply(rename_tac nat,induct_tac nat, simp_all)
       apply(rename_tac n)
-      apply(induct_tac n)
-       apply(simp_all)
-      done
+      by (metis funpow_swap1)
     
     lemma domainNameChopRotateSuc: "domainNameChop dn (Suc n) = domainNameDeptChopOne (domainNameChop dn n)"
     by(simp add: domainNameChopFunApply)

@@ -22,7 +22,7 @@ Example:
 
   Alice is in internal protected subnet. Google can not arbitrarily access Alice.
   Alice sends requests to google.
-  It is desirable that alice gets the response back
+  It is desirable that Alice gets the response back
   Implementation: TCP and stateful packet filter that allows, once Alice establishes a connection, to get a response back via this connection.
 
 Result:
@@ -62,8 +62,8 @@ begin
   lemma E_validD: assumes "(v,v') \<in> flows_fix \<T>"
     shows "v \<in> hosts \<T>" "v' \<in> hosts \<T>"
     apply -
-    apply (rule set_mp[OF E_valid(1)])
-    using assms apply force
+     apply (rule set_mp[OF E_valid(1)])
+     using assms apply force
     apply (rule set_mp[OF E_valid(2)])
     using assms apply force
     done
@@ -78,8 +78,8 @@ begin
   lemma E_state_validD: assumes "(v,v') \<in> flows_state \<T>"
     shows "v \<in> hosts \<T>" "v' \<in> hosts \<T>"
     apply -
-    apply (rule set_mp[OF E_state_valid(1)])
-    using assms apply force
+     apply (rule set_mp[OF E_state_valid(1)])
+     using assms apply force
     apply (rule set_mp[OF E_state_valid(2)])
     using assms apply force
     done
@@ -118,12 +118,12 @@ text{*Minimizing stateful flows such that only newly added backflows remain*}
   lemma filternew_flows_state_alt: "filternew_flows_state \<T>  = flows_state \<T> - (backflows (flows_fix \<T>))"
     apply(simp add: backflows_def filternew_flows_state_def)
     apply(rule)
-    apply blast+
+     apply blast+
     done
   lemma filternew_flows_state_alt2: "filternew_flows_state \<T>  = {e \<in> flows_state \<T>. e \<notin> backflows (flows_fix \<T>)}"
     apply(simp add: backflows_def filternew_flows_state_def)
     apply(rule)
-    apply blast+
+     apply blast+
     done
   lemma backflows_filternew_flows_state: "backflows (filternew_flows_state \<T>) = (backflows (flows_state \<T>)) - (flows_fix \<T>)"
     by(simp add: filternew_flows_state_alt backflows_minus_backflows)
@@ -133,9 +133,9 @@ text{*Minimizing stateful flows such that only newly added backflows remain*}
     stateful_policy_to_network_graph \<lparr>hosts = hosts \<T>, flows_fix = flows_fix \<T>, flows_state = filternew_flows_state \<T> \<rparr>"
     apply(drule valid_stateful_policy.E_state_fix)
     apply(simp add: stateful_policy_to_network_graph_def all_flows_def)
-    apply(rule)
-    apply(simp add: filternew_flows_state_def backflows_def)
-    apply(rule, blast)+
+    apply(rule Set.equalityI)
+     apply(simp add: filternew_flows_state_def backflows_def)
+     apply(rule, blast)+
     apply(simp add: filternew_flows_state_def backflows_def)
     apply fastforce
     done
@@ -165,7 +165,7 @@ text{* @{term valid_stateful_policy} implies @{term valid_graph} *}
     apply(simp add: all_flows_def valid_graph_def valid_stateful_policy_def 
           valid_stateful_policy.finite_fix valid_stateful_policy.finite_state valid_stateful_policy.finite_backflows_state)
     apply(rule conjI)
-    apply (metis image_Un sup.bounded_iff)+
+     apply (metis image_Un sup.bounded_iff)+
     done
 
 
@@ -301,11 +301,11 @@ locale stateful_policy_compliance =
             apply(rule_tac x="{e \<in> E. e \<in>(backflows (flows_state \<T>) - backflows (filternew_flows_state \<T>))}" in exI)
             apply(simp)
             apply(rule)
-            apply blast
+             apply blast
             apply(rule)
-            apply blast
+             apply blast
             apply(rule)
-            using h1 apply blast
+             using h1 apply blast
             using backflows_filternew_disjunct_flows_fix by blast
     
           from this obtain E1 E2 where E1_prop: "E1 \<subseteq> backflows (filternew_flows_state \<T>)" and E2_prop: "E2 \<subseteq> (backflows (flows_state \<T>) - backflows (filternew_flows_state \<T>))" and "E = E1 \<union> E2" and "E1 \<inter> E2 = {}" by blast

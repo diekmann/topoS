@@ -22,23 +22,23 @@ lemma valid_list_graph_stateful_list_policy_to_list_graph:
     "valid_list_graph G \<Longrightarrow> distinct E \<Longrightarrow> set E \<subseteq> set (edgesL G) \<Longrightarrow> valid_list_graph (stateful_list_policy_to_list_graph \<lparr>hostsL = nodesL G, flows_fixL = edgesL G, flows_stateL = E\<rparr>)"
   apply(simp add: valid_list_graph_def stateful_list_policy_to_list_graph_def)
   apply(rule conjI)
-  apply(simp add: backlinks_distinct)
+   apply(simp add: backlinks_distinct)
   apply(rule conjI)
-  apply(simp add: backlinks_set)
-  apply(blast)
+   apply(simp add: backlinks_set)
+   apply(blast)
   apply(rule conjI)
-  apply(simp add: backlinks_set)
-  apply(blast)
+   apply(simp add: backlinks_set)
+   apply(blast)
   apply(simp add: valid_list_graph_axioms_def)
-  apply(rule conjI)
-  apply(simp add: backlinks_set)
-  apply(force)
+   apply(rule conjI)
+   apply(simp add: backlinks_set)
+   apply(force)
   apply(simp add: backlinks_set)
   apply(clarsimp)
   apply(erule disjE)
-  apply(auto)[1]
+   apply(auto)[1]
   apply(erule disjE)
-  apply(auto)[1]
+   apply(auto)[1]
   by force
   
 

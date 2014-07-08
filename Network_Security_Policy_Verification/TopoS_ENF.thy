@@ -82,7 +82,7 @@ begin
   
   lemma ENF_notevalmodel_imp_offending_not_empty:
   "sinvar_all_edges_normal_form P \<Longrightarrow> \<not> sinvar G nP \<Longrightarrow> set_offending_flows G nP \<noteq> {}"
-    (*TODO get easier from monotonicity? would require valid graph ...*)
+    (*TODO get easier from monotonicity? but would require valid graph assumption ...*)
     proof -
       assume enf: "sinvar_all_edges_normal_form P"
       and ns: "\<not> sinvar G nP"
@@ -201,7 +201,6 @@ subsubsection {* Instance Helper *}
       using sinvar_all_edges_normal_form_def by simp
   
     from ENF_default_update_fst[OF a1 a2d] a3 have subgoal1: "\<not> (\<forall> (e1, e2) \<in> edges G. P ((nP(i := \<bottom>)) e1) (nP e2))" by blast
-    (*next asm*)
     
     let ?nP' = "(nP(i := \<bottom>))"
   

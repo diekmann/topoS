@@ -24,14 +24,15 @@ subsection{* Some unimportant lemmata *}
           (stateful_policy_to_network_graph \<lparr> hosts = V, flows_fix = Efix, flows_state = E' \<rparr>)"
     apply(simp add: stateful_policy_to_network_graph_def all_flows_def)
     apply(drule all_security_requirements_fulfilled_mono[where E="Efix \<union> E \<union> backflows E" and E'="Efix \<union> E' \<union> backflows E'" and V="V"])
-    apply(thin_tac "valid_graph ?G")
-    apply(thin_tac "all_security_requirements_fulfilled ?M ?G")
-    apply(simp add: backflows_def, blast)
-    apply(thin_tac "all_security_requirements_fulfilled ?M ?G")
-    apply(simp add: valid_graph_def)
-    apply(simp add: backflows_def)
-    apply(auto)[1]
-    by(simp_all)
+       apply(thin_tac "valid_graph ?G")
+       apply(thin_tac "all_security_requirements_fulfilled ?M ?G")
+       apply(simp add: backflows_def, blast)
+      apply(thin_tac "all_security_requirements_fulfilled ?M ?G")
+      apply(simp add: valid_graph_def)
+      apply(simp add: backflows_def)
+      apply(auto)[1]
+     apply(simp_all)
+   done
 
 
 subsection {* Sketch for generating a stateful policy from a simple directed policy *}
@@ -40,8 +41,8 @@ subsection {* Sketch for generating a stateful policy from a simple directed pol
     "\<lbrakk> valid_graph \<lparr> nodes = V, edges = E \<rparr>; valid_reqs M; all_security_requirements_fulfilled M \<lparr> nodes = V, edges = E \<rparr> \<rbrakk> \<Longrightarrow> 
       stateful_policy_compliance \<lparr> hosts = V, flows_fix = E, flows_state = {} \<rparr> \<lparr> nodes = V, edges = E \<rparr> M"
       apply(unfold_locales)
-      apply(simp_all add: valid_graph_def stateful_policy_to_network_graph_def all_flows_def backflows_def False_set)
-      apply(simp add: get_IFS_def get_ACS_def all_security_requirements_fulfilled_def)
+                   apply(simp_all add: valid_graph_def stateful_policy_to_network_graph_def all_flows_def backflows_def False_set)
+       apply(simp add: get_IFS_def get_ACS_def all_security_requirements_fulfilled_def)
       apply(clarify)
       apply(drule valid_reqs_ACS_D) 
       apply(drule all_security_requirements_fulfilled_ACS_D)
@@ -65,19 +66,19 @@ subsection {* Sketch for generating a stateful policy from a simple directed pol
 
     lemma filter_IFS_no_violations_subseteq_input: "set (filter_IFS_no_violations G M Es) \<subseteq> set Es"
     apply(subgoal_tac "\<forall> accu. set (filter_IFS_no_violations_accu G M accu Es) \<subseteq> set Es \<union> set accu")
-    apply(erule_tac x="[]" in allE)
-    apply(simp add: filter_IFS_no_violations_def)
-      unfolding filter_IFS_no_violations_def
-      apply(induct_tac Es)
-      apply(simp_all)
-      apply(metis List.set.simps(2) Un_insert_right subset_insertI2)
+     apply(erule_tac x="[]" in allE)
+     apply(simp add: filter_IFS_no_violations_def)
+    unfolding filter_IFS_no_violations_def
+    apply(induct_tac Es)
+     apply(simp_all)
+    apply(metis List.set.simps(2) Un_insert_right subset_insertI2)
     done
     lemma filter_IFS_no_violations_accu_correct_induction: "valid_reqs (get_IFS M) \<Longrightarrow> valid_graph \<lparr> nodes = V, edges = E \<rparr> \<Longrightarrow>
             all_security_requirements_fulfilled (get_IFS M) (stateful_policy_to_network_graph \<lparr> hosts = V, flows_fix = E, flows_state = set (accu) \<rparr>) \<Longrightarrow> 
             (set accu) \<union> (set edgesList) \<subseteq> E \<Longrightarrow> 
             all_security_requirements_fulfilled (get_IFS M) (stateful_policy_to_network_graph \<lparr> hosts = V, flows_fix = E, flows_state = set (filter_IFS_no_violations_accu \<lparr> nodes = V, edges = E \<rparr> M accu edgesList) \<rparr>)"
       apply(induction edgesList arbitrary: accu)
-      by(simp_all)
+       by(simp_all)
     lemma filter_IFS_no_violations_correct: "\<lbrakk>valid_reqs (get_IFS M); valid_graph G;
             all_security_requirements_fulfilled (get_IFS M) G; 
             (set edgesList) \<subseteq> edges G \<rbrakk> \<Longrightarrow> 
@@ -85,13 +86,13 @@ subsection {* Sketch for generating a stateful policy from a simple directed pol
     unfolding filter_IFS_no_violations_def
     apply(case_tac G, simp)
     apply(drule(1) filter_IFS_no_violations_accu_correct_induction[where accu="[]", simplified])
-    apply(simp_all)
+      apply(simp_all)
     by(simp add: stateful_policy_to_network_graph_def all_flows_def backflows_def False_set)
     lemma filter_IFS_no_violations_accu_no_IFS: "valid_reqs (get_IFS M) \<Longrightarrow> valid_graph G \<Longrightarrow> get_IFS M = [] \<Longrightarrow>
             (set accu) \<union> (set edgesList) \<subseteq> edges G \<Longrightarrow> 
             filter_IFS_no_violations_accu G M accu edgesList = rev(edgesList)@accu"
       apply(induction edgesList arbitrary: accu)
-      by(simp_all add: all_security_requirements_fulfilled_def)
+       by(simp_all add: all_security_requirements_fulfilled_def)
 
 
     lemma filter_IFS_no_violations_accu_maximal_induction: "valid_reqs (get_IFS M) \<Longrightarrow> valid_graph \<lparr> nodes = V, edges = E \<rparr> \<Longrightarrow> 
@@ -142,10 +143,10 @@ subsection {* Sketch for generating a stateful policy from a simple directed pol
            apply(erule_tac x="ea" in ballE)
            prefer 2
            apply simp
-           apply(simp only: stateful_policy_to_network_graph_def all_flows_def stateful_policy.select_convs)
-           apply(simp)
-           apply(frule(1) neg_mono[simplified])
-           by(simp)
+          apply(simp only: stateful_policy_to_network_graph_def all_flows_def stateful_policy.select_convs)
+          apply(simp)
+          apply(frule(1) neg_mono[simplified])
+          by(simp)
          hence goalTrue:
           "\<forall> ea\<in>E - (set (e # accu) \<union> set Es). 
             \<not> all_security_requirements_fulfilled (get_IFS M) 
@@ -156,10 +157,10 @@ subsection {* Sketch for generating a stateful policy from a simple directed pol
         apply(simp add: Let_def)
         apply(rule conjI)
 
-        apply(rule impI)
-        apply(thin_tac "?A") (*dont't need it*)
-        using Cons.IH[where accu="e # accu", OF Cons.prems(1) Cons.prems(2) _ _ goalTrue, simplified Let_def] Cons.prems(3) Cons.prems(4)
-        apply(auto) [1]
+         apply(rule impI)
+         apply(thin_tac "?A") (*dont't need it*)
+         using Cons.IH[where accu="e # accu", OF Cons.prems(1) Cons.prems(2) _ _ goalTrue, simplified Let_def] Cons.prems(3) Cons.prems(4)
+         apply(auto) [1]
 
         apply(rule impI)
         using Cons.IH[where accu="accu", OF Cons.prems(1) Cons.prems(2), simplified Let_def] Cons.prems(5) Cons.prems(3) Cons.prems(4)
@@ -174,7 +175,7 @@ subsection {* Sketch for generating a stateful policy from a simple directed pol
     unfolding filter_IFS_no_violations_def
     apply(case_tac G, simp)
     apply(drule(1) filter_IFS_no_violations_accu_maximal_induction[where accu="[]" and edgesList="edgesList"])
-    by(simp_all)
+       by(simp_all)
 
     --"It is not only maximal for single flows but all non-empty subsets"
     corollary filter_IFS_no_violations_maximal_allsubsets: 
@@ -261,11 +262,11 @@ subsection {* Sketch for generating a stateful policy from a simple directed pol
 
     lemma filter_compliant_stateful_ACS_subseteq_input: "set (filter_compliant_stateful_ACS G M Es) \<subseteq> set Es"
       apply(subgoal_tac "\<forall> accu. set (filter_compliant_stateful_ACS_accu G M accu Es) \<subseteq> set Es \<union> set accu")
-      apply(erule_tac x="[]" in allE)
-      apply(simp add: filter_compliant_stateful_ACS_def)
-        apply(induct_tac Es)
-        apply(simp_all)
-        apply(metis List.set.simps(2) Un_insert_right subset_insertI2)
+       apply(erule_tac x="[]" in allE)
+       apply(simp add: filter_compliant_stateful_ACS_def)
+      apply(induct_tac Es)
+       apply(simp_all)
+      apply(metis List.set.simps(2) Un_insert_right subset_insertI2)
       done
     lemma filter_compliant_stateful_ACS_accu_correct_induction: "valid_reqs (get_ACS M) \<Longrightarrow> valid_graph \<lparr> nodes = V, edges = E \<rparr> \<Longrightarrow>
             (set accu) \<union> (set edgesList) \<subseteq> E \<Longrightarrow> 
@@ -292,24 +293,24 @@ subsection {* Sketch for generating a stateful policy from a simple directed pol
             filter_compliant_stateful_ACS_accu G M accu edgesList = rev([ e \<leftarrow> edgesList. e \<notin> backflows (edges G)])@accu"
       apply(simp add: backflows_minus_backflows)
       apply(induction edgesList arbitrary: accu)
-      apply(simp)
+       apply(simp)
       apply(simp add: stateful_policy_to_network_graph_def all_flows_def)
       apply(rule impI)
       apply(case_tac G, simp, rename_tac V E)
       thm Un_set_offending_flows_bound_minus_subseteq'[where X="backflows E - E" and E="E \<union> backflows E"]
       apply(drule_tac X="backflows E - E" and E="E \<union> backflows E" and E'="(E \<union> backflows E) - (insert a (E \<union> set accu \<union> backflows (insert a (set accu))))" in Un_set_offending_flows_bound_minus_subseteq')
-      defer
-      prefer 2
-      apply blast
-      apply auto[1]
-      apply(subgoal_tac "E \<union> backflows E - (E \<union> backflows E - insert a (E \<union> set accu \<union> backflows (insert a (set accu)))) = insert a (E \<union> set accu \<union> backflows (insert a (set accu)))")
-      apply(simp)
-      prefer 2
-      apply (metis Un_assoc Un_least Un_mono backflows_subseteq double_diff insert_def insert_subset subset_refl)
-      apply(subgoal_tac "backflows (insert a (set accu)) \<subseteq> backflows E - E - (E \<union> backflows E - insert a (E \<union> set accu \<union> backflows (insert a (set accu))))")
-      apply(blast)
-      apply(simp add: backflows_def)
-      apply fast
+         defer
+         prefer 2
+         apply blast
+        apply auto[1]
+       apply(subgoal_tac "E \<union> backflows E - (E \<union> backflows E - insert a (E \<union> set accu \<union> backflows (insert a (set accu)))) = insert a (E \<union> set accu \<union> backflows (insert a (set accu)))")
+        apply(simp)
+        prefer 2
+        apply (metis Un_assoc Un_least Un_mono backflows_subseteq double_diff insert_def insert_subset subset_refl)
+       apply(subgoal_tac "backflows (insert a (set accu)) \<subseteq> backflows E - E - (E \<union> backflows E - insert a (E \<union> set accu \<union> backflows (insert a (set accu))))")
+        apply(blast)
+       apply(simp add: backflows_def)
+       apply fast
       using FiniteGraph.backflows_valid FiniteGraph.valid_graph_union_edges by metis
 
 
@@ -536,12 +537,12 @@ subsection {* Sketch for generating a stateful policy from a simple directed pol
             \<not> (\<Union> get_offending_flows (get_ACS M) (stateful_policy_to_network_graph \<lparr> hosts = V, flows_fix = E, flows_state = stateful \<union> {e} \<rparr>) 
                 \<subseteq> backflows (filternew_flows_state \<lparr> hosts = V, flows_fix = E, flows_state = stateful \<union> {e} \<rparr>))"
     apply(drule(1) filter_compliant_stateful_ACS_accu_induction_maximal[where accu="[]", simplified])
-    apply(blast)
+       apply(blast)
+      apply(simp add: filter_compliant_stateful_ACS_def)
+     apply(simp)
+     apply fastforce
     apply(simp add: filter_compliant_stateful_ACS_def)
-    apply(simp)
-    apply fastforce
-    apply(simp add: filter_compliant_stateful_ACS_def)
-    done
+   done
 
 
     lemma filter_compliant_stateful_ACS_maximal_allsubsets:

@@ -3,9 +3,9 @@ imports "../TopoS_Helper"
 begin
 
 subsection {* SecurityInvariant ACLnotCommunicateWith*}
-text{*An access control list strategy that says that hosts must not transitively access each other*}
+text{*An access control list strategy that says that hosts must not transitively access each other.*}
 
-text{* node properties: a set of hosts this host must no access *}
+text{* node properties: a set of hosts this host must not access *}
 
 definition default_node_properties :: "'v set"
   where  "default_node_properties \<equiv> UNIV"
@@ -22,10 +22,8 @@ definition receiver_violation :: "bool" where
 
 
 lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
-  apply(simp only: SecurityInvariant_withOffendingFlows.sinvar_mono_def)
-  apply(rule)+
-  apply(clarify)
-  proof -
+  unfolding SecurityInvariant_withOffendingFlows.sinvar_mono_def
+  proof(clarify)
     fix nP::"('v \<Rightarrow> 'v set)" and N E' E
     assume a1: "valid_graph \<lparr>nodes = N, edges = E\<rparr>"
     and    a2: "E' \<subseteq> E"
@@ -40,7 +38,6 @@ lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
 qed
   
 
-lemma False_set: "{(e1, e2). False} = {}" by blast
 lemma succ_tran_empty: "(succ_tran \<lparr>nodes = nodes G, edges = {}\<rparr> v) = {}"
   by(simp add: succ_tran_def)
 
@@ -53,7 +50,7 @@ and verify_globals = verify_globals
     apply(rename_tac list_edges)
     apply(rule_tac ff="list_edges" in SecurityInvariant_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF sinvar_mono])
         apply(auto)[4]
-    apply(auto simp add: SecurityInvariant_withOffendingFlows.is_offending_flows_def graph_ops False_set succ_tran_empty)[1]
+    apply(auto simp add: SecurityInvariant_withOffendingFlows.is_offending_flows_def graph_ops succ_tran_empty)[1]
    apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_sinvar_mono[OF sinvar_mono])
   apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_mono])
  done

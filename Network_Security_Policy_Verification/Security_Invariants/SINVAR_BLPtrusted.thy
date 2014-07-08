@@ -2,7 +2,7 @@ theory SINVAR_BLPtrusted
 imports "../TopoS_Helper"
 begin
 
-subsection {* SecurityInvariant Basic Bell LePadula with trusted entities *}
+subsection {* SecurityInvariant Basic Bell LaPadula with trusted entities *}
 
 type_synonym privacy_level = nat
 
@@ -128,7 +128,10 @@ interpretation BLPtrusted: SecurityInvariant_IFS
  
 hide_type (open) node_config
 hide_const (open) sinvar_mono
+
 hide_const (open) BLP_P
+hide_fact BLP_def_unique zero_default_candidate  privacylevel_refl BLP_ENF BLP_ENF_refl
+
 hide_const (open) sinvar verify_globals receiver_violation default_node_properties
 
 end

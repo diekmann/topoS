@@ -37,8 +37,8 @@ section {* Definitions *}
     lemma E_validD: assumes "(v,v') \<in> E"
       shows "v \<in> V" "v' \<in> V"
       apply -
-      apply (rule set_mp[OF E_valid(1)])
-      using assms apply force
+       apply (rule set_mp[OF E_valid(1)])
+       using assms apply force
       apply (rule set_mp[OF E_valid(2)])
       using assms apply force
       done
@@ -220,7 +220,7 @@ section {*Lemmata*}
    apply(simp add: delete_edge_def add_edge_def valid_graph_def)
    apply(clarify)
    apply(rule graph_eq_intro)
-   by (auto)
+    by (auto)
 
   lemma add_delete_edges: "valid_graph (G::'v graph) \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow> (a,b) \<notin> fs \<Longrightarrow>
   add_edge a b (delete_edges G (insert (a, b) fs)) = (delete_edges G fs)"
@@ -308,12 +308,6 @@ lemmas graph_ops=add_node_def delete_node_def add_edge_def delete_edge_def delet
   lemma valid_graph_add_subset_edges: "\<lbrakk> valid_graph \<lparr> nodes = V, edges = E \<rparr>; E' \<subseteq> E \<rbrakk> \<Longrightarrow>
      valid_graph \<lparr> nodes = V, edges= E \<union> E'\<rparr>"
     by(auto simp add: valid_graph_def) (metis rev_finite_subset)
-
-
-
-
-
-
 
 
 

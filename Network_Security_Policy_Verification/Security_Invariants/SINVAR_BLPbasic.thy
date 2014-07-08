@@ -128,7 +128,8 @@ subsubsection {*ENF*}
   lemma TopoS_BLPBasic: "SecurityInvariant sinvar default_node_properties receiver_violation"
   unfolding receiver_violation_def by unfold_locales
    
-hide_fact (open) sinvar_mono   
+hide_fact (open) sinvar_mono
+hide_fact BLP_def_unique zero_default_candidate zero_default_candidate_rule privacylevel_refl BLP_ENF BLP_ENF_refl
 
 hide_const (open) sinvar verify_globals receiver_violation default_node_properties
 

@@ -4,12 +4,12 @@ begin
 
 subsection {* SecurityInvariant NoRefl *}
 
-text{*Hosts are not allowed to communicate with themselves-*}
+text{*Hosts are not allowed to communicate with themselves.*}
 
 text {* This can be used to effectively lift hosts to roles.
         Just list all roles that are allowed to communicate with themselves.
         Otherwise, communication between hosts of the same role (group) is prohibited. 
-        Useful in conjunction with the security gateway *}
+        Useful in conjunction with the security gateway. *}
 
 datatype node_config = NoRefl | Refl 
 
@@ -64,10 +64,10 @@ subsubsection {*Preliminaries*}
     apply(rename_tac G nP)
     apply(simp only: SecurityInvariant_withOffendingFlows.ENFsr_offending_set[OF NoRfl_ENRsr])
     apply(case_tac "sinvar G nP")
-    apply(simp)
+     apply(simp)
     apply(simp)
     apply(rule)
-    apply(rule)
+     apply(rule)
      apply(clarsimp)
      using node_config.exhaust apply blast
     apply(rule)

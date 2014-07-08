@@ -1,11 +1,12 @@
 theory SINVAR_ACLcommunicateWith
 imports "../TopoS_Helper"
 begin
-
-text{*Warning: transitive model is slow model*}
-
 subsection {* SecurityInvariant ACLcommunicateWith *}
 text{*An access control list strategy that says that hosts must only transitively access each other if allowed*}
+
+
+text{*Warning: this transitive model has exponential computational complexity*}
+
 
 datatype 'v access_list = AccessList "'v list"
 
@@ -26,10 +27,8 @@ definition receiver_violation :: "bool" where
 
 
 lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
-  apply(simp only: SecurityInvariant_withOffendingFlows.sinvar_mono_def)
-  apply(rule)+
-  apply(clarify)
-  proof -
+  unfolding SecurityInvariant_withOffendingFlows.sinvar_mono_def
+  proof(clarify)
     fix nP::"('v \<Rightarrow> 'v access_list)" and N E' E
     assume a1: "valid_graph \<lparr>nodes = N, edges = E\<rparr>"
     and    a2: "E' \<subseteq> E"
@@ -94,7 +93,6 @@ and verify_globals = verify_globals
       SecurityInvariant_withOffendingFlows.is_offending_flows_def)
   apply (simp add:graph_ops)
   apply (simp split: split_split_asm split_split add:prod_case_beta)
-  thm List.neq_Nil_conv
   apply(simp add: List.neq_Nil_conv)
   apply(erule exE)
   apply(rename_tac canAccessThis)
