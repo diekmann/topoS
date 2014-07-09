@@ -1,9 +1,0 @@
-chapter Corny
-
-session "ACView" = HOL + 
-  options [timeout = 600]
-  theories [show_question_marks = false]
-    "../../thy_lib/ML_GraphViz_Disable"
-    NetworkModel_Library
-    Impl_List_Playground_statefulpolicycompliance
-    example_forte14
