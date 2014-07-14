@@ -395,11 +395,11 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
    apply(induction M arbitrary: G)
     apply(simp_all add: delete_edges_simp2 generate_valid_topology_nodes) by fastforce
 
- lemma c_offending_flows_subseteq_edges: "configured_SecurityInvariant m \<Longrightarrow> \<Union>c_offending_flows m G \<subseteq> edges G"
-      apply(clarify)
-      apply(simp only: configured_SecurityInvariant.valid_c_offending_flows)
-      apply(thin_tac "configured_SecurityInvariant ?x")
-      by auto
+  lemma c_offending_flows_subseteq_edges: "configured_SecurityInvariant m \<Longrightarrow> \<Union>c_offending_flows m G \<subseteq> edges G"
+    apply(clarify)
+    apply(simp only: configured_SecurityInvariant.valid_c_offending_flows)
+    apply(thin_tac "configured_SecurityInvariant ?x")
+    by auto
 
   (*text{*Does it also generate a maximum topology? It should if offending flows uniquely defined*} (*TODO comment!!*)*)
   definition max_topo :: "('v::vertex) SecurityInvariant_configured list \<Rightarrow> 'v graph \<Rightarrow> bool" where
@@ -407,13 +407,11 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
       \<forall> (v1, v2) \<in> (nodes G \<times> nodes G) - (edges G). \<not> all_security_requirements_fulfilled M (add_edge v1 v2 G))"
 
   lemma unique_offending_obtain: 
-    assumes "configured_SecurityInvariant m" and  "\<exists>F. c_offending_flows m G = {F}"
+    assumes m: "configured_SecurityInvariant m" and  unique: "\<exists>F. c_offending_flows m G = {F}"
     obtains F P where "c_offending_flows m G = {F}" and "F = {(v1, v2) \<in> edges G. P (v1, v2)}"
                      "c_sinvar m (delete_edges G F)" and "(\<forall>(e1, e2)\<in>F. \<not> c_sinvar m (add_edge e1 e2 (delete_edges G F)))"
-    using assms proof -
-    assume m: "configured_SecurityInvariant m"
-    and unique: "\<exists>F. c_offending_flows m G = {F}"
-    and EX: "(\<And>F P. c_offending_flows m G = {F} \<Longrightarrow>
+    proof -
+    assume EX: "(\<And>F P. c_offending_flows m G = {F} \<Longrightarrow>
             F = {(v1, v2). (v1, v2) \<in> edges G \<and> P (v1, v2)} \<Longrightarrow>
             c_sinvar m (delete_edges G F) \<Longrightarrow> \<forall>(e1, e2)\<in>F. \<not> c_sinvar m (add_edge e1 e2 (delete_edges G F)) \<Longrightarrow> thesis)"
     
@@ -424,10 +422,11 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
     hence 1: "F = {(v1, v2) \<in> edges G. P (v1, v2)}" by auto
 
     from configured_SecurityInvariant.valid_c_offending_flows[OF m] have "c_offending_flows m G =
-  {F. F \<subseteq> edges G \<and> \<not> c_sinvar m G \<and> c_sinvar m (delete_edges G F) \<and> (\<forall>(e1, e2)\<in>F. \<not> c_sinvar m (add_edge e1 e2 (delete_edges G F)))}" .
+          {F. F \<subseteq> edges G \<and> \<not> c_sinvar m G \<and> c_sinvar m (delete_edges G F) \<and> 
+              (\<forall>(e1, e2)\<in>F. \<not> c_sinvar m (add_edge e1 e2 (delete_edges G F)))}" .
 
-    from this F_prop have "\<not> c_sinvar m G" and "c_sinvar m (delete_edges G F)" and "(\<forall>(e1, e2)\<in>F. \<not> c_sinvar m (add_edge e1 e2 (delete_edges G F)))"
-      by auto
+    from this F_prop have "\<not> c_sinvar m G" and "c_sinvar m (delete_edges G F)" and 
+                          "(\<forall>(e1, e2)\<in>F. \<not> c_sinvar m (add_edge e1 e2 (delete_edges G F)))" by auto
 
     from this EX[of F P] F_prop 1 show ?thesis by fast
   qed
