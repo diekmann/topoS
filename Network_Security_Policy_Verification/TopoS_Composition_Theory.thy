@@ -430,10 +430,10 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
     from 2 `F = {e \<in> edges G. \<not> P e}` `\<not> c_sinvar m G` have 5: "c_sinvar m G = (\<forall>(v1,v2) \<in> edges G. P (v1, v2))"
       by (metis (lifting, no_types) Collect_cong Set.empty_def delete_edges_empty prod_caseE)
 
-    from EX[of P] unique 1 5show ?thesis by fast
+    from EX[of P] unique 1 5 show ?thesis by fast
   qed
 
- (* lemma generate_valid_topology_generates_max_topo: "\<lbrakk> valid_reqs M; valid_graph (G::'v::vertex graph);
+ (*lemma generate_valid_topology_generates_max_topo: "\<lbrakk> valid_reqs M; valid_graph (G::'v::vertex graph);
      \<not> all_security_requirements_fulfilled M (fully_connected G);
       \<forall>m \<in> set M. \<exists>F. c_offending_flows m (fully_connected G) = {F}\<rbrakk> \<Longrightarrow> 
       max_topo M (generate_valid_topology M (fully_connected G))"
@@ -497,10 +497,13 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
          from unique_offending `F \<in> c_offending_flows m ?G` `m \<in> set M` have "c_offending_flows m ?G = {F}" by fastforce
          from `m \<in> set M` valid_mD have "configured_SecurityInvariant m" by simp
 
-         from unique_offending_obtain[OF `configured_SecurityInvariant m`] `c_offending_flows m ?G = {F}` have
-          
+         from unique_offending_obtain[OF `configured_SecurityInvariant m` `c_offending_flows m ?G = {F}`] obtain P where
+          "F = {(v1, v2) \<in> edges ?G. \<not> P (v1, v2)}" and  "c_sinvar m ?G = (\<forall>(v1, v2)\<in>edges ?G. P (v1, v2))"
+            by auto
         
          show "\<exists>m\<in>set M. \<not> c_sinvar m \<lparr>nodes = V, edges = insert (v1, v2) E\<rparr>"
+          apply(rule_tac x="m" in bexI)
+          
 
        apply(drule valid_mD)
        apply(erule_tac G="?G" in unique_offending_obtain)
