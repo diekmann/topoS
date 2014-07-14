@@ -407,18 +407,13 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
       \<forall> (v1, v2) \<in> (nodes G \<times> nodes G) - (edges G). \<not> all_security_requirements_fulfilled M (add_edge v1 v2 G))"
 
   lemma unique_offending_obtain: 
-    assumes m: "configured_SecurityInvariant m" and unique: "\<exists>F. c_offending_flows m G = {F}"
-    obtains F P where "c_offending_flows m G = {F}" and "F = {(v1, v2) \<in> edges G. \<not> P (v1, v2)}" and
-                      "c_sinvar m G = (\<forall>(v1,v2) \<in> edges G. P (v1, v2))"
-                      (* "\<forall>(v1,v2) \<in> edges G - F. P (v1, v2)" and "c_sinvar m (delete_edges G F)" and 
-                      "(\<forall>(e1, e2)\<in>F. \<not> c_sinvar m (add_edge e1 e2 (delete_edges G F)))"*)
+    assumes m: "configured_SecurityInvariant m" and unique: "c_offending_flows m G = {F}"
+    obtains P where "F = {(v1, v2) \<in> edges G. \<not> P (v1, v2)}" and "c_sinvar m G = (\<forall>(v1,v2) \<in> edges G. P (v1, v2))"
     proof -
-    assume EX: "(\<And>F P. c_offending_flows m G = {F} \<Longrightarrow> 
-                 F = {(v1, v2). (v1, v2) \<in> edges G \<and> \<not> P (v1, v2)} \<Longrightarrow> c_sinvar m G = (\<forall>(v1, v2)\<in>edges G. P (v1, v2)) \<Longrightarrow> thesis)"
-    
-    from unique obtain F where F_prop: "c_offending_flows m G = {F}" by blast
+    assume EX: "(\<And>P. F = {(v1, v2). (v1, v2) \<in> edges G \<and> \<not> P (v1, v2)} \<Longrightarrow> 
+                     c_sinvar m G = (\<forall>(v1, v2)\<in>edges G. P (v1, v2)) \<Longrightarrow> thesis)"
 
-    from F_prop c_offending_flows_subseteq_edges[OF m] have "F \<subseteq> edges G" by force
+    from unique c_offending_flows_subseteq_edges[OF m] have "F \<subseteq> edges G" by force
     from this obtain P where "F = {e \<in> edges G. \<not> P e}" by (metis double_diff set_diff_eq subset_refl)
     hence 1: "F = {(v1, v2) \<in> edges G. \<not> P (v1, v2)}" by auto
 
@@ -426,7 +421,7 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
           {F. F \<subseteq> edges G \<and> \<not> c_sinvar m G \<and> c_sinvar m (delete_edges G F) \<and> 
               (\<forall>(e1, e2)\<in>F. \<not> c_sinvar m (add_edge e1 e2 (delete_edges G F)))}" .
 
-    from this F_prop have "\<not> c_sinvar m G" and 2: "c_sinvar m (delete_edges G F)" and 
+    from this unique have "\<not> c_sinvar m G" and 2: "c_sinvar m (delete_edges G F)" and 
                           3: "(\<forall>(e1, e2)\<in>F. \<not> c_sinvar m (add_edge e1 e2 (delete_edges G F)))" by auto
 
     from this `F = {e \<in> edges G. \<not> P e}` have "\<forall> e \<in> edges G - F. P e" by (metis (lifting) mem_Collect_eq set_diff_eq)
@@ -435,7 +430,7 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
     from 2 `F = {e \<in> edges G. \<not> P e}` `\<not> c_sinvar m G` have 5: "c_sinvar m G = (\<forall>(v1,v2) \<in> edges G. P (v1, v2))"
       by (metis (lifting, no_types) Collect_cong Set.empty_def delete_edges_empty prod_caseE)
 
-    from EX[of F P] F_prop 1 2 3 5 show ?thesis by fast
+    from EX[of P] unique 1 5show ?thesis by fast
   qed
 
  (* lemma generate_valid_topology_generates_max_topo: "\<lbrakk> valid_reqs M; valid_graph (G::'v::vertex graph);
