@@ -502,7 +502,6 @@ section{*Legacy: Composition of ENF-Structured Security Invariants *}
       using EX_invalid_fully_connected_simp by blast
 
       hence "\<exists> m \<in> set M. \<not> c_sinvar m \<lparr>nodes = V, edges = E \<union> {(a, b)}\<rparr>"
-        apply(simp add: all_security_requirements_fulfilled_def)
         apply(simp add: E_prop)
         apply(simp add: fully_connected_def V_prop)
         apply(simp add: subst_hlp2)
