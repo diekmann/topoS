@@ -459,16 +459,37 @@ oops *)
     from EX[of P] unique 1 x3 5 show ?thesis by fast
   qed
 
+  lemma enf_offending_flows:
+    assumes vm: "configured_SecurityInvariant m" and enf: "\<forall>G. c_sinvar m G = (\<forall>e \<in> edges G. P e)"
+    shows "\<forall>G. c_offending_flows m G = (if c_sinvar m G then {} else {{e \<in> edges G. \<not> P e}})"
+    proof -
+      from vm configured_SecurityInvariant.valid_c_offending_flows have offending_formaldef: "\<And>G.
+      c_offending_flows m G =
+      {F. F \<subseteq> edges G \<and> \<not> c_sinvar m G \<and> c_sinvar m (delete_edges G F) \<and> (\<forall>(e1, e2)\<in>F. \<not> c_sinvar m (add_edge e1 e2 (delete_edges G F)))}"
+      by auto
+
+      show "\<forall>G. c_offending_flows m G = (if c_sinvar m G then {} else {{e \<in> edges G. \<not> P e}})"
+        apply(rule allI)
+        apply(case_tac "c_sinvar m G")
+         apply(simp add: offending_formaldef graph_ops enf)
+        apply(simp only: offending_formaldef graph_ops enf)
+        apply(simp)
+        apply(rule Set.equalityI)
+         apply blast
+        apply(blast)
+        done 
+      qed
+
  lemma generate_valid_topology_generates_max_topo: "\<lbrakk> valid_reqs M; valid_graph (G::'v::vertex graph);
      \<not> all_security_requirements_fulfilled M (fully_connected G);
-      \<forall>m \<in> set M. \<forall>G. \<exists>P. c_sinvar m G = (\<forall>e \<in> edges G. P e)\<rbrakk> \<Longrightarrow> 
+      \<forall>m \<in> set M. \<exists>P. \<forall>G. c_sinvar m G = (\<forall>e \<in> edges G. P e)\<rbrakk> \<Longrightarrow> 
       max_topo M (generate_valid_topology M (fully_connected G))"
   proof -
     let ?G="(fully_connected G)"
     assume validRs: "valid_reqs M"
     and    validG:       "valid_graph G"
     and    not_valid_by_default: "\<not> all_security_requirements_fulfilled M ?G"
-    and unique_offending: "\<forall>m \<in> set M. \<exists>(F::('v::vertex \<times> 'v::vertex) set). c_offending_flows m ?G = {F}"
+    and enf: "\<forall>m \<in> set M. \<exists>P. \<forall>G. c_sinvar m G = (\<forall>e \<in> edges G. P e)"
 
 
     obtain V E where VE_prop: "\<lparr> nodes = V, edges = E \<rparr> = generate_valid_topology M ?G" by (metis graph.cases)
@@ -502,11 +523,10 @@ oops *)
     have "\<And>A B. A - (A - B) = B \<inter> A" by fast 
     from this[of "V \<times> V"] E_prop hlp1 have "V \<times> V - E = (\<Union>m\<in>set M. \<Union>c_offending_flows m ?G)" by force
 
-    from valid_mD configured_SecurityInvariant.valid_c_offending_flows have "\<And>m. m \<in> set M \<Longrightarrow>
-      c_offending_flows m ?G =
-      {F. F \<subseteq> edges ?G \<and> \<not> c_sinvar m ?G \<and> c_sinvar m (delete_edges ?G F) \<and> (\<forall>(e1, e2)\<in>F. \<not> c_sinvar m (add_edge e1 e2 (delete_edges ?G F)))}"
+    from valid_mD configured_SecurityInvariant.valid_c_offending_flows have xx: "\<And>m G. m \<in> set M \<Longrightarrow>
+      c_offending_flows m G =
+      {F. F \<subseteq> edges G \<and> \<not> c_sinvar m G \<and> c_sinvar m (delete_edges G F) \<and> (\<forall>(e1, e2)\<in>F. \<not> c_sinvar m (add_edge e1 e2 (delete_edges G F)))}"
       by auto
-    from this unique_offending have "\<And>m. m \<in> set M \<Longrightarrow> \<exists>X. \<Union> c_offending_flows m ?G = X" by blast
     
     from not_valid_by_default have "(\<Union>m\<in>set M. \<Union>c_offending_flows m ?G) \<noteq> {}"
       by (metis VE_all_valid VE_prop VE_prop_asset delete_edges_empty generate_valid_topology_as_set)
@@ -514,7 +534,12 @@ oops *)
       apply(simp add: E_prop)
       by (metis (lifting, no_types) prod_caseI2)
 
-    have valid_fullG: "valid_graph \<lparr>nodes = V, edges = V \<times> V\<rparr>" sorry
+    from VE_prop valid_graph_generate_valid_topology[OF fully_connected_valid[OF validG]]
+    have validG_VE: "valid_graph \<lparr> nodes = V, edges = E \<rparr>" by force
+    from fully_connected_valid[OF validG] have valid_fullG: "valid_graph \<lparr>nodes = V, edges = V \<times> V\<rparr>"
+      by(simp add: fully_connected_def V_prop)
+
+    thm enf_offending_flows
 
     have "\<forall>(v1, v2) \<in> (\<Union>m\<in>set M. \<Union>c_offending_flows m ?G).
        \<not> all_security_requirements_fulfilled M \<lparr> nodes = V, edges = E \<union> {(v1, v2)}\<rparr>"
