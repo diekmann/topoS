@@ -480,7 +480,7 @@ oops *)
         done 
       qed
 
- lemma generate_valid_topology_generates_max_topo: "\<lbrakk> valid_reqs M; valid_graph (G::'v::vertex graph);
+ theorem generate_valid_topology_max_topo: "\<lbrakk> valid_reqs M; valid_graph G;
       \<forall>m \<in> set M. \<exists>P. \<forall>G. c_sinvar m G = (\<forall>e \<in> edges G. P e)\<rbrakk> \<Longrightarrow> 
       max_topo M (generate_valid_topology M (fully_connected G))"
   proof -
@@ -503,8 +503,7 @@ oops *)
     from VE_prop valid_graph_generate_valid_topology[OF fully_connected_valid[OF validG]]
     have validG_VE: "valid_graph \<lparr> nodes = V, edges = E \<rparr>" by force
 
-    from generate_valid_topology_sound[OF validRs validG_VE] fully_connected_valid[OF validG]
-    have VE_all_valid: 
+    from generate_valid_topology_sound[OF validRs validG_VE] fully_connected_valid[OF validG] have VE_all_valid: 
       "all_security_requirements_fulfilled M \<lparr> nodes = V, edges = V \<times> V - (\<Union>m\<in>set M. \<Union>c_offending_flows m ?G)\<rparr>"
       by (metis VE_prop VE_prop_asset fully_connected_def generate_valid_topology_sound validRs)
     hence goal1: "all_security_requirements_fulfilled M (generate_valid_topology M (fully_connected G))" by (metis VE_prop VE_prop_asset)
