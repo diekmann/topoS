@@ -384,12 +384,7 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
           by (simp add: all_security_requirements_fulfilled_def)
        qed
 
-   (*TODO
-    all offending flows uniquely defined \<Longrightarrow> generate_valid_topology is maximum topology
-   *)
-   (*
-    add generate_valid_topology_max_topo from Composition_Theory_ENF to here!
-   *)
+
   lemma generate_valid_topology_as_set: 
   "generate_valid_topology M G = delete_edges G (\<Union>m \<in> set M. (\<Union> (c_offending_flows m G)))"
    apply(induction M arbitrary: G)
@@ -401,36 +396,13 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
     apply(thin_tac "configured_SecurityInvariant ?x")
     by auto
 
-  (*text{*Does it also generate a maximum topology? It should if offending flows uniquely defined*} (*TODO comment!!*)*)
+
+  text{*Does it also generate a maximum topology? It does, if the security invariants are in ENF-form. That means, if 
+        all security invariants can be expressed as a predicate over the edges, 
+        @{term "\<exists>P. \<forall>G. c_sinvar m G = (\<forall>(v1,v2) \<in> edges G. P (v1,v2))"}*}
   definition max_topo :: "('v::vertex) SecurityInvariant_configured list \<Rightarrow> 'v graph \<Rightarrow> bool" where
     "max_topo M G \<equiv> all_security_requirements_fulfilled M G \<and> (
       \<forall> (v1, v2) \<in> (nodes G \<times> nodes G) - (edges G). \<not> all_security_requirements_fulfilled M (add_edge v1 v2 G))"
-
-(*  lemma fixes G::"'v::vertex graph" and F::"('v \<times> 'v) set"
-        assumes eq_sinvar: "c_sinvar m G = (\<forall>(v1,v2) \<in> edges G. P (v1, v2))"
-        and vM: "configured_SecurityInvariant m" and vG: "valid_graph G"
-        shows "c_sinvar m (delete_edges G F) = (\<forall>(v1,v2) \<in> edges G - F. P (v1, v2))"
-  proof -
-  have "edges G - F \<subseteq> edges G" by blast
-  from configured_SecurityInvariant.mono_sinvar[OF vM _ this] vG have
-    "c_sinvar m \<lparr>nodes = nodes G, edges = edges G\<rparr> \<Longrightarrow> c_sinvar m \<lparr>nodes = nodes G, edges = edges G - F\<rparr>" 
-  by (metis graph.select_convs(1) graph.select_convs(2) graph_eq_intro)
-  hence 1: "c_sinvar m G \<Longrightarrow> c_sinvar m (delete_edges G F)"
-    apply(simp add: graph_ops)
-    apply(subgoal_tac "\<lparr>nodes = nodes G, edges = edges G\<rparr> = G")
-     apply(simp)  
-    apply(rule graph_eq_intro)
-     apply simp_all
-    done
-  show ?thesis
-    apply(case_tac "c_sinvar m G")
-     apply(frule 1)
-     apply(subst(asm) eq_sinvar)
-     apply(simp)
-    apply(case_tac "c_sinvar m (delete_edges G F)")
-     apply(subst(asm) eq_sinvar)
-    apply(simp)
-oops *)
 
   lemma unique_offending_obtain: 
     assumes m: "configured_SecurityInvariant m" and unique: "c_offending_flows m G = {F}"
@@ -561,7 +533,6 @@ oops *)
     from goal1 goal2 show ?thesis
       unfolding max_topo_def by presburger
   qed
-  (*end TODO*)
 
 
 
