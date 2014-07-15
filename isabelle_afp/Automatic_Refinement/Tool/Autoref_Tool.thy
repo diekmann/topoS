@@ -70,26 +70,24 @@ setup {*
   let
     fun higher_order_rl_of ctxt thm = case concl_of thm of
       @{mpat "Trueprop ((_,?t)\<in>_)"} => let
-        open HOLogic
         val (f,args) = strip_comb t
       in
         if length args = 0 then 
           thm
         else let
-          val cT = TVar(("'c",0),typeS)
+          val cT = TVar(("'c",0), @{sort type})
           val c = Var (("c",0),cT)
-          val R = Var (("R",0),mk_setT (mk_prodT (cT, fastype_of f)))
+          val R = Var (("R",0), HOLogic.mk_setT (HOLogic.mk_prodT (cT, fastype_of f)))
           val goal = 
             HOLogic.mk_mem (HOLogic.mk_prod (c,f), R)
             |> HOLogic.mk_Trueprop
             |> cterm_of (Proof_Context.theory_of ctxt)
 
-          val res_thm = Goal.prove_internal [] goal (fn _ => 
+          val res_thm = Goal.prove_internal ctxt [] goal (fn _ => 
             REPEAT (rtac @{thm fun_relI} 1)
             THEN (rtac thm 1)
             THEN (ALLGOALS atac)
           )
-
         in
           res_thm
         end

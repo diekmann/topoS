@@ -79,7 +79,7 @@ ML {*
     val eqsubst_inst_tac: Proof.context -> bool -> int list 
       -> (indexname * string) list -> thm -> int -> tactic
 
-    val eqsubst_inst_meth: (Proof.context -> Method.method) context_parser
+    val eqsubst_inst_meth: (Proof.context -> Proof.method) context_parser
 
     (* Parsing *)
     val ->> : 'a context_parser *('a * Context.generic -> 'b * Context.generic)
@@ -133,7 +133,7 @@ ML {*
     val ite_conv: conv -> conv -> conv -> conv
 
     val cfg_trace_f_tac_conv: bool Config.T
-    val f_tac_conv: (term -> term) -> tactic -> conv
+    val f_tac_conv: Proof.context -> (term -> term) -> tactic -> conv
 
     (* Parsing *)
     val parse_bool_config: string -> bool Config.T -> bool context_parser
@@ -198,7 +198,7 @@ ML {*
       | is_TFree _ = false
 
     fun is_def_thm thm = case thm |> prop_of of
-      Const (@{const_name "=="},_)$_$_ => true | _ => false
+      Const (@{const_name "Pure.eq"},_)$_$_ => true | _ => false
 
 
     type tactic' = int -> tactic
@@ -322,10 +322,10 @@ ML {*
       FIRST' (map (fn thm => fo_rtac thm ctxt) thms);
 
     (* Resolve with premises. Copied and adjusted from Goal.assume_rule_tac. *)
-    fun rprems_tac ctxt = Goal.norm_hhf_tac THEN' CSUBGOAL (fn (goal, i) =>
+    fun rprems_tac ctxt = Goal.norm_hhf_tac ctxt THEN' CSUBGOAL (fn (goal, i) =>
       let
-        fun non_atomic (Const ("==>", _) $ _ $ _) = true
-          | non_atomic (Const ("all", _) $ _) = true
+        fun non_atomic (Const (@{const_name Pure.imp}, _) $ _ $ _) = true
+          | non_atomic (Const (@{const_name Pure.all}, _) $ _) = true
           | non_atomic _ = false;
 
         val ((_, goal'), ctxt') = Variable.focus_cterm goal ctxt;
@@ -335,19 +335,19 @@ ML {*
           (Drule.strip_imp_prems goal'');
 
         val ethms = Rs |> map (fn R =>
-          (Raw_Simplifier.norm_hhf (Thm.trivial R)));
+          (Simplifier.norm_hhf ctxt (Thm.trivial R)));
       in eresolve_tac ethms i end
       );
 
     (* Resolve with premise. Copied and adjusted from Goal.assume_rule_tac. *)
-    fun rprem_tac n ctxt = Goal.norm_hhf_tac THEN' CSUBGOAL (fn (goal, i) =>
+    fun rprem_tac n ctxt = Goal.norm_hhf_tac ctxt THEN' CSUBGOAL (fn (goal, i) =>
       let
         val ((_, goal'), ctxt') = Variable.focus_cterm goal ctxt;
         val goal'' = Drule.cterm_rule 
           (singleton (Variable.export ctxt' ctxt)) goal';
 
         val R = nth (Drule.strip_imp_prems goal'') (n - 1)
-        val rl = Raw_Simplifier.norm_hhf (Thm.trivial R)
+        val rl = Simplifier.norm_hhf ctxt (Thm.trivial R)
       in
         etac rl i
       end
@@ -389,7 +389,7 @@ ML {*
       Scan.lift (Args.mode "asm" -- Scan.optional (Args.parens (Scan.repeat Parse.nat)) [0]) --
       Scan.optional (Scan.lift
         (Parse.and_list1 
-          (Args.var -- (Args.$$$ "=" |-- Parse.!!! Args.name_source)) --|
+          (Args.var -- (Args.$$$ "=" |-- Parse.!!! Args.name_inner_syntax)) --|
           Args.$$$ "in")) [] --
       Attrib.thms >>
       (fn (((quant, (asm, occL)), insts), thms) => fn ctxt => METHOD 
@@ -406,7 +406,8 @@ ML {*
     fun eqsubst_inst_tac ctxt asm occL insts thm = 
       Subgoal.FOCUS (
         fn {context=ctxt,...} => let
-          val thm' = thm |> Rule_Insts.read_instantiate ctxt insts
+          val ctxt' = ctxt |> Proof_Context.set_mode Proof_Context.mode_schematic  (* FIXME !? *)
+          val thm' = thm |> Rule_Insts.read_instantiate ctxt' insts []
         in eqsubst_tac' ctxt asm occL [thm'] 1 end
       ) ctxt
 
@@ -463,7 +464,7 @@ ML {*
     fun cterm_instantiate' instl thm = let
       fun err msg =
         raise TERM ("instantiate': " ^ msg,
-          map_filter (Option.map Thm.term_of) instl);
+          map_filter (map_option Thm.term_of) instl);
 
       fun inst_of (v, ct) =
         (Thm.cterm_of (Thm.theory_of_cterm ct) (Var v), ct)
@@ -555,9 +556,9 @@ ML {*
         ) tm;
         val ct' = Thm.instantiate_cterm (tym,tm') pat;
 
-        val rthm = Goal.prove_internal [] (mk_equals_ct (ct,ct'))
+        val rthm = Goal.prove_internal ctxt [] (mk_equals_ct (ct,ct'))
           (K (simp_tac (put_simpset HOL_basic_ss ctxt addsimps @{thms conv_tag_def}) 1))
-        |> Goal.norm_result
+        |> Goal.norm_result ctxt
       in 
         fixup_vars ct rthm 
       end handle Pattern.MATCH 
@@ -622,19 +623,17 @@ ML {*
         Attrib.setup_config_bool @{binding trace_f_tac_conv} (K false)
 
       (* Transform term and prove equality to original by tactic *)
-      fun f_tac_conv f tac ct = let
+      fun f_tac_conv ctxt f tac ct = let
         val t = term_of ct
         val t' = f t
-        val thy = theory_of_cterm ct
         val goal = Logic.mk_equals (t,t')
-        val _ = if Config.get_global thy cfg_trace_f_tac_conv then
-          Syntax.pretty_term_global thy goal 
-          |> Pretty.string_of |> tracing
+        val _ = if Config.get ctxt cfg_trace_f_tac_conv then
+          tracing (Syntax.string_of_term ctxt goal)
         else ()
 
-        val goal = cterm_of thy goal
+        val goal = cterm_of (Proof_Context.theory_of ctxt) goal
 
-        val thm = Goal.prove_internal [] goal (K tac)
+        val thm = Goal.prove_internal ctxt [] goal (K tac)
       in
         thm
       end
@@ -682,6 +681,12 @@ ML {*
          "repeteadly apply elimination rules to all subgoals"
       #> Method.setup @{binding subst_tac} eqsubst_inst_meth
            "single-step substitution (dynamic instantiation)"
+      #> Method.setup @{binding clarsimp_all} (
+           let open Clasimp in
+             Method.sections clasimp_modifiers >> K (fn ctxt => SIMPLE_METHOD (
+               CHANGED_PROP (ALLGOALS (clarsimp_tac ctxt))))
+            end
+         ) "Simplify and clarify all subgoals"
 
   end
 

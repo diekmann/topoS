@@ -44,7 +44,9 @@ ML {*
       in res end
       else ft thy thms;
 
-      fun s_functrans thy thms = let
+      fun s_functrans ctxt thms =
+        let
+        val thy = Proof_Context.theory_of ctxt;
         val trs = Data.get thy;
         val process = fold (fn (_,_,tr) => fn thm => tr thy thm) trs;
         val process' = fold (fn (_,name,tr) => fn thm => let
@@ -92,7 +94,7 @@ ML {*
 
     local 
       fun trans_fun thy thm = let
-        val ss = get thy |> Raw_Simplifier.global_context thy
+        val ss = Proof_Context.init_global thy |> put_simpset (get thy)
       in simplify ss thm end;
     in
       val setup = Ord_Code_Preproc.add (prio, name, trans_fun);

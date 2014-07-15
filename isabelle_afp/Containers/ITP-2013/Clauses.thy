@@ -15,7 +15,7 @@ datatype bexp
 
 declare [[coercion Var]] [[coercion_enabled]]
 
-declare UN_cong[fundef_cong del]
+declare strong_SUP_cong[fundef_cong del]
 function cnf :: "bexp \<Rightarrow> cnf"
 where
   "cnf v = {{(v, True)}}"
@@ -26,8 +26,8 @@ where
 | "cnf (not (b and b')) = cnf (not b or not b')"
 | "cnf (not (b or b')) = cnf (not b and not b')"
 by pat_completeness simp_all
-termination by(relation "measure (bexp_rec (\<lambda>_. 1) (\<lambda>_ n. 3 * n + 1) (\<lambda>_ _ n m. n + m + 1) (\<lambda>_ _ n m. n + m + 1))") simp_all
-declare UN_cong[fundef_cong]
+termination by(relation "measure (rec_bexp (\<lambda>_. 1) (\<lambda>_ n. 3 * n + 1) (\<lambda>_ _ n m. n + m + 1) (\<lambda>_ _ n m. n + m + 1))") simp_all
+declare strong_SUP_cong[fundef_cong]
 
 definition test 
 where 
@@ -41,7 +41,7 @@ where
   (1 and 2) or (3 and 4) or
   (1 and 3) or (2 and 4)"
 
-value [code] "cnf test = {}"
+value "cnf test = {}"
 
 text {* Sanity check for correctness *}
 
@@ -61,8 +61,8 @@ lemma cnf_correct: "\<Phi> \<turnstile> cnf b \<longleftrightarrow> \<Phi> \<Tur
 proof(rule sym, induction b rule: cnf.induct)
   case 2 show ?case by(simp add: "2.IH")(auto simp add: eval_cnf_def)
 next
-  case 3 thus ?case
-    by(simp add: "3.IH")(auto 4 3 simp add: eval_cnf_def split_beta)
+  case 3 then show ?case
+    by (auto simp add: "3.IH" eval_cnf_def split_beta) blast+
 qed(auto simp add: eval_cnf_def)
 
 end

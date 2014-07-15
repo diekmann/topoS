@@ -3,12 +3,12 @@ Example: offending-flows-union-mono can be found with
 find access_control_abstraction/thy/ -iname '*.thy' | xargs grep 'offending_flows_union_mono'
 
 
-get Isabelle/HOL 2013-2 at
+get Isabelle/HOL 2014-RC0 at
 http://isabelle.in.tum.de/
 
 
 
-access_control_abstraction
+Network_Security_Policy_Verification (former access_control_abstraction)
   Theory for reasoning about logical access control abstraction (security policy, who can communicate with whom?)
   All the the formal theory files for Isabelle/HOL
 

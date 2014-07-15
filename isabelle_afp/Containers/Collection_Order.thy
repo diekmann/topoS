@@ -200,18 +200,18 @@ by(simp add: is_corder_def corder_prod_def ID_None ID_Some split: option.split)
 
 instantiation list :: (corder) corder begin
 definition "CORDER('a list) =
-  Option.map (\<lambda>(leq, lt). (\<lambda>xs ys. ord.lexord_eq lt xs ys, ord.lexord lt)) (ID CORDER('a))"
+  map_option (\<lambda>(leq, lt). (\<lambda>xs ys. ord.lexordp_eq lt xs ys, ord.lexordp lt)) (ID CORDER('a))"
 instance
 proof
   fix leq lt
   assume "CORDER('a list) = Some (leq, lt)"
   then obtain leq_a lt_a where a: "ID CORDER('a) = Some (leq_a, lt_a)"
-    and leq: "\<And>xs ys. leq xs ys \<longleftrightarrow> ord.lexord_eq lt_a xs ys"
-    and lt: "\<And>xs ys. lt xs ys \<longleftrightarrow> ord.lexord lt_a xs ys"
+    and leq: "\<And>xs ys. leq xs ys \<longleftrightarrow> ord.lexordp_eq lt_a xs ys"
+    and lt: "\<And>xs ys. lt xs ys \<longleftrightarrow> ord.lexordp lt_a xs ys"
     by(auto simp add: corder_list_def)
   from a interpret a!: linorder leq_a lt_a by(rule ID_corder)
   show "class.linorder leq lt" unfolding leq[abs_def] lt[abs_def]
-    by(rule a.lexord_linorder)
+    by(rule a.lexordp_linorder)
 qed
 end
 
@@ -221,7 +221,7 @@ by(simp add: is_corder_def corder_list_def ID_def)
 
 instantiation option :: (corder) corder begin
 definition "CORDER('a option) =
-  Option.map (\<lambda>(leq, lt). (\<lambda>x y. case x of None \<Rightarrow> True | Some x' \<Rightarrow> case y of None \<Rightarrow> False | Some y' \<Rightarrow> leq x' y',
+  map_option (\<lambda>(leq, lt). (\<lambda>x y. case x of None \<Rightarrow> True | Some x' \<Rightarrow> case y of None \<Rightarrow> False | Some y' \<Rightarrow> leq x' y',
                            \<lambda>x y. case y of None \<Rightarrow> False | Some y' \<Rightarrow> case x of None \<Rightarrow> True | Some x' \<Rightarrow> lt x' y')) 
     (ID CORDER('a))"
 instance
@@ -247,7 +247,7 @@ lemma is_corder_fun [simp]: "\<not> is_corder TYPE('a \<Rightarrow> 'b)"
 by(simp add: is_corder_def corder_fun_def ID_None)
 
 instantiation set :: (corder) corder begin
-definition "CORDER('a set) = Option.map (\<lambda>(leq, lt). (ord.set_less_eq leq, ord.set_less leq)) (ID CORDER('a))"
+definition "CORDER('a set) = map_option (\<lambda>(leq, lt). (ord.set_less_eq leq, ord.set_less leq)) (ID CORDER('a))"
 instance by(intro_classes)(auto simp add: corder_set_def intro: linorder.set_less_eq_linorder ID_corder)
 end
 
@@ -266,7 +266,7 @@ lemma corder_set_code [code]:
   "CORDER('a :: corder set) = (case ID CORDER('a) of None \<Rightarrow> None | Some _ \<Rightarrow> Some (cless_eq_set, cless_set))"
 by(clarsimp simp add: corder_set_def ID_Some split: option.split)
 
-
+derive (no) corder Predicate.pred
 
 subsection {* Proper intervals *}
 

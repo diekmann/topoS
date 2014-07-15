@@ -28,14 +28,14 @@ code_datatype Assoc_List_Mapping RBT_Mapping Mapping
 
 subsection {* Map operations *}
 
-lemma [code, code del]: "Mapping.lookup = Mapping.lookup" ..
+declare [[code drop: Mapping.lookup]]
 
 lemma lookup_Mapping_code [code]:
   "Mapping.lookup (Assoc_List_Mapping al) = DAList.lookup al"
   "Mapping.lookup (RBT_Mapping t) = RBT_Mapping2.lookup t"
 by(simp_all)(transfer, rule)+
 
-lemma [code, code del]: "Mapping.is_empty = Mapping.is_empty" ..
+declare [[code drop: Mapping.is_empty]]
 
 context
 begin
@@ -44,7 +44,7 @@ interpretation lifting_syntax .
 lemma is_empty_transfer [transfer_rule]:
   "(pcr_mapping op = op = ===> op =) (\<lambda>m. m = empty) Mapping.is_empty"
 unfolding mapping.pcr_cr_eq
-apply(rule fun_relI)
+apply(rule rel_funI)
 apply(case_tac y)
 apply(simp add: Mapping.is_empty_def cr_mapping_def Mapping_inverse Mapping.keys.rep_eq)
 done
@@ -62,7 +62,7 @@ apply(simp_all split: option.split)
 apply(transfer, simp)
 done
 
-lemma [code, code del]: "Mapping.update = Mapping.update" ..
+declare [[code drop: Mapping.update]]
 
 lemma update_Mapping [code]:
   fixes t :: "('a :: corder, 'b) mapping_rbt" shows
@@ -73,7 +73,7 @@ lemma update_Mapping [code]:
                      | Some _ \<Rightarrow> RBT_Mapping (RBT_Mapping2.insert k v t))" (is ?RBT)
 by(simp_all split: option.split)(transfer, simp)+
 
-lemma [code, code del]: "Mapping.delete = Mapping.delete" ..
+declare [[code drop: Mapping.delete]]
 
 lemma delete_Mapping [code]:
   fixes t :: "('a :: corder, 'b) mapping_rbt" shows
@@ -84,9 +84,9 @@ lemma delete_Mapping [code]:
                      | Some _ \<Rightarrow> RBT_Mapping (RBT_Mapping2.delete k t))"
 by(simp_all split: option.split)(transfer, simp)+
 
-lemma [code, code del]: "Mapping.keys = Mapping.keys" ..
+declare [[code drop: Mapping.keys]]
 
-theorem (in ord) rbt_lookup_map_const: "rbt_lookup (RBT_Impl.map (\<lambda>_. f) t) = Option.map f \<circ> rbt_lookup t"
+theorem (in ord) rbt_lookup_map_const: "rbt_lookup (RBT_Impl.map (\<lambda>_. f) t) = map_option f \<circ> rbt_lookup t"
 by(induct t)(simp_all add: fun_eq_iff)
 
 lemma keys_Mapping [code]:
@@ -101,7 +101,7 @@ proof -
     by(simp add: RBT_set_def)(transfer, auto simp add: ord.rbt_lookup_map_const o_def)
 qed
 
-lemma [code, code del]: "Mapping.size = Mapping.size" ..
+declare [[code drop: Mapping.size]]
 
 context
 begin
@@ -109,7 +109,7 @@ interpretation lifting_syntax .
 
 lemma Mapping_size_transfer [transfer_rule]:
   "(pcr_mapping op = op = ===> op =) (card \<circ> dom) Mapping.size"
-apply(rule fun_relI)
+apply(rule rel_funI)
 apply(case_tac y)
 apply(simp add: Mapping.size_def Mapping.keys.rep_eq Mapping_inverse mapping.pcr_cr_eq cr_mapping_def)
 done
@@ -127,25 +127,23 @@ apply(transfer, simp add: dom_map_of_conv_image_fst set_map[symmetric] distinct_
 apply transfer
 apply(clarsimp simp add: size_eq_card_dom_lookup)
 apply(simp add: linorder.rbt_lookup_keys[OF ID_corder] ord.is_rbt_rbt_sorted RBT_Impl.keys_def distinct_card linorder.distinct_entries[OF ID_corder] del: set_map)
-apply(subst distinct_card)
-apply(rule linorder.distinct_entries[OF ID_corder], assumption)
-apply(simp_all add: ord.is_rbt_rbt_sorted)
 done
 
 
-lemma [code, code del]: "Mapping.tabulate = Mapping.tabulate" ..
-
-lemma tabulate_Mapping [code]:
-  "Mapping.tabulate xs f = fold (\<lambda>k m. Mapping.update k (f k) m) xs Mapping.empty"
-apply(rule sym)
-apply transfer
-apply(unfold tabulate_alt_def)
-apply(induct_tac xs rule: rev_induct)
-apply(auto simp add: fun_eq_iff restrict_map_def)
-done
+declare [[code drop: Mapping.tabulate]]
+declare tabulate_fold [code]
 
 datatype mapping_impl = Mapping_IMPL
-declare mapping_impl.eq.simps [code del]
+declare
+  mapping_impl.eq.simps [code del]
+  mapping_impl.rec [code del]
+  mapping_impl.case [code del]
+
+lemma [code]:
+  fixes x :: mapping_impl
+  shows "size x = 0"
+  and "size_mapping_impl x = 0"
+by(case_tac [!] x) simp_all
 
 definition mapping_Choose :: mapping_impl where [simp]: "mapping_Choose = Mapping_IMPL"
 definition mapping_Assoc_List :: mapping_impl where [simp]: "mapping_Assoc_List = Mapping_IMPL"
@@ -200,7 +198,7 @@ let
 in [(@{syntax_const "_MAPPING_IMPL"}, K mapping_impl_tr)] end
 *}
 
-lemma [code, code del]: "Mapping.empty = Mapping.empty" ..
+declare [[code drop: Mapping.empty]]
 
 lemma Mapping_empty_code [code, code_unfold]: 
   "(Mapping.empty :: ('a :: mapping_impl, 'b) mapping) =

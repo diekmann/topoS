@@ -425,8 +425,10 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
     from this `F = {e \<in> edges G. \<not> P e}` have x3: "\<forall> e \<in> edges G - F. P e" by (metis (lifting) mem_Collect_eq set_diff_eq)
     hence 4: "\<forall>(v1,v2) \<in> edges G - F. P (v1, v2)" by blast
 
-    from 2 `F = {e \<in> edges G. \<not> P e}` `\<not> c_sinvar m G` have 5: "c_sinvar m G = (\<forall>(v1,v2) \<in> edges G. P (v1, v2))"
-      by (metis (lifting, no_types) Collect_cong Set.empty_def delete_edges_empty prod_caseE)
+    have "F \<noteq> {}" by (metis assms(1) assms(2) configured_SecurityInvariant.empty_offending_contra insertCI)
+    from this `F = {e \<in> edges G. \<not> P e}` `\<not> c_sinvar m G` have 5: "c_sinvar m G = (\<forall>(v1,v2) \<in> edges G. P (v1, v2))"
+      apply(simp add: graph_ops)
+      by(blast)
 
     from EX[of P] unique 1 x3 5 show ?thesis by fast
   qed
@@ -525,9 +527,15 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
       have "\<forall>(v1, v2)\<in>V \<times> V - E.  V \<union> {v1, v2} = V" by blast
       hence "\<forall>(v1, v2)\<in>V \<times> V - E. \<lparr>nodes = V \<union> {v1, v2}, edges = {(v1, v2)} \<union> E\<rparr> = \<lparr>nodes = V, edges = E \<union> {(v1, v2)}\<rparr>" by blast
       from this a show "\<forall>(v1, v2)\<in>V \<times> V - E. \<not> all_security_requirements_fulfilled M \<lparr>nodes = V \<union> {v1, v2}, edges = {(v1, v2)} \<union> E\<rparr>"
+        --"TODO: this should be trivial ..."
         apply(simp)
         apply(rule ballI)
-        by (metis (lifting, mono_tags) prod_caseI2 split_conv)
+        apply(erule_tac x=x and A="V \<times> V - E" in ballE)
+         prefer 2 apply simp
+        apply(erule_tac x=x and A="V \<times> V - E" in ballE)
+         prefer 2 apply(simp)
+        apply(clarify)
+        by presburger
     qed
      
     from goal1 goal2 show ?thesis

@@ -57,8 +57,6 @@ ML {*
 
 setup Refine_Relators_Thms.rel_comb_def_rules.setup
 
-
-
 subsection {* Basic HOL Relators *}
 subsubsection {* Function *}
 definition fun_rel where 
@@ -405,10 +403,9 @@ ML {*
       natural_relator_from_term (t as Const (name,T)) = let
         fun err msg = raise TERM (msg,[t])
   
-        open HOLogic
         val (argTs,bodyT) = strip_type T
-        val (conTs,absTs) = argTs |> map (dest_setT #> dest_prodT) |> split_list
-        val (bconT,babsT) = bodyT |> dest_setT |> dest_prodT
+        val (conTs,absTs) = argTs |> map (HOLogic.dest_setT #> HOLogic.dest_prodT) |> split_list
+        val (bconT,babsT) = bodyT |> HOLogic.dest_setT |> HOLogic.dest_prodT
         val (Tcon,bconTs) = dest_Type bconT
         val (Tcon',babsTs) = dest_Type babsT
   
@@ -441,7 +438,7 @@ ML {*
         declare_natural_relator (natural_relator_from_term t) context
         handle 
           TERM (msg,_) => warn msg
-        | _ => warn ""
+        | exn => if Exn.is_interrupt exn then reraise exn else warn ""
       end
     in
       val natural_relator_attr = Scan.repeat1 Args.term >> (fn ts => 
@@ -716,16 +713,23 @@ lemma br_comp_alt':
   "{(c,a) . a=\<alpha> c \<and> I c} O R = { (c,a) . I c \<and> (\<alpha> c,a)\<in>R }"
   by auto
 
-text {* Convenience rule: *}
-(* TODO: Move those rules to own file at end of dep-chain *)
-(*lemma build_rel_SPEC: 
-  "M \<le> SPEC ( \<lambda>x. \<Phi> (\<alpha> x) \<and> I x) \<Longrightarrow> M \<le> \<Down>(build_rel \<alpha> I) (SPEC \<Phi>)"
-  by (auto simp: pw_le_iff refine_pw_simps refine_rel_defs)
-*)
+lemma single_valued_as_brE:
+  assumes "single_valued R"
+  obtains \<alpha> invar where "R=br \<alpha> invar"
+  apply (rule that[of "\<lambda>x. THE y. (x,y)\<in>R" "\<lambda>x. x\<in>Domain R"])
+  using assms unfolding br_def
+  by (auto dest: single_valuedD 
+    intro: the_equality[symmetric] theI)
 
 lemma sv_add_invar: 
   "single_valued R \<Longrightarrow> single_valued {(c, a). (c, a) \<in> R \<and> I c}"
   by (auto dest: single_valuedD intro: single_valuedI)
 
+
+
+subsection {* Miscellanneous *}
+lemma rel_cong: "(f,g)\<in>Id \<Longrightarrow> (x,y)\<in>Id \<Longrightarrow> (f x, g y)\<in>Id" by simp
+lemma rel_fun_cong: "(f,g)\<in>Id \<Longrightarrow> (f x, g x)\<in>Id" by simp
+lemma rel_arg_cong: "(x,y)\<in>Id \<Longrightarrow> (f x, f y)\<in>Id" by simp
 
 end

@@ -131,8 +131,7 @@ where "Set_RBT \<equiv> Mapping_RBT"
 subsection {* Primitive operations *}
 
 lift_definition member :: "'a :: corder set_rbt \<Rightarrow> 'a \<Rightarrow> bool" is
-  "\<lambda>t x. x \<in> dom (ord.rbt_lookup cless t)"
-by simp
+  "\<lambda>t x. x \<in> dom (ord.rbt_lookup cless t)" .
 
 abbreviation empty :: "'a :: corder set_rbt"
 where "empty \<equiv> RBT_Mapping2.empty"
@@ -167,11 +166,11 @@ by(auto 4 3 intro: linorder.is_rbt_rbt_minus ID_corder)
 abbreviation filter :: "('a :: corder \<Rightarrow> bool) \<Rightarrow> 'a set_rbt \<Rightarrow> 'a set_rbt"
 where "filter P \<equiv> RBT_Mapping2.filter (P \<circ> fst)"
 
-lift_definition fold :: "('a :: corder \<Rightarrow> 'b \<Rightarrow> 'b) \<Rightarrow> 'a set_rbt \<Rightarrow> 'b \<Rightarrow> 'b" is "\<lambda>f. RBT_Impl.fold (\<lambda>a _. f a)" ..
+lift_definition fold :: "('a :: corder \<Rightarrow> 'b \<Rightarrow> 'b) \<Rightarrow> 'a set_rbt \<Rightarrow> 'b \<Rightarrow> 'b" is "\<lambda>f. RBT_Impl.fold (\<lambda>a _. f a)" .
 
-lift_definition fold1 :: "('a :: corder \<Rightarrow> 'a \<Rightarrow> 'a) \<Rightarrow> 'a set_rbt \<Rightarrow> 'a" is "RBT_Impl_fold1" ..
+lift_definition fold1 :: "('a :: corder \<Rightarrow> 'a \<Rightarrow> 'a) \<Rightarrow> 'a set_rbt \<Rightarrow> 'a" is "RBT_Impl_fold1" .
 
-lift_definition keys :: "'a :: corder set_rbt \<Rightarrow> 'a list" is "RBT_Impl.keys" ..
+lift_definition keys :: "'a :: corder set_rbt \<Rightarrow> 'a list" is "RBT_Impl.keys" .
 
 abbreviation all :: "('a :: corder \<Rightarrow> bool) \<Rightarrow> 'a set_rbt \<Rightarrow> bool"
 where "all P \<equiv> RBT_Mapping2.all (\<lambda>k _. P k)"
@@ -207,6 +206,12 @@ by transfer auto
 lemma unfoldr_rbt_keys_generator:
   "list.unfoldr rbt_keys_generator (init t) = keys t"
 by transfer(simp add: unfoldr_rbt_keys_generator)
+
+lemma keys_eq_Nil_iff [simp]: "keys rbt = [] \<longleftrightarrow> rbt = empty"
+by transfer(case_tac rbt, simp_all)
+
+lemma fold1_conv_fold: "fold1 f rbt = List.fold f (tl (keys rbt)) (hd (keys rbt))"
+by transfer(simp add: RBT_Impl_fold1_def)
 
 context assumes ID_corder_neq_None: "ID CORDER('a :: corder) \<noteq> None"
 begin
@@ -275,7 +280,7 @@ by(auto simp add: member_lookup fun_eq_iff lookup_meet[OF ID_corder_neq_None] sp
 
 lemma member_inter_list [simp]:
   "member (inter_list (t :: 'a set_rbt) xs) = (\<lambda>x. member t x \<and> x \<in> set xs)"
-by transfer(auto simp add: ID_corder_neq_None fun_eq_iff linorder.rbt_lookup_fold_rbt_insert[OF set_linorder] ord.Empty_is_rbt map_of_map_Pair_key ord.rbt_lookup.simps option_rel_def split: split_if_asm option.split_asm)
+by transfer(auto simp add: ID_corder_neq_None fun_eq_iff linorder.rbt_lookup_fold_rbt_insert[OF set_linorder] ord.Empty_is_rbt map_of_map_Pair_key ord.rbt_lookup.simps rel_option_iff split: split_if_asm option.split_asm)
 
 lemma member_filter [simp]:
   "member (filter P (t :: 'a set_rbt)) = (\<lambda>x. member t x \<and> P x)"
@@ -314,7 +319,7 @@ end
 end
 
 lemma sorted_RBT_Set_keys: 
-  "Option.map fst (ID CORDER('a :: corder)) = Some le 
+  "map_option fst (ID CORDER('a :: corder)) = Some le 
   \<Longrightarrow> linorder.sorted le (RBT_Set2.keys rbt)"
 by transfer(auto simp add: RBT_Set2.keys.rep_eq RBT_Impl.keys_def linorder.rbt_sorted_entries[OF ID_corder] ord.is_rbt_rbt_sorted)
 
@@ -323,14 +328,6 @@ begin
 
 lemma set_linorder2: "class.linorder (cless_eq :: 'a \<Rightarrow> 'a \<Rightarrow> bool) cless"
 using ID_corder_neq_None by(clarsimp)(rule ID_corder)
-
-lemma Inf_fin_member:
-  "(rbt :: 'a set_rbt) \<noteq> RBT_Set2.empty \<Longrightarrow> Inf_fin (Collect (member rbt)) = RBT_Set2.fold1 inf rbt"
-by(transfer)(clarsimp simp add: ID_corder_neq_None linorder.rbt_lookup_keys[OF set_linorder2] ord.is_rbt_rbt_sorted RBT_Impl_fold1_def neq_Empty_conv, simp add: Inf_fin.set_eq_fold[symmetric])
-
-lemma Sup_fin_member:
-  "(rbt :: 'a set_rbt) \<noteq> RBT_Set2.empty \<Longrightarrow> Sup_fin (Collect (member rbt)) = RBT_Set2.fold1 sup rbt"
-by(transfer)(clarsimp simp add: ID_corder_neq_None linorder.rbt_lookup_keys[OF set_linorder2] ord.is_rbt_rbt_sorted RBT_Impl_fold1_def neq_Empty_conv, simp add: Sup_fin.set_eq_fold[symmetric])
 
 end
 

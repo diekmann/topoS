@@ -135,7 +135,7 @@ lemma REC_rule_arb:
   shows "REC body x \<le> M arb x"
 proof -
   have "(\<forall>arb x. \<Phi> arb x \<longrightarrow> lfp body x \<le> M arb x) \<and> lfp body \<le> REC body"
-    apply (rule lfp_cadm_induct[OF _ M])
+    apply (rule lfp_cadm_induct[OF _ _ M])
       apply rule
       apply rule
       apply rule
@@ -146,6 +146,8 @@ proof -
       apply simp
       apply (rule Sup_least)
       apply simp
+
+      apply (simp add: le_funI)
 
       apply (rule)
       apply (rule)
@@ -296,6 +298,8 @@ proof clarsimp
     apply (rule Inf_greatest)
     apply (auto intro: le_funI) []
 
+    apply simp
+
     apply fact
   
     using REF REC_EQ by force
@@ -318,16 +322,18 @@ proof (clarsimp simp add: `mono b`)
   assume "mono B"
   show "\<alpha> (lfp b x) \<le> lfp B x"
     apply (rule_tac x=x in spec)
-    apply (rule lfp_cadm_induct[OF _ `mono b`])
+    apply (rule lfp_cadm_induct[OF _ _ `mono b`])
 
     apply rule
     apply clarsimp
 
     apply (unfold Sup_fun_def SUP_def)
     apply (drule_tac x=x in point_chainI)
-    apply (simp add: \<alpha>_dist)
+    apply (simp only: \<alpha>_dist)
     apply (rule Sup_least)
     apply auto []
+
+    apply simp
 
     apply clarsimp
     apply (subst lfp_unfold[OF `mono B`])

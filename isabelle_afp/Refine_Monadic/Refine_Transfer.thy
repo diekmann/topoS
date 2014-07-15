@@ -66,7 +66,7 @@ lemma nres_transfer:
     apply (subgoal_tac "A={dFAIL,dRETURN r}", auto) []
 
     apply (drule imageI[where f=nres_of])
-    apply (auto intro: bot_Inf[symmetric]) []
+    apply (auto intro: bot_Inf [symmetric] simp add: INF_def simp del: Inf_image_eq) []
   done
 
 lemma nres_correctD:
@@ -112,7 +112,7 @@ interpretation det_while!: transfer_WHILE
 
 (*
 interpretation det_foreach!: 
-  transfer_FOREACH nres_of dRETURN dbind "dres_case True True"
+  transfer_FOREACH nres_of dRETURN dbind "case_dres True True"
   apply unfold_locales
   apply (blast intro: det_bind)
   apply simp
@@ -122,21 +122,21 @@ interpretation det_foreach!:
 *)
 
 (* Done generally in RefineG_Transfer
-lemma det_list_rec[refine_transfer]:
+lemma det_rec_list[refine_transfer]:
   assumes FN: "\<And>s. RETURN (fn s) \<le> (fn' s)"
   assumes FC: "\<And>x l rec rec' s. \<lbrakk> \<And>s. RETURN (rec s) \<le> (rec' s) \<rbrakk> 
     \<Longrightarrow> RETURN (fc x l rec s) \<le> fc' x l rec' s"
-  shows "RETURN (list_rec fn fc l s) \<le> list_rec fn' fc' l s"
+  shows "RETURN (rec_list fn fc l s) \<le> rec_list fn' fc' l s"
   apply (induct l arbitrary: s)
   apply (simp add: FN)
   apply (simp add: FC)
   done
 
-lemma det_nat_rec[refine_transfer]:
+lemma det_rec_nat[refine_transfer]:
   assumes FN: "\<And>s. RETURN (fn s) \<le> (fn' s)"
   assumes FC: "\<And>n rec rec' s. \<lbrakk> \<And>s. RETURN (rec s) \<le> (rec' s) \<rbrakk> 
     \<Longrightarrow> RETURN (fc x l rec s) \<le> fc' x l rec' s"
-  shows "RETURN (list_rec fn fc l s) \<le> list_rec fn' fc' l s"
+  shows "RETURN (rec_list fn fc l s) \<le> rec_list fn' fc' l s"
   apply (induct l arbitrary: s)
   apply (simp add: FN)
   apply (simp add: FC)
@@ -209,5 +209,45 @@ lemma autoref_detI:
   using assms
   unfolding nres_rel_def detTAG_def
   by simp
+
+
+subsection {* Relator-Based Transfer *}
+
+definition dres_nres_rel_internal_def: 
+  "dres_nres_rel R \<equiv> {(c,a). nres_of c \<le> \<Down> R a}"
+
+lemma dres_nres_rel_def: "\<langle>R\<rangle>dres_nres_rel \<equiv> {(c,a). nres_of c \<le> \<Down> R a}"
+  by (simp add: dres_nres_rel_internal_def relAPP_def)
+
+lemma dres_nres_relI[intro?]: "nres_of c \<le> \<Down> R a \<Longrightarrow> (c,a)\<in>\<langle>R\<rangle>dres_nres_rel"
+  by (simp add: dres_nres_rel_def)
+
+lemma dres_nres_relD: "(c,a)\<in>\<langle>R\<rangle>dres_nres_rel \<Longrightarrow> nres_of c \<le> \<Down> R a"
+  by (simp add: dres_nres_rel_def)
+
+lemma dres_nres_rel_as_br_conv: 
+  "\<langle>R\<rangle>dres_nres_rel = br nres_of (\<lambda>_. True) O \<langle>R\<rangle>nres_rel"
+  unfolding dres_nres_rel_def br_def nres_rel_def by auto
+
+
+definition plain_nres_rel_internal_def: 
+  "plain_nres_rel R \<equiv> {(c,a). RETURN c \<le> \<Down> R a}"
+
+lemma plain_nres_rel_def: "\<langle>R\<rangle>plain_nres_rel \<equiv> {(c,a). RETURN c \<le> \<Down> R a}"
+  by (simp add: plain_nres_rel_internal_def relAPP_def)
+
+lemma plain_nres_relI[intro?]: "RETURN c \<le> \<Down> R a \<Longrightarrow> (c,a)\<in>\<langle>R\<rangle>plain_nres_rel"
+  by (simp add: plain_nres_rel_def)
+
+lemma plain_nres_relD: "(c,a)\<in>\<langle>R\<rangle>plain_nres_rel \<Longrightarrow> RETURN c \<le> \<Down> R a"
+  by (simp add: plain_nres_rel_def)
+
+lemma plain_nres_rel_as_br_conv: 
+  "\<langle>R\<rangle>plain_nres_rel = br RETURN (\<lambda>_. True) O \<langle>R\<rangle>nres_rel"
+  unfolding plain_nres_rel_def br_def nres_rel_def by auto
+
+(* TODO: Refine_Transfer could be expressed also just as a 
+    parametricity based transfer, and based on the same infrastructure
+    as autoref *)
 
 end
