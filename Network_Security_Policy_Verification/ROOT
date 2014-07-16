@@ -13,6 +13,9 @@ session "Network_Security_Policy_Verification" = HOL +
     TopoS_generateCode
   theories [document = false]
     attic
+  document_files
+    "root.bib"
+    "root.tex"
 
 session "Network_Security_Policy_Verification_Examples" = "Network_Security_Policy_Verification" +
   theories [document = false]
