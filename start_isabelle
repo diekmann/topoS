@@ -7,4 +7,10 @@ cd "$TOPOS_HOME"
 
 export AFP="${TOPOS_HOME}/isabelle_afp"
 
-isabelle jedit -d "${TOPOS_HOME}/isabelle_afp" -l "Collections" &
+#isabelle 2013
+#isabelle jedit -d "${TOPOS_HOME}/isabelle_afp" -l "Collections" &
+
+# TODO: isabelle 2014
+~/Downloads/Isabelle2014-RC0/bin/isabelle build -d isabelle_afp/ -b Collections
+~/Downloads/Isabelle2014-RC0/bin/isabelle jedit -d isabelle_afp/ -l Collections
+
