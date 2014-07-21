@@ -95,9 +95,11 @@ in
       val formatted_edges = map (fn (str, t) => str ^ "\n" ^ edge_to_string t) evaluated_edges
     in
       if !open_viewer then (* only run the shell commands if not disabled by open_viewer *)
-        (apply_dot_header formatted_edges
-        |> write_to_tmpfile
-        |> paint_graph Graphviz_Platform_Config.executable_pdf_viewer Graphviz_Platform_Config.executable_dot)
+        (
+          apply_dot_header formatted_edges
+          |> write_to_tmpfile
+          |> paint_graph Graphviz_Platform_Config.executable_pdf_viewer Graphviz_Platform_Config.executable_dot
+        )
       else
         (writeln "visualization disabled (Graphviz.open_viewer)"; 0)
     end
