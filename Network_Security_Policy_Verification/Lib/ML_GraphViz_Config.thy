@@ -15,7 +15,7 @@ struct
 
   datatype platform = Linux | MacOs | Windows;
   local
-    val SOME platform_str = OS.Process.getEnv "ML_PLATFORM";
+    val platform_str = getenv "ML_PLATFORM";
   in
     val platform = if (String.isSuffix "linux" platform_str)
       then
@@ -32,9 +32,9 @@ struct
   
   (*Change your system config here*)
   val (executable_dot: string, executable_pdf_viewer: string) = (case platform of 
-                   Linux => ("dot", "xdg-open")
-                 | MacOs => ("dot", "open")
-                 | Windows => ("dot", "acroread"));
+                   Linux => ("dot", getenv "PDF_VIEWER")
+                 | MacOs => ("dot", getenv "PDF_VIEWER")
+                 | Windows => ("dot", getenv "PDF_VIEWER"));
   
   local
     fun check_executable e =
