@@ -20,7 +20,7 @@ struct
     val platform = if (String.isSuffix "linux" platform_str)
       then
         Linux
-      else if String.isSuffix "macos" platform_str (*TODO, what is the MacOs string?*)
+      else if String.isSuffix "darwin" platform_str
       then
         MacOs
       else if String.isSuffix "cygwin" platform_str
