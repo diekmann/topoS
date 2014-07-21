@@ -15,8 +15,8 @@ struct
   (*Change your system config here*)
   val (executable_dot: string, executable_pdf_viewer: string) = (
             case getenv "ISABELLE_PLATFORM_FAMILY" of 
-                   "linux" => ("dot", getenv "PDF_VIEWER")
-                 | "macos" => ("dot", getenv "PDF_VIEWER")
+                   "linux" => ("dot", getenv "PDF_VIEWER") (*tested, works*)
+                 | "macos" => ("dot", getenv "PDF_VIEWER") (*tested, works*)
                  | "windows" => (warning "GRAPHVIZ_PLATFORM_CONFIG: never tested on windows"; ("dot", getenv "PDF_VIEWER"))
                  | _ => raise Fail "$ISABELLE_PLATFORM_FAMILY: cannot determine operating system"
             );
