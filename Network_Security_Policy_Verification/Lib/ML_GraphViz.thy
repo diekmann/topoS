@@ -51,9 +51,11 @@ local
 
   (* viz is graphiz command, e.g. dot
      viewer is a PDF viewer, e.g. xdg-open
-     retuns return code of bash command *)
+     retuns return code of bash command.
+     noticeable side effect: generated pdf file is not deleted (maybe still open in editor)*)
   fun paint_graph (viewer: string) (viz: string) (f: Path.T): int =
     if (Isabelle_System.bash ("which "^viz)) <> 0 then
+      (*TODO: `which` on windows?*)
       error "ML_GraphViz: Graphviz command not found"
     else if (Isabelle_System.bash ("which "^viewer)) <> 0 then
       error "ML_GraphViz: viewer command not found"
@@ -65,6 +67,7 @@ local
       in
         (writeln ("executing: "^cmd); Isabelle_System.bash cmd; ());
         Isabelle_System.bash ("rm "^file) (*cleanup dot file, PDF file will still exist*)
+        (*some pdf viewers do not like it if we delete the pdf file they are currently displaying*)
       end
 
   fun is_valid_char c =
