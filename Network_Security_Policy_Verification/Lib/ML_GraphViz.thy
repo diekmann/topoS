@@ -1,6 +1,13 @@
 theory ML_GraphViz
-imports Main
+imports ML_GraphViz_Config
 begin
+
+
+ML_val{*
+  val _ = writeln ("using `"^Graphviz_Platform_Config.executable_pdf_viewer^"` as pdf viewer and `"^
+                   Graphviz_Platform_Config.executable_dot^"` to render graphs.");
+*}
+
 
 ML {*
 signature GRAPHVIZ =
@@ -87,7 +94,7 @@ in
       if !open_viewer then (* only run the shell commands if not disabled by open_viewer *)
         (apply_dot_header formatted_edges
         |> write_to_tmpfile
-        |> paint_graph "xdg-open" "dot")
+        |> paint_graph Graphviz_Platform_Config.executable_pdf_viewer Graphviz_Platform_Config.executable_dot)
       else
         (writeln "visualization disabled (Graphviz.open_viewer)"; 0)
     end
