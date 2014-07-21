@@ -18,7 +18,7 @@ struct
                    "linux" => ("dot", getenv "PDF_VIEWER")
                  | "macos" => ("dot", getenv "PDF_VIEWER")
                  | "windows" => (warning "GRAPHVIZ_PLATFORM_CONFIG: never tested on windows"; ("dot", getenv "PDF_VIEWER"))
-                 | _ => raise Fail "cannot determine operating system"
+                 | _ => raise Fail "$ISABELLE_PLATFORM_FAMILY: cannot determine operating system"
             );
   
   local
