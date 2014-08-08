@@ -37,7 +37,7 @@ val default_tune_node_format = (fn _ => I)
 fun write_to_tmpfile (t: string): Path.T = 
   let 
     val p = Isabelle_System.create_tmp_path "graphviz" "graph_tmp.dot"
-    val p_str = File.platform_path p
+    val p_str = File.shell_path p
   in
     writeln ("using tmpfile " ^ p_str); File.write p (t^"\n"); p
   end
