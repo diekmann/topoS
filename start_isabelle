@@ -1,4 +1,15 @@
 #!/bin/bash
+#
+# sets $AFP which is required by the isabelle theoreis
+#
+# If you are on windows:
+#  find Cygwin-Terminal.bat in your Isabelle folder
+#  $ export AFP=~/path/to/topoS/isabelle_afp
+#  $ isabelle jedit
+#
+# If you are on MacOS, I heared that the dirname command fails. Please report bugs!
+# 
+
 TOPOS_HOME="$(readlink -f "$(pwd)/$(dirname "$0")")"
 
 echo "setting TOPOS_HOME to: $TOPOS_HOME"
