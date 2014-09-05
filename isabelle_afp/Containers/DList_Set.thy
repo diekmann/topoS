@@ -165,24 +165,24 @@ by(auto simp add: equal_base.list_distinct_filter)
 
 text {* Derived operations: *}
 
-lift_definition null :: "'a :: ceq set_dlist \<Rightarrow> bool" is List.null ..
+lift_definition null :: "'a :: ceq set_dlist \<Rightarrow> bool" is List.null .
 
-lift_definition member :: "'a :: ceq set_dlist \<Rightarrow> 'a \<Rightarrow> bool" is "equal_base.list_member ceq'" ..
+lift_definition member :: "'a :: ceq set_dlist \<Rightarrow> 'a \<Rightarrow> bool" is "equal_base.list_member ceq'" .
 
-lift_definition length :: "'a :: ceq set_dlist \<Rightarrow> nat" is List.length ..
+lift_definition length :: "'a :: ceq set_dlist \<Rightarrow> nat" is List.length .
 
-lift_definition fold :: "('a :: ceq \<Rightarrow> 'b \<Rightarrow> 'b) \<Rightarrow> 'a set_dlist \<Rightarrow> 'b \<Rightarrow> 'b" is List.fold ..
+lift_definition fold :: "('a :: ceq \<Rightarrow> 'b \<Rightarrow> 'b) \<Rightarrow> 'a set_dlist \<Rightarrow> 'b \<Rightarrow> 'b" is List.fold .
 
-lift_definition foldr :: "('a :: ceq \<Rightarrow> 'b \<Rightarrow> 'b) \<Rightarrow> 'a set_dlist \<Rightarrow> 'b \<Rightarrow> 'b" is List.foldr ..
+lift_definition foldr :: "('a :: ceq \<Rightarrow> 'b \<Rightarrow> 'b) \<Rightarrow> 'a set_dlist \<Rightarrow> 'b \<Rightarrow> 'b" is List.foldr .
 
-lift_definition hd :: "'a :: ceq set_dlist \<Rightarrow> 'a" is "List.hd" ..
+lift_definition hd :: "'a :: ceq set_dlist \<Rightarrow> 'a" is "List.hd" .
 
 lift_definition tl :: "'a :: ceq set_dlist \<Rightarrow> 'a set_dlist" is "List.tl"
 by(auto simp add: equal_base.list_distinct_tl)
 
-lift_definition dlist_all :: "('a \<Rightarrow> bool) \<Rightarrow> 'a :: ceq set_dlist \<Rightarrow> bool" is "list_all" ..
+lift_definition dlist_all :: "('a \<Rightarrow> bool) \<Rightarrow> 'a :: ceq set_dlist \<Rightarrow> bool" is "list_all" .
 
-lift_definition dlist_ex :: "('a \<Rightarrow> bool) \<Rightarrow> 'a :: ceq set_dlist \<Rightarrow> bool" is "list_ex" ..
+lift_definition dlist_ex :: "('a \<Rightarrow> bool) \<Rightarrow> 'a :: ceq set_dlist \<Rightarrow> bool" is "list_ex" .
 
 definition union :: "'a :: ceq set_dlist \<Rightarrow> 'a set_dlist \<Rightarrow> 'a set_dlist" where
   "union = fold insert"
@@ -321,7 +321,7 @@ lemma fold_transfer2 [transfer_rule]:
     (pcr_set_dlist op = :: 'a list \<Rightarrow> 'a set_dlist \<Rightarrow> bool) ===> pcr_set_dlist op = ===> pcr_set_dlist op =)
      List.fold DList_Set.fold"
 unfolding Transfer.Rel_def set_dlist.pcr_cr_eq
-proof(rule fun_relI)+
+proof(rule rel_funI)+
   fix f :: "'a \<Rightarrow> 'b list \<Rightarrow> 'b list" and g and xs :: "'a list" and ys and b :: "'b list" and c
   assume fg: "(A ===> cr_set_dlist ===> cr_set_dlist) f g"
   assume "cr_set_dlist xs ys" "cr_set_dlist b c"
@@ -333,7 +333,7 @@ proof(rule fun_relI)+
     have "A y y" and "cr_set_dlist (list_of_dlist c) c"
       using assms by(simp_all add: cr_set_dlist_def is_equality_def)
     with fg have "cr_set_dlist (f y (list_of_dlist c)) (g y c)"
-      by -(drule (1) fun_relD)+
+      by -(drule (1) rel_funD)+
     thus ?case using insert by(simp add: cr_set_dlist_def)
   qed
 qed
@@ -404,30 +404,6 @@ proof -
     by(auto simp add: ceq_prod_def ID_Some fun_eq_iff)
   ultimately show ?thesis by(transfer)(auto simp add: List.member_def[abs_def])
 qed
-
-context assumes ID_ceq_neq_None: "ID CEQ('a :: {ceq, complete_lattice}) \<noteq> None"
-begin
-
-lemma Inf_member: "Inf (Collect (member (dxs :: 'a set_dlist))) = fold inf dxs top"
-by(transfer)(simp add: ID_ceq_neq_None equal.equal_eq[OF equal_ceq] List.member_def[abs_def] Inf_set_fold)
-
-lemma Sup_member: "Sup (Collect (member (dxs :: 'a set_dlist))) = fold sup dxs bot"
-by(transfer)(simp add: ID_ceq_neq_None equal.equal_eq[OF equal_ceq] List.member_def[abs_def] Sup_set_fold)
-
-end
-
-context assumes ID_ceq_neq_None: "ID CEQ('a :: {ceq, lattice}) \<noteq> None"
-begin
-
-lemma Inf_fin_member: 
-  "dxs \<noteq> empty \<Longrightarrow> Inf_fin (Collect (member (dxs :: 'a set_dlist))) = fold inf (tl dxs) (hd dxs)"
-by transfer(clarsimp simp add: ID_ceq_neq_None equal.equal_eq[OF equal_ceq] List.member_def[abs_def] neq_Nil_conv Inf_fin.set_eq_fold simp del: set.simps)
-
-lemma Sup_fin_member: 
-  "dxs \<noteq> empty \<Longrightarrow> Sup_fin (Collect (member (dxs :: 'a set_dlist))) = fold sup (tl dxs) (hd dxs)"
-by transfer(clarsimp simp add: ID_ceq_neq_None equal.equal_eq[OF equal_ceq] List.member_def[abs_def] neq_Nil_conv Sup_fin.set_eq_fold simp del: set.simps)
-
-end
 
 hide_const (open) empty insert remove null member length fold foldr union filter hd tl dlist_all product Id_on
 

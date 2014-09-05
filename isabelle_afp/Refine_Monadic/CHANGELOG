@@ -1,4 +1,12 @@
 Changes of Refinement Framework since 2011-12-24:
+
+2014-06 Peter Lammich
+  * Added vc_solve method
+  * Fine-tuned rcg/vcg setup for ASSERT/ASSUME
+  * Added more convenience lemmas
+  * VCG-rules for nfoldli
+  * Improved Autoref-setup for FOREACH-loops
+
 2013-09 Peter Lammich
   * Made this dependent on Automatic_Refinement
 

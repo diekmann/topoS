@@ -151,7 +151,7 @@ lemma dres_cases[cases type, case_names dSUCCEED dRETURN dFAIL]:
   obtains "x=dSUCCEED" | r where "x=dRETURN r" | "x=dFAIL" 
   unfolding bot_dres_def top_dres_def by (cases x) auto
 
-lemmas [simp] = dres.cases(1,2)[folded top_dres_def bot_dres_def]
+lemmas [simp] = dres.case(1,2)[folded top_dres_def bot_dres_def]
 
 lemma dres_order_simps[simp]:
   "x\<le>dSUCCEED \<longleftrightarrow> x=dSUCCEED" 
@@ -371,11 +371,11 @@ lemma dres_ne_bot_basic[refine_transfer]:
   "\<And>\<Phi>. dASSERT \<Phi> \<noteq> dSUCCEED"
   "\<And>b m1 m2. \<lbrakk> m1\<noteq>dSUCCEED; m2\<noteq>dSUCCEED \<rbrakk> \<Longrightarrow> If b m1 m2 \<noteq> dSUCCEED"
   "\<And>x f. \<lbrakk> \<And>x. f x\<noteq>dSUCCEED \<rbrakk> \<Longrightarrow> Let x f \<noteq> dSUCCEED"
-  "\<And>g p. \<lbrakk> \<And>x1 x2. g x1 x2 \<noteq> dSUCCEED \<rbrakk> \<Longrightarrow> prod_case g p \<noteq> dSUCCEED"
+  "\<And>g p. \<lbrakk> \<And>x1 x2. g x1 x2 \<noteq> dSUCCEED \<rbrakk> \<Longrightarrow> case_prod g p \<noteq> dSUCCEED"
   "\<And>fn fs x. 
-    \<lbrakk> fn\<noteq>dSUCCEED; \<And>v. fs v \<noteq> dSUCCEED \<rbrakk> \<Longrightarrow> option_case fn fs x \<noteq> dSUCCEED"
+    \<lbrakk> fn\<noteq>dSUCCEED; \<And>v. fs v \<noteq> dSUCCEED \<rbrakk> \<Longrightarrow> case_option fn fs x \<noteq> dSUCCEED"
   "\<And>fn fc x. 
-    \<lbrakk> fn\<noteq>dSUCCEED; \<And>x xs. fc x xs \<noteq> dSUCCEED \<rbrakk> \<Longrightarrow> list_case fn fc x \<noteq> dSUCCEED"
+    \<lbrakk> fn\<noteq>dSUCCEED; \<And>x xs. fc x xs \<noteq> dSUCCEED \<rbrakk> \<Longrightarrow> case_list fn fc x \<noteq> dSUCCEED"
   apply (auto split: prod.split option.split list.split)
   apply (case_tac m, auto) []
   apply (case_tac \<Phi>, auto) []
@@ -390,7 +390,7 @@ lemma dres_ne_bot_RECT[rule_format, refine_transfer]:
   apply (intro impI conjI)
   apply simp
   apply (intro impI)
-  apply (erule gfp_cadm_induct[rotated])
+  apply (erule gfp_cadm_induct[rotated 2])
   apply (intro allI)
   apply (rule A)
   apply simp
@@ -400,10 +400,14 @@ lemma dres_ne_bot_RECT[rule_format, refine_transfer]:
   apply (intro allI)
   apply (drule_tac x=x in point_chainI)
   apply (erule dres_Inf_chain_cases)
-  apply (auto simp: Inf_fun_def INF_def dest!: subset_singletonD) []
-  apply (auto simp: Inf_fun_def INF_def) []
-  apply (auto simp: Inf_fun_def INF_def) []
+
+  apply (auto simp: INF_def simp del: Inf_image_eq dest!: subset_singletonD) []
+  apply (auto simp: INF_def simp del: Inf_image_eq) []
+  apply (clarsimp simp: INF_def simp del: Inf_image_eq) []
   apply metis
+
+  apply simp
+
   apply simp
   done
 

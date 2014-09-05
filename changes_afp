@@ -1,0 +1,29 @@
+--- afp/thys/Network_Security_Policy_Verification/ROOT	2014-07-15 12:38:04.967911293 +0200
++++ topoS/Network_Security_Policy_Verification/ROOT	2014-07-15 12:47:41.175919939 +0200
+@@ -1,6 +1,6 @@
+-chapter AFP
++chapter TopoS
+ 
+-session Network_Security_Policy_Verification (AFP) = Collections + 
++session "Network_Security_Policy_Verification" = HOL + 
+   options [timeout = 600]
+   theories [document = false]
+     "Lib/ML_GraphViz_Disable"
+@@ -11,10 +11,11 @@
+   theories
+     Network_Security_Policy_Verification
+     TopoS_generateCode
++    TopoS_Composition_Theory_ENF
+   theories [document = false]
+     attic
+ 
+-session Network_Security_Policy_Verification_Examples (AFP) = Network_Security_Policy_Verification +
++session "Network_Security_Policy_Verification_Examples" = "Network_Security_Policy_Verification" +
+   theories [document = false]
+     "Examples/Impl_List_Playground_statefulpolicycompliance"
+     "Examples/Example"
+
+
+
+
+sed -i 's/$AFP/..\/../g' Lib/*.thy

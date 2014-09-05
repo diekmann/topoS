@@ -306,7 +306,7 @@ begin
         moreover have "\<alpha> (foldl (\<lambda>s (k, v). update k v s) m0 (kv # l)) =
           \<alpha> m0 ++ map_of (rev (kv # l))"
           apply simp
-          (*thm trans[OF conjunct2[OF Cons.IH]]*)
+          thm trans[OF conjunct2[OF Cons.IH]]
           apply (rule trans[OF conjunct2[OF Cons.IH]])
           apply (auto 
             simp: update_correct Cons.prems Map.map_add_def[abs_def]
@@ -563,7 +563,7 @@ begin
       iterate_to_map m2.empty m2.update_dj (
         set_iterator_image_filter f (m1.iteratei m))" 
       unfolding g_image_filter_def iterate_to_map_alt_def 
-        set_iterator_image_filter_def prod_case_beta
+        set_iterator_image_filter_def case_prod_beta
       by simp
   
     from m1.iteratei_correct[OF invar_m] 

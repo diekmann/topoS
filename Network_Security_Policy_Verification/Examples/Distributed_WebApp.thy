@@ -89,7 +89,7 @@ text{*
 Visualizing the maximum policy
 *}
 ML{*
-vizualize_graph @{context} @{theory} @{term "security_invariants"} @{term "max_policy"};
+vizualize_graph @{context} @{term "security_invariants"} @{term "max_policy"};
 *}
 
 text{*The maximum policy also fulfills all security invariants. *}
@@ -108,7 +108,7 @@ text{*
 The diff to the maximum policy.
 *}
 ML_val{*
-visualize_edges @{context} @{theory} @{term "edgesL my_policy"} 
+visualize_edges @{context} @{term "edgesL my_policy"} 
     [("edge [dir=\"arrow\", style=dashed, color=\"#3399FF\", constraint=false]", @{term "[e \<leftarrow> edgesL max_policy. e \<notin> set (edgesL my_policy)]"})]; 
 *}
 
@@ -131,7 +131,7 @@ text{*No information flow violations*}
 
 text{*Visualizing the stateful policy.*}
 ML_val{*
-visualize_edges @{context} @{theory} @{term "flows_fixL stateful_policy"} 
+visualize_edges @{context} @{term "flows_fixL stateful_policy"} 
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "flows_stateL stateful_policy"})]; 
 *}
 
@@ -141,13 +141,13 @@ subsection{*Exporting to Network Security Mechanism Configurations*}
 
 text{*Space-separated policy dump*}
 ML_val{*
-iterate_edges_ML @{context} @{theory} @{term "flows_fixL stateful_policy"}
+iterate_edges_ML @{context} @{term "flows_fixL stateful_policy"}
   (fn (v1,v2) => writeln (""^v1^" "^v2) )
   (fn _ => () )
   (fn _ => () );
 
 writeln "# stateful answers";
-iterate_edges_ML @{context} @{theory} @{term "flows_stateL stateful_policy"}
+iterate_edges_ML @{context} @{term "flows_stateL stateful_policy"}
   (fn (v1,v2) => writeln (v2^" "^v1) )
   (fn _ => () )
   (fn _ => () )
@@ -163,12 +163,12 @@ writeln ("echo 1 > /proc/sys/net/ipv4/ip_forward"^"\n"^
          "#default policy for FORWARD chain:"^"\n"^
          "iptables -P FORWARD DROP");
 
-iterate_edges_ML @{context} @{theory}  @{term "flows_fixL stateful_policy"}
+iterate_edges_ML @{context}  @{term "flows_fixL stateful_policy"}
   (fn (v1,v2) => writeln ("iptables -A FORWARD -i $"^v1^"_iface -s $"^v1^"_ipv4 -o "^v2^"_iface -d $"^v2^"_ipv4 -j ACCEPT"^" # "^v1^" -> "^v2) )
   (fn _ => () )
   (fn _ => () );
 
-iterate_edges_ML @{context} @{theory} @{term "flows_stateL stateful_policy"}
+iterate_edges_ML @{context} @{term "flows_stateL stateful_policy"}
   (fn (v1,v2) => writeln ("iptables -I FORWARD -m state --state ESTABLISHED -i $"^v2^"_iface -s $"^v2^"_ipv4 -o $"^v1^"_iface -d $"^v1^"_ipv4 # "^v2^" -> "^v1^" (answer)") )
   (fn _ => () )
   (fn _ => () )
@@ -187,12 +187,12 @@ writeln ("echo 1 > /proc/sys/net/ipv4/ip_forward"^"\n"^
 fun iface (s: string): string =
   if s = "INET" then "eth0" else "tun0";
 
-iterate_edges_ML @{context} @{theory} @{term "[(s,r) \<leftarrow> flows_fixL stateful_policy. s \<noteq> r]"}
+iterate_edges_ML @{context} @{term "[(s,r) \<leftarrow> flows_fixL stateful_policy. s \<noteq> r]"}
   (fn (v1,v2) => writeln ("iptables -A FORWARD -i "^iface v1^" -s $"^v1^"_ipv4 -o "^iface v2^" -d $"^v2^"_ipv4 -j ACCEPT") )
   (fn _ => () )
   (fn _ => () );
 
-iterate_edges_ML @{context} @{theory} @{term "flows_stateL stateful_policy"}
+iterate_edges_ML @{context} @{term "flows_stateL stateful_policy"}
   (fn (v1,v2) => writeln ("iptables -I FORWARD -m state --state ESTABLISHED -i "^iface v2^" -s $"^v2^"_ipv4 -o "^iface v1^" -d $"^v1^"_ipv4 -j ACCEPT") )
   (fn _ => () )
   (fn _ => () )
@@ -239,12 +239,12 @@ in
       ;
 end;
 
-iterate_edges_ML @{context} @{theory} @{term "stateful_flows"}
+iterate_edges_ML @{context} @{term "stateful_flows"}
   (fn (v1,v2) => writeln ((ARP v1 v2) ^ "\n" ^ (ARP v2 v1) ^ "\n" ^ (IPv4 v1 v2) ^ "\n" ^ (IPv4 v2 v1) ^"\n"))
   (fn _ => () )
   (fn _ => () );
 
-iterate_edges_ML @{context} @{theory} @{term "stateless_flows"}
+iterate_edges_ML @{context} @{term "stateless_flows"}
   (fn (v1,v2) =>  writeln ((ARP v1 v2) ^ "\n" ^ (IPv4 v1 v2) ^ "\n"))
   (fn _ => () )
   (fn _ => () )

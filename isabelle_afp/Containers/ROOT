@@ -5,7 +5,7 @@ session Containers (AFP) = "Datatype_Order_Generator" +
   theories [document = false]
     "../Regular-Sets/Regexp_Method"
   theories
-    Auxiliary
+    Containers_Auxiliary
     Card_Datatype
     Set_Linorder
     Collection_Order
@@ -15,9 +15,10 @@ session Containers (AFP) = "Datatype_Order_Generator" +
     Containers_Userguide
   theories [document = false]
     Card_Datatype_Ex
-  files
-    "document/root.tex"
-    "document/root.bib"
+    Map_To_Mapping_Ex
+  document_files
+    "root.tex"
+    "root.bib"
 
 session "Containers-Benchmarks" (AFP) = Containers +
   options [timeout = 600, document = false]

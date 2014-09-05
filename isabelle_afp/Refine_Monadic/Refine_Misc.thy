@@ -2,7 +2,6 @@ header {* \isaheader{Miscellanneous Lemmas and Tools} *}
 theory Refine_Misc
 imports 
   "../Automatic_Refinement/Automatic_Refinement"
-  "../Containers/Unit_Instantiations"
 begin
 
 subsection {* ML-level stuff *}
@@ -76,20 +75,20 @@ text {* Basic configuration for monotonicity prover: *}
 lemmas [refine_mono] = monoI monotoneI[of "op \<le>" "op \<le>"]
 lemmas [refine_mono] = TrueI le_funI order_refl
 
-lemma prod_case_mono[refine_mono]: 
-  "\<lbrakk>\<And>a b. p=(a,b) \<Longrightarrow> f a b \<le> f' a b\<rbrakk> \<Longrightarrow> prod_case f p \<le> prod_case f' p"
+lemma case_prod_mono[refine_mono]: 
+  "\<lbrakk>\<And>a b. p=(a,b) \<Longrightarrow> f a b \<le> f' a b\<rbrakk> \<Longrightarrow> case_prod f p \<le> case_prod f' p"
   by (auto split: prod.split)
 
-lemma option_case_mono[refine_mono]:
+lemma case_option_mono[refine_mono]:
   assumes "fn \<le> fn'"
   assumes "\<And>v. x=Some v \<Longrightarrow> fs v \<le> fs' v"
-  shows "option_case fn fs x \<le> option_case fn' fs' x"
+  shows "case_option fn fs x \<le> case_option fn' fs' x"
   using assms by (auto split: option.split)
 
-lemma list_case_mono[refine_mono]:
+lemma case_list_mono[refine_mono]:
   assumes "fn \<le> fn'"
   assumes "\<And>x xs. l=x#xs \<Longrightarrow> fc x xs \<le> fc' x xs"
-  shows "list_case fn fc l \<le> list_case fn' fc' l"
+  shows "case_list fn fc l \<le> case_list fn' fc' l"
   using assms by (auto split: list.split)
 
 lemma if_mono[refine_mono]:
@@ -184,7 +183,7 @@ proof (rule wf_no_infinite_down_chainI, simp)
   qed
 
   txt {* Construct chain in @{text "S'"}*}
-  def g'\<equiv>"nat_rec x0' (\<lambda>i x. SOME x'. 
+  def g'\<equiv>"rec_nat x0' (\<lambda>i x. SOME x'. 
           (x,x')\<in>S' \<and> (f' (Suc i),x')\<in>R \<and> (x0', x')\<in>S'\<^sup>* )"
   {
     fix i
@@ -464,15 +463,14 @@ lemma point_chainI: "is_chain M \<Longrightarrow> is_chain ((\<lambda>f. f x)`M)
 text {* We transfer the admissible induction lemmas to complete
   lattices. *}
 lemma lfp_cadm_induct:
-  "\<lbrakk>chain_admissible P; mono f; \<And>x. P x \<Longrightarrow> P (f x)\<rbrakk> \<Longrightarrow> P (lfp f)"
-  apply (simp only: ccpo_mono_simp[symmetric] ccpo_lfp_simp[symmetric])
-  by (rule ccpo.fixp_induct[OF is_ccpo])
+  "\<lbrakk>chain_admissible P; P (Sup {}); mono f; \<And>x. P x \<Longrightarrow> P (f x)\<rbrakk> \<Longrightarrow> P (lfp f)"
+  by (simp only: ccpo_mono_simp[symmetric] ccpo_lfp_simp[symmetric])
+     (rule ccpo.fixp_induct[OF is_ccpo])
 
 lemma gfp_cadm_induct:
-  "\<lbrakk>dual_chain_admissible P; mono f; \<And>x. P x \<Longrightarrow> P (f x)\<rbrakk> \<Longrightarrow> P (gfp f)"
-  apply (simp only: dual_ccpo_mono_simp[symmetric] ccpo_gfp_simp[symmetric])
-  by (rule ccpo.fixp_induct[OF is_dual_ccpo])
-
+  "\<lbrakk>dual_chain_admissible P; P (Inf {}); mono f; \<And>x. P x \<Longrightarrow> P (f x)\<rbrakk> \<Longrightarrow> P (gfp f)"
+  by (simp only: dual_ccpo_mono_simp[symmetric] ccpo_gfp_simp[symmetric])
+     (rule ccpo.fixp_induct[OF is_dual_ccpo])
 
 subsubsection {* Continuity and Kleene Fixed Point Theorem *}
 definition "cont f \<equiv> \<forall>C. C\<noteq>{} \<longrightarrow> f (Sup C) = Sup (f`C)"
@@ -483,6 +481,8 @@ lemma contI[intro?]: "\<lbrakk>\<And>C. C\<noteq>{} \<Longrightarrow> f (Sup C) 
   unfolding cont_def by auto
 lemma contD: "cont f \<Longrightarrow> C\<noteq>{} \<Longrightarrow> f (Sup C) = Sup (f`C)" 
   unfolding cont_def by auto
+lemma contD': "cont f \<Longrightarrow> C\<noteq>{} \<Longrightarrow> f (Sup C) = SUPREMUM C f" 
+  using contD by simp
 
 lemma strictD[dest]: "strict f \<Longrightarrow> f bot = bot" 
   unfolding strict_def by auto
@@ -506,7 +506,7 @@ lemma inf_distribD'[simp]:
   fixes f :: "'a::complete_lattice \<Rightarrow> 'b::complete_lattice"
   shows "inf_distrib f \<Longrightarrow> f (Sup C) = Sup (f`C)"
   apply (cases "C={}")
-  apply (auto dest: inf_distribD contD)
+  apply (auto dest: inf_distribD contD')
   done
 
 lemma inf_distribI':
@@ -553,7 +553,7 @@ next
   show "lfp f \<le> (SUP i. (f^^i) bot)"
     apply (rule lfp_lowerbound)
     unfolding SUP_def
-    apply (simp add: contD[OF CONT])
+    apply (simp add: contD [OF CONT] del: Sup_image_eq)
     apply (rule Sup_subset_mono)
     apply (auto)
     apply (rule_tac x="Suc i" in range_eqI)
