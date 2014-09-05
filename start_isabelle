@@ -18,10 +18,15 @@ cd "$TOPOS_HOME"
 
 export AFP="${TOPOS_HOME}/isabelle_afp"
 
-#isabelle 2013
-#isabelle jedit -d "${TOPOS_HOME}/isabelle_afp" -l "Collections" &
+ISABELLE=isabelle
 
-# TODO: isabelle 2014
-~/Downloads/Isabelle2014-RC0/bin/isabelle build -d isabelle_afp/ -b Collections
-~/Downloads/Isabelle2014-RC0/bin/isabelle jedit -d isabelle_afp/ -l Collections
+if $ISABELLE version | grep 'Isabelle2014: August 2014'; then
+    echo "Isabelle 2014"
+else
+    echo "Isabelle 2014 is required"
+    exit -1
+fi
+
+$ISABELLE build -d isabelle_afp/ -b Collections &&
+  $ISABELLE jedit -d isabelle_afp/ -l Collections
 
