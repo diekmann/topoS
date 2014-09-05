@@ -3,7 +3,7 @@ Example: offending-flows-union-mono can be found with
 find access_control_abstraction/thy/ -iname '*.thy' | xargs grep 'offending_flows_union_mono'
 
 
-get Isabelle/HOL 2014-RC0 at
+get Isabelle/HOL 2014 at
 http://isabelle.in.tum.de/
 
 
