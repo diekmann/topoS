@@ -75,12 +75,9 @@ begin
  
 
    text{*Invariant violations do not disappear if we add more flows. *}
-   (*todo: remove, use next*)
    lemma sinvar_mono_imp_negative_mono:
    "sinvar_mono
-   \<Longrightarrow> 
-   (\<forall> nP N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr> \<and> 
-   E' \<subseteq> E \<and> \<not> sinvar \<lparr> nodes = N, edges = E' \<rparr> nP \<longrightarrow> \<not> sinvar \<lparr> nodes = N, edges = E \<rparr> nP )"
+   \<Longrightarrow> valid_graph \<lparr> nodes = N, edges = E \<rparr> \<Longrightarrow>  E' \<subseteq> E \<Longrightarrow> \<not> sinvar \<lparr> nodes = N, edges = E' \<rparr> nP \<Longrightarrow> \<not> sinvar \<lparr> nodes = N, edges = E \<rparr> nP"
    apply (unfold sinvar_mono_def)
    by(blast)
 
@@ -716,10 +713,9 @@ subsection {* Monotonicity of offending flows *}
        
               from a2 f1 f2 have gFadd3: 
                    "(E' - (F' \<union> Fadd)) \<union> {(e1, e2)} \<subseteq> (E - (F' \<union> Fadd)) \<union> {(e1, e2)}" by fast
-             
-              from sinvar_mono_imp_negative_mono[OF sinvar_monoI] have negative_mono_HOL:
-                  "\<And>nP N E' E. valid_graph \<lparr>nodes = N, edges = E\<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> \<not> sinvar \<lparr>nodes = N, edges = E'\<rparr> nP \<Longrightarrow> \<not> sinvar \<lparr>nodes = N, edges = E\<rparr> nP" by metis      
-              from negative_mono_HOL[where E="(E - (F' \<union> Fadd)) \<union> {(e1, e2)}" and E'="(E' - (F' \<union> Fadd)) \<union> {(e1, e2)}" and N="V" and nP="nP", OF gFadd2 gFadd3 gFadd1]
+               
+              from sinvar_mono_imp_negative_mono[where E="(E - (F' \<union> Fadd)) \<union> {(e1, e2)}" and E'="(E' - (F' \<union> Fadd)) \<union> {(e1, e2)}" and N="V" and nP="nP"]
+                   sinvar_monoI gFadd2 gFadd3 gFadd1
               show "\<not> sinvar \<lparr>nodes = V, edges = (E - (F' \<union> Fadd)) \<union> {(e1, e2)}\<rparr> nP" .
           qed
        qed
