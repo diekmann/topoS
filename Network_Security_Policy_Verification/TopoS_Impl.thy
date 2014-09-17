@@ -171,14 +171,18 @@ visualize_edges @{context}  @{term "[(1::int, 1::int), (1,2), (2, 1), (1,3)]"} [
 
 
 ML {*
-(*M: security requirements, list
+(* Convenience function. Use whenever possible!
+  M: security requirements, list
   G: list_graph*)
 fun vizualize_graph (ctx: Proof.context) (M: term) (G: term): unit = 
   let
+    val valid_list_graph = apply_function ctx @{const_name "valid_list_graph"} [G];
     val all_fulfilled = apply_function ctx @{const_name "all_security_requirements_fulfilled"} [M, G];
     val edges = apply_function ctx @{const_name "edgesL"} [G];
   in
-    if all_fulfilled = @{term "False"} then
+    if valid_list_graph = @{term "False"} then
+      error ("The supplied graph is syntactically invalid. Check valid_list_graph.")
+    else if all_fulfilled = @{term "False"} then
       (let
         val offending = apply_function ctx @{const_name "implc_get_offending_flows"} [M, G];
         val offending_flat = apply_function ctx @{const_name "List.remdups"} [apply_function ctx @{const_name "List.concat"} [offending]];
