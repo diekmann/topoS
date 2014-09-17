@@ -401,8 +401,8 @@ begin
     from is_offending_flows_min_set_minimalize_offending_overapprox[OF mono_sinvar vG iO sS dF] 
      have "is_offending_flows_min_set (set (minimalize_offending_overapprox ff [] G nP)) G nP" by simp
     from this set_offending_flows_def sS have
-    "(set (minimalize_offending_overapprox ff [] G nP)) \<in> set_offending_flows G nP"
-      by (metis (lifting, no_types) List.set_empty Un_empty_right mem_Collect_eq minimalize_offending_overapprox_subset subset_code(1))
+      "(set (minimalize_offending_overapprox ff [] G nP)) \<in> set_offending_flows G nP"
+      using minimalize_offending_overapprox_subset[where keeps="[]"] by fastforce
     thus ?thesis by blast 
    qed
 
