@@ -124,17 +124,14 @@ in
       ("edge [dir=\"none\", color=\"#000000\"]", biflows)] @ coloredges) (*dir=none, dir=both*)
     end
 
-  (*iterate over the edges in ML, usefull for printing them in certain formats*)
+  (*iterate over the edges in ML, useful for printing them in certain formats*)
   fun iterate_edges_ML (ctx: Proof.context) (edges: term) (all: (string*string) -> unit) (bi: (string*string) -> unit) (uni: (string*string) -> unit): unit =
     let
       val _ = writeln("iterate_edges_ML");
       val tune_node_format = (get_tune_node_format edges);
+      val node_to_string = Graphviz.node_to_string ctx tune_node_format;
       val evaluated_edges : term = evalutae_term ctx edges;
       val (biflows, uniflows) = partition_by_biflows ctx evaluated_edges;
-      fun node_to_string (n: term) : string = n |> Syntax.pretty_term ctx |> Pretty.string_of |> ATP_Util.unyxml |> tune_node_format n
-          handle Subscript => let
-            val _ = writeln ("Subscript Exception in iterate_edges_ML: node_to_string");
-          in "ERROR" end;
     in
       let
         fun edge_to_list (es: term) : (term * term) list = es |> HOLogic.dest_list |> map HOLogic.dest_prod;
@@ -165,10 +162,11 @@ in
   val _ = Pretty.writeln (Syntax.pretty_term (Config.put show_types true @{context}) uniflows);
 end;
 
-val t = fastype_of @{term "[(TopoS_Vertices.V ''x'', 2::nat)]"}
+val t = fastype_of @{term "[(TopoS_Vertices.V ''x'', 2::nat)]"};
 
-(*
-visualize_edges @{context} @{theory} @{term "[(1::int, 1::int), (1,2), (2, 1), (1,3)]"} []; *)
+*}
+ML_val{*(*
+visualize_edges @{context}  @{term "[(1::int, 1::int), (1,2), (2, 1), (1,3)]"} []; *)
 *}
 
 

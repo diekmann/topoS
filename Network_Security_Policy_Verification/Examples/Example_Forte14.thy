@@ -81,7 +81,7 @@ lemma "implc_get_offending_flows security_invariants policy = []" by eval
 
 
 text{*
-Visualization with a violation
+Visualization with a violation.
 *}
 ML{*
 vizualize_graph @{context} @{term "security_invariants"} @{term "policy\<lparr>edgesL := (V ''P1'', V ''CC'')#edgesL policy\<rparr>"};
@@ -100,7 +100,7 @@ value "max_policy"
 
 
 text{*
-The diff to the maximum policy
+The diff to the maximum policy. It adds reflexive flows and the IFEsrv may send to the PODs.
 *}
 ML_val{*
 visualize_edges @{context} @{term "edgesL policy"} 
@@ -109,10 +109,10 @@ visualize_edges @{context} @{term "edgesL policy"}
 
 
 text{*
-Visualizing the maximum policy
+Visualizing the maximum policy.
 *}
 ML{*
-vizualize_graph @{context} @{term "security_invariants"} @{term "policy"};
+vizualize_graph @{context} @{term "security_invariants"} @{term "max_policy"};
 *}
 
 lemma "all_security_requirements_fulfilled security_invariants policy" by eval

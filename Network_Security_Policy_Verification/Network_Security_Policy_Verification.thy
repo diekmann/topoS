@@ -99,6 +99,14 @@ visualize_edges @{context} @{term "flows_fixL stateful_policy"}
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "flows_stateL stateful_policy"})]; 
 *}
 
+
+text{*This is how it would look like if @{term "(3,1)"} were a stateful flow*}
+ML_val{*
+visualize_edges @{context} @{term "flows_fixL stateful_policy"} 
+    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "[(3::nat,1::nat)]"})]; 
+*}
+
+
 hide_const policy security_invariants max_policy stateful_policy
 
 
