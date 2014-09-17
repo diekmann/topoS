@@ -137,11 +137,6 @@ in
         fun edge_to_list (es: term) : (term * term) list = es |> HOLogic.dest_list |> map HOLogic.dest_prod;
         fun edge_to_string (es: (term * term) list) : (string * string) list =
           List.map (fn (v1, v2) => (node_to_string v1, node_to_string v2)) es
-          handle Subscript => let
-            val _ = writeln ("Subscript Exception in iterate_edges_ML: edge_to_string");
-            val _ = List.map (fn (v1, _) => Pretty.writeln (Syntax.pretty_term ctx v1)) es;
-            val _ = List.map (fn (_, v2) => Pretty.writeln (Syntax.pretty_term ctx v2)) es;
-            in [] end;
       in
         edge_to_list evaluated_edges |> edge_to_string |> List.map all;
         edge_to_list biflows |> edge_to_string |> List.map bi;

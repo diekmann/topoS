@@ -55,9 +55,7 @@ fun evaluate_term (ctx: Proof.context) edges =
 
 fun node_to_string (ctx: Proof.context) (tune_node_format: term -> string -> string) (n: term) : string = 
   n |> Syntax.pretty_term ctx |> Pretty.string_of |> ATP_Util.unyxml |> tune_node_format n
-  handle Subscript => let
-    val _ = error ("Subscript Exception in node_to_string");
-  in "ERROR" end;
+  handle Subscript => error ("Subscript Exception in node_to_string for string "^( Pretty.string_of (Syntax.pretty_term ctx n)));
 
 local
 
