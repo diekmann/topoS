@@ -75,6 +75,7 @@ begin
  
 
    text{*Invariant violations do not disappear if we add more flows. *}
+   (*todo: remove, use next*)
    lemma sinvar_mono_imp_negative_mono:
    "sinvar_mono
    \<Longrightarrow> 
@@ -84,12 +85,17 @@ begin
    by(blast)
 
   corollary sinvar_mono_imp_negative_delete_edge_mono:
-   "sinvar_mono
-   \<Longrightarrow> 
-   (\<forall> (G:: 'v graph) nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP )"
-   apply(intro allI impI, elim conjE)
-   apply(frule_tac G=G in delete_edges_edges_mono)
-   by (metis delete_edges_simp2 delete_edges_valid sinvar_mono_imp_negative_mono graph.select_convs(2))
+   "sinvar_mono \<Longrightarrow> valid_graph G \<Longrightarrow> X \<subseteq> Y \<Longrightarrow> \<not> sinvar (delete_edges G Y) nP \<Longrightarrow> \<not> sinvar (delete_edges G X) nP "
+  proof -
+   assume sinvar_mono
+   and "valid_graph G" and "X \<subseteq> Y" and "\<not> sinvar (delete_edges G Y) nP"
+   from delete_edges_valid[OF `valid_graph G`] have valid_G_delete: "valid_graph \<lparr>nodes = nodes G, edges = edges G - X\<rparr>" by(simp add: delete_edges_simp2)
+   from `X \<subseteq> Y` have "edges G - Y \<subseteq> edges G - X" by blast
+   with `sinvar_mono` sinvar_mono_def valid_G_delete have
+    "sinvar \<lparr>nodes = nodes G, edges = edges G - X\<rparr> nP \<Longrightarrow> sinvar \<lparr>nodes = nodes G, edges = edges G - Y\<rparr> nP" by blast
+   hence "sinvar (delete_edges G X) nP \<Longrightarrow> sinvar (delete_edges G Y) nP" by(simp add: delete_edges_simp2)
+   with `\<not> sinvar (delete_edges G Y) nP` show ?thesis by blast
+  qed
 
 
   (*lemma mono_offending_flows_min_set:
@@ -396,7 +402,7 @@ begin
   proof -
     from iO SecurityInvariant_withOffendingFlows.is_offending_flows_def have nS: "\<not> sinvar G nP" by metis
     from sinvar_mono_imp_negative_delete_edge_mono[OF mono_sinvar] have negative_delete_edge_mono: 
-      "\<forall> G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP" by simp
+      "\<forall> G nP X Y. valid_graph G \<and> X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP" by blast
       
     from is_offending_flows_min_set_minimalize_offending_overapprox[OF mono_sinvar vG iO sS dF] 
      have "is_offending_flows_min_set (set (minimalize_offending_overapprox ff [] G nP)) G nP" by simp
