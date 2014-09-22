@@ -23,11 +23,11 @@ fun allowed_subnet_flow :: "subnets \<Rightarrow> subnets \<Rightarrow> bool" wh
   "allowed_subnet_flow (Subnet s1) (Subnet s2) = (s1 = s2)" | 
   "allowed_subnet_flow (Subnet s1) (BorderRouter s2) = (s1 = s2)" |
   "allowed_subnet_flow (Subnet s1) (BorderRouter' s2) = (s1 = s2)" |
-  "allowed_subnet_flow (Subnet _) Unassigned = True" | 
+  "allowed_subnet_flow (Subnet _) _ = True" | 
   "allowed_subnet_flow (BorderRouter _) (Subnet _) = False" |
   "allowed_subnet_flow (BorderRouter _) _ = True" |
   "allowed_subnet_flow (BorderRouter' s1) (Subnet s2) = (s1 = s2)" |
-  "allowed_subnet_flow (BorderRouter' _) _ = True" |
+  "allowed_subnet_flow (BorderRouter' _) _ = True" | 
   "allowed_subnet_flow InboundRouter (Subnet _) = False" | 
   "allowed_subnet_flow InboundRouter _ = True" | 
   "allowed_subnet_flow Unassigned Unassigned  = True" |
