@@ -1,13 +1,20 @@
-theory SINVAR_Subnets
+theory SINVAR_Subnets2
 imports"../TopoS_Helper"
 begin
 
-subsection {* SecurityInvariant Subnets *}
 
-text{*If unsure, maybe you should look at @{file "SINVAR_SubnetsInGW.thy"}*}
+(*EXPERIMENTAL!!*)
+
+subsection {* SecurityInvariant Subnets2 *}
+
+text{*Warning, This is just a test. Please look at @{file "SINVAR_Subnets.thy"}.
+This security invariant has the following changes, compared to @{file "SINVAR_Subnets.thy"}:
+A new BorderRouter' is introduced which can send to the members of its subnet.
+Still, it is not possible for anyone from the outside world to contact members of the subnet.
+*}
 
 
-datatype subnets = Subnet nat | BorderRouter nat | Unassigned
+datatype subnets = Subnet nat | BorderRouter nat | BorderRouter' nat | Unassigned
 
 definition default_node_properties :: "subnets"
   where  "default_node_properties \<equiv> Unassigned"
@@ -15,10 +22,12 @@ definition default_node_properties :: "subnets"
 fun allowed_subnet_flow :: "subnets \<Rightarrow> subnets \<Rightarrow> bool" where
   "allowed_subnet_flow (Subnet s1) (Subnet s2) = (s1 = s2)" | 
   "allowed_subnet_flow (Subnet s1) (BorderRouter s2) = (s1 = s2)" |
-  "allowed_subnet_flow (Subnet s1) Unassigned = True" | 
-  "allowed_subnet_flow (BorderRouter s1) (Subnet s2) = False" |
-  "allowed_subnet_flow (BorderRouter s1) Unassigned = True" | 
-  "allowed_subnet_flow (BorderRouter s1) (BorderRouter s2) = True" |
+  "allowed_subnet_flow (Subnet s1) (BorderRouter' s2) = (s1 = s2)" |
+  "allowed_subnet_flow (Subnet _) Unassigned = True" | 
+  "allowed_subnet_flow (BorderRouter _) (Subnet _) = False" |
+  "allowed_subnet_flow (BorderRouter _) _ = True" |
+  "allowed_subnet_flow (BorderRouter' s1) (Subnet s2) = (s1 = s2)" |
+  "allowed_subnet_flow (BorderRouter' _) _ = True" | 
   "allowed_subnet_flow Unassigned Unassigned  = True" |
   "allowed_subnet_flow Unassigned _  = False"
 
@@ -61,10 +70,9 @@ subsubsection{*ENF*}
   lemma All_to_Unassigned: "\<forall> e1. allowed_subnet_flow e1 Unassigned"
     by (rule allI, case_tac e1, simp_all)
   lemma Unassigned_default_candidate: "\<forall> nP e1 e2. \<not> allowed_subnet_flow (nP e1) (nP e2) \<longrightarrow> \<not> allowed_subnet_flow Unassigned (nP e2)"
-    apply(rule allI)+
+    apply(intro allI)
     apply(case_tac "nP e2")
-      apply simp
-     apply simp
+       apply simp_all
     by(simp add: All_to_Unassigned)
   lemma allowed_subnet_flow_refl: "\<forall> e. allowed_subnet_flow e e"
     by(rule allI, case_tac e, simp_all)
@@ -94,11 +102,11 @@ subsubsection{*ENF*}
 
 
 interpretation Subnets: SecurityInvariant_ACS
-where default_node_properties = SINVAR_Subnets.default_node_properties
-and sinvar = SINVAR_Subnets.sinvar
+where default_node_properties = SINVAR_Subnets2.default_node_properties
+and sinvar = SINVAR_Subnets2.sinvar
 and verify_globals = verify_globals
 where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = Subnets_offending_set"
-  unfolding SINVAR_Subnets.default_node_properties_def
+  unfolding SINVAR_Subnets2.default_node_properties_def
   apply unfold_locales
     apply(rule ballI)
     apply (rule SecurityInvariant_withOffendingFlows.ENF_fsts_refl_instance[OF Subnets_ENF_refl Unassigned_default_candidate])[1]
@@ -113,8 +121,11 @@ where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = Subnets
    apply(rule conjI)
     apply(simp add: valid_graph_def)
    apply(case_tac otherbot, simp_all)
-    apply(rename_tac mysubnetcase)
-    apply(rule_tac x="(\<lambda> x. Unassigned)(vertex_1 := Unassigned, vertex_2 := BorderRouter mysubnetcase)" in exI, simp)
+     apply(rename_tac mysubnetcase)
+     apply(rule_tac x="(\<lambda> x. Unassigned)(vertex_1 := Unassigned, vertex_2 := BorderRouter mysubnetcase)" in exI, simp)
+     apply(rule_tac x="vertex_1" in exI, simp)
+     apply(rule_tac x="{(vertex_1,vertex_2)}" in exI, simp)
+    apply(rule_tac x="(\<lambda> x. Unassigned)(vertex_1 := Unassigned, vertex_2 := BorderRouter whatever)" in exI, simp)
     apply(rule_tac x="vertex_1" in exI, simp)
     apply(rule_tac x="{(vertex_1,vertex_2)}" in exI, simp)
    apply(rule_tac x="(\<lambda> x. Unassigned)(vertex_1 := Unassigned, vertex_2 := BorderRouter whatever)" in exI, simp)
@@ -124,68 +135,8 @@ where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = Subnets
  done
 
 
-  lemma TopoS_Subnets: "SecurityInvariant sinvar default_node_properties receiver_violation"
+  lemma TopoS_Subnets2: "SecurityInvariant sinvar default_node_properties receiver_violation"
   unfolding receiver_violation_def by unfold_locales
-
-subsubsection {* Analysis *}
-
-lemma violating_configurations: "\<not> sinvar G nP \<Longrightarrow> 
-    \<exists> (e1, e2) \<in> edges G. nP e1 = Unassigned \<or> (\<exists> s1. nP e1 = Subnet s1) \<or> (\<exists> s1. nP e1 = BorderRouter s1)"
-  apply simp
-  apply clarify
-  apply(rename_tac a b)
-  apply(case_tac "nP b", simp_all)
-    apply(case_tac "nP a", simp_all)
-      apply blast
-     apply blast
-    apply blast
-   apply(case_tac "nP a", simp_all)
-    apply blast
-   apply blast
-  apply(simp add: All_to_Unassigned)
-done
-
-lemma violating_configurations_exhaust_Unassigned: "\<And>n1 n2. (n1, n2) \<in> (edges G) \<Longrightarrow> nP n1 = Unassigned \<Longrightarrow> \<not> allowed_subnet_flow (nP n1) (nP n2) \<Longrightarrow>
-    \<exists> (e1, e2) \<in> (edges G).  nP e1 = Unassigned \<and> nP e2 \<noteq> Unassigned "
-  apply simp
-  apply(case_tac "nP n2", simp_all)
-   apply force
-  apply force
- done
-lemma violating_configurations_exhaust_Subnet: "\<And>n1 n2. (n1, n2) \<in> (edges G) \<Longrightarrow> nP n1 = Subnet s1' \<Longrightarrow> \<not> allowed_subnet_flow (nP n1) (nP n2) \<Longrightarrow>
-  \<exists> (e1, e2) \<in> (edges G). \<exists> s1 s2. nP e1 = Subnet s1 \<and> s1 \<noteq> s2 \<and> (nP e2 = Subnet s2 \<or> nP e2 = BorderRouter s2)"
-  apply simp
-  apply(case_tac "nP n2", simp_all)
-   apply blast
-  apply blast
-done
-lemma violating_configurations_exhaust_BorderRouter: "\<And>n1 n2. (n1, n2) \<in> (edges G) \<Longrightarrow> nP n1 = BorderRouter s1' \<Longrightarrow> \<not> allowed_subnet_flow (nP n1) (nP n2) \<Longrightarrow>
-  \<exists> (e1, e2) \<in> (edges G). \<exists> s1 s2. nP e1 = BorderRouter s1 \<and> nP e2 = Subnet s2"
-  apply simp
-  apply(case_tac "nP n2")
-    apply simp_all
-  apply blast
-done
-
-text {* All cases where the model can become invalid: *}
-theorem violating_configurations_exhaust: "\<not> sinvar G nP \<Longrightarrow> 
-    \<exists> (e1, e2) \<in> (edges G). 
-      nP e1 = Unassigned \<and> nP e2 \<noteq> Unassigned \<or> 
-      (\<exists> s1 s2. nP e1 = Subnet s1 \<and> s1 \<noteq> s2 \<and> (nP e2 = Subnet s2 \<or> nP e2 = BorderRouter s2)) \<or> 
-      (\<exists> s1 s2. nP e1 = BorderRouter s1 \<and> nP e2 = Subnet s2)"
-  apply simp
-  apply clarify
-  apply(rename_tac n1 n2)
-  apply(case_tac "nP n1", simp_all)
-    apply(rename_tac s1)
-    apply(drule_tac nP="nP" and s1'="s1" in violating_configurations_exhaust_Subnet, simp_all)
-    apply blast
-   apply(rename_tac s1)
-   apply(drule_tac nP="nP" and s1'="s1" in violating_configurations_exhaust_BorderRouter, simp_all)
-   apply blast
-  apply(drule_tac nP="nP" in violating_configurations_exhaust_Unassigned, simp_all)
-  apply blast
-done
 
 
 hide_fact (open) sinvar_mono   
