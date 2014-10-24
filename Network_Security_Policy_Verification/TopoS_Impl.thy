@@ -174,10 +174,16 @@ definition internal_node_configs :: "'a list_graph \<Rightarrow> ('a \<Rightarro
 
 ML {*
 local
-  fun get_graphiv_node_desc (ctx: Proof.context) (node_config: term): string =
-   let (*TODO: tune node format?*)
+  fun get_graphivz_node_desc (ctx: Proof.context) (node_config: term): string =
+   let
      val (node, config) = HOLogic.dest_prod node_config;
-     val node_str = Graphviz.node_to_string ctx Graphviz.default_tune_node_format node;
+     (*TODO: tune node format? There must be a better way ...*)
+     val tune_node_format = if (fastype_of node) = @{typ "TopoS_Vertices.vString"}
+      then
+        tune_Vstring_format
+      else
+        Graphviz.default_tune_node_format;
+     val node_str = Graphviz.node_to_string ctx tune_node_format node;
      val config_str = Graphviz.term_to_string_safe ctx config;
    in
      node_str^"[label=<<TABLE BORDER=\"0\" CELLSPACING=\"0\"><TR><TD><FONT face=\"Verdana Bold\">"^node_str^"</FONT></TD></TR><TR><TD>"^config_str^"</TD></TR></TABLE>>]\n"
@@ -187,7 +193,7 @@ in
     let
       val configlist: term list = apply_function ctx @{const_name "internal_node_configs"} [G, configs] |> HOLogic.dest_list;
     in
-      fold (fn c => fn acc => acc^get_graphiv_node_desc ctx c) configlist ""
+      fold (fn c => fn acc => acc^get_graphivz_node_desc ctx c) configlist ""
     end;
 end;
 
