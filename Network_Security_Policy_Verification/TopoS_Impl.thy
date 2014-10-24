@@ -113,7 +113,7 @@ local
       of SOME x => x
       | NONE => raise TERM ("could not evaluate", []);
 in
-  fun visualize_edges (ctx: Proof.context) (edges: term) (coloredges: (string * term) list): int = 
+  fun visualize_edges (ctx: Proof.context) (edges: term) (coloredges: (string * term) list) (graphviz_header: string): int = 
     let
       val _ = writeln("visualize_edges");
       val (biflows, uniflows) = partition_by_biflows ctx edges;
@@ -121,6 +121,7 @@ in
       Graphviz.visualize_graph_pretty ctx (get_tune_node_format edges) ([
       ("", uniflows),
       ("edge [dir=\"none\", color=\"#000000\"]", biflows)] @ coloredges) (*dir=none, dir=both*)
+       graphviz_header
     end
 
   (*iterate over the edges in ML, useful for printing them in certain formats*)
@@ -168,27 +169,39 @@ definition internal_get_invariant_types_list:: "'a SecurityInvariant list \<Righ
   "internal_get_invariant_types_list M \<equiv> map implc_type M"
 
 
-ML {*
+definition internal_node_configs :: "'a list_graph \<Rightarrow> ('a \<Rightarrow> 'b) \<Rightarrow> ('a \<times>'b) list" where
+  "internal_node_configs G config \<equiv> zip (nodesL G) (map config (nodesL G))"
 
-fun  get_configs_by_node (ctx: Proof.context) (configs: term) (node: term): string list =
-  let 
-    val configs_list: term list = configs |> HOLogic.dest_list;
-    val config_map_list: term list = List.map (fn c => apply_function ctx @{const_name "map_of"} [c, node]) configs_list;
-    val node_config: string list = List.map (fn c => Graphviz.term_to_string ctx c) config_map_list;
-  in
-    node_config
-  end;
+ML {*
+local
+  fun get_graphiv_node_desc (ctx: Proof.context) (node_config: term): string =
+   let (*TODO: tune node format?*)
+     val (node, config) = HOLogic.dest_prod node_config;
+     val node_str = Graphviz.node_to_string ctx Graphviz.default_tune_node_format node;
+     val config_str = Graphviz.term_to_string_safe ctx config;
+   in
+     node_str^"[label=<<TABLE BORDER=\"0\" CELLSPACING=\"0\"><TR><TD><FONT face=\"Verdana Bold\">"^node_str^"</FONT></TD></TR><TR><TD>"^config_str^"</TD></TR></TABLE>>]\n"
+   end;
+in
+  fun generate_graphviz_header (ctx: Proof.context) (G: term) (configs: term): string =
+    let
+      val configlist: term list = apply_function ctx @{const_name "internal_node_configs"} [G, configs] |> HOLogic.dest_list;
+    in
+      fold (fn c => fn acc => acc^get_graphiv_node_desc ctx c) configlist ""
+    end;
+end;
 
 (* Convenience function. Use whenever possible!
   M: security requirements, list
   G: list_graph*)
-fun vizualize_graph (ctx: Proof.context) (M: term) (G: term): unit = 
+fun visualize_graph_header (ctx: Proof.context) (M: term) (G: term) (Config: term): unit = 
   let
     val valid_list_graph = apply_function ctx @{const_name "valid_list_graph"} [G];
     val all_fulfilled = apply_function ctx @{const_name "all_security_requirements_fulfilled"} [M, G];
     val edges = apply_function ctx @{const_name "edgesL"} [G];
     val invariants = apply_function ctx @{const_name "internal_get_invariant_types_list"} [M];
     val _ = writeln("Invariants:" ^ Pretty.string_of (Syntax.pretty_term ctx invariants));
+    val header = if Config = @{term "[]"} then "#header" else generate_graphviz_header ctx G Config;
   in
     if valid_list_graph = @{term "False"} then
       error ("The supplied graph is syntactically invalid. Check valid_list_graph.")
@@ -199,13 +212,16 @@ fun vizualize_graph (ctx: Proof.context) (M: term) (G: term): unit =
       in
        writeln("offending flows:");
        Pretty.writeln (Syntax.pretty_term ctx offending);
-       visualize_edges ctx edges [("edge [dir=\"arrow\", style=dashed, color=\"#FF0000\", constraint=false]", offending_flat)]; 
+       visualize_edges ctx edges [("edge [dir=\"arrow\", style=dashed, color=\"#FF0000\", constraint=false]", offending_flat)] header; 
       () end)
     else if all_fulfilled <> @{term "True"} then raise ERROR "all_fulfilled neither False nor True" else (
        writeln("All valid:");
-       visualize_edges ctx edges []; 
+       visualize_edges ctx edges [] header; 
       ())
   end;
+
+
+fun visualize_graph (ctx: Proof.context) (M: term) (G: term): unit = visualize_graph_header ctx M G @{term "[]"};
 *}
 
 end

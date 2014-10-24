@@ -22,13 +22,14 @@ sig
   (* @{context} default_tune_node_format (edges_format \<times> edges)list*)
   val visualize_graph: Proof.context -> (term -> string -> string) -> term -> int
 
-  (* @{context} default_tune_node_format (edges_format \<times> edges)list*)
-  val visualize_graph_pretty: Proof.context -> (term -> string -> string) -> (string * term) list-> int
+  (* @{context} default_tune_node_format (edges_format \<times> edges)list graphviz_header*)
+  val visualize_graph_pretty: Proof.context -> (term -> string -> string) -> (string * term) list -> string-> int
 
   (* helper function.
      @{context} tune_node_format node *)
   val node_to_string: Proof.context -> (term -> string -> string) ->  term -> string
   val term_to_string: Proof.context ->  term -> string;
+  val term_to_string_safe: Proof.context ->  term -> string;
 end
 
 structure Graphviz: GRAPHVIZ =
@@ -53,8 +54,24 @@ fun evaluate_term (ctx: Proof.context) edges =
   | NONE => error "ML_GraphViz: failed to evaluate edges"
 
 
+fun is_valid_char c =
+  (c <= #"z" andalso c >= #"a") orelse (c <= #"Z" andalso c >= #"A") orelse
+  (c <= #"9" andalso c >= #"0")
+
+val sanitize_string =
+  String.map (fn c => if is_valid_char c then c else #"_")
+
+
 fun term_to_string (ctx: Proof.context) (n: term) : string = 
   n |> Syntax.pretty_term ctx |> Pretty.string_of |> ATP_Util.unyxml
+
+
+fun term_to_string_safe (ctx: Proof.context) (n: term) : string = 
+  let
+    val str = term_to_string ctx n
+  in
+    if sanitize_string str <> str then (warning ("String  "^str^" contains invalid characters!"); sanitize_string str)
+     else str end;
 
 fun node_to_string (ctx: Proof.context) (tune_node_format: term -> string -> string) (n: term) : string = 
   n |> term_to_string ctx |> tune_node_format n
@@ -88,13 +105,6 @@ local
         (*some pdf viewers do not like it if we delete the pdf file they are currently displaying*)
       end
 
-  fun is_valid_char c =
-    (c <= #"z" andalso c >= #"a") orelse (c <= #"Z" andalso c >= #"A") orelse
-    (c <= #"9" andalso c >= #"0")
-
-  val sanitize_string =
-    String.map (fn c => if is_valid_char c then c else #"_")
-
   fun format_dot_edges (ctx: Proof.context) tune_node_format trm =
     let
       fun format_node t = let val str = node_to_string ctx tune_node_format t in
@@ -107,10 +117,10 @@ local
       map format_dot_edge trm
     end
 
-  fun apply_dot_header es =
-    "digraph graphname {\n" ^ implode es ^ "}"
+  fun apply_dot_header header edgess =
+    "digraph graphname {\n#header\n" ^ header ^"\n#edges\n\n"^ implode edgess ^ "}"
 in
-  fun visualize_graph_pretty (ctx: Proof.context) tune_node_format Es : int =
+  fun visualize_graph_pretty (ctx: Proof.context) tune_node_format Es (header:string): int =
     let 
       val evaluated_edges = map (fn (str, t) => (str, evaluate_term ctx t)) Es
       val edge_to_string = HOLogic.dest_list #> map HOLogic.dest_prod #> format_dot_edges ctx tune_node_format #> implode
@@ -118,7 +128,7 @@ in
     in
       if !open_viewer then (* only run the shell commands if not disabled by open_viewer *)
         (
-          apply_dot_header formatted_edges
+          apply_dot_header header formatted_edges
           |> write_to_tmpfile
           |> paint_graph Graphviz_Platform_Config.executable_pdf_viewer Graphviz_Platform_Config.executable_dot
         )
@@ -128,7 +138,7 @@ in
   end
 
 fun visualize_graph thy tune_node_format edges =
-  visualize_graph_pretty thy tune_node_format [("", edges)]
+  visualize_graph_pretty thy tune_node_format [("", edges)] "#TODO add header here"
 
 end;
 *}

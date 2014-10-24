@@ -84,7 +84,7 @@ text{*
 Visualization with a violation.
 *}
 ML{*
-vizualize_graph @{context} @{term "security_invariants"} @{term "policy\<lparr>edgesL := (V ''P1'', V ''CC'')#edgesL policy\<rparr>"};
+visualize_graph @{context} @{term "security_invariants"} @{term "policy\<lparr>edgesL := (V ''P1'', V ''CC'')#edgesL policy\<rparr>"};
 *}
 
 
@@ -104,7 +104,7 @@ The diff to the maximum policy. It adds reflexive flows and the IFEsrv may send 
 *}
 ML_val{*
 visualize_edges @{context} @{term "edgesL policy"} 
-    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "[e \<leftarrow> edgesL max_policy. e \<notin> set (edgesL policy)]"})]; 
+    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "[e \<leftarrow> edgesL max_policy. e \<notin> set (edgesL policy)]"})] ""; 
 *}
 
 
@@ -112,7 +112,7 @@ text{*
 Visualizing the maximum policy.
 *}
 ML{*
-vizualize_graph @{context} @{term "security_invariants"} @{term "max_policy"};
+visualize_graph @{context} @{term "security_invariants"} @{term "max_policy"};
 *}
 
 lemma "all_security_requirements_fulfilled security_invariants policy" by eval
@@ -125,7 +125,7 @@ value "stateful_policy"
 
 ML_val{*
 visualize_edges @{context} @{term "flows_fixL stateful_policy"} 
-    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "flows_stateL stateful_policy"})]; 
+    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "flows_stateL stateful_policy"})] ""; 
 *}
 
 
