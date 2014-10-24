@@ -17,7 +17,7 @@ We need in instantiated security invariant, i.e.\ get rid of @{typ "'a"} and @{t
     c_offending_flows::"('v) graph \<Rightarrow> ('v \<times> 'v) set set"
     c_isIFS::"bool"
 
-  --{* First three parameters are the @{text "SecurityInvariant"}:
+  --{*  parameters 1-3 are the @{text "SecurityInvariant"}:
       @{text sinvar} @{text "\<bottom>"} @{text "receiver_violation"}
 
       Fourth parameter is the host attribute mapping @{text nP}

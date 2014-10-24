@@ -165,6 +165,9 @@ visualize_edges @{context}  @{term "[(1::int, 1::int), (1,2), (2, 1), (1,3)]"} [
 *}
 
 
+definition internal_get_invariant_types_list:: "'a SecurityInvariant list \<Rightarrow> string list" where
+  "internal_get_invariant_types_list M \<equiv> map implc_type M"
+
 ML {*
 (* Convenience function. Use whenever possible!
   M: security requirements, list
@@ -174,6 +177,8 @@ fun vizualize_graph (ctx: Proof.context) (M: term) (G: term): unit =
     val valid_list_graph = apply_function ctx @{const_name "valid_list_graph"} [G];
     val all_fulfilled = apply_function ctx @{const_name "all_security_requirements_fulfilled"} [M, G];
     val edges = apply_function ctx @{const_name "edgesL"} [G];
+    val invariants = apply_function ctx @{const_name "internal_get_invariant_types_list"} [M];
+    val _ = writeln("Invariants:" ^ Pretty.string_of (Syntax.pretty_term ctx invariants));
   in
     if valid_list_graph = @{term "False"} then
       error ("The supplied graph is syntactically invalid. Check valid_list_graph.")
@@ -187,7 +192,6 @@ fun vizualize_graph (ctx: Proof.context) (M: term) (G: term): unit =
        visualize_edges ctx edges [("edge [dir=\"arrow\", style=dashed, color=\"#FF0000\", constraint=false]", offending_flat)]; 
       () end)
     else if all_fulfilled <> @{term "True"} then raise ERROR "all_fulfilled neither False nor True" else (
-       writeln("check TRUE");
        writeln("All valid:");
        visualize_edges ctx edges []; 
       ())
