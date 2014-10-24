@@ -85,8 +85,7 @@ ML{*
 (*apply args to f. f ist best supplied using @{const_name "name_of_function"} *)
 fun apply_function (ctx: Proof.context) (f: string) (args: term list) : term = 
   let
-    val _ = writeln ("applying "^f^" to ");
-    val _ = List.map (fn t => Pretty.writeln (Syntax.pretty_term (Config.put show_types true ctx) t)) args;
+    val _ = writeln ("applying "^f^" to " ^ (fold (fn t => fn acc => acc^(Pretty.string_of (Syntax.pretty_term (Config.put show_types true ctx) t))^" ") args ""));
     (*val t_eval = Code_Evaluation.dynamic_value_strict thy t;*)
     (* $ associates to the left, give f its arguments*)
     val applied_untyped_uneval : term = List.foldl (fn (t, a) => a $ t) (Const (f, dummyT)) args;
@@ -168,7 +167,18 @@ visualize_edges @{context}  @{term "[(1::int, 1::int), (1,2), (2, 1), (1,3)]"} [
 definition internal_get_invariant_types_list:: "'a SecurityInvariant list \<Rightarrow> string list" where
   "internal_get_invariant_types_list M \<equiv> map implc_type M"
 
+
 ML {*
+
+fun  get_configs_by_node (ctx: Proof.context) (configs: term) (node: term): string list =
+  let 
+    val configs_list: term list = configs |> HOLogic.dest_list;
+    val config_map_list: term list = List.map (fn c => apply_function ctx @{const_name "map_of"} [c, node]) configs_list;
+    val node_config: string list = List.map (fn c => Graphviz.term_to_string ctx c) config_map_list;
+  in
+    node_config
+  end;
+
 (* Convenience function. Use whenever possible!
   M: security requirements, list
   G: list_graph*)

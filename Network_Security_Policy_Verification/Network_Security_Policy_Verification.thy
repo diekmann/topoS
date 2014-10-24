@@ -53,10 +53,14 @@ value "implc_get_offending_flows security_invariants policy"
 lemma "implc_get_offending_flows security_invariants policy = [[(2, 3)]]" by eval
 
 
+ML_val{*
+get_configs_by_node @{context} @{term "[[(1::nat, ''foo'')], [(2, ''bar'')]]"} @{term "1::nat"}
+*}
+
 text{*
 Visualization of the violation (only in interactive mode)
 *}
-ML{*
+ML_val{*
 vizualize_graph @{context} @{term "security_invariants"} @{term "policy"};
 *}
 

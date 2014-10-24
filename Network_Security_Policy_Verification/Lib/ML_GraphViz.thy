@@ -28,7 +28,7 @@ sig
   (* helper function.
      @{context} tune_node_format node *)
   val node_to_string: Proof.context -> (term -> string -> string) ->  term -> string
-
+  val term_to_string: Proof.context ->  term -> string;
 end
 
 structure Graphviz: GRAPHVIZ =
@@ -53,8 +53,11 @@ fun evaluate_term (ctx: Proof.context) edges =
   | NONE => error "ML_GraphViz: failed to evaluate edges"
 
 
+fun term_to_string (ctx: Proof.context) (n: term) : string = 
+  n |> Syntax.pretty_term ctx |> Pretty.string_of |> ATP_Util.unyxml
+
 fun node_to_string (ctx: Proof.context) (tune_node_format: term -> string -> string) (n: term) : string = 
-  n |> Syntax.pretty_term ctx |> Pretty.string_of |> ATP_Util.unyxml |> tune_node_format n
+  n |> term_to_string ctx |> tune_node_format n
   handle Subscript => error ("Subscript Exception in node_to_string for string "^( Pretty.string_of (Syntax.pretty_term ctx n)));
 
 local
