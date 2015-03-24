@@ -1,11 +1,16 @@
+Get the latest stable version here: 
+http://afp.sourceforge.net/entries/Network_Security_Policy_Verification.shtml
+
+
+
+This repo is where the development happens.
+
 In theory files, identifiers are written with underscores.
 Example: offending-flows-union-mono can be found with
 find access_control_abstraction/thy/ -iname '*.thy' | xargs grep 'offending_flows_union_mono'
 
-
 get Isabelle/HOL 2014 at
 http://isabelle.in.tum.de/
-
 
 
 Network_Security_Policy_Verification (former access_control_abstraction)
