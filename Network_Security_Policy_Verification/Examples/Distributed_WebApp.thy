@@ -89,7 +89,7 @@ text{*
 Visualizing the maximum policy
 *}
 ML{*
-vizualize_graph @{context} @{term "security_invariants"} @{term "max_policy"};
+visualize_graph @{context} @{term "security_invariants"} @{term "max_policy"};
 *}
 
 text{*The maximum policy also fulfills all security invariants. *}
@@ -109,7 +109,7 @@ The diff to the maximum policy.
 *}
 ML_val{*
 visualize_edges @{context} @{term "edgesL my_policy"} 
-    [("edge [dir=\"arrow\", style=dashed, color=\"#3399FF\", constraint=false]", @{term "[e \<leftarrow> edgesL max_policy. e \<notin> set (edgesL my_policy)]"})]; 
+    [("edge [dir=\"arrow\", style=dashed, color=\"#3399FF\", constraint=false]", @{term "[e \<leftarrow> edgesL max_policy. e \<notin> set (edgesL my_policy)]"})] ""; 
 *}
 
 
@@ -132,7 +132,7 @@ text{*No information flow violations*}
 text{*Visualizing the stateful policy.*}
 ML_val{*
 visualize_edges @{context} @{term "flows_fixL stateful_policy"} 
-    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "flows_stateL stateful_policy"})]; 
+    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "flows_stateL stateful_policy"})] ""; 
 *}
 
 
