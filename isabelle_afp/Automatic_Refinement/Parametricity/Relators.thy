@@ -1,4 +1,4 @@
-header {* \isaheader{Relators} *}
+section {* Relators *}
 theory Relators
 imports "../Lib/Refine_Lib"
 begin
@@ -304,7 +304,7 @@ declaration {*
     @{thms relprop_triggers} 
     @{binding relator_props_solver}
     "Additional relator peoperties solver"
-    (fn ctxt => (REPEAT_ALL_NEW (match_tac (relator_props.get ctxt))))
+    (fn ctxt => (REPEAT_ALL_NEW (match_tac ctxt (relator_props.get ctxt))))
 *}
 
 declaration {*
@@ -312,7 +312,7 @@ declaration {*
     []
     @{binding force_relator_props_solver}
     "Additional relator properties solver (instantiate schematics)"
-    (fn ctxt => (REPEAT_ALL_NEW (resolve_tac (relator_props.get ctxt))))
+    (fn ctxt => REPEAT_ALL_NEW (resolve_tac ctxt (relator_props.get ctxt)))
 *}
 
 lemma relprop_id_orient[relator_props]: 
@@ -491,10 +491,10 @@ ML_val {*
     [@{term "Ra::('c\<times>'a) set"},@{term "\<langle>Rb\<rangle>option_rel"}] 
     @{type_name prod}
   |> the
-  |> cterm_of @{theory}
+  |> Thm.cterm_of @{context}
 ;
   Relators.mk_fun_rel @{term "\<langle>Id\<rangle>option_rel"} @{term "\<langle>Id\<rangle>list_rel"}
-  |> cterm_of @{theory}
+  |> Thm.cterm_of @{context}
 *}
 
 subsubsection "Additional Properties"

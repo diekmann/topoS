@@ -1,4 +1,4 @@
-header "More Automation"
+section "More Automation"
 theory Refine_Automation
 imports Refine_Basic Refine_Transfer
 keywords "concrete_definition" :: thy_decl
@@ -30,7 +30,7 @@ signature REFINE_AUTOMATION = sig
   val prepare_code_thms_cmd: string list -> thm -> local_theory -> local_theory
 
   val define_concrete_fun: extraction list option -> binding -> 
-    Args.src list -> indexname list -> thm ->
+    Token.src list -> indexname list -> thm ->
     cterm list -> local_theory -> local_theory
   
 
@@ -65,12 +65,12 @@ structure Refine_Automation :REFINE_AUTOMATION = struct
     type T = extraction list Symtab.table
     val empty = Symtab.empty
     val extend = I
-    val merge = Symtab.merge_list (op = o pairself #pattern)
+    val merge = Symtab.merge_list (op = o apply2 #pattern)
   )
 
   fun add_extraction name ex = 
     Context.theory_map (extractions.map (
-      Symtab.update_list (op = o pairself #pattern) (name,ex)))
+      Symtab.update_list (op = o apply2 #pattern) (name,ex)))
 
   (*
     Define new constant name for subterm t in context bnd.
@@ -107,10 +107,9 @@ fun mk_qualified basename q = Binding.qualify true basename (Binding.name q);
 fun extract_recursion_eqs exs basename orig_def_thm lthy = let
 
   val thy = Proof_Context.theory_of lthy
-  val cert = cterm_of thy
  
   val pat_net : extraction Item_Net.T =
-    Item_Net.init (op= o pairself #pattern) (fn {pattern, ...} => [pattern])
+    Item_Net.init (op= o apply2 #pattern) (fn {pattern, ...} => [pattern])
     |> fold Item_Net.update exs
 
   local
@@ -161,7 +160,7 @@ fun extract_recursion_eqs exs basename orig_def_thm lthy = let
   (* Import theorem and extract RHS *)
   val ((_,orig_def_thm'),lthy) = yield_singleton2 
     (Variable.import true) orig_def_thm lthy;
-  val (lhs,rhs) = orig_def_thm' |> prop_of |> Logic.dest_equals;
+  val (lhs,rhs) = orig_def_thm' |> Thm.prop_of |> Logic.dest_equals;
   
   (* Transform RHS, generating new constants *)
   val ((rhs',defs),lthy) = transform rhs lthy;
@@ -175,7 +174,7 @@ fun extract_recursion_eqs exs basename orig_def_thm lthy = let
   val def_unfold_ss = 
     put_simpset HOL_basic_ss lthy addsimps (orig_def_thm::def_thms)
   val new_def_thm = Goal.prove_internal lthy
-    [] (Logic.mk_equals (lhs,rhs') |> cert) (K (simp_tac def_unfold_ss 1))
+    [] (Logic.mk_equals (lhs,rhs') |> Thm.cterm_of lthy) (K (simp_tac def_unfold_ss 1))
 
   (* Obtain new theorem by folding with defs of generated constants *)
   (* TODO: Maybe cleaner to generate eq-thm and prove by "unfold, refl" *)
@@ -215,7 +214,7 @@ fun prepare_code_thms_cmd names thm lthy = let
     | name_of (Free (n,_)) = n
     | name_of _ = raise (THM ("No definitional theorem",0,[thm]));
 
-  val (lhs,_) = thm |> prop_of |> Logic.dest_equals;
+  val (lhs,_) = thm |> Thm.prop_of |> Logic.dest_equals;
   val basename = lhs |> strip_comb |> #1 
     |> name_of 
     |> Long_Name.base_name;
@@ -246,10 +245,10 @@ fun extract_concrete_fun _ [] concl =
         | SOME [t] => t
         | SOME (t::_) => (
           warning ("concrete_definition: Pattern has multiple holes, taking "
-            ^ "first one: " ^ PolyML.makestring pat
+            ^ "first one: " ^ @{make_string} pat
           ); t)
         | _ => (warning ("concrete_definition: Ignoring invalid pattern " 
-             ^ PolyML.makestring pat);
+             ^ @{make_string} pat);
              extract_concrete_fun thy pats concl)
     )
 
@@ -262,14 +261,14 @@ let
   val lthy = orig_lthy;
   val ((inst,thm'),lthy) = yield_singleton2 (Variable.import true) thm lthy;
 
-  val concl = thm' |> concl_of
+  val concl = thm' |> Thm.concl_of
 
   (*val ((typ_subst,term_subst),lthy) 
     = Variable.import_inst true [concl] lthy;
   val concl = Term_Subst.instantiate (typ_subst,term_subst) concl;
   *)
 
-  val term_subst = #2 inst |> map (pairself term_of) 
+  val term_subst = #2 inst |> map (apply2 Thm.term_of) 
     |> map (apfst dest_Var);
 
   val param_terms = map (fn name =>
@@ -308,7 +307,7 @@ in
   lthy
 end;
 
-  val cd_pat_eq = pairself (term_of #> Refine_Util.anorm_term) #> op aconv
+  val cd_pat_eq = apply2 (Thm.term_of #> Refine_Util.anorm_term) #> op aconv
 
   structure cd_patterns = Generic_Data (
     type T = cterm list
@@ -318,11 +317,11 @@ end;
   ) 
 
   fun prepare_cd_pattern pat = 
-    case term_of pat |> fastype_of of
+    case Thm.term_of pat |> fastype_of of
       @{typ bool} => 
-        term_of pat 
+        Thm.term_of pat 
         |> HOLogic.mk_Trueprop 
-        |> cterm_of (theory_of_cterm pat)
+        |> Thm.global_cterm_of (Thm.theory_of_cterm pat)
     | _ => pat
 
   fun add_cd_pattern pat = 
@@ -354,16 +353,16 @@ end;
 
     val rec_modifiers = [
       Args.$$$ "rec" -- Scan.option Args.add -- Args.colon 
-        >> K ((I,rec_thms.add):Method.modifier),
+        >> K (Method.modifier rec_thms.add @{here}),
       Args.$$$ "rec" -- Scan.option Args.del -- Args.colon 
-        >> K ((I,rec_thms.del):Method.modifier)
+        >> K (Method.modifier rec_thms.del @{here})
     ];
 
     val solve_modifiers = [
       Args.$$$ "solve" -- Scan.option Args.add -- Args.colon 
-        >> K ((I,solve_thms.add):Method.modifier),
+        >> K (Method.modifier solve_thms.add @{here}),
       Args.$$$ "solve" -- Scan.option Args.del -- Args.colon 
-        >> K ((I,solve_thms.del):Method.modifier)
+        >> K (Method.modifier solve_thms.del @{here})
     ];
 
     val vc_solve_modifiers = 
@@ -376,8 +375,8 @@ end;
       val tac = SELECT_GOAL (auto_tac ctxt)
     in
       TRY o pre_tac
-      THEN_ALL_NEW_FWD (TRY o REPEAT_ALL_NEW_FWD (resolve_tac rthms))
-      THEN_ALL_NEW_FWD (TRY o SOLVED' (resolve_tac sthms THEN_ALL_NEW_FWD tac))
+      THEN_ALL_NEW_FWD (TRY o REPEAT_ALL_NEW_FWD (resolve_tac ctxt rthms))
+      THEN_ALL_NEW_FWD (TRY o SOLVED' (resolve_tac ctxt sthms THEN_ALL_NEW_FWD tac))
     end
 
     val setup = I
@@ -393,12 +392,11 @@ setup Refine_Automation.setup
 setup {*
   let
     fun parse_cpat cxt = let 
-      val (t,(context,tks)) = Scan.lift Args.name_inner_syntax cxt 
-      val thy = Context.theory_of context
+      val (t, (context, tks)) = Scan.lift Args.name_inner_syntax cxt 
       val ctxt = Context.proof_of context
       val t = Proof_Context.read_term_pattern ctxt t
     in
-      (cterm_of thy t,(context,tks))
+      (Thm.cterm_of ctxt t, (context, tks))
     end
 
     fun do_p f = Scan.repeat1 parse_cpat >> (fn pats => 
@@ -420,22 +418,21 @@ setup {*
   parameters on which it does not depend *)
 
 ML {* Outer_Syntax.local_theory 
-  @{command_spec "concrete_definition"} 
+  @{command_keyword concrete_definition} 
   "Define function from refinement theorem" 
   (Parse.binding 
-    -- Parse_Spec.opt_attribs
+    -- Parse.opt_attribs
     -- Scan.optional (@{keyword "for"} |-- Scan.repeat1 Args.var) []
-    --| @{keyword "uses"} -- Parse_Spec.xthm
+    --| @{keyword "uses"} -- Parse.xthm
     -- Scan.optional (@{keyword "is"} |-- Scan.repeat1 Args.name_inner_syntax) []
   >> (fn ((((name,attribs),params),raw_thm),pats) => fn lthy => let
     val thm = 
       case Attrib.eval_thms lthy [raw_thm] of
         [thm] => thm
         | _ => error "Expecting exactly one theorem";
-    val thy = Proof_Context.theory_of lthy
     val pats = case pats of 
       [] => Refine_Automation.get_cd_patterns lthy
-    | l => map (Proof_Context.read_term_pattern lthy #> cterm_of thy #> 
+    | l => map (Proof_Context.read_term_pattern lthy #> Thm.cterm_of lthy #>
         Refine_Automation.prepare_cd_pattern) l
 
   in 
@@ -454,7 +451,7 @@ text {*
   
   If the @{text "for"} clause is given, it lists variables in the theorem, 
   and thus determines the order of parameters of the defined constant. Otherwise,
-  parameters will be in order of occurence.
+  parameters will be in order of occurrence.
 
   If the @{text "is"} clause is given, it lists patterns. The conclusion of the
   theorem will be matched against each of these patterns. For the first matching
@@ -479,9 +476,9 @@ ML {*
      (@{keyword "("} |-- Parse.list1 Parse.xname --| @{keyword ")"}) [])
   in
     Outer_Syntax.local_theory 
-    @{command_spec "prepare_code_thms"} 
+    @{command_keyword prepare_code_thms} 
     "Refinement framework: Prepare theorems for code generation" 
-    (modes -- Parse_Spec.xthms1
+    (modes -- Parse.xthms1
       >> (fn (modes,raw_thms) => fn lthy => let
         val thms = Attrib.eval_thms lthy raw_thms
       in
@@ -520,13 +517,13 @@ lemma gen_code_thm_REC:
 
 setup {*
   Refine_Automation.add_extraction "nres" {
-    pattern = term_of @{cpat "REC _"},
+    pattern = Thm.term_of @{cpat "REC _"},
     gen_thm = @{thm gen_code_thm_REC},
     gen_tac = Refine_Misc.mono_prover_tac
   }
   #> 
   Refine_Automation.add_extraction "nres" {
-    pattern = term_of @{cpat "RECT _"},
+    pattern = Thm.term_of @{cpat "RECT _"},
     gen_thm = @{thm gen_code_thm_RECT},
     gen_tac = Refine_Misc.mono_prover_tac
   }

@@ -2,7 +2,7 @@
     Author:     Andreas Lochbihler, ETH Zurich
 *)
 
-header {* More bit operations on integers *}
+chapter {* More bit operations on integers *}
 
 theory More_Bits_Int
 imports
@@ -603,7 +603,7 @@ using sign m x unfolding y
 proof(induction m arbitrary: x y n)
   case 0
   thus ?case
-    by(simp add: bin_last_def shiftl_int_def) (metis (hide_lams, no_types) mod_diff_right_eq mod_self neq0_conv numeral_One power_eq_0_iff power_mod semiring_numeral_div_class.diff_zero zero_neq_numeral)
+    by(simp add: bin_last_def shiftl_int_def) (metis (hide_lams, no_types) mod_diff_right_eq mod_self neq0_conv numeral_One power_eq_0_iff power_mod diff_zero zero_neq_numeral)
 next
   case (Suc m)
   from `Suc m < n` obtain n' where [simp]: "n = Suc n'" by(cases n) auto

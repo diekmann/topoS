@@ -1,4 +1,4 @@
-header {* Antiquotation to Build Terms *}
+section {* Antiquotation to Build Terms *}
 theory Mk_Term_Antiquot
 imports Refine_Util
 begin
@@ -75,9 +75,9 @@ local
       |> map #1
   
     (*
-    val _ = tracing ("tvars: " ^ PolyML.makestring tvars)
-    val _ = tracing ("vtvars: " ^ PolyML.makestring vtvars)
-    val _ = tracing ("unused_tvars: " ^ PolyML.makestring unused_tvars)
+    val _ = tracing ("tvars: " ^ @{make_string} tvars)
+    val _ = tracing ("vtvars: " ^ @{make_string} vtvars)
+    val _ = tracing ("unused_tvars: " ^ @{make_string} unused_tvars)
     *)
   
     fun 
@@ -186,8 +186,8 @@ ML_val {*
   fun mk_2elem_list a b = @{mk_term "[?a,?b]"}
   fun mk_compr s P = @{mk_term "{ x\<in>?s. ?P x}"}
 
-  val test1 = mk_2elem_list @{term "1::nat"} @{term "2::nat"} |> cterm_of @{theory}
-  val test2 = mk_compr @{term "{1,2,3::nat}"} @{term "op < (2::nat)"} |> cterm_of @{theory}
+  val test1 = mk_2elem_list @{term "1::nat"} @{term "2::nat"} |> Thm.cterm_of @{context}
+  val test2 = mk_compr @{term "{1,2,3::nat}"} @{term "op < (2::nat)"} |> Thm.cterm_of @{context}
 
   val test3 = let 
     val x = Bound 0 

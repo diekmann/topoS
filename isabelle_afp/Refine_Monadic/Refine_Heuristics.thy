@@ -1,4 +1,4 @@
-header {* \isaheader{Data Refinement Heuristics} *}
+section {* Data Refinement Heuristics *}
 theory Refine_Heuristics
 imports Refine_Basic
 begin
@@ -77,7 +77,6 @@ structure Refine_dref_type = struct
     val failed_t_str = Pretty.string_of 
       (Syntax.pretty_term (Config.put show_types true ctxt) failed_t);
     val msg = "Failed to resolve refinement goal \n  " ^ failed_t_str;
-    (*val _ = Output.urgent_message (msg);*)
     val _ = if Config.get ctxt tracing then Output.tracing msg else ();
     in () end;
     
@@ -86,9 +85,9 @@ structure Refine_dref_type = struct
      refine_dref_RELATES-rules. *)
   fun type_tac ctxt =
     ALL_GOALS_FWD (TRY o (
-      resolve_tac (pattern_rules.get ctxt) THEN'
+      resolve_tac ctxt (pattern_rules.get ctxt) THEN'
       match_goal_shape_tac has_schematic ctxt THEN'
-      (SOLVED' (REPEAT_ALL_NEW (resolve_tac (RELATES_rules.get ctxt)))
+      (SOLVED' (REPEAT_ALL_NEW (resolve_tac ctxt (RELATES_rules.get ctxt)))
         ORELSE' (fn i => fn st => let 
           val failed_t = 
             HOLogic.dest_Trueprop (Logic.concl_of_goal (Thm.prop_of st) i);

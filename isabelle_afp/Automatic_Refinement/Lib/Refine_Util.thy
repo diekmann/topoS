@@ -1,4 +1,4 @@
-header "General Utilities"
+section "General Utilities"
 theory Refine_Util
 imports Main
 begin
@@ -69,7 +69,7 @@ ML {*
     val fo_resolve_tac: thm list -> Proof.context -> tactic'
     val rprems_tac: Proof.context -> tactic'
     val rprem_tac: int -> Proof.context -> tactic'
-    val elim_all_tac: thm list -> tactic
+    val elim_all_tac: Proof.context -> thm list -> tactic
 
     val prefer_tac: int -> tactic
 
@@ -77,7 +77,7 @@ ML {*
     val insert_subgoals_tac: cterm list -> tactic'
 
     val eqsubst_inst_tac: Proof.context -> bool -> int list 
-      -> (indexname * string) list -> thm -> int -> tactic
+      -> ((indexname * Position.T) * string) list -> thm -> int -> tactic
 
     val eqsubst_inst_meth: (Proof.context -> Proof.method) context_parser
 
@@ -172,7 +172,7 @@ ML {*
     | SOME (a,seq) => (false, Seq.cons a seq)
 
     fun (thA RSm thB) = let
-      val thy = Context.merge (pairself theory_of_thm (thA,thB))
+      val thy = Context.merge (apply2 Thm.theory_of_thm (thA,thB))
       val ctxt = Proof_Context.init_global thy
       val octxt = ctxt
       val ctxt = Variable.declare_thm thA ctxt
@@ -197,7 +197,7 @@ ML {*
     fun is_TFree (TFree _) = true
       | is_TFree _ = false
 
-    fun is_def_thm thm = case thm |> prop_of of
+    fun is_def_thm thm = case thm |> Thm.prop_of of
       Const (@{const_name "Pure.eq"},_)$_$_ => true | _ => false
 
 
@@ -205,12 +205,12 @@ ML {*
     type itactic = int -> int -> tactic
 
     (* Fail if subgoal does not exist *)
-    fun IF_EXGOAL tac i st = if i <= nprems_of st then
+    fun IF_EXGOAL tac i st = if i <= Thm.nprems_of st then
       tac i st
     else no_tac st;
 
     fun COND' P = IF_EXGOAL (fn i => fn st => 
-      (if P (prop_of st |> curry Logic.nth_prem i) then
+      (if P (Thm.prop_of st |> curry Logic.nth_prem i) then
       all_tac st else no_tac st) 
       handle TERM _ => no_tac st
       | Pattern.MATCH => no_tac st
@@ -240,7 +240,7 @@ ML {*
     fun INTERVAL_FWD tac l u st =
       if l>u then all_tac st 
       else (tac l THEN (fn st' => let
-          val ofs = nprems_of st' - nprems_of st;
+          val ofs = Thm.nprems_of st' - Thm.nprems_of st;
         in
           if ofs < ~1 then raise THM (
             "INTERVAL_FWD: Tac solved more than one goal",~1,[st,st'])
@@ -250,7 +250,7 @@ ML {*
     (* Apply tac2 to all subgoals emerged from tac1, in forward manner. *)
     fun (tac1 THEN_ALL_NEW_FWD tac2) i st =
       (tac1 i 
-        THEN (fn st' => INTERVAL_FWD tac2 i (i+nprems_of st'-nprems_of st) st')
+        THEN (fn st' => INTERVAL_FWD tac2 i (i + Thm.nprems_of st' - Thm.nprems_of st) st')
       ) st;
 
     fun REPEAT_ALL_NEW_FWD tac =
@@ -259,13 +259,13 @@ ML {*
     (* Repeat tac on subgoal. Determinize each step. 
        Stop if tac fails or subgoal is solved. *)
     fun REPEAT_DETERM' tac i st = let
-      val n = nprems_of st 
+      val n = Thm.nprems_of st 
     in
       REPEAT_DETERM (COND (has_fewer_prems n) no_tac (tac i)) st
     end
 
     fun REPEAT' tac i st = let
-      val n = nprems_of st 
+      val n = Thm.nprems_of st 
     in
       REPEAT (COND (has_fewer_prems n) no_tac (tac i)) st
     end
@@ -276,9 +276,9 @@ ML {*
     fun ALL_GOALS_FWD' tac i st =
       (tac i THEN (fn st' => 
         let
-          val i' = i + nprems_of st' + 1 - nprems_of st;
+          val i' = i + Thm.nprems_of st' + 1 - Thm.nprems_of st;
         in
-          if i' <= nprems_of st' then
+          if i' <= Thm.nprems_of st' then
             ALL_GOALS_FWD' tac i' st'
           else
             all_tac st'
@@ -294,7 +294,7 @@ ML {*
     fun ((tac1:itactic) THEN_INTERVAL (tac2:itactic)) = 
       (fn i => fn j => fn st =>
         ( tac1 i j
-          THEN (fn st' => tac2 i (j + nprems_of st' - nprems_of st) st')
+          THEN (fn st' => tac2 i (j + Thm.nprems_of st' - Thm.nprems_of st) st')
         ) st
       ):itactic
 
@@ -312,7 +312,7 @@ ML {*
       From cookbook, added exception handling *)
     fun fo_rtac thm = Subgoal.FOCUS (fn {concl, ...} => 
     let
-      val concl_pat = Drule.strip_imp_concl (cprop_of thm)
+      val concl_pat = Drule.strip_imp_concl (Thm.cprop_of thm)
       val insts = Thm.first_order_match (concl_pat, concl)
     in
       rtac (Drule.instantiate_normalize insts thm) 1
@@ -336,7 +336,7 @@ ML {*
 
         val ethms = Rs |> map (fn R =>
           (Simplifier.norm_hhf ctxt (Thm.trivial R)));
-      in eresolve_tac ethms i end
+      in eresolve_tac ctxt ethms i end
       );
 
     (* Resolve with premise. Copied and adjusted from Goal.assume_rule_tac. *)
@@ -353,17 +353,17 @@ ML {*
       end
       );
 
-    fun elim_all_tac thms = ALLGOALS (REPEAT_ALL_NEW (ematch_tac thms))
+    fun elim_all_tac ctxt thms = ALLGOALS (REPEAT_ALL_NEW (ematch_tac ctxt thms))
 
     fun prefer_tac i = defer_tac i THEN PRIMITIVE (Thm.permute_prems 0 ~1)
 
-    fun order_by ord f = sort (ord o pairself f)
+    fun order_by ord f = sort (ord o apply2 f)
 
     (* CLONE from tactic.ML *)
     local
       (*insert one tagged rl into the net*)
       fun insert_krl (krl as (_,th)) =
-        Net.insert_term (K false) (concl_of th, krl);
+        Net.insert_term (K false) (Thm.concl_of th, krl);
     in
       (*build a net of rules for resolution*)
       fun build_res_net rls =
@@ -389,7 +389,7 @@ ML {*
       Scan.lift (Args.mode "asm" -- Scan.optional (Args.parens (Scan.repeat Parse.nat)) [0]) --
       Scan.optional (Scan.lift
         (Parse.and_list1 
-          (Args.var -- (Args.$$$ "=" |-- Parse.!!! Args.name_inner_syntax)) --|
+          (Parse.position Args.var -- (Args.$$$ "=" |-- Parse.!!! Args.name_inner_syntax)) --|
           Args.$$$ "in")) [] --
       Attrib.thms >>
       (fn (((quant, (asm, occL)), insts), thms) => fn ctxt => METHOD 
@@ -422,7 +422,7 @@ ML {*
       fun ignore (Var ((name,_),_)) = String.isPrefix "_" name
         | ignore _ = true;
 
-      val pat = term_of cpat;
+      val pat = Thm.term_of cpat;
       val pvars = fold_aterms (
         fn t => fn l => if is_Var t andalso not (ignore t)
           then t::l else l
@@ -451,14 +451,14 @@ ML {*
     in t end;
 
     fun import_cterms is_open cts ctxt = let
-      val ts = map term_of cts
-      val (ts',ctxt') = Variable.import_terms is_open ts ctxt
-      val cts' = cts~~ts' |> map (fn (ct,t') => cterm_of (theory_of_cterm ct) t')
-    in (cts',ctxt') end
+      val ts = map Thm.term_of cts
+      val (ts', ctxt') = Variable.import_terms is_open ts ctxt
+      val cts' = map (Thm.cterm_of ctxt) ts'
+    in (cts', ctxt') end
 
 
     (*
-      Instantiate variables by left-to-right order of occurence, 
+      Instantiate variables by left-to-right order of occurrence, 
       inferring type instantiations
     *)
     fun cterm_instantiate' instl thm = let
@@ -467,7 +467,7 @@ ML {*
           map_filter (map_option Thm.term_of) instl);
 
       fun inst_of (v, ct) =
-        (Thm.cterm_of (Thm.theory_of_cterm ct) (Var v), ct)
+        (Thm.global_cterm_of (Thm.theory_of_cterm ct) (Var v), ct)
           handle TYPE (msg, _, _) => err msg;
 
       fun zip_vars xs ys =
@@ -499,7 +499,7 @@ ML {*
       val freqs = map (freqf thy net) rhss
 
       val res = freqs ~~ items 
-        |> sort (rev_order o int_ord o pairself fst)
+        |> sort (rev_order o int_ord o apply2 fst)
         |> map snd
   
     in res end
@@ -509,14 +509,16 @@ ML {*
 
     fun abs_def ctxt = Local_Defs.meta_rewrite_rule ctxt #> Drule.abs_def
 
-    fun trace_conv ct = (tracing (PolyML.makestring ct); Conv.all_conv ct);
+    fun trace_conv ct = (tracing (@{make_string} ct); Conv.all_conv ct);
 
     fun monitor_conv msg conv ct = let
-      val _ = tracing (msg ^ " (gets): " ^ PolyML.makestring ct);
+      val _ = tracing (msg ^ " (gets): " ^ @{make_string} ct);
       val res = conv ct 
-        handle exc => (tracing (msg ^ " (raises): " ^ PolyML.makestring exc);
+        handle exc =>
+         (if Exn.is_interrupt exc then reraise exc
+          else tracing (msg ^ " (raises): " ^ @{make_string} exc);
           reraise exc)
-      val _ = tracing (msg ^ " (yields): " ^ PolyML.makestring res);
+      val _ = tracing (msg ^ " (yields): " ^ @{make_string} res);
     in res end
 
     fun monitor_conv' msg conv ctxt ct = monitor_conv msg (conv ctxt) ct
@@ -533,24 +535,24 @@ ML {*
 
     local
       fun mk_equals_ct (ct,ct') = let
-        val thy = Context.merge (theory_of_cterm ct, theory_of_cterm ct');
+        val thy = Context.merge (Thm.theory_of_cterm ct, Thm.theory_of_cterm ct');
       in
-        Logic.mk_equals (term_of ct, term_of ct') |> cterm_of thy
+        Logic.mk_equals (Thm.term_of ct, Thm.term_of ct') |> Thm.global_cterm_of thy
       end
 
       fun tag_ct name ct = let
-        val thy = theory_of_cterm ct;
-        val t = term_of ct;
+        val thy = Thm.theory_of_cterm ct;
+        val t = Thm.term_of ct;
         val ty = fastype_of t;
         val t' = Const (@{const_name conv_tag},@{typ unit}-->ty-->ty)
           $Free (name,@{typ unit})$t;
-        val ct' = cterm_of thy t';
+        val ct' = Thm.global_cterm_of thy t';
       in ct' end
 
       fun mpat_conv pat ctxt ct = let
         val (tym,tm) = Thm.first_order_match (pat,ct);
         val tm' = map (fn (pt,ot) =>
-          case term_of pt of
+          case Thm.term_of pt of
             (Var ((name,_),_)) => (pt,tag_ct name ot)
           | _ => (pt,ot)
         ) tm;
@@ -564,7 +566,7 @@ ML {*
       end handle Pattern.MATCH 
         => raise (CTERM ("mpat_conv: No match",[pat,ct]));
 
-      fun tag_conv cnv ctxt ct = case term_of ct of
+      fun tag_conv cnv ctxt ct = case Thm.term_of ct of
         Const (@{const_name conv_tag},_)$Free(name,_)$_ => (
           (Conv.rewr_conv (@{thm conv_tag_def}) then_conv (cnv name) ctxt) ct)
       | _ => Conv.all_conv ct;
@@ -596,11 +598,11 @@ ML {*
 
     fun fix_conv conv ct = let
       val thm = conv ct
-      val eq = Logic.mk_equals (term_of ct, term_of ct) |> head_of
-    in if (term_of (Thm.lhs_of thm) aconv term_of ct)
+      val eq = Logic.mk_equals (Thm.term_of ct, Thm.term_of ct) |> head_of
+    in if (Thm.term_of (Thm.lhs_of thm) aconv Thm.term_of ct)
       then thm
       else thm RS Thm.trivial
-        (Thm.mk_binop (cterm_of (theory_of_cterm ct) eq) ct (Thm.rhs_of thm)) 
+        (Thm.mk_binop (Thm.global_cterm_of (Thm.theory_of_cterm ct) eq) ct (Thm.rhs_of thm)) 
     end
 
     fun ite_conv cv cv1 cv2 ct =
@@ -624,14 +626,14 @@ ML {*
 
       (* Transform term and prove equality to original by tactic *)
       fun f_tac_conv ctxt f tac ct = let
-        val t = term_of ct
+        val t = Thm.term_of ct
         val t' = f t
         val goal = Logic.mk_equals (t,t')
         val _ = if Config.get ctxt cfg_trace_f_tac_conv then
           tracing (Syntax.string_of_term ctxt goal)
         else ()
 
-        val goal = cterm_of (Proof_Context.theory_of ctxt) goal
+        val goal = Thm.cterm_of ctxt goal
 
         val thm = Goal.prove_internal ctxt [] goal (K tac)
       in
@@ -677,15 +679,13 @@ ML {*
         ) 
         "Resolve with premises"
       #> Method.setup @{binding elim_all}
-         (Attrib.thms >> (fn thms => fn _ => SIMPLE_METHOD (elim_all_tac thms)))
+         (Attrib.thms >> (fn thms => fn ctxt => SIMPLE_METHOD (elim_all_tac ctxt thms)))
          "repeteadly apply elimination rules to all subgoals"
       #> Method.setup @{binding subst_tac} eqsubst_inst_meth
            "single-step substitution (dynamic instantiation)"
       #> Method.setup @{binding clarsimp_all} (
-           let open Clasimp in
-             Method.sections clasimp_modifiers >> K (fn ctxt => SIMPLE_METHOD (
-               CHANGED_PROP (ALLGOALS (clarsimp_tac ctxt))))
-            end
+           Method.sections Clasimp.clasimp_modifiers >> K (fn ctxt => SIMPLE_METHOD (
+             CHANGED_PROP (ALLGOALS (Clasimp.clarsimp_tac ctxt))))
          ) "Simplify and clarify all subgoals"
 
   end

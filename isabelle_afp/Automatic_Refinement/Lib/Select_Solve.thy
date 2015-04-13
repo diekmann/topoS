@@ -47,7 +47,7 @@ end
 
 structure Select_Solve :SELECT_SOLVE = struct
   fun PREFER_SOLVED tac st = let
-    val n = nprems_of st
+    val n = Thm.nprems_of st
     val res = tac st
     (*val res' = Seq.append 
       (Seq.filter (has_fewer_prems n) res)
@@ -59,7 +59,7 @@ structure Select_Solve :SELECT_SOLVE = struct
   end
 
   fun IF_SUBGOAL_SOLVED tac1 then_tac else_tac st = let
-    val n = nprems_of st
+    val n = Thm.nprems_of st
   in
     (tac1 THEN COND (has_fewer_prems n) then_tac else_tac) st
   end
@@ -73,34 +73,34 @@ structure Select_Solve :SELECT_SOLVE = struct
       ) st
 
   fun TRY_SOLVE_ALL_NEW_FWD tac1 tac2 tac3 st = let
-    val n = nprems_of st
+    val n = Thm.nprems_of st
   in 
     (
       tac1 THEN_ELSE 
-        ( fn st' => let val n' = nprems_of st' in TRY_SOLVE_FWD (n' - n + 1) tac2 st' end,
+        ( fn st' => let val n' = Thm.nprems_of st' in TRY_SOLVE_FWD (n' - n + 1) tac2 st' end,
           tac3)
     ) st 
   end
 
 
-  fun SELECT_FIRST tac st = if nprems_of st < 2 then tac st
+  fun SELECT_FIRST tac st = if Thm.nprems_of st < 2 then tac st
   else let
-    val thy = theory_of_thm st
-    val cert = cterm_of thy
+    val thy = Thm.theory_of_thm st
+    val cert = Thm.global_cterm_of thy
 
     (*val _ = print_tac "Focusing" st*)
 
     (* Extract first subgoal *)
-    val (P,Q) = Thm.dest_implies (cprop_of st)
+    val (P,Q) = Thm.dest_implies (Thm.cprop_of st)
 
-    (*val _ = "Extracted: " ^ PolyML.makestring P |> tracing*)
+    (*val _ = "Extracted: " ^ @{make_string} P |> tracing*)
 
     (* Prepare tag *)
     local 
       fun intr_bal [] = @{thm NO_TAG}
         | intr_bal l = Conjunction.intr_balanced l
 
-      val t = term_of P 
+      val t = Thm.term_of P 
 
       val vars = Term.add_vars t []
       val tvars = Term.add_tvars t []
@@ -118,7 +118,7 @@ structure Select_Solve :SELECT_SOLVE = struct
       val tag_thm = Conjunction.intr tvars_tag vars_tag
     end
 
-    val TAG = cprop_of tag_thm
+    val TAG = Thm.cprop_of tag_thm
 
     (* Prepare new proof state *)
     val st' = Conjunction.mk_conjunction (TAG, P)
@@ -126,7 +126,7 @@ structure Select_Solve :SELECT_SOLVE = struct
       |> Conjunction.curry_balanced 2
       |> Thm.elim_implies tag_thm
 
-    (*val _ = "New proof state: " ^ PolyML.makestring st' |> tracing*)
+    (*val _ = "New proof state: " ^ @{make_string} st' |> tracing*)
 
     (*val _ = print_tac "New state" st'*)
 
@@ -134,13 +134,13 @@ structure Select_Solve :SELECT_SOLVE = struct
     val seq = tac st'
 
     fun elim_implies thA thAB = 
-      case try Thm.dest_implies (cprop_of thAB) of 
+      case try Thm.dest_implies (Thm.cprop_of thAB) of 
         SOME (A,_) => (
-          A aconvc cprop_of thA
+          A aconvc Thm.cprop_of thA
             orelse (
-              (*tracing (PolyML.makestring (term_of A));
-              tracing (PolyML.makestring (prop_of thA));*)
-              raise CTERM ("implies_elim: No aconv",[A,cprop_of thA])
+              (*tracing (@{make_string} (term_of A));
+              tracing (@{make_string} (prop_of thA));*)
+              raise CTERM ("implies_elim: No aconv",[A,Thm.cprop_of thA])
             );
           Thm.elim_implies thA thAB
         )
@@ -148,15 +148,15 @@ structure Select_Solve :SELECT_SOLVE = struct
 
     fun retrofit st' = let
       val st' = Drule.incr_indexes st st'
-      val n = nprems_of st'
+      val n = Thm.nprems_of st'
       val thm = Conjunction.uncurry_balanced n st'
         |> Goal.conclude
         |> Conv.fconv_rule (Thm.beta_conversion true)
-      (*val _ = "Proved: " ^ PolyML.makestring thm |> tracing*)
+      (*val _ = "Proved: " ^ @{make_string} thm |> tracing*)
     in
       if n=0 then 
         let
-          val (TAG',_) = Conjunction.dest_conjunction (cprop_of thm)
+          val (TAG',_) = Conjunction.dest_conjunction (Thm.cprop_of thm)
           val inst = Thm.match (TAG, TAG')
           val st = Thm.instantiate inst st 
             |> Conv.fconv_rule (Thm.beta_conversion true)
@@ -171,7 +171,7 @@ structure Select_Solve :SELECT_SOLVE = struct
         end
       else 
         let
-          val (R,TP') = Thm.dest_implies (cprop_of thm)
+          val (R,TP') = Thm.dest_implies (Thm.cprop_of thm)
           val (TAG',_) = Conjunction.dest_conjunction TP'
           val inst = Thm.match (TAG, TAG')
           val st = Thm.instantiate inst st
@@ -193,7 +193,7 @@ structure Select_Solve :SELECT_SOLVE = struct
   end
 
   fun AS_FIRSTGOAL tac i st = 
-    if i <= nprems_of st then
+    if i <= Thm.nprems_of st then
       (PRIMITIVE (Thm.permute_prems 0 (i-1)) 
       THEN tac 
       THEN PRIMITIVE (Thm.permute_prems 0 (1-i))) st
@@ -201,7 +201,7 @@ structure Select_Solve :SELECT_SOLVE = struct
 
   fun REPEAT_SOLVE_FWD_SELECT bias tac = let
     fun BIASED_SELECT tac st = 
-      if nprems_of st < 2 then tac st
+      if Thm.nprems_of st < 2 then tac st
       else let
         val s = Drule.size_of_thm st
         (*val _ = if s>100 then string_of_int s |> tracing else ()*)
@@ -209,7 +209,7 @@ structure Select_Solve :SELECT_SOLVE = struct
         if s < bias then 
           tac st 
         else let
-          val s1 = Logic.dest_implies (prop_of st) |> #1 |> size_of_term
+          val s1 = Logic.dest_implies (Thm.prop_of st) |> #1 |> size_of_term
         in
           if 5 * s1 < 2 * s then
             SELECT_FIRST tac st

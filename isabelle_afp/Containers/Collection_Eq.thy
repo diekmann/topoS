@@ -4,6 +4,7 @@
 theory Collection_Eq imports
   Containers_Auxiliary
   Containers_Generator
+  "../Deriving/Equality_Generator/Equality_Instances"
 begin
 
 section {* A type class for optional equality testing *}
@@ -12,6 +13,9 @@ class ceq =
   fixes ceq :: "('a \<Rightarrow> 'a \<Rightarrow> bool) option"
   assumes ceq: "ceq = Some eq \<Longrightarrow> eq = op ="
 begin
+
+lemma ceq_equality: "ceq = Some eq \<Longrightarrow> equality eq"
+  by (drule ceq, rule Equality_Generator.equalityI, simp)
 
 lemma ID_ceq: "ID ceq = Some eq \<Longrightarrow> eq = op ="
 unfolding ID_def id_apply by(rule ceq)
@@ -72,34 +76,30 @@ text {*
 This generator can be used for arbitrary types, not just datatypes. 
 *}
 
-ML_file "ceq_generator.ML"
+lemma equality_subst: "c1 = c2 \<Longrightarrow> equality c1 \<Longrightarrow> equality c2" by blast
 
-setup {*
-  Ceq_Generator.setup
-*}
+ML_file "ceq_generator.ML"
 
 subsection {* Type class instances for HOL types *}
 
 derive (eq) ceq unit
 lemma [code]: "CEQ(unit) = Some (\<lambda>_ _. True)"
   unfolding ceq_unit_def by (simp, intro ext, auto)
-derive (eq) ceq bool
-derive (eq) ceq nat
-derive (eq) ceq int
-derive (eq) ceq Enum.finite_1
-derive (eq) ceq Enum.finite_2
-derive (eq) ceq Enum.finite_3
-derive (eq) ceq Enum.finite_4
-derive (eq) ceq Enum.finite_5
-derive (eq) ceq integer
-derive (eq) ceq natural
-derive (eq) ceq nibble
-derive (eq) ceq char
-derive (eq) ceq String.literal
-derive ceq sum
-derive ceq prod
-derive ceq list
-derive ceq option
+derive (eq) ceq
+  bool
+  nat
+  int
+  Enum.finite_1
+  Enum.finite_2
+  Enum.finite_3
+  Enum.finite_4
+  Enum.finite_5
+  integer
+  natural
+  nibble
+  char
+  String.literal
+derive ceq sum prod list option
 derive (no) ceq "fun"
 
 lemma is_ceq_fun [simp]: "\<not> is_ceq TYPE('a \<Rightarrow> 'b)"

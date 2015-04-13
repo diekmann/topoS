@@ -89,9 +89,9 @@ ML {*
 
     val parse_cpat =
       Args.context --
-        Scan.lift Args.name_inner_syntax >> (fn (context,str) => 
-          Proof_Context.read_term_pattern context str
-          |> cterm_of (Proof_Context.theory_of context) 
+        Scan.lift Args.name_inner_syntax >> (fn (ctxt, str) => 
+          Proof_Context.read_term_pattern ctxt str
+          |> Thm.cterm_of ctxt 
         );
 
 
@@ -103,10 +103,10 @@ ML {*
     val renames_cterm = can rename_cterm;
 
     fun import_cterm ct ctxt = let
-      val (t',ctxt') = yield_singleton (Variable.import_terms true) 
-        (term_of ct) ctxt;
-      val ct' = cterm_of (Proof_Context.theory_of ctxt') t';
-    in (ct',ctxt') end
+      val (t', ctxt') = yield_singleton (Variable.import_terms true) 
+        (Thm.term_of ct) ctxt;
+      val ct' = Thm.cterm_of ctxt' t';
+    in (ct', ctxt') end
 
   (* Get theorem by name, that is visible in HOL.Main. Moreover, the
     theory of this theorem will be HOL.Main, which is required to avoid
@@ -168,14 +168,14 @@ ML {*
 
     (* Remove duplicate premises (stable) *)
     fun rem_dup_prems ctxt thm = let
-      val prems = prems_of thm;
+      val prems = Thm.prems_of thm;
       val perm = prems
       |> tag_list 0 
       |> map swap 
       |> Termtab.make_list
       |> Termtab.dest 
       |> map snd
-      |> sort (int_ord o pairself hd)
+      |> sort (int_ord o apply2 hd)
       |> flat;
 
       val thm' = Drule.rearrange_prems perm thm
@@ -189,7 +189,7 @@ ML {*
     | dest_def_eq t = raise TERM ("No definitional equation",[t]);
 
     fun norm_def_thm thm =
-      case concl_of thm of
+      case Thm.concl_of thm of
         (Const (@{const_name Pure.eq},_)$_$_) => thm
       | _ => thm RS eq_reflection;
 
@@ -198,13 +198,13 @@ ML {*
     val dt_params = dt_lhs #> strip_comb #> snd;
     val dt_head = dt_lhs #> head_of;
 
-    val dthm_lhs = concl_of #> dt_lhs;
-    val dthm_rhs = concl_of #> dt_rhs;
-    val dthm_params = concl_of #> dt_params;
-    val dthm_head = concl_of #> dt_head;
+    val dthm_lhs = Thm.concl_of #> dt_lhs;
+    val dthm_rhs = Thm.concl_of #> dt_rhs;
+    val dthm_params = Thm.concl_of #> dt_params;
+    val dthm_head = Thm.concl_of #> dt_head;
 
     (* Head of function application (cterm) *)
-    fun chead_of ct = case term_of ct of
+    fun chead_of ct = case Thm.term_of ct of
       (_$_) => chead_of (Thm.dest_fun ct)
       | _ => ct;
 
@@ -214,11 +214,11 @@ ML {*
         OF @{thms "arg_cong"} OF @{thms "meta_eq_to_obj_eq"}
 
     fun inst_meta_cong ct = let
-      val thy = theory_of_cterm ct;
+      val thy = Thm.theory_of_cterm ct;
       val ctxt = Proof_Context.init_global thy;
       val (ct,ctxt') = import_cterm ct ctxt;
       val mc_thm = meta_cong_rl;
-      val fpat = mc_thm |> cprop_of |> Drule.strip_imp_concl 
+      val fpat = mc_thm |> Thm.cprop_of |> Drule.strip_imp_concl 
         |> Thm.dest_arg1 |> chead_of;
       val inst = Drule.cterm_instantiate 
         [(fpat,ct)] mc_thm;
@@ -246,8 +246,7 @@ ML {*
     fun wrap_lthy_global f = wrap_lthy_result_global (pair () o f) (K I) #> #2;
 
     fun wrap_lthy_result_local f rmap lthy = let
-      val lthy = Local_Theory.open_target 
-        (Local_Theory.naming_of lthy) (Local_Theory.operations_of lthy) I lthy;
+      val (_, lthy) = Local_Theory.open_target lthy;
       val (r,lthy) = f lthy;
       val m = Local_Theory.target_morphism lthy;
       val lthy = Local_Theory.close_target lthy;
@@ -270,8 +269,7 @@ ML {*
 
     (* Define name\<equiv>rhs, yielding constant *)
     fun define_simple_local name rhs lthy = let
-      val lthy = Local_Theory.open_target 
-        (Local_Theory.naming_of lthy) (Local_Theory.operations_of lthy) I lthy;
+      val (_, lthy) = Local_Theory.open_target lthy;
       val (r,lthy) = define_simple name rhs lthy;
       val m = Local_Theory.target_morphism lthy;
       val lthy = Local_Theory.close_target lthy;
@@ -289,7 +287,7 @@ ML {*
         else Long_Name.qualify (Context.theory_name thy) mpat;
       val {const_space, constants, ...} = Sign.consts_of thy |> Consts.dest;
       val names = 
-      Name_Space.extern_entries ctxt const_space constants
+      Name_Space.extern_entries true ctxt const_space constants
       |> map_filter (fn
           ((name, _), (_, SOME _)) =>
             if Long_Name.qualifier name = match_prefix then SOME name else NONE

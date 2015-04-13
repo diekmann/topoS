@@ -1,4 +1,4 @@
-header {* \isaheader{Automatic Refinement Tool} *}
+section {* Automatic Refinement Tool *}
 theory Autoref_Tool
 imports 
   Autoref_Translate 
@@ -68,7 +68,7 @@ subsection {* Tools *}
 
 setup {*
   let
-    fun higher_order_rl_of ctxt thm = case concl_of thm of
+    fun higher_order_rl_of ctxt thm = case Thm.concl_of thm of
       @{mpat "Trueprop ((_,?t)\<in>_)"} => let
         val (f,args) = strip_comb t
       in
@@ -81,12 +81,12 @@ setup {*
           val goal = 
             HOLogic.mk_mem (HOLogic.mk_prod (c,f), R)
             |> HOLogic.mk_Trueprop
-            |> cterm_of (Proof_Context.theory_of ctxt)
+            |> Thm.cterm_of ctxt
 
           val res_thm = Goal.prove_internal ctxt [] goal (fn _ => 
             REPEAT (rtac @{thm fun_relI} 1)
             THEN (rtac thm 1)
-            THEN (ALLGOALS atac)
+            THEN (ALLGOALS (assume_tac ctxt))
           )
         in
           res_thm
@@ -152,7 +152,7 @@ ML {*
     end
 
     fun print_thm_pairs_matching ctxt cpat = let
-      val pat = term_of cpat
+      val pat = Thm.term_of cpat
       val ctxt = Autoref_Phases.init_data ctxt
       val thy = Proof_Context.theory_of ctxt
 

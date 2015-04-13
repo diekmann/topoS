@@ -7,9 +7,6 @@ sig
   (* derives a trivial instance (None) for class enum and any type *)
   val derive_no_cenum : string -> theory -> theory
 
-  (* registeres method in Derive-Manager *)
-  val setup : theory -> theory
-
 end
 
 structure Cenum_Generator : CENUM_GENERATOR = 
@@ -26,15 +23,16 @@ fun mk_none_cenum ty =
   in res
 end
 
-val derive_no_cenum = derive_none @{const_name cEnum} @{sort cenum} mk_none_cenum 
+val derive_no_cenum = 
+  derive_none @{const_name cEnum} @{sort cenum} mk_none_cenum
 
 fun derive_cenum typ_name param thy = 
   let
     val _ = if (param = "no") then false else  
       error "currently only parameter 'no' is accepted for class cenum"
-    in derive_no_cenum typ_name thy
+    in derive_no_cenum typ_name thy 
   end
 
-val setup = 
-  Derive_Manager.register_derive "cenum" "use (no) enumeration for class cenum" derive_cenum 
+val _ = Theory.setup  
+  (Derive_Manager.register_derive "cenum" "use (no) enumeration for class cenum" derive_cenum) 
 end

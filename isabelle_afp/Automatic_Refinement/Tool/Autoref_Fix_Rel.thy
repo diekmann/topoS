@@ -1,4 +1,4 @@
-header {* Relator Fixing *}
+section {* Relator Fixing *}
 theory Autoref_Fix_Rel
 imports Autoref_Id_Ops
 begin
@@ -24,7 +24,7 @@ abbreviation "DFLT_PRIO_TAG \<equiv> PRIO_TAG 0 0"
 text {* Some standard tags *}
 abbreviation "PRIO_TAG_OPTIMIZATION \<equiv> MINOR_PRIO_TAG 10"
   -- "Optimized version of an algorithm, with additional side-conditions"
-abbreviation "PRIO_TAG_GEN_ALGO \<equiv> MINOR_PRIO_TAG -10"
+abbreviation "PRIO_TAG_GEN_ALGO \<equiv> MINOR_PRIO_TAG (- 10)"
   -- "Generic algorithm, considered to be less efficient than default algorithm"
 
 
@@ -194,7 +194,7 @@ ML {*
     end
 
     fun constraints_of_goal i st =
-      case Logic.concl_of_goal (prop_of st) i of
+      case Logic.concl_of_goal (Thm.prop_of st) i of
         @{mpat "Trueprop ((_,?a)\<in>_)"} => constraints_of_term a
       | _ => raise THM ("constraints_of_goal",i,[st])
 
@@ -221,7 +221,7 @@ ML {*
     (* Internal use for hom-patterns, f and R are unified *)
     fun mk_CONSTRAINT_rl_atom thy (f,R) = let
       open Refine_Util
-      val ts = map (SOME o cterm_of thy) [f,R]
+      val ts = map (SOME o Thm.global_cterm_of thy) [f,R]
       val idx = Term.maxidx_term f (Term.maxidx_of_term R) + 1
       val thm = cterm_instantiate' ts 
         (Thm.incr_indexes idx @{thm CONSTRAINTI})
@@ -230,9 +230,9 @@ ML {*
     end;
 
     fun insert_CONSTRAINTS_tac i st = let
-      val thy = theory_of_thm st
+      val thy = Thm.theory_of_thm st
       val cs = constraints_of_goal i st 
-      |> map (mk_CONSTRAINT #> HOLogic.mk_Trueprop #> cterm_of thy)
+      |> map (mk_CONSTRAINT #> HOLogic.mk_Trueprop #> Thm.global_cterm_of thy)
     in
       Refine_Util.insert_subgoals_tac cs i st
     end
@@ -274,14 +274,14 @@ ML {*
         | _ => raise THM ("constraint_of_thm: Invalid concl",~1,[thm])
       end
 
-      val (f,rel) = relator_of (prop_of thm) 
+      val (f,rel) = relator_of (Thm.prop_of thm) 
         handle exc as (NO_REL t) => (
           warning (
             "Could not infer unique higher-order relator for "
             ^ "refinement rule: \n"
             ^ Display.string_of_thm_without_context thm
             ^ "\n for argument: " 
-            ^ Syntax.string_of_term_global (theory_of_thm thm) t
+            ^ Syntax.string_of_term_global (Thm.theory_of_thm thm) t
           ); 
           reraise exc)
 
@@ -291,7 +291,7 @@ ML {*
           if has_Var f then NONE else SOME (f,R)
       | genop_cs _ = NONE
 
-      val gen_ops = prems_of thm
+      val gen_ops = Thm.prems_of thm
         |> map_filter genop_cs
 
     in
@@ -303,7 +303,7 @@ ML {*
     (*********************)
     structure Rel_Prio_List = Prio_List (
       type item = string * term
-      val eq = op = o pairself fst 
+      val eq = op = o apply2 fst 
     )
 
     structure Rel_Prio = Generic_Data (
@@ -336,7 +336,7 @@ ML {*
 
     fun declare_prio name cpat relpos phi = 
       let
-        val item = (name,term_of (Morphism.cterm phi cpat))
+        val item = (name,Thm.term_of (Morphism.cterm phi cpat))
       in
         Rel_Prio.map (fn rpl =>
           case relpos of
@@ -359,11 +359,11 @@ ML {*
       end
 
       fun dest_prio_tag @{mpat "Trueprop (PRIO_TAG ?ma ?mi)"} = 
-            pairself (#2 o HOLogic.dest_number) (ma,mi)
+            apply2 (#2 o HOLogic.dest_number) (ma,mi)
         | dest_prio_tag t = raise TERM ("dest_prio_tag",[t])
 
       fun get_tagged_prios thm = let
-        val prems = prems_of thm
+        val prems = Thm.prems_of thm
         fun r [] = (0,0)
           | r (prem::prems) = (
               case try dest_prio_tag prem of
@@ -408,9 +408,9 @@ ML {*
             ^ Display.string_of_thm ctxt thm
           )
 
-          val R_cert = cterm_of (Proof_Context.theory_of ctxt) R
+          val R_cert = Thm.cterm_of ctxt R
 
-          fun cnv ctxt ct = (case term_of ct of
+          fun cnv ctxt ct = (case Thm.term_of ct of
             @{mpat "OP _ ::: _"} => all_conv
           | @{mpat "OP _"} => mk_rel_ANNOT_conv R_cert
           | @{mpat "_ $ _"} => arg1_conv (cnv ctxt)
@@ -418,12 +418,12 @@ ML {*
 
           ) ct
 
-          (*val _ = tracing ("ANNOT: " ^ PolyML.makestring thm)*)
+          (*val _ = tracing ("ANNOT: " ^ @{make_string} thm)*)
           val thm = (fconv_rule (rhs_conv cnv ctxt)) thm
           val thm = case try (fconv_rule (rhs_conv cnv ctxt)) thm of
             NONE => (warn (); thm)
           | SOME thm => thm
-          (*val _ = tracing ("RES: " ^ PolyML.makestring thm)*)
+          (*val _ = tracing ("RES: " ^ @{make_string} thm)*)
 
         in
           (SOME (ps,(f,R)),thm)
@@ -439,7 +439,7 @@ ML {*
           |> map (fn thm => (try constraint_of_thm thm,thm))
         val spairs = filter (is_some o #1) pairs
           |> map add_o 
-          |> sort (prio_order o pairself #1)
+          |> sort (prio_order o apply2 #1)
           |> map #2
         val npairs = filter (is_none o #1) pairs
       in
@@ -461,7 +461,7 @@ ML {*
       val description = "Autoref: Homogenity rules"
       val sort = K I
       val transform = K (
-        fn thm => case concl_of thm of 
+        fn thm => case Thm.concl_of thm of 
           @{mpat "Trueprop (CONSTRAINT _ _)"} => [thm]
         | _ => raise THM ("Invalid homogenity rule",~1,[thm])
       )
@@ -512,7 +512,7 @@ ML {*
         val cs' = map (fn (_,(f,R)) => (f,hom_pat_of_rel ctxt R)) cs
         val thy = Proof_Context.theory_of ctxt
         val thms = get_hom_rules ctxt @ map (mk_CONSTRAINT_rl_atom thy) cs'
-        val thms = map (cprop_of #> Thm.trivial) thms
+        val thms = map (Thm.cprop_of #> Thm.trivial) thms
         val net = Tactic.build_net thms
       in
         net
@@ -531,7 +531,7 @@ ML {*
       val sort = K I
 
       val transform = K (
-        fn thm => case prop_of thm of 
+        fn thm => case Thm.prop_of thm of 
           @{mpat "Trueprop (TYREL _)"} => [thm]
         | _ => raise THM ("Invalid tyrel-rule",~1,[thm])
       )
@@ -561,20 +561,20 @@ ML {*
       end
   
       fun add_relators_of_subgoal st i acc = 
-        case Logic.concl_of_goal (prop_of st) i of
+        case Logic.concl_of_goal (Thm.prop_of st) i of
           @{mpat "Trueprop (CONSTRAINT _ ?R)"} => add_relators R acc
         | _ => acc
   
     in
 
       fun insert_tyrel_tac i j k st = let
-        val thy = theory_of_thm st
+        val thy = Thm.theory_of_thm st
 
         fun get_constraint t = let
           val T = fastype_of t
           val res = Const (@{const_name TYREL}, T --> HOLogic.boolT) $ t
         in
-          res |> HOLogic.mk_Trueprop |> cterm_of thy
+          res |> HOLogic.mk_Trueprop |> Thm.global_cterm_of thy
         end
         
         val relators = fold (add_relators_of_subgoal st) (i upto j) []
@@ -586,7 +586,7 @@ ML {*
 
     fun solve_tyrel_tac ctxt = let
       fun mk_tac rl = rtac @{thm TYREL_RES} 
-        THEN' match_tac [rl RS @{thm DOMAIN_OF_TYREL}]
+        THEN' match_tac ctxt [rl RS @{thm DOMAIN_OF_TYREL}]
         THEN' rtac rl
 
       val tac = FIRST' (map mk_tac (tyrel_rules.get ctxt))
@@ -603,7 +603,7 @@ ML {*
     fun internal_hom_tac ctxt = let
       val hom_net = hom_netD.get ctxt
     in
-      Seq.INTERVAL (TRY o DETERM o resolve_from_net_tac hom_net)    
+      Seq.INTERVAL (TRY o DETERM o resolve_from_net_tac ctxt hom_net)    
     end
 
     fun internal_spec_tac ctxt = let
@@ -625,7 +625,7 @@ ML {*
         |> map_filter (fst #> map_option (mk_CONSTRAINT_rl thy))
         |> Tactic.build_net
     in 
-      Seq.INTERVAL (TRY o DETERM o REPEAT_ALL_NEW (resolve_from_net_tac net))
+      Seq.INTERVAL (TRY o DETERM o REPEAT_ALL_NEW (resolve_from_net_tac ctxt net))
     end
 
     fun guess_relators_tac ctxt = let
@@ -638,7 +638,7 @@ ML {*
       val hom_net = hom_netD.get ctxt
 
       fun hom_tac i j = Seq.INTERVAL 
-        (TRY o DETERM o resolve_from_net_tac hom_net) i j
+        (TRY o DETERM o resolve_from_net_tac ctxt hom_net) i j
 
       fun spec_tac i j = 
         REPEAT (CHANGED 
@@ -646,7 +646,7 @@ ML {*
         )
 
       fun solve_tac i j = Seq.INTERVAL 
-        (TRY o DETERM o REPEAT_ALL_NEW (resolve_from_net_tac net)) i j
+        (TRY o DETERM o REPEAT_ALL_NEW (resolve_from_net_tac ctxt net)) i j
     in
       Seq.INTERVAL insert_CONSTRAINTS_tac
       THEN_INTERVAL hom_tac
@@ -697,10 +697,10 @@ ML {*
       fun unifies thy (t1,t2) = Term.could_unify (t1,t2) andalso
         let
           val idx1 = Term.maxidx_of_term t1
-          val t2 = Logic.incr_indexes ([],idx1+1) t2
+          val t2 = Logic.incr_indexes ([], [], idx1 + 1) t2
           val idx2 = Term.maxidx_of_term t2
         in
-          can (Pattern.unify thy (t1,t2)) (Envir.empty idx2)
+          can (Pattern.unify (Context.Theory thy) (t1,t2)) (Envir.empty idx2)
         end
 
       fun analyze_possible_problems ctxt (f,R) = let
@@ -791,10 +791,10 @@ ML {*
 
       end
 
-      fun pretty_try_candidates ctxt i st = if i > nprems_of st then
+      fun pretty_try_candidates ctxt i st = if i > Thm.nprems_of st then
         Pretty.str "Goal number out of range"
       else
-        case Logic.concl_of_goal (prop_of st) i of
+        case Logic.concl_of_goal (Thm.prop_of st) i of
           @{mpat "Trueprop (CONSTRAINT ?f ?R)"} =>
             let
               val pairs = thm_pairsD.get ctxt
@@ -843,7 +843,7 @@ ML {*
 
       exception ERR of Pretty.T
       fun analyze' ctxt i j st = let
-        val As = Logic.strip_horn (prop_of st) |> #1 
+        val As = Logic.strip_horn (Thm.prop_of st) |> #1 
           |> drop (i-1) |> take (j-i+1)
           |> map (strip_all_body #> Logic.strip_imp_concl)
         val Cs = map_filter (
@@ -885,10 +885,10 @@ ML {*
         (analyze' ctxt i j st; Pretty.str "No failure") handle ERR p => p
 
       fun try_solve_tac ctxt i st =  
-        if i > nprems_of st then
+        if i > Thm.nprems_of st then
           (tracing "Goal number out of range"; Seq.empty)
         else
-          case Logic.concl_of_goal (prop_of st) i of
+          case Logic.concl_of_goal (Thm.prop_of st) i of
             @{mpat "Trueprop (CONSTRAINT ?f ?R)"} =>
               let
                 val pairs = thm_pairsD.get ctxt
@@ -922,15 +922,12 @@ ML {*
                     pretty_constraint ctxt c
                   ] |> Pretty.string_of |> tracing
 
-                  val old = !Pattern.unify_trace_failure_default (* Argh! *)
-                  val _ = Pattern.unify_trace_failure_default := true
                   val rl = mk_CONSTRAINT_rl thy c 
                      |> Drule.zero_var_indexes
                   val res = (SOLVED' (rtac rl 
-                      THEN_ALL_NEW (REPEAT_ALL_NEW (resolve_from_net_tac net)))
+                      THEN_ALL_NEW (REPEAT_ALL_NEW (resolve_from_net_tac ctxt net)))
                     ) i st
                     |> Seq.pull |> is_some
-                  val _ = Pattern.unify_trace_failure_default := old
 
                   val _ = (if res then Pretty.str "OK" else Pretty.str "ERR")
                     |> Pretty.string_of |> tracing
@@ -956,7 +953,7 @@ ML {*
         |> map_filter (fst #> map_option (mk_CONSTRAINT_rl thy))
         |> Tactic.build_net
     in 
-      resolve_from_net_tac net
+      resolve_from_net_tac ctxt net
     end
 
     val phase = {

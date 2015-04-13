@@ -2,7 +2,7 @@
     Author:     Andreas Lochbihler, ETH Zurich
 *)
 
-header {* Bit operations for target language integers *}
+chapter {* Bit operations for target language integers *}
 
 theory Bits_Integer imports
   More_Bits_Int
@@ -496,8 +496,8 @@ lemma integer_shiftl_code [code]:
   "integer_shiftl x 0 = x"
   "integer_shiftl x (Code_Numeral.Pos n) = integer_shiftl (Code_Numeral.dup x) (Code_Numeral.sub n num.One)"
   "integer_shiftl 0 (Code_Numeral.Pos n) = 0"
-by(simp_all add: integer_shiftl_def shiftl_integer_def)
-  (transfer, simp, metis ac_simps comm_semiring_1_class.normalizing_semiring_rules(7) int_shiftl_numeral(1) mult_numeral_1 shiftl_int_def)
+  by (simp_all add: integer_shiftl_def shiftl_integer_def shiftl_int_def numeral_eq_Suc)
+    (transfer, simp)
 
 end
 
@@ -865,11 +865,11 @@ section {* Test code generator setup *}
 
 definition bit_integer_test :: "bool" where
   "bit_integer_test =
-  (([ -1 AND 3, 1 AND -3, 3 AND 5, -3 AND -5
-    , -3 OR 1, 1 OR -3, 3 OR 5, -3 OR -5
-    , NOT 1, NOT -3
-    , -1 XOR 3, 1 XOR -3, 3 XOR 5, -5 XOR -3
-    , set_bit 5 4 True, set_bit -5 2 True, set_bit 5 0 False, set_bit -5 1 False
+  (([ -1 AND 3, 1 AND -3, 3 AND 5, -3 AND (- 5)
+    , -3 OR 1, 1 OR -3, 3 OR 5, -3 OR (- 5)
+    , NOT 1, NOT (- 3)
+    , -1 XOR 3, 1 XOR (- 3), 3 XOR 5, -5 XOR (- 3)
+    , set_bit 5 4 True, set_bit (- 5) 2 True, set_bit 5 0 False, set_bit (- 5) 1 False
     , 1 << 2, -1 << 3
     , 100 >> 3, -100 >> 3] :: integer list)
   = [ 3, 1, 1, -7
