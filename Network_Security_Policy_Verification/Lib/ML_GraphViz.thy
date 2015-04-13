@@ -62,10 +62,12 @@ val sanitize_string =
   String.map (fn c => if is_valid_char c then c else #"_")
 
 
-fun term_to_string (ctx: Proof.context) (n: term) : string = 
+fun term_to_string (ctxt: Proof.context) (t: term) : string = 
   (*n |> Syntax.pretty_term ctx |> Pretty.string_of |> ATP_Util.unyxml*)
-  let val _ = writeln "TODO: need to reimplement"; in
-  "TODO: isabelle 2015, reimplement this function" end
+  let
+    val ctxt' = Config.put show_markup false ctxt;
+  in Print_Mode.setmp [] (Syntax.string_of_term ctxt') t
+  end;
 
 
 fun term_to_string_safe (ctx: Proof.context) (n: term) : string = 
