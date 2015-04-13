@@ -63,7 +63,9 @@ val sanitize_string =
 
 
 fun term_to_string (ctx: Proof.context) (n: term) : string = 
-  n |> Syntax.pretty_term ctx |> Pretty.string_of |> ATP_Util.unyxml
+  (*n |> Syntax.pretty_term ctx |> Pretty.string_of |> ATP_Util.unyxml*)
+  let val _ = writeln "TODO: need to reimplement"; in
+  "TODO: isabelle 2015, reimplement this function" end
 
 
 fun term_to_string_safe (ctx: Proof.context) (n: term) : string = 

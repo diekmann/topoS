@@ -76,8 +76,7 @@ begin
 
    text{*Invariant violations do not disappear if we add more flows. *}
    lemma sinvar_mono_imp_negative_mono:
-   "sinvar_mono
-   \<Longrightarrow> valid_graph \<lparr> nodes = N, edges = E \<rparr> \<Longrightarrow>  E' \<subseteq> E \<Longrightarrow> \<not> sinvar \<lparr> nodes = N, edges = E' \<rparr> nP \<Longrightarrow> \<not> sinvar \<lparr> nodes = N, edges = E \<rparr> nP"
+   "sinvar_mono \<Longrightarrow> valid_graph \<lparr> nodes = N, edges = E \<rparr> \<Longrightarrow>  E' \<subseteq> E \<Longrightarrow> \<not> sinvar \<lparr> nodes = N, edges = E' \<rparr> nP \<Longrightarrow> \<not> sinvar \<lparr> nodes = N, edges = E \<rparr> nP"
    apply (unfold sinvar_mono_def)
    by(blast)
 
@@ -817,12 +816,12 @@ subsection {* Monotonicity of offending flows *}
               apply(simp_all)
                 apply(simp add: `Fadd \<subseteq> Eadd`)
                apply(simp add: delete_edges_simp2, clarify)
-               apply(thin_tac "\<not> sinvar ?X ?y")
-               apply(thin_tac "\<forall> x\<in> Fadd. ?X x")
+               apply(thin_tac "\<not> sinvar X y" for X y)
+               apply(thin_tac "\<forall> x\<in> Fadd. X x" for X)
                apply(insert graph_edges_simp_helper, simp)
               apply(erule conjE)+
-              apply(thin_tac "\<not> sinvar ?X ?y")
-              apply(thin_tac "sinvar ?X ?y")
+              apply(thin_tac "\<not> sinvar X y" for X y)
+              apply(thin_tac "sinvar X y" for X y)
               apply(simp add: delete_edges_simp2)
               done
     
@@ -925,8 +924,8 @@ subsection {* Monotonicity of offending flows *}
         apply(subgoal_tac "insert a (insert b V) = V")
          apply(simp)
          using goal_not_eval apply fastforce
-        apply(thin_tac "\<forall>F \<subseteq> E. ?X F")
-        apply(thin_tac "\<exists>F \<subseteq> ?E. ?X F")
+        apply(thin_tac "\<forall>F \<subseteq> E. X F" for X)
+        apply(thin_tac "\<exists>F \<subseteq> E. X F" for E X)
         apply(insert validG)
         apply(simp add: valid_graph_def)
         apply(fastforce)
