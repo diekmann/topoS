@@ -12,6 +12,7 @@ text{*
 *}
 
 
+
 context SecurityInvariant_withOffendingFlows
 begin
   text{*We define the monotonicity of @{text "sinvar"}:
@@ -30,13 +31,6 @@ begin
   text{*
     If one can show @{const sinvar_mono}, then the instantiation of the @{term SecurityInvariant_preliminaries} locale is tremendously simplified. 
   *}
-
-
-  lemma sinvarE: "
-  sinvar_mono \<Longrightarrow>
-  (\<And> nP N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E \<rparr> nP \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E' \<rparr> nP )"
-  unfolding sinvar_mono_def
-  by metis
 
   lemma sinvar_mono_I_proofrule_simple: 
   "\<lbrakk> (\<forall> G nP. sinvar G nP = (\<forall> (e1, e2) \<in> edges G. P e1 e2 nP) ) \<rbrakk> \<Longrightarrow> sinvar_mono"
@@ -114,9 +108,12 @@ begin
   proof -
     from validG have validG': "valid_graph \<lparr>nodes = nodes G, edges = {(e1, e2). (e1, e2) \<in> edges G \<and> (e1, e2) \<notin> FF}\<rparr>" 
       by (metis delete_edges_def delete_edges_valid)
+    from mono have sinvarE: "(\<And> nP N E' E. valid_graph \<lparr> nodes = N, edges = E \<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E \<rparr> nP \<Longrightarrow> sinvar \<lparr> nodes = N, edges = E' \<rparr> nP )"
+      unfolding sinvar_mono_def
+      by metis
     have "\<And> G FF F. {(e1, e2). (e1, e2) \<in> edges G \<and> (e1, e2) \<notin> FF \<and> (e1, e2) \<notin> F} \<subseteq> {(e1, e2). (e1, e2) \<in> edges G \<and> (e1, e2) \<notin> FF} "
-      apply(rule Collect_mono) by(simp)
-    from sinvarE[OF mono validG' this]
+      by(rule Collect_mono) (simp)
+    from sinvarE[OF validG' this]
     show "is_offending_flows FF G nP \<Longrightarrow> is_offending_flows (FF \<union> F) G nP"
       by(simp add: is_offending_flows_def delete_edges_def)
   qed
@@ -146,10 +143,6 @@ begin
     else
       minimalize_offending_overapprox fs (f#keep) G nP
     )"
-
-
-  lemma delete_edges_list_union_insert: "delete_edges_list G (f#fs@keep) = delete_edges G ({f} \<union> set fs \<union> set keep)"
-  by(simp add: graph_ops delete_edges_list_set)
 
 
 
@@ -195,8 +188,6 @@ begin
 
 
 
-
-
   lemma not_model_mono_imp_addedge_mono: 
   assumes mono: "sinvar_mono"
    and vG: "valid_graph G" and ain: "(a1,a2) \<in> edges G" and xy: "X \<subseteq> Y" and ns: "\<not> sinvar (add_edge a1 a2 (delete_edges G (Y))) nP"  
@@ -216,50 +207,6 @@ begin
       from this[OF 2 1] have "\<not> sinvar (delete_edges G (X - {(a1, a2)})) nP" by simp
       from this valid_graph_add_delete_edge_simp[symmetric] show ?thesis by simp
    qed
-
-
-
-
-
-
-  (*lemma add_delete_insert_helper: "valid_graph G \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow> (a,b)\<notin>F \<Longrightarrow> 
-    (add_edge a b (delete_edges G (insert (a, b) F))) = delete_edges G F"
-    apply(simp add: graph_ops)
-    apply(rule conjI)
-     apply(simp add: valid_graph_def)
-     apply (auto)[1]
-    by fastforce*)
-  (*lemma a_is_in_offending_flows_min: "valid_graph G \<Longrightarrow> a \<in> edges G \<Longrightarrow>  a \<notin> F \<Longrightarrow>
-      \<not> sinvar G nP \<Longrightarrow>
-       sinvar (delete_edges G (insert a F)) nP \<Longrightarrow>
-       \<not> sinvar (delete_edges G F) nP \<Longrightarrow> 
-       (\<forall>(e1, e2)\<in> F. \<not> sinvar (add_edge e1 e2 (delete_edges G (insert a F))) nP) \<Longrightarrow>
-       is_offending_flows_min_set (insert a F) G nP"
-  apply(unfold is_offending_flows_min_set_def is_offending_flows_def)
-  apply(rule conjI)
-   apply(simp)
-  apply(simp)
-  apply(clarify)
-  apply(simp add: add_delete_insert_helper)
-  done*)
-
-  
-  (*lemma "\<lbrakk> (\<forall> G nP X Y. X \<subseteq> Y \<and> \<not> sinvar (delete_edges G (Y)) nP \<longrightarrow> \<not> sinvar (delete_edges G X) nP );
-      valid_graph G; is_offending_flows (set ff) G nP; set ff \<subseteq> edges G; distinct ff \<rbrakk> \<Longrightarrow> 
-    \<exists> f \<subseteq> (set ff). is_offending_flows_min_set f G nP"
-  apply(simp add: is_offending_flows_def is_offending_flows_min_set_def)
-  apply(clarify)
-  apply(rule_tac x="set (minimalize_offending_overapprox ff [] G nP)" in exI)
-  (*x \<subseteq> ff \<and> (\<forall>(e1, e2)\<in>x. \<not> sinvar (add_edge e1 e2 (delete_edges G x)) nP)*)
-  apply(rule conjI)
-   thm minimalize_offending_overapprox_subset[of "ff" "[]", simplified]
-   apply(simp add:  minimalize_offending_overapprox_subset[of "ff" "[]", simplified])
-  apply(rule conjI)
-   apply(simp add:minimalize_offending_overapprox_maintains_evalmodel)
-  apply(rule mono_imp_minimalize_offending_overapprox_minimal) 
-        apply(simp_all)
-  apply(simp add: in_mono)
-  done*)
 
 
   theorem is_offending_flows_min_set_minimalize_offending_overapprox:
@@ -317,7 +264,11 @@ begin
           hence ff_distinct: "distinct ff" and a_not_in_ff: "a \<notin> set ff "by simp_all
         assume minimal: "\<forall>(e1, e2)\<in>set keeps. 
           \<not> sinvar (add_edge e1 e2 (delete_edges G (set (minimalize_offending_overapprox (a # ff) keeps G nP)))) nP"
-    
+        
+        
+        have delete_edges_list_union_insert: "\<And> f fs keep. delete_edges_list G (f#fs@keep) = delete_edges G ({f} \<union> set fs \<union> set keep)"
+        by(simp add: graph_ops delete_edges_list_set)
+
         let ?goal="?case" --"we show this by case distinction"
         show ?case
         proof(cases "sinvar (delete_edges_list G (ff@keeps)) nP")
@@ -456,18 +407,16 @@ begin
   text{*
   @{const minimalize_offending_overapprox} not only computes a set where @{const is_offending_flows_min_set} holds, but it also returns a subset of the input.
   *}
-  lemma  minimalize_offending_overapprox_keeps_keeps:
-      "(set keeps) \<subseteq> set (minimalize_offending_overapprox ff keeps G nP)"
-      apply(induction ff keeps G nP rule: minimalize_offending_overapprox.induct)
-       apply(simp_all)
-      done
+  lemma minimalize_offending_overapprox_keeps_keeps: "(set keeps) \<subseteq> set (minimalize_offending_overapprox ff keeps G nP)"
+    proof(induction ff keeps G nP rule: minimalize_offending_overapprox.induct)
+    qed(simp_all)
 
-  lemma  minimalize_offending_overapprox_subseteq_input:
-      "set (minimalize_offending_overapprox ff keeps G nP) \<subseteq> (set ff) \<union> (set keeps)"
-      apply(induction ff keeps G nP rule: minimalize_offending_overapprox.induct)
-       apply(simp_all)
-      apply(simp add: delete_edges_list_set delete_edges_simp2)
-      by blast
+  lemma minimalize_offending_overapprox_subseteq_input: "set (minimalize_offending_overapprox ff keeps G nP) \<subseteq> (set ff) \<union> (set keeps)"
+    proof(induction ff keeps G nP rule: minimalize_offending_overapprox.induct)
+    case 1 thus ?case by simp
+    next
+    case 2 thus ?case by(simp add: delete_edges_list_set delete_edges_simp2) blast
+    qed
 
 end
 
@@ -476,23 +425,42 @@ end
 
 context SecurityInvariant_preliminaries
   begin
-    
     text{* @{const sinvar_mono} naturally holds in @{const SecurityInvariant_preliminaries} *}
     lemma sinvar_monoI: "sinvar_mono"
-      apply(unfold sinvar_mono_def)
-      apply(insert mono_sinvar)
-      by blast
+      unfolding sinvar_mono_def using mono_sinvar by blast
+
+    text{*Note: due to monotonicity, the minimality also holds for arbitrary subsets *}
+    lemma assumes "valid_graph G" and "is_offending_flows_min_set F G nP" and "F \<subseteq> edges G" and "E \<subseteq> F" and "E \<noteq> {}"
+          shows "\<not> sinvar \<lparr> nodes = nodes G, edges = ((edges G) - F) \<union> E \<rparr> nP"
+    proof -
+      from sinvar_mono_imp_negative_delete_edge_mono[OF sinvar_monoI `valid_graph G`] have negative_delete_edge_mono: 
+      "\<And>X Y. X \<subseteq> Y \<Longrightarrow> \<not> sinvar \<lparr> nodes = nodes G, edges = (edges G) - Y \<rparr> nP \<Longrightarrow> \<not> sinvar \<lparr> nodes = nodes G, edges = edges G - X \<rparr> nP"
+        using delete_edges_simp2 by metis
+      from assms(2) have "(\<forall>(e1, e2)\<in>F. \<not> sinvar (add_edge e1 e2 (delete_edges G F)) nP)"
+      unfolding is_offending_flows_min_set_def by simp
+      with `valid_graph G` have min: "(\<forall>(e1, e2)\<in>F. \<not> sinvar \<lparr> nodes = nodes G, edges = ((edges G) - F) \<union> {(e1,e2)} \<rparr> nP)"
+        apply(simp add: delete_edges_simp2 add_edge_def)
+        apply(rule, rename_tac x, case_tac x, rename_tac e1 e2, simp)
+        apply(erule_tac x="(e1, e2)" in ballE)
+         apply(simp_all)
+        apply(subgoal_tac "insert e1 (insert e2 (nodes G)) = nodes G")
+         apply(simp)
+        by (metis assms(3) insert_absorb set_rev_mp valid_graph.E_validD(1) valid_graph.E_validD(2))
+      from `E \<noteq> {}` obtain e where "e \<in> E" by blast
+      with min `E \<subseteq> F` have mine: "\<not> sinvar \<lparr> nodes = nodes G, edges = ((edges G) - F) \<union> {e} \<rparr> nP" by fast
+      have e1: "edges G - (F - {e}) = insert e (edges G - F)" using DiffD2 `e \<in> E` assms(3) assms(4) by auto 
+      have e2: "edges G - (F - E) = ((edges G) - F) \<union> E" using assms(3) assms(4) by auto 
+      from negative_delete_edge_mono[where Y="F - {e}" and X="F - E"] `e \<in> E` have
+      "\<not> sinvar \<lparr>nodes = nodes G, edges = edges G - (F - {e})\<rparr> nP \<Longrightarrow> \<not> sinvar \<lparr>nodes = nodes G, edges = edges G - (F - E)\<rparr> nP" by blast
+      with mine e1 e2 show ?thesis by simp
+    qed
 
     
     text{* The algorithm @{const minimalize_offending_overapprox} is correct *}
     lemma minimalize_offending_overapprox_sound: 
       "\<lbrakk> valid_graph G; is_offending_flows (set ff) G nP; set ff \<subseteq> edges G; distinct ff \<rbrakk>
-        \<Longrightarrow>
-         is_offending_flows_min_set (set (minimalize_offending_overapprox ff [] G nP)) G nP "
-    apply(insert sinvar_monoI)
-    apply(unfold sinvar_mono_def)
-    using is_offending_flows_min_set_minimalize_offending_overapprox
-    by (metis (full_types) sinvar_monoI)
+        \<Longrightarrow> is_offending_flows_min_set (set (minimalize_offending_overapprox ff [] G nP)) G nP "
+    using is_offending_flows_min_set_minimalize_offending_overapprox sinvar_monoI by blast
 
     text{* 
       If @{term "\<not> sinvar G nP"}
@@ -533,6 +501,8 @@ context SecurityInvariant_preliminaries
        apply(induction ff keeps G nP rule: minimalize_offending_overapprox.induct)
         apply(simp_all)
       done*)
+
+    
  end
 
 
@@ -585,10 +555,10 @@ begin
 
             from this[symmetric] add_edge_valid[OF delete_edges_valid[OF validG]] have 
               "valid_graph \<lparr>nodes = nodes G, edges = edges G - f \<union> {(e1, e2)}\<rparr>" by simp
-            from sinvarE[OF mono this] have mono'':
+            from mono this  have mono'':
               "\<And> E'. E' \<subseteq> edges G - f \<union> {(e1, e2)} \<Longrightarrow>
                 sinvar \<lparr>nodes = nodes G, edges = edges G - f \<union> {(e1, e2)}\<rparr> nP \<Longrightarrow> 
-                sinvar \<lparr>nodes = nodes G, edges = E'\<rparr> nP" by simp
+                sinvar \<lparr>nodes = nodes G, edges = E'\<rparr> nP" unfolding sinvar_mono_def by blast
             
             from e1e2cond Geq have "sinvar \<lparr> nodes = nodes G, edges = edges G - f \<union> {(e1,e2)}\<rparr> nP" by simp
             from this mono'' have "sinvar \<lparr> nodes = nodes G, edges = edges G - f\<rparr> nP" by auto
@@ -1083,8 +1053,8 @@ end
 
   corollary Un_set_offending_flows_bound_minus_subseteq': 
     "\<lbrakk> valid_graph \<lparr> nodes = V, edges = E \<rparr>;
-    \<Union> set_offending_flows \<lparr>nodes = V, edges = E \<rparr> nP \<subseteq> X \<rbrakk> \<Longrightarrow>
-    \<Union>set_offending_flows \<lparr> nodes = V, edges = E - E' \<rparr> nP \<subseteq> X - E'"
+    \<Union> set_offending_flows \<lparr> nodes = V, edges = E \<rparr> nP \<subseteq> X \<rbrakk> \<Longrightarrow>
+    \<Union> set_offending_flows \<lparr> nodes = V, edges = E - E' \<rparr> nP \<subseteq> X - E'"
     apply(drule(1) Un_set_offending_flows_bound_minus_subseteq) by blast
 
 
