@@ -30,6 +30,7 @@ sig
   val node_to_string: Proof.context -> (term -> string -> string) ->  term -> string
   val term_to_string: Proof.context ->  term -> string;
   val term_to_string_safe: Proof.context ->  term -> string;
+  val term_to_string_html: Proof.context ->  term -> string;
 end
 
 structure Graphviz: GRAPHVIZ =
@@ -51,7 +52,7 @@ fun write_to_tmpfile (t: string): Path.T =
 fun evaluate_term (ctxt: Proof.context) edges = 
   case Code_Evaluation.dynamic_value ctxt edges of
     SOME x => x
-  | NONE => error "ML_GraphViz: failed to evaluate edges"
+  | NONE => error "ML_GraphViz: failed to evaluate term"
 
 
 fun is_valid_char c =
@@ -76,6 +77,20 @@ fun term_to_string_safe ctxt (n: term) : string =
   in
     if sanitize_string str <> str then (warning ("String  "^str^" contains invalid characters!"); sanitize_string str)
      else str end;
+
+local
+  val sanitize_string_html =
+    String.map (fn c => if (is_valid_char c orelse c = #" " orelse (c <= #"/" andalso c >= #"(")
+                            orelse c = #"|" orelse c = #"=" orelse c = #"?" orelse c = #"!" orelse c = #"_"
+                            orelse c = #"[" orelse c = #"}") then c else #"_")
+in
+  fun term_to_string_html ctxt (n: term) : string = 
+    let
+      val str = term_to_string ctxt n
+    in
+      if sanitize_string_html str <> str then (warning ("String  "^str^" contains invalid characters!"); sanitize_string_html str)
+       else str end
+end;
 
 fun node_to_string ctxt (tune_node_format: term -> string -> string) (n: term) : string = 
   n |> term_to_string ctxt |> tune_node_format n
@@ -121,8 +136,8 @@ local
       map format_dot_edge trm
     end
 
-  fun apply_dot_header header edgess =
-    "digraph graphname {\n#header\n" ^ header ^"\n#edges\n\n"^ implode edgess ^ "}"
+  fun apply_dot_header header edges =
+    "digraph graphname {\n#header\n" ^ header ^"\n#edges\n\n"^ implode edges ^ "}"
 in
   fun visualize_graph_pretty ctxt tune_node_format Es (header:string): int =
     let 

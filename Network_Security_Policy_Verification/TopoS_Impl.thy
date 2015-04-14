@@ -184,7 +184,7 @@ local
       else
         Graphviz.default_tune_node_format;
      val node_str = Graphviz.node_to_string ctxt tune_node_format node;
-     val config_str = Graphviz.term_to_string_safe ctxt config;
+     val config_str = Graphviz.term_to_string_html ctxt config;
    in
      node_str^"[label=<<TABLE BORDER=\"0\" CELLSPACING=\"0\"><TR><TD><FONT face=\"Verdana Bold\">"^node_str^"</FONT></TD></TR><TR><TD>"^config_str^"</TD></TR></TABLE>>]\n"
    end;
