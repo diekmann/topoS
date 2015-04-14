@@ -83,21 +83,21 @@ subsection{*Utility Functions*}
 
 ML{*
 (*apply args to f. f ist best supplied using @{const_name "name_of_function"} *)
-fun apply_function (ctx: Proof.context) (f: string) (args: term list) : term = 
+fun apply_function (ctxt: Proof.context) (f: string) (args: term list) : term = 
   let
-    val _ = writeln ("applying "^f^" to " ^ (fold (fn t => fn acc => acc^(Pretty.string_of (Syntax.pretty_term (Config.put show_types true ctx) t))^" ") args ""));
+    val _ = writeln ("applying "^f^" to " ^ (fold (fn t => fn acc => acc^(Pretty.string_of (Syntax.pretty_term (Config.put show_types true ctxt) t))^" ") args ""));
     (*val t_eval = Code_Evaluation.dynamic_value_strict thy t;*)
     (* $ associates to the left, give f its arguments*)
-    val applied_untyped_uneval : term = List.foldl (fn (t, a) => a $ t) (Const (f, dummyT)) args;
-    val applied_uneval: term = Syntax.check_term ctx applied_untyped_uneval;
+    val applied_untyped_uneval: term = list_comb (Const (f, dummyT), args);
+    val applied_uneval: term = Syntax.check_term ctxt applied_untyped_uneval;
   in
-    applied_uneval |>  Code_Evaluation.dynamic_value_strict ctx
+    applied_uneval |> Code_Evaluation.dynamic_value_strict ctxt
   end;
 
 
-(*ctx -> thy -> edges -> (biflows, uniflows)*)
-fun partition_by_biflows (ctx: Proof.context) (t: term) : (term * term) = 
-  apply_function ctx @{const_name "partition_by_biflows"} [t] |> HOLogic.dest_prod
+(*ctxt -> edges -> (biflows, uniflows)*)
+fun partition_by_biflows ctxt (t: term) : (term * term) = 
+  apply_function ctxt @{const_name "partition_by_biflows"} [t] |> HOLogic.dest_prod
 
 
 local
@@ -108,39 +108,39 @@ local
     else
       Graphviz.default_tune_node_format;
 
-  fun evalutae_term (ctx: Proof.context) (edges: term) : term = 
-    case Code_Evaluation.dynamic_value ctx edges
+  fun evalutae_term ctxt (edges: term) : term = 
+    case Code_Evaluation.dynamic_value ctxt edges
       of SOME x => x
       | NONE => raise TERM ("could not evaluate", []);
 in
-  fun visualize_edges (ctx: Proof.context) (edges: term) (coloredges: (string * term) list) (graphviz_header: string): int = 
+  fun visualize_edges ctxt (edges: term) (coloredges: (string * term) list) (graphviz_header: string): int = 
     let
       val _ = writeln("visualize_edges");
-      val (biflows, uniflows) = partition_by_biflows ctx edges;
+      val (biflows, uniflows) = partition_by_biflows ctxt edges;
     in
-      Graphviz.visualize_graph_pretty ctx (get_tune_node_format edges) ([
+      Graphviz.visualize_graph_pretty ctxt (get_tune_node_format edges) ([
       ("", uniflows),
       ("edge [dir=\"none\", color=\"#000000\"]", biflows)] @ coloredges) (*dir=none, dir=both*)
        graphviz_header
     end
 
   (*iterate over the edges in ML, useful for printing them in certain formats*)
-  fun iterate_edges_ML (ctx: Proof.context) (edges: term) (all: (string*string) -> unit) (bi: (string*string) -> unit) (uni: (string*string) -> unit): unit =
+  fun iterate_edges_ML ctxt (edges: term) (all: (string*string) -> unit) (bi: (string*string) -> unit) (uni: (string*string) -> unit): unit =
     let
       val _ = writeln("iterate_edges_ML");
       val tune_node_format = (get_tune_node_format edges);
-      val node_to_string = Graphviz.node_to_string ctx tune_node_format;
-      val evaluated_edges : term = evalutae_term ctx edges;
-      val (biflows, uniflows) = partition_by_biflows ctx evaluated_edges;
+      val node_to_string = Graphviz.node_to_string ctxt tune_node_format;
+      val evaluated_edges : term = evalutae_term ctxt edges;
+      val (biflows, uniflows) = partition_by_biflows ctxt evaluated_edges;
     in
       let
         fun edge_to_list (es: term) : (term * term) list = es |> HOLogic.dest_list |> map HOLogic.dest_prod;
         fun edge_to_string (es: (term * term) list) : (string * string) list =
-          List.map (fn (v1, v2) => (node_to_string v1, node_to_string v2)) es
+          map (fn (v1, v2) => (node_to_string v1, node_to_string v2)) es
       in
-        edge_to_list evaluated_edges |> edge_to_string |> List.map all;
-        edge_to_list biflows |> edge_to_string |> List.map bi;
-        edge_to_list uniflows |> edge_to_string |> List.map uni;
+        edge_to_list evaluated_edges |> edge_to_string |> map all;
+        edge_to_list biflows |> edge_to_string |> map bi;
+        edge_to_list uniflows |> edge_to_string |> map uni;
         ()
       end
       handle Subscript => writeln ("Subscript Exception in iterate_edges_ML")
@@ -174,7 +174,7 @@ definition internal_node_configs :: "'a list_graph \<Rightarrow> ('a \<Rightarro
 
 ML {*
 local
-  fun get_graphivz_node_desc (ctx: Proof.context) (node_config: term): string =
+  fun get_graphivz_node_desc ctxt (node_config: term): string =
    let
      val (node, config) = HOLogic.dest_prod node_config;
      (*TODO: tune node format? There must be a better way ...*)
@@ -183,51 +183,51 @@ local
         tune_Vstring_format
       else
         Graphviz.default_tune_node_format;
-     val node_str = Graphviz.node_to_string ctx tune_node_format node;
-     val config_str = Graphviz.term_to_string_safe ctx config;
+     val node_str = Graphviz.node_to_string ctxt tune_node_format node;
+     val config_str = Graphviz.term_to_string_safe ctxt config;
    in
      node_str^"[label=<<TABLE BORDER=\"0\" CELLSPACING=\"0\"><TR><TD><FONT face=\"Verdana Bold\">"^node_str^"</FONT></TD></TR><TR><TD>"^config_str^"</TD></TR></TABLE>>]\n"
    end;
 in
-  fun generate_graphviz_header (ctx: Proof.context) (G: term) (configs: term): string =
+  fun generate_graphviz_header ctxt (G: term) (configs: term): string =
     let
-      val configlist: term list = apply_function ctx @{const_name "internal_node_configs"} [G, configs] |> HOLogic.dest_list;
+      val configlist: term list = apply_function ctxt @{const_name "internal_node_configs"} [G, configs] |> HOLogic.dest_list;
     in
-      fold (fn c => fn acc => acc^get_graphivz_node_desc ctx c) configlist ""
+      fold (fn c => fn acc => acc^get_graphivz_node_desc ctxt c) configlist ""
     end;
 end;
 
 (* Convenience function. Use whenever possible!
   M: security requirements, list
   G: list_graph*)
-fun visualize_graph_header (ctx: Proof.context) (M: term) (G: term) (Config: term): unit = 
+fun visualize_graph_header ctxt (M: term) (G: term) (Config: term): unit = 
   let
-    val valid_list_graph = apply_function ctx @{const_name "valid_list_graph"} [G];
-    val all_fulfilled = apply_function ctx @{const_name "all_security_requirements_fulfilled"} [M, G];
-    val edges = apply_function ctx @{const_name "edgesL"} [G];
-    val invariants = apply_function ctx @{const_name "internal_get_invariant_types_list"} [M];
-    val _ = writeln("Invariants:" ^ Pretty.string_of (Syntax.pretty_term ctx invariants));
-    val header = if Config = @{term "[]"} then "#header" else generate_graphviz_header ctx G Config;
+    val valid_list_graph = apply_function ctxt @{const_name "valid_list_graph"} [G];
+    val all_fulfilled = apply_function ctxt @{const_name "all_security_requirements_fulfilled"} [M, G];
+    val edges = apply_function ctxt @{const_name "edgesL"} [G];
+    val invariants = apply_function ctxt @{const_name "internal_get_invariant_types_list"} [M];
+    val _ = writeln("Invariants:" ^ Pretty.string_of (Syntax.pretty_term ctxt invariants));
+    val header = if Config = @{term "[]"} then "#header" else generate_graphviz_header ctxt G Config;
   in
     if valid_list_graph = @{term "False"} then
       error ("The supplied graph is syntactically invalid. Check valid_list_graph.")
     else if all_fulfilled = @{term "False"} then
       (let
-        val offending = apply_function ctx @{const_name "implc_get_offending_flows"} [M, G];
-        val offending_flat = apply_function ctx @{const_name "List.remdups"} [apply_function ctx @{const_name "List.concat"} [offending]];
+        val offending = apply_function ctxt @{const_name "implc_get_offending_flows"} [M, G];
+        val offending_flat = apply_function ctxt @{const_name "List.remdups"} [apply_function ctxt @{const_name "List.concat"} [offending]];
       in
        writeln("offending flows:");
-       Pretty.writeln (Syntax.pretty_term ctx offending);
-       visualize_edges ctx edges [("edge [dir=\"arrow\", style=dashed, color=\"#FF0000\", constraint=false]", offending_flat)] header; 
+       Pretty.writeln (Syntax.pretty_term ctxt offending);
+       visualize_edges ctxt edges [("edge [dir=\"arrow\", style=dashed, color=\"#FF0000\", constraint=false]", offending_flat)] header; 
       () end)
     else if all_fulfilled <> @{term "True"} then raise ERROR "all_fulfilled neither False nor True" else (
        writeln("All valid:");
-       visualize_edges ctx edges [] header; 
+       visualize_edges ctxt edges [] header; 
       ())
   end;
 
 
-fun visualize_graph (ctx: Proof.context) (M: term) (G: term): unit = visualize_graph_header ctx M G @{term "[]"};
+fun visualize_graph ctxt (M: term) (G: term): unit = visualize_graph_header ctxt M G @{term "[]"};
 *}
 
 end
