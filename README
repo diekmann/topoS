@@ -9,7 +9,7 @@ In theory files, identifiers are written with underscores.
 Example: offending-flows-union-mono can be found with
 find access_control_abstraction/thy/ -iname '*.thy' | xargs grep 'offending_flows_union_mono'
 
-get Isabelle/HOL 2014 at
+get Isabelle/HOL 2015 at
 http://isabelle.in.tum.de/
 
 
@@ -18,4 +18,4 @@ Network_Security_Policy_Verification (former access_control_abstraction)
   All the the formal theory files for Isabelle/HOL
 
 scala_tool
-  The tool, cool and usable. 
+  The tool, quite unmaintained and out of sync with theory files! But isabelle now directly supports visualization. See Network_Security_Policy_Verification.thy for an example.
