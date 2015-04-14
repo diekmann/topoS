@@ -83,7 +83,7 @@ No assumptions are necessary for this step.
     by(simp add: removing_offending_flows_makes_invariant_hold)
 
   lemma set_offending_flows_simp: 
-    "\<lbrakk> valid_graph G \<rbrakk> \<Longrightarrow>
+    "\<lbrakk> wf_graph G \<rbrakk> \<Longrightarrow>
       set_offending_flows G nP = {F. F \<subseteq> edges G \<and>
         (\<not> sinvar G nP \<and> sinvar \<lparr>nodes = nodes G, edges = edges G - F\<rparr> nP) \<and>
         (\<forall>(e1, e2)\<in>F. \<not> sinvar \<lparr>nodes = nodes G, edges = {(e1, e2)} \<union> (edges G - F)\<rparr> nP)}"
@@ -91,7 +91,7 @@ No assumptions are necessary for this step.
       is_offending_flows_def delete_edges_simp2 add_edge_def graph.select_convs)
     apply(subgoal_tac "\<And>F e1 e2. F \<subseteq> edges G \<Longrightarrow> (e1, e2) \<in> F \<Longrightarrow> nodes G \<union> {e1, e2} = nodes G")
      apply fastforce
-    apply(simp add: valid_graph_def)
+    apply(simp add: wf_graph_def)
     by (metis fst_conv imageI in_mono insert_absorb snd_conv)
 
    end
@@ -144,13 +144,13 @@ Later, we will show that is suffices to show that the invariant is monotonic. Th
     +
     assumes 
       defined_offending:
-      "\<lbrakk> valid_graph G; \<not> sinvar G nP \<rbrakk> \<Longrightarrow> set_offending_flows G nP \<noteq> {}"
+      "\<lbrakk> wf_graph G; \<not> sinvar G nP \<rbrakk> \<Longrightarrow> set_offending_flows G nP \<noteq> {}"
     and
       mono_sinvar:
-      "\<lbrakk> valid_graph \<lparr> nodes = N, edges = E \<rparr>; E' \<subseteq> E; sinvar \<lparr> nodes = N, edges = E \<rparr> nP \<rbrakk> \<Longrightarrow> 
+      "\<lbrakk> wf_graph \<lparr> nodes = N, edges = E \<rparr>; E' \<subseteq> E; sinvar \<lparr> nodes = N, edges = E \<rparr> nP \<rbrakk> \<Longrightarrow> 
         sinvar \<lparr> nodes = N, edges = E' \<rparr> nP"
     and mono_offending:
-      "\<lbrakk> valid_graph G; is_offending_flows ff G nP \<rbrakk> \<Longrightarrow> is_offending_flows (ff \<union> f') G nP"
+      "\<lbrakk> wf_graph G; is_offending_flows ff G nP \<rbrakk> \<Longrightarrow> is_offending_flows (ff \<union> f') G nP"
   begin
 
   text {*
@@ -208,13 +208,13 @@ The details can be looked up in \cite{diekmann2014forte}.
         Thought experiment 1: admin forgot to configure host, hence it is handled by default configuration value ...
         Thought experiment 2: new node (attacker) is added to the network. What is its default configuration value ...*}
       default_secure:
-      "\<lbrakk> valid_graph G; \<not> sinvar G nP; F \<in> set_offending_flows G nP \<rbrakk> \<Longrightarrow>
+      "\<lbrakk> wf_graph G; \<not> sinvar G nP; F \<in> set_offending_flows G nP \<rbrakk> \<Longrightarrow>
         (\<not> receiver_violation \<longrightarrow> i \<in> fst ` F \<longrightarrow> \<not> sinvar G (nP(i := \<bottom>))) \<and>
         (receiver_violation \<longrightarrow> i \<in> snd ` F \<longrightarrow> \<not> sinvar G (nP(i := \<bottom>)))"
       and
       default_unique:
       "otherbot \<noteq> \<bottom> \<Longrightarrow> 
-        \<exists> (G::('v::vertex) graph) nP i F. valid_graph G \<and> \<not> sinvar G nP \<and> F \<in> set_offending_flows G nP \<and> 
+        \<exists> (G::('v::vertex) graph) nP i F. wf_graph G \<and> \<not> sinvar G nP \<and> F \<in> set_offending_flows G nP \<and> 
          sinvar (delete_edges G F) nP \<and>
          (\<not> receiver_violation \<longrightarrow> i \<in> fst ` F \<and> sinvar G (nP(i := otherbot))) \<and>
          (receiver_violation \<longrightarrow> i \<in> snd ` F \<and> sinvar G (nP(i := otherbot))) "
@@ -250,12 +250,12 @@ The details can be looked up in \cite{diekmann2014forte}.
       \end{enumerate}
     *}
     definition eval::"'v graph \<Rightarrow> ('v, 'a, 'b)TopoS_Params \<Rightarrow> bool" where
-    "eval G P \<equiv> valid_graph G \<and> verify_globals G (node_props P) (model_global_properties P) \<and> 
+    "eval G P \<equiv> wf_graph G \<and> verify_globals G (node_props P) (model_global_properties P) \<and> 
           sinvar G (node_props P)"
 
 
     lemma unique_common_math_notation:
-    assumes "\<forall>G nP i F. valid_graph (G::('v::vertex) graph) \<and> \<not> sinvar G nP \<and> F \<in> set_offending_flows G nP \<and> 
+    assumes "\<forall>G nP i F. wf_graph (G::('v::vertex) graph) \<and> \<not> sinvar G nP \<and> F \<in> set_offending_flows G nP \<and> 
          sinvar (delete_edges G F) nP \<and> 
          (\<not> receiver_violation \<longrightarrow> i \<in> fst ` F \<longrightarrow> \<not> sinvar G (nP(i := otherbot))) \<and>
          (receiver_violation \<longrightarrow> i \<in> snd ` F \<longrightarrow> \<not> sinvar G (nP(i := otherbot)))"
@@ -295,17 +295,17 @@ subsection {*Information Flow Security Strategy (IFS)*}
       +
       fixes default_node_properties :: "'a" ("\<bottom>") 
       assumes  default_secure_IFS:
-        "\<lbrakk> valid_graph G; f \<in> set_offending_flows G nP \<rbrakk> \<Longrightarrow>
+        "\<lbrakk> wf_graph G; f \<in> set_offending_flows G nP \<rbrakk> \<Longrightarrow>
           \<forall>i \<in> snd` f. \<not> sinvar G (nP(i := \<bottom>))"
       and
       --{* If some otherbot fulfills @{text default_secure}, it must be @{term "\<bottom>"} 
              Hence, @{term "\<bottom>"} is uniquely defined *}
       default_unique_IFS:
-      "(\<forall>G f nP i. valid_graph G \<and> f \<in> set_offending_flows G nP \<and> i \<in> snd` f 
+      "(\<forall>G f nP i. wf_graph G \<and> f \<in> set_offending_flows G nP \<and> i \<in> snd` f 
                 \<longrightarrow> \<not> sinvar G (nP(i := otherbot))) \<Longrightarrow> otherbot = \<bottom>"
       begin
         lemma default_unique_EX_notation: "otherbot \<noteq> \<bottom> \<Longrightarrow> 
-          \<exists> G nP i f. valid_graph G \<and> \<not> sinvar G nP \<and> f \<in> set_offending_flows G nP \<and> 
+          \<exists> G nP i f. wf_graph G \<and> \<not> sinvar G nP \<and> f \<in> set_offending_flows G nP \<and> 
            sinvar (delete_edges G f) nP \<and>
            (i \<in> snd` f \<and> sinvar G (nP(i := otherbot)))"
           apply(erule contrapos_pp)
@@ -336,10 +336,10 @@ subsection {*Information Flow Security Strategy (IFS)*}
   
 
 lemma default_uniqueness_by_counterexample_IFS:
-  assumes "(\<forall>G F nP i. valid_graph G \<and> F \<in> SecurityInvariant_withOffendingFlows.set_offending_flows sinvar G nP \<and> i \<in> snd` F 
+  assumes "(\<forall>G F nP i. wf_graph G \<and> F \<in> SecurityInvariant_withOffendingFlows.set_offending_flows sinvar G nP \<and> i \<in> snd` F 
                 \<longrightarrow> \<not> sinvar G (nP(i := otherbot)))"
   and "otherbot \<noteq> default_value \<Longrightarrow>
-    \<exists>G nP i F. valid_graph G \<and> \<not> sinvar G nP \<and> F \<in> (SecurityInvariant_withOffendingFlows.set_offending_flows sinvar G nP) \<and>
+    \<exists>G nP i F. wf_graph G \<and> \<not> sinvar G nP \<and> F \<in> (SecurityInvariant_withOffendingFlows.set_offending_flows sinvar G nP) \<and>
        sinvar (delete_edges G F) nP \<and>
         i \<in> snd ` F \<and> sinvar G (nP(i := otherbot)) "
    shows "otherbot = default_value"
@@ -353,15 +353,15 @@ subsection {*Access Control Strategy (ACS)*}
       +
       fixes default_node_properties :: "'a" ("\<bottom>") 
       assumes  default_secure_ACS:
-        "\<lbrakk> valid_graph G; f \<in> set_offending_flows G nP \<rbrakk> \<Longrightarrow>
+        "\<lbrakk> wf_graph G; f \<in> set_offending_flows G nP \<rbrakk> \<Longrightarrow>
           \<forall>i \<in> fst` f. \<not> sinvar G (nP(i := \<bottom>))"
       and
       default_unique_ACS:
-      "(\<forall>G f nP i. valid_graph G \<and> f \<in> set_offending_flows G nP \<and> i \<in> fst` f 
+      "(\<forall>G f nP i. wf_graph G \<and> f \<in> set_offending_flows G nP \<and> i \<in> fst` f 
                 \<longrightarrow> \<not> sinvar G (nP(i := otherbot))) \<Longrightarrow> otherbot = \<bottom>"
       begin
         lemma default_unique_EX_notation: "otherbot \<noteq> \<bottom> \<Longrightarrow> 
-          \<exists> G nP i f. valid_graph G \<and> \<not> sinvar G nP \<and> f \<in> set_offending_flows G nP \<and> 
+          \<exists> G nP i f. wf_graph G \<and> \<not> sinvar G nP \<and> f \<in> set_offending_flows G nP \<and> 
            sinvar (delete_edges G f) nP \<and>
            (i \<in> fst` f \<and> sinvar G (nP(i := otherbot)))"
           apply(erule contrapos_pp)
@@ -393,10 +393,10 @@ subsection {*Access Control Strategy (ACS)*}
 
 
 lemma default_uniqueness_by_counterexample_ACS:
-  assumes "(\<forall>G F nP i. valid_graph G \<and> F \<in> SecurityInvariant_withOffendingFlows.set_offending_flows sinvar G nP \<and> i \<in> fst ` F 
+  assumes "(\<forall>G F nP i. wf_graph G \<and> F \<in> SecurityInvariant_withOffendingFlows.set_offending_flows sinvar G nP \<and> i \<in> fst ` F 
                 \<longrightarrow> \<not> sinvar G (nP(i := otherbot)))"
   and "otherbot \<noteq> default_value \<Longrightarrow>
-    \<exists>G nP i F. valid_graph G \<and> \<not> sinvar G nP \<and> F \<in> (SecurityInvariant_withOffendingFlows.set_offending_flows sinvar G nP) \<and>
+    \<exists>G nP i F. wf_graph G \<and> \<not> sinvar G nP \<and> F \<in> (SecurityInvariant_withOffendingFlows.set_offending_flows sinvar G nP) \<and>
        sinvar (delete_edges G F) nP \<and>
         i \<in> fst ` F \<and> sinvar G (nP(i := otherbot))"
   shows "otherbot = default_value"

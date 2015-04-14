@@ -24,11 +24,11 @@ definition policy :: "nat list_graph" where
     "policy \<equiv> \<lparr> nodesL = [1,2,3],
                 edgesL = [(1,2), (2,2), (2,3)] \<rparr>"
 
-text{*It is syntactically valid. *}
-lemma "valid_list_graph policy" by eval
+text{*It is syntactically well-formed *}
+lemma "wf_list_graph policy" by eval
 
-text{*In contrast, this is not a syntactically valid graph. *}
-lemma "\<not> valid_list_graph \<lparr> nodesL = [1,2]::nat list, edgesL = [(1,2), (2,2), (2,3)] \<rparr>" by eval
+text{*In contrast, this is not a syntactically well-formed graph. *}
+lemma "\<not> wf_list_graph \<lparr> nodesL = [1,2]::nat list, edgesL = [(1,2), (2,2), (2,3)] \<rparr>" by eval
 
 text{*Our @{const policy} has three rules. *}
 lemma "length (edgesL policy) = 3" by eval

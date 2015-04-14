@@ -22,11 +22,11 @@ section {* Definitions *}
     nodes :: "'v set"
     edges :: "('v \<times>'v) set"
 
-  text {* In a valid graph, edges only go from nodes to nodes. *}
-  locale valid_graph = 
+  text {* In a well-formed graph, edges only go from nodes to nodes. *}
+  locale wf_graph = 
     fixes G :: "'v graph"
     -- "Edges only refernce to existing nodes"
-    assumes E_valid: "fst ` (edges G) \<subseteq> (nodes G)"
+    assumes E_wf: "fst ` (edges G) \<subseteq> (nodes G)"
                      "snd ` (edges G) \<subseteq> (nodes G)"
     and finiteE: "finite (edges G)" (*implied by finiteV*)
     and finiteV: "finite (nodes G)"
@@ -34,17 +34,17 @@ section {* Definitions *}
     abbreviation "V \<equiv> (nodes G)"
     abbreviation "E \<equiv> (edges G)"
 
-    lemma E_validD: assumes "(v,v') \<in> E"
+    lemma E_wfD: assumes "(v,v') \<in> E"
       shows "v \<in> V" "v' \<in> V"
       apply -
-       apply (rule set_mp[OF E_valid(1)])
+       apply (rule set_mp[OF E_wf(1)])
        using assms apply force
-      apply (rule set_mp[OF E_valid(2)])
+      apply (rule set_mp[OF E_wf(2)])
       using assms apply force
       done
 
-    lemma E_validD2: "\<forall>e \<in> E. fst e \<in> V \<and> snd e \<in> V"
-    by (auto simp add: E_validD)
+    lemma E_wfD2: "\<forall>e \<in> E. fst e \<in> V \<and> snd e \<in> V"
+    by (auto simp add: E_wfD)
   end
 
 subsection {* Basic operations on Graphs *}
@@ -96,10 +96,10 @@ text {* extended graph operations *}
     "succ_tran G v = {e2. (v,e2) \<in> (edges G)\<^sup>+}"
 
   --"succ_tran is always finite"
-  lemma succ_tran_finite: "valid_graph G \<Longrightarrow> finite (succ_tran G v)"
+  lemma succ_tran_finite: "wf_graph G \<Longrightarrow> finite (succ_tran G v)"
   proof -
-    assume "valid_graph G"
-    from valid_graph.finiteE[OF this] have "finite ((edges G)\<^sup>+)" using finite_trancl[symmetric, of "edges G"] by metis
+    assume "wf_graph G"
+    from wf_graph.finiteE[OF this] have "finite ((edges G)\<^sup>+)" using finite_trancl[symmetric, of "edges G"] by metis
     from this have "finite {(e1,e2). (e1, e2) \<in> (edges G)\<^sup>+}" by simp
     from this have finite: "finite (snd ` {(e1,e2). (e1, e2) \<in> (edges G)\<^sup>+})" by (metis finite_imageI)
     have "{(e1,e2). (e1, e2) \<in> (edges G)\<^sup>+ \<and> e1 = v} \<subseteq> {(e1,e2). (e1, e2) \<in> (edges G)\<^sup>+}" by blast
@@ -111,13 +111,13 @@ text {* extended graph operations *}
   qed
   
   text{* If there is no edge leaving from v, then v has no successors *}
-  lemma succ_tran_empty: "\<lbrakk> valid_graph G; v \<notin> (fst ` edges G) \<rbrakk> \<Longrightarrow> succ_tran G v = {}"
+  lemma succ_tran_empty: "\<lbrakk> wf_graph G; v \<notin> (fst ` edges G) \<rbrakk> \<Longrightarrow> succ_tran G v = {}"
   by (metis (lifting) Collect_empty_eq Domain.DomainI converse_tranclE fst_eq_Domain succ_tran_def)
 
   text{* succ_tran is subset of nodes *}
-  lemma succ_tran_subseteq_nodes: "\<lbrakk> valid_graph G \<rbrakk> \<Longrightarrow> succ_tran G v \<subseteq> nodes G"
+  lemma succ_tran_subseteq_nodes: "\<lbrakk> wf_graph G \<rbrakk> \<Longrightarrow> succ_tran G v \<subseteq> nodes G"
     apply(simp add: succ_tran_def)
-    by (metis (lifting) mem_Collect_eq subsetI trancl.cases valid_graph.E_validD(2))
+    by (metis (lifting) mem_Collect_eq subsetI trancl.cases wf_graph.E_wfD(2))
 
 
   text {* The number of reachable nodes from v *}
@@ -127,9 +127,9 @@ text {* extended graph operations *}
   definition num_reachable_norefl :: "'v graph \<Rightarrow> 'v \<Rightarrow> nat" where
     "num_reachable_norefl G v = card (succ_tran G v - {v})"
 
-  text{*card returns 0 for infinite sets. Here, for a valid graph, if num_reachable is zero,
+  text{*card returns 0 for infinite sets. Here, for a well-formed graph, if num_reachable is zero,
         there are actually no nodes reachable.*}
-  lemma num_reachable_zero: "\<lbrakk>valid_graph G; num_reachable G v = 0\<rbrakk> \<Longrightarrow> succ_tran G v = {}"
+  lemma num_reachable_zero: "\<lbrakk>wf_graph G; num_reachable G v = 0\<rbrakk> \<Longrightarrow> succ_tran G v = {}"
   apply(unfold num_reachable_def)
   apply(case_tac "finite (succ_tran G v)")
    apply(simp)
@@ -137,7 +137,7 @@ text {* extended graph operations *}
   done
   lemma num_succtran_zero: "\<lbrakk>succ_tran G v = {}\<rbrakk> \<Longrightarrow> num_reachable G v = 0"
   by(unfold num_reachable_def, simp)
-  lemma num_reachable_zero_iff: "\<lbrakk>valid_graph G\<rbrakk> \<Longrightarrow> (num_reachable G v = 0) <-> (succ_tran G v = {})"
+  lemma num_reachable_zero_iff: "\<lbrakk>wf_graph G\<rbrakk> \<Longrightarrow> (num_reachable G v = 0) <-> (succ_tran G v = {})"
   by(metis num_succtran_zero num_reachable_zero)
 
 
@@ -158,41 +158,41 @@ section {*Lemmata*}
   by simp
 
   -- "finite"
-  lemma valid_graph_finite_filterE: "valid_graph G \<Longrightarrow> finite {(e1, e2). (e1, e2) \<in> edges G \<and> P e1 e2}"
-  by(simp add: valid_graph.finiteE split_def)
-  lemma valid_graph_finite_filterV: "valid_graph G \<Longrightarrow> finite {n. n \<in> nodes G \<and> P n}"
-  by(simp add: valid_graph.finiteV)
+  lemma wf_graph_finite_filterE: "wf_graph G \<Longrightarrow> finite {(e1, e2). (e1, e2) \<in> edges G \<and> P e1 e2}"
+  by(simp add: wf_graph.finiteE split_def)
+  lemma wf_graph_finite_filterV: "wf_graph G \<Longrightarrow> finite {n. n \<in> nodes G \<and> P n}"
+  by(simp add: wf_graph.finiteV)
 
   -- "empty"
-  lemma empty_valid[simp]: "valid_graph empty"
+  lemma empty_wf[simp]: "wf_graph empty"
     unfolding empty_def by unfold_locales auto
   lemma nodes_empty[simp]: "nodes empty = {}" unfolding empty_def by simp
   lemma edges_empty[simp]: "edges empty = {}" unfolding empty_def by simp
 
   -- "add node"
-  lemma add_node_valid[simp]:
-    "valid_graph g \<Longrightarrow> valid_graph (add_node v g)"
+  lemma add_node_wf[simp]:
+    "wf_graph g \<Longrightarrow> wf_graph (add_node v g)"
       unfolding add_node_def
-      unfolding valid_graph_def
+      unfolding wf_graph_def
       by (auto)
 
-  lemma delete_node_valid[simp]:
-  "valid_graph G \<Longrightarrow> valid_graph (delete_node v G)"
-  by(auto simp add: delete_node_def valid_graph_def valid_graph_finite_filterE)
+  lemma delete_node_wf[simp]:
+  "wf_graph G \<Longrightarrow> wf_graph (delete_node v G)"
+  by(auto simp add: delete_node_def wf_graph_def wf_graph_finite_filterE)
 
   -- "add edgde"
-  lemma add_edge_valid[simp]: "valid_graph G \<Longrightarrow> valid_graph (add_edge v v' G)"
-  by(auto simp add: add_edge_def add_node_def valid_graph_def)
+  lemma add_edge_wf[simp]: "wf_graph G \<Longrightarrow> wf_graph (add_edge v v' G)"
+  by(auto simp add: add_edge_def add_node_def wf_graph_def)
 
   -- "delete edge"
-  lemma delete_edge_valid[simp]: "valid_graph G \<Longrightarrow> valid_graph (delete_edge v v' G)"
-  by(auto simp add: delete_edge_def add_node_def valid_graph_def split_def)
+  lemma delete_edge_wf[simp]: "wf_graph G \<Longrightarrow> wf_graph (delete_edge v v' G)"
+  by(auto simp add: delete_edge_def add_node_def wf_graph_def split_def)
  
   -- "delte edges"
-  lemma delete_edges_list_valid[simp]: "valid_graph G \<Longrightarrow> valid_graph (delete_edges_list G E)"
+  lemma delete_edges_list_wf[simp]: "wf_graph G \<Longrightarrow> wf_graph (delete_edges_list G E)"
     by(induction E arbitrary: G, simp, force)
-  lemma delete_edges_valid[simp]: "valid_graph G \<Longrightarrow> valid_graph (delete_edges G E)"
-  by(auto simp add: delete_edges_def add_node_def valid_graph_def split_def)
+  lemma delete_edges_wf[simp]: "wf_graph G \<Longrightarrow> wf_graph (delete_edges G E)"
+  by(auto simp add: delete_edges_def add_node_def wf_graph_def split_def)
   lemma delete_edges_list_set: "delete_edges_list G E = delete_edges G (set E)"
     apply(induction E arbitrary: G)
      apply(simp_all add: delete_edges_def)
@@ -215,16 +215,16 @@ section {*Lemmata*}
     by(simp add: delete_edges_simp2)
 
  --"add delete"
-  lemma add_delete_edge: "valid_graph (G::'a graph) \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow> 
+  lemma add_delete_edge: "wf_graph (G::'a graph) \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow> 
   add_edge a b (delete_edge a b G) = G"
-   apply(simp add: delete_edge_def add_edge_def valid_graph_def)
+   apply(simp add: delete_edge_def add_edge_def wf_graph_def)
    apply(clarify)
    apply(rule graph_eq_intro)
     by (auto)
 
-  lemma add_delete_edges: "valid_graph (G::'v graph) \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow> (a,b) \<notin> fs \<Longrightarrow>
+  lemma add_delete_edges: "wf_graph (G::'v graph) \<Longrightarrow> (a,b) \<in> edges G \<Longrightarrow> (a,b) \<notin> fs \<Longrightarrow>
   add_edge a b (delete_edges G (insert (a, b) fs)) = (delete_edges G fs)"
-  apply(simp add: delete_edges_simp2 add_edge_def valid_graph_def)
+  apply(simp add: delete_edges_simp2 add_edge_def wf_graph_def)
   apply(clarify)
   apply(auto)
   done
@@ -232,13 +232,13 @@ section {*Lemmata*}
  --"fully_connected"
   lemma fully_connected_simp: "fully_connected \<lparr>nodes = N, edges = ignore \<rparr>\<equiv> \<lparr>nodes = N, edges = N \<times> N \<rparr>"
     by(simp add: fully_connected_def)
-  lemma fully_connected_valid: "valid_graph G \<Longrightarrow> valid_graph (fully_connected G)"
-    by(simp add: fully_connected_def valid_graph_def)
+  lemma fully_connected_wf: "wf_graph G \<Longrightarrow> wf_graph (fully_connected G)"
+    by(simp add: fully_connected_def wf_graph_def)
 
  --"succ_tran"
  lemma succ_tran_mono: 
-  "valid_graph \<lparr>nodes=N, edges=E\<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> succ_tran \<lparr>nodes=N, edges=E'\<rparr> v \<subseteq> succ_tran \<lparr>nodes=N, edges=E\<rparr> v"
-   apply(drule valid_graph.finiteE)
+  "wf_graph \<lparr>nodes=N, edges=E\<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> succ_tran \<lparr>nodes=N, edges=E'\<rparr> v \<subseteq> succ_tran \<lparr>nodes=N, edges=E\<rparr> v"
+   apply(drule wf_graph.finiteE)
    apply(frule_tac A="E'" in rev_finite_subset, simp)
    apply(simp add: num_reachable_def)
    apply(simp add: succ_tran_def)
@@ -247,7 +247,7 @@ section {*Lemmata*}
 
   --"num_reachable"
   lemma num_reachable_mono:
-  "valid_graph \<lparr>nodes=N, edges=E\<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> num_reachable \<lparr>nodes=N, edges=E'\<rparr> v \<le> num_reachable \<lparr>nodes=N, edges=E\<rparr> v"
+  "wf_graph \<lparr>nodes=N, edges=E\<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> num_reachable \<lparr>nodes=N, edges=E'\<rparr> v \<le> num_reachable \<lparr>nodes=N, edges=E\<rparr> v"
    apply(simp add: num_reachable_def)
    apply(frule_tac E'="E'" and v="v" in succ_tran_mono, simp)
    apply(frule_tac v="v" in succ_tran_finite)
@@ -256,16 +256,16 @@ section {*Lemmata*}
 
   --"num_reachable_norefl"
   lemma num_reachable_norefl_mono:
-  "valid_graph \<lparr>nodes=N, edges=E\<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> num_reachable_norefl \<lparr>nodes=N, edges=E'\<rparr> v \<le> num_reachable_norefl \<lparr>nodes=N, edges=E\<rparr> v"
+  "wf_graph \<lparr>nodes=N, edges=E\<rparr> \<Longrightarrow> E' \<subseteq> E \<Longrightarrow> num_reachable_norefl \<lparr>nodes=N, edges=E'\<rparr> v \<le> num_reachable_norefl \<lparr>nodes=N, edges=E\<rparr> v"
    apply(simp add: num_reachable_norefl_def)
    apply(frule_tac E'="E'" and v="v" in succ_tran_mono, simp)
    apply(frule_tac v="v" in succ_tran_finite)
    using card_mono by (metis Diff_mono finite_Diff subset_refl)
 
   --"backflows"
-  lemma backflows_valid: 
-    "valid_graph \<lparr>nodes=N, edges=E\<rparr> \<Longrightarrow> valid_graph \<lparr>nodes=N, edges=backflows E\<rparr>"
-    using [[simproc add: finite_Collect]] by(auto simp add: valid_graph_def backflows_def)
+  lemma backflows_wf: 
+    "wf_graph \<lparr>nodes=N, edges=E\<rparr> \<Longrightarrow> wf_graph \<lparr>nodes=N, edges=backflows E\<rparr>"
+    using [[simproc add: finite_Collect]] by(auto simp add: wf_graph_def backflows_def)
   lemma undirected_backflows: 
     "undirected G = \<lparr> nodes = nodes G, edges = (edges G) \<union> backflows (edges G) \<rparr>"
     by(simp add: backflows_def undirected_def)
@@ -293,21 +293,21 @@ section {*Lemmata*}
 lemmas graph_ops=add_node_def delete_node_def add_edge_def delete_edge_def delete_edges_simp2
 
 
-  --"valid_graph"
-  lemma valid_graph_remove_edges: "valid_graph \<lparr> nodes = V, edges = E \<rparr> \<Longrightarrow> valid_graph \<lparr> nodes = V, edges=E - X\<rparr>"
-    by (metis delete_edges_simp2 delete_edges_valid select_convs(1) select_convs(2))
+  --"wf_graph"
+  lemma wf_graph_remove_edges: "wf_graph \<lparr> nodes = V, edges = E \<rparr> \<Longrightarrow> wf_graph \<lparr> nodes = V, edges=E - X\<rparr>"
+    by (metis delete_edges_simp2 delete_edges_wf select_convs(1) select_convs(2))
 
-  lemma valid_graph_remove_edges_union: 
-    "valid_graph \<lparr> nodes = V, edges = E \<union> E' \<rparr> \<Longrightarrow> valid_graph \<lparr> nodes = V, edges=E\<rparr>"
-    by(auto simp add: valid_graph_def)
+  lemma wf_graph_remove_edges_union: 
+    "wf_graph \<lparr> nodes = V, edges = E \<union> E' \<rparr> \<Longrightarrow> wf_graph \<lparr> nodes = V, edges=E\<rparr>"
+    by(auto simp add: wf_graph_def)
 
-  lemma valid_graph_union_edges: "\<lbrakk> valid_graph \<lparr> nodes = V, edges = E \<rparr>; valid_graph \<lparr> nodes = V, edges=E'\<rparr> \<rbrakk> \<Longrightarrow>
-     valid_graph \<lparr> nodes = V, edges=E \<union> E'\<rparr>"
-    by(auto simp add: valid_graph_def)
+  lemma wf_graph_union_edges: "\<lbrakk> wf_graph \<lparr> nodes = V, edges = E \<rparr>; wf_graph \<lparr> nodes = V, edges=E'\<rparr> \<rbrakk> \<Longrightarrow>
+     wf_graph \<lparr> nodes = V, edges=E \<union> E'\<rparr>"
+    by(auto simp add: wf_graph_def)
 
-  lemma valid_graph_add_subset_edges: "\<lbrakk> valid_graph \<lparr> nodes = V, edges = E \<rparr>; E' \<subseteq> E \<rbrakk> \<Longrightarrow>
-     valid_graph \<lparr> nodes = V, edges= E \<union> E'\<rparr>"
-    by(auto simp add: valid_graph_def) (metis rev_finite_subset)
+  lemma wf_graph_add_subset_edges: "\<lbrakk> wf_graph \<lparr> nodes = V, edges = E \<rparr>; E' \<subseteq> E \<rbrakk> \<Longrightarrow>
+     wf_graph \<lparr> nodes = V, edges= E \<union> E'\<rparr>"
+    by(auto simp add: wf_graph_def) (metis rev_finite_subset)
 
 
 
@@ -330,8 +330,8 @@ http://afp.sourceforge.net/entries/Dijkstra_Shortest_Path.shtml*)
 
   lemma succ_empty: "succ empty v = {}" unfolding empty_def succ_def by auto
 
-  lemma (in valid_graph) succ_subset: "succ G v \<subseteq> V"
-    unfolding succ_def using E_valid
+  lemma (in wf_graph) succ_subset: "succ G v \<subseteq> V"
+    unfolding succ_def using E_wf
     by (force)
 
 
