@@ -26,12 +26,12 @@ A Security Invariant is defined as locale.
 
 We successively define more and more locales with more and more assumptions.
 This clearly depicts which assumptions are necessary to use certain features of a Security Invariant.
-In addition, it makes instance proofs of Security Invariants easier, since the lemmata obtained by an (easy, few assumptions) instance proof 
+In addition, it makes instance proofs of Security Invariants easier, since the lemmas obtained by an (easy, few assumptions) instance proof 
 can be used for the complicated (more assumptions) instance proofs.
 
 A security Invariant consists of two functions. A function @{text "sinvar"} and a function @{text "verify_globals"}.
 @{text "sinvar"} is the most important function. 
-Essentially, it is a predicate over the policy (depiced as graph @{text "G"} and a host attribute mapping (@{text "nP"})).
+Essentially, it is a predicate over the policy (depicted as graph @{text "G"} and a host attribute mapping (@{text "nP"})).
 
 The second function @{text "verify_globals"} is less important. It can for example be used to check so properties if the global attributes.
 It is barely used.
@@ -167,9 +167,6 @@ Later, we will show that is suffices to show that the invariant is monotonic. Th
     Basically, @{text "sinvar_mono."} implies almost all assumptions here and is equal to @{prop mono_sinvar}.
     \end{small}
   *}
-  (*
-
-  *)
   end
 
 
@@ -236,10 +233,7 @@ The details can be looked up in \cite{diekmann2014forte}.
     (\<lambda> i. (if i \<in> dom (node_properties P) then the (node_properties P i) else \<bottom>))"
 
     lemma node_props_eq_node_props_formaldef: "node_props_formaldef = node_props"
-     apply(simp add: fun_eq_iff node_props_formaldef_def)
-     apply(rule allI)+
-     apply(simp add: option.case_eq_if domIff)
-     done
+     by(simp add: fun_eq_iff node_props_formaldef_def option.case_eq_if domIff)
 
     text{*
       Checking whether a security invariant holds.
