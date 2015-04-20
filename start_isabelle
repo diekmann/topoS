@@ -30,4 +30,4 @@ fi
 #$ISABELLE build -d isabelle_afp/ -b Collections &&
 #$ISABELLE jedit -d isabelle_afp/ -l Collections
 #collections does not load ATM, waiting for new version
-$ISABELLE jedit -d isabelle_afp/ -l Automatic_Refinement
+$ISABELLE jedit -d isabelle_afp/ -l Collections
