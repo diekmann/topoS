@@ -18,9 +18,9 @@ cd "$TOPOS_HOME"
 
 export AFP="${TOPOS_HOME}/isabelle_afp"
 
-ISABELLE="/home/diekmann/Downloads/Isabelle2015-RC0/bin/isabelle"
+ISABELLE="/home/diekmann/Downloads/Isabelle2015-RC1/bin/isabelle"
 
-if $ISABELLE version | grep 'Isabelle2015-RC0: April 2015'; then
+if $ISABELLE version | grep 'Isabelle2015-RC1: April 2015'; then
     echo "Isabelle 2015"
 else
     echo "Isabelle 2015 is required"

@@ -169,8 +169,9 @@ lemma "stateful_policy = \<lparr>hostsL = [1, 2, 3], flows_fixL = [(1, 2), (2, 2
   text{*Interlude: the stateful policy we are computing fulfills all the necessary properties*}
   thm generate_valid_stateful_policy_IFSACS_2_complies
 
-  (*TODO: individual algorithms return max policy*)
-    thm filter_compliant_stateful_ACS_correct filter_compliant_stateful_ACS_maximal
+  (*the individual algorithms fir IFS/ACS return a maximum policy*)
+  thm filter_compliant_stateful_ACS_correct filter_compliant_stateful_ACS_maximal
+  thm filter_IFS_no_violations_correct filter_IFS_no_violations_maximal
 
 text{*
 Visualizing the stateful policy (only in interactive mode)
