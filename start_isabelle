@@ -18,15 +18,16 @@ cd "$TOPOS_HOME"
 
 export AFP="${TOPOS_HOME}/isabelle_afp"
 
-ISABELLE=isabelle
+ISABELLE="/home/diekmann/Downloads/Isabelle2015-RC1/bin/isabelle"
 
-if $ISABELLE version | grep 'Isabelle2014: August 2014'; then
-    echo "Isabelle 2014"
+if $ISABELLE version | grep 'Isabelle2015-RC1: April 2015'; then
+    echo "Isabelle 2015"
 else
-    echo "Isabelle 2014 is required"
+    echo "Isabelle 2015 is required"
     exit -1
 fi
 
-$ISABELLE build -d isabelle_afp/ -b Collections &&
-  $ISABELLE jedit -d isabelle_afp/ -l Collections
-
+#$ISABELLE build -d isabelle_afp/ -b Collections &&
+#$ISABELLE jedit -d isabelle_afp/ -l Collections
+#collections does not load ATM, waiting for new version
+$ISABELLE jedit -d isabelle_afp/ -l Collections

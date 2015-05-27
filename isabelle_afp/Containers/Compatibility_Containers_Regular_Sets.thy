@@ -15,8 +15,9 @@ text {*
   because the code generator takes longer to generate the evaluation code for @{text regexp}.
 *}
 
+datatype_compat rexp
 derive ceq rexp
-derive corder rexp
+derive ccompare rexp
 derive (choose) set_impl rexp
 
 notepad begin

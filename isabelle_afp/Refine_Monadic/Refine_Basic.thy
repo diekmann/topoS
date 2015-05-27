@@ -1,4 +1,4 @@
-header {* \isaheader{Basic Concepts} *}
+section {* Basic Concepts *}
 theory Refine_Basic
 imports Main 
   "~~/src/HOL/Library/Monad_Syntax" 
@@ -61,9 +61,9 @@ subsection {* Setup *}
             K no_tac
           else
             (simp_tac prod_ss THEN' 
-              REPEAT_ALL_NEW (resolve_tac @{thms impI allI}));
+              REPEAT_ALL_NEW (resolve_tac ctxt @{thms impI allI}));
       in
-        REPEAT_ALL_NEW (DETERM o (resolve_tac ref_thms ORELSE' prod_simp_tac))
+        REPEAT_ALL_NEW (DETERM o (resolve_tac ctxt ref_thms ORELSE' prod_simp_tac))
       end;
 
       fun post_tac ctxt = let
@@ -71,7 +71,7 @@ subsection {* Setup *}
       in
         REPEAT_ALL_NEW (FIRST' [
           eq_assume_tac,
-          (*match_tac thms,*)
+          (*match_tac ctxt thms,*)
           SOLVED' (Tagged_Solver.solve_tac ctxt)]) 
            (* TODO: Get rid of refine_post! Use tagged_solver instead *)
       end;

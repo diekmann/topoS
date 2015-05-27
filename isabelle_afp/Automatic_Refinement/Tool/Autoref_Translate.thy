@@ -69,17 +69,17 @@ ML {*
 
   structure Autoref_Tacticals :AUTOREF_TACTICALS = struct
     fun is_prefer_cond i st =
-      case Logic.concl_of_goal (prop_of st) i of
+      case Logic.concl_of_goal (Thm.prop_of st) i of
         @{mpat "Trueprop (PREFER_tag _)"} => true
       | _ => false
 
     fun is_defer_cond i st =
-      case Logic.concl_of_goal (prop_of st) i of
+      case Logic.concl_of_goal (Thm.prop_of st) i of
         @{mpat "Trueprop (DEFER_tag _)"} => true
       | _ => false
 
     fun REPEAT_INTERVAL tac i j st = let
-      val n = nprems_of st - (j - i)
+      val n = Thm.nprems_of st - (j - i)
       fun r st = (
         COND 
           (has_fewer_prems n) 
@@ -97,7 +97,7 @@ ML {*
     fun REPEAT_ON_SUBGOAL tac i = REPEAT_INTERVAL tac i i
 
     fun IF_SOLVED tac tac1 tac2 i st = let
-      val n = nprems_of st
+      val n = Thm.nprems_of st
     in
       (tac i THEN COND (has_fewer_prems n) (tac1 i) (tac2 i)) st
     end
@@ -165,7 +165,7 @@ ML {*
 
     fun REMOVE_INTERNAL_conv ctxt = 
       Conv.top_sweep_conv (
-        fn _ => fn ct => (case term_of ct of
+        fn _ => fn ct => (case Thm.term_of ct of
           @{mpat "REMOVE_INTERNAL _"} => 
             Conv.rewr_conv @{thm REMOVE_INTERNAL_def}
             then_conv Autoref_Tagging.untag_conv ctxt
@@ -175,22 +175,22 @@ ML {*
     fun REMOVE_INTERNAL_tac ctxt = CONVERSION (REMOVE_INTERNAL_conv ctxt)
 
     fun side_tac ctxt =
-      resolve_tac @{thms SIDEI}
+      resolve_tac ctxt @{thms SIDEI}
       THEN' REMOVE_INTERNAL_tac ctxt
       THEN' Tagged_Solver.solve_tac ctxt
 
     fun side_dbg_tac ctxt = let
       val ctxt = Config.put Tagged_Solver.cfg_keep true ctxt
     in
-      resolve_tac @{thms SIDEI}
+      resolve_tac ctxt @{thms SIDEI}
       THEN' REMOVE_INTERNAL_tac ctxt
       THEN' TRY o Tagged_Solver.solve_tac ctxt
     end
 
     local
       open Autoref_Tacticals
-      fun trans_rule_tac net = resolve_from_net_tac net 
-        THEN_ALL_NEW (TRY o match_tac [@{thm PRIO_TAGI}])
+      fun trans_rule_tac ctxt net = resolve_from_net_tac ctxt net
+        THEN_ALL_NEW (TRY o match_tac ctxt [@{thm PRIO_TAGI}])
 
     in
       (* Do not even attempt to solve side conditions *)
@@ -200,7 +200,7 @@ ML {*
         (
           COND'' is_defer_cond 
             (K no_tac)
-            (atac ORELSE' trans_rule_tac net)
+            (assume_tac ctxt ORELSE' trans_rule_tac ctxt net)
         )
       end
 
@@ -212,9 +212,9 @@ ML {*
         COND'' is_defer_cond 
           (SOLVED' s_tac)
           (
-            atac
+            assume_tac ctxt
             ORELSE'
-            (trans_rule_tac net 
+            (trans_rule_tac ctxt net 
               THEN_ALL_NEW_FWD 
                 COND'' is_prefer_cond
                   (TRY o DETERM o SOLVED' s_tac)
@@ -231,9 +231,9 @@ ML {*
         COND'' is_defer_cond 
           (SOLVED' s_tac)
           (
-            atac
+            assume_tac ctxt
             ORELSE'
-            (trans_rule_tac net 
+            (trans_rule_tac ctxt net 
               THEN_ALL_NEW_FWD 
                 COND'' is_prefer_cond
                   (DETERM o SOLVED' s_tac)
@@ -264,7 +264,7 @@ ML {*
     fun trans_pretty_failure ctxt i j st = 
       if j < i then Pretty.str "No failure"
       else let
-        val goal = Logic.get_goal (prop_of st) i
+        val goal = Logic.get_goal (Thm.prop_of st) i
         val concl = strip_all_body goal |> Logic.strip_imp_concl
 
         val msg = case concl of

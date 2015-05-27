@@ -1,4 +1,4 @@
-header {* Operation Identification *}
+section {* Operation Identification *}
 theory Autoref_Id_Ops
 imports 
   "../Lib/Refine_Lib" 
@@ -122,15 +122,15 @@ ML {*
     | depth_of (Abs (_,_,t)) = depth_of t + 1
     | depth_of _ = 0
 
-  val depth_of_lhs = depth_of o term_of o Thm.lhs_of
-  val depth_of_rhs = depth_of o term_of o Thm.rhs_of
+  val depth_of_lhs = depth_of o Thm.term_of o Thm.lhs_of
+  val depth_of_rhs = depth_of o Thm.term_of o Thm.rhs_of
 
   fun pretty_rewrite ctxt thm rthm = let
     val lhsd = depth_of_lhs thm
-    val t = Thm.lhs_of rthm |> term_of |> limit_depth lhsd
+    val t = Thm.lhs_of rthm |> Thm.term_of |> limit_depth lhsd
 
     val rhsd = depth_of_rhs thm
-    val t' = Thm.rhs_of rthm |> term_of |> limit_depth rhsd
+    val t' = Thm.rhs_of rthm |> Thm.term_of |> limit_depth rhsd
   in
     Pretty.block [
       Syntax.pretty_term ctxt t, 
@@ -146,14 +146,14 @@ ML_val {*
   depth_of @{term "f [1] [2] []"};
 
   limit_depth 2 @{term "[1,2,3,4,5,6,7]"}
-  |> cterm_of @{theory}
+  |> Thm.cterm_of @{context}
 
 *}
 
 
 ML {*
   fun index_rewr_thms thms = let
-    fun lhs thm = case concl_of thm of
+    fun lhs thm = case Thm.concl_of thm of
       @{mpat "?lhs == _"} => [lhs]
     | _ => []
 
@@ -165,7 +165,7 @@ ML {*
 
   fun net_rewr_tac net get_pat frame_conv ctxt = IF_EXGOAL (
     fn i => fn st => let
-      val g = Logic.concl_of_goal (prop_of st) i |> get_pat
+      val g = Logic.concl_of_goal (Thm.prop_of st) i |> get_pat
       val thms = Item_Net.retrieve net g
       val cnv = map 
         (fn thm => CONVERSION (frame_conv (Conv.rewr_conv thm) ctxt)) thms
@@ -184,7 +184,7 @@ ML {*
     val id_phase: Autoref_Phases.phase
 
     val mk_const_intf: term -> term -> term
-    val mk_const_intf_thm: theory -> term -> term -> thm
+    val mk_const_intf_thm: Proof.context -> term -> term -> thm
 
     val dest_const_intf: term -> term * term
     val dest_const_intf_thm: thm -> term * term
@@ -217,10 +217,10 @@ ML {*
       Const (@{const_name CONST_INTF},T)$c$I
     end
 
-    fun mk_const_intf_thm thy f I = let
-      val fT = fastype_of f |> ctyp_of thy
-      val f = cterm_of thy f
-      val I = cterm_of thy I
+    fun mk_const_intf_thm ctxt f I = let
+      val fT = fastype_of f |> Thm.ctyp_of ctxt
+      val f = Thm.cterm_of ctxt f
+      val I = Thm.cterm_of ctxt I
       val thm = Drule.instantiate' [SOME fT] [SOME f, SOME I] @{thm itypeI}
     in
       thm
@@ -229,7 +229,7 @@ ML {*
     fun dest_const_intf @{mpat "?c::\<^sub>i?I"} = (c,I)
       | dest_const_intf t = raise TERM ("dest_const_intf",[t])
 
-    val dest_const_intf_thm = concl_of 
+    val dest_const_intf_thm = Thm.concl_of 
       #> HOLogic.dest_Trueprop 
       #> dest_const_intf
 
@@ -237,7 +237,7 @@ ML {*
       (fn @{mpat "Trueprop (ID_OP ?lhs _ _)"} => P lhs | _ => false)
     
     local open Conv in
-      fun id_op_lhs_conv cnv ct = case term_of ct of
+      fun id_op_lhs_conv cnv ct = case Thm.term_of ct of
         @{mpat "ID_OP _ _ _"} => (fun_conv (fun_conv (arg_conv cnv))) ct
       | _ => raise CTERM ("id_op_lhs_conv",[ct])
     end
@@ -278,18 +278,17 @@ ML {*
     fun get_typ_net ctxt = let
       val thy = Proof_Context.theory_of ctxt
       val typ_net = intf_types.get ctxt
-        |> Refine_Util.subsume_sort concl_of thy
+        |> Refine_Util.subsume_sort Thm.concl_of thy
         |> Tactic.build_net
     in typ_net end
 
     fun typ_thms_of_seq' ctxt typ_net c = let
-      val thy = Proof_Context.theory_of ctxt 
       val idx = Term.maxidx_of_term c + 1
       val typ_thms = mk_const_intf c (Var (("I",idx),@{typ interface}))
         |> HOLogic.mk_Trueprop
-        |> cterm_of thy
+        |> Thm.cterm_of ctxt
         |> Goal.init
-        |> resolve_from_net_tac typ_net 1
+        |> resolve_from_net_tac ctxt typ_net 1
         |> Seq.map Goal.conclude
     in typ_thms end
 
@@ -315,7 +314,7 @@ ML {*
       val tr_iu = 
         if Config.get ctxt cfg_trace_intf_unif then
           fn i => fn st => ((
-            case Logic.concl_of_goal (prop_of st) i of
+            case Logic.concl_of_goal (Thm.prop_of st) i of
               (t as @{mpat "Trueprop (?c::\<^sub>i_)"}) => ( case typ_thms_of c of
                 [] => ()
               | tts => Pretty.block [
@@ -325,11 +324,12 @@ ML {*
                     Syntax.pretty_term ctxt t
                   ], 
                   Pretty.fbrk,
-                  Pretty.indent 2 (Pretty.block [
+                  Pretty.str "  ",
+                  Pretty.block [
                     Pretty.str "Candidates: ", 
                     Pretty.fbrk,
                     pretty_typ_thms tts
-                  ])
+                  ]
                 ]
                 |> Pretty.string_of |> tracing
               )
@@ -338,15 +338,15 @@ ML {*
         else K no_tac
 
       val id_typ = 
-        resolve_from_net_tac typ_net
+        resolve_from_net_tac ctxt typ_net
         ORELSE' tr_iu
 
       val pat_net = op_patterns.get ctxt 
-        |> Refine_Util.subsume_sort (concl_of #> Logic.dest_equals #> #1) thy
+        |> Refine_Util.subsume_sort (Thm.concl_of #> Logic.dest_equals #> #1) thy
         |> index_rewr_thms
 
       val def_pat_net = op_patterns_def.get ctxt
-        |> Refine_Util.subsume_sort (concl_of #> Logic.dest_equals #> #1) thy
+        |> Refine_Util.subsume_sort (Thm.concl_of #> Logic.dest_equals #> #1) thy
         |> index_rewr_thms
 
       val id_abs = CONVERSION (HOL_concl_conv 
@@ -361,11 +361,11 @@ ML {*
       in 
         if trace then IF_EXGOAL (fn i => fn st => let
             fun tr_tac _ st' = let
-              val goal = Logic.get_goal (prop_of st) i
-              val concl = Logic.concl_of_goal (prop_of st) i
+              val goal = Logic.get_goal (Thm.prop_of st) i
+              val concl = Logic.concl_of_goal (Thm.prop_of st) i
               val _ = case concl of
                   @{mpat "Trueprop (ID_OP ?lhs _ _)"} =>
-                    tracing ("ID_TAG: " ^ PolyML.makestring lhs) 
+                    tracing ("ID_TAG: " ^ @{make_string} lhs) 
                 | _ => tracing "ID_TAG: LHS???"
 
               val _ = Pretty.block [
@@ -398,9 +398,9 @@ ML {*
           )
         )
   
-      val id_tagged = resolve_tac @{thms ID_tagged}
+      val id_tagged = resolve_tac ctxt @{thms ID_tagged}
 
-      val id_annotated = resolve_tac @{thms ID_annotated}
+      val id_annotated = resolve_tac ctxt @{thms ID_annotated}
 
       (*
       val traced_rewr_conv = if Config.get ctxt cfg_trace_patterns then
@@ -433,7 +433,7 @@ ML {*
       val id_fail = if Config.get ctxt cfg_trace_failed_id then
         IF_EXGOAL (fn i => fn st => 
           let 
-            val pat = Logic.concl_of_goal (prop_of st) i
+            val pat = Logic.concl_of_goal (Thm.prop_of st) i
                   |> get_rewr_pat
             val _ = Pretty.block [ 
                 Pretty.str "Failed to identify: ",
@@ -449,7 +449,7 @@ ML {*
       val ss = Config.get ctxt cfg_ss_id_op
       val step_tac = 
         FIRST' [
-          atac,
+          assume_tac ctxt,
           id_tagged,
           rtac @{thm ID_is_tagged_OP} THEN_ELSE' (
             rtac @{thm ID_tagged_OP_no_annot} THEN' id_typ,
@@ -489,15 +489,14 @@ ML {*
 
     fun decl_derived_typing overl c I context = let
       val ctxt = Context.proof_of context
-      val thy = Context.theory_of context
 
       val typ_thms = intf_types.get ctxt 
         (* TODO: Use net cached in ctxt here! *)
 
-      val thm = mk_const_intf_thm thy c I
+      val thm = mk_const_intf_thm ctxt c I
 
-      val st = cprop_of thm |> Goal.init
-      val has_t = SOLVED' (match_tac typ_thms) 1 st |> Seq.pull |> is_some
+      val st = Thm.cprop_of thm |> Goal.init
+      val has_t = SOLVED' (match_tac ctxt typ_thms) 1 st |> Seq.pull |> is_some
     in
       if has_t then context
       else (
@@ -620,7 +619,6 @@ structure Autoref_Rel_Inf :AUTOREF_REL_INF = struct
     | roi @{mpat "i_of_rel ?R"} ctxt = (R,ctxt)
     | roi t _ = raise TERM ("rel_of_intf: Unexpected interface", [t])
 
-    val thy = Proof_Context.theory_of ctxt
     val orig_ctxt = ctxt
     val (I,ctxt) = yield_singleton (Variable.import_terms true) I ctxt
     val (R,ctxt) = roi I ctxt
@@ -628,7 +626,7 @@ structure Autoref_Rel_Inf :AUTOREF_REL_INF = struct
     val res = Syntax.check_term ctxt res
     val res = singleton (Variable.export_terms ctxt orig_ctxt) res
       |> HOLogic.mk_Trueprop
-      |> cterm_of thy
+      |> Thm.cterm_of ctxt
 
     val thm = Goal.prove_internal ctxt [] res (fn _ => rtac @{thm REL_OF_INTF_I} 1)
   in thm end
@@ -638,15 +636,15 @@ structure Autoref_Rel_Inf :AUTOREF_REL_INF = struct
     val ind_net = rel_indirect.get ctxt |> Tactic.build_net
   in
     IF_EXGOAL (
-      atac
+      assume_tac ctxt
       ORELSE'
       Indep_Vars.indep_tac
-      ORELSE' resolve_from_net_tac ind_net
+      ORELSE' resolve_from_net_tac ctxt ind_net
       ORELSE'
       (fn i => fn st => 
-        case Logic.concl_of_goal (prop_of st) i of
+        case Logic.concl_of_goal (Thm.prop_of st) i of
           @{mpat "Trueprop (CNV_ANNOT _ _ _)"} => 
-            resolve_tac @{thms CNV_ANNOT} i st
+            resolve_tac ctxt @{thms CNV_ANNOT} i st
         | @{mpat "Trueprop (REL_OF_INTF ?I _)"} => 
             rtac (rel_of_intf_thm ctxt I) i st
         | _ => Seq.empty
@@ -658,10 +656,10 @@ structure Autoref_Rel_Inf :AUTOREF_REL_INF = struct
         | @{mpat "Trueprop (REL_OF_INTF_P (\<langle>_\<rangle>\<^sub>i_) _)"} => 
             rtac @{thm ROI_app} i st
         | @{mpat "Trueprop (REL_OF_INTF_P (i_of_rel _) _)"} => 
-            resolve_tac @{thms ROI_i_of_rel} i st
+            resolve_tac ctxt @{thms ROI_i_of_rel} i st
         | @{mpat "Trueprop (REL_OF_INTF (i_of_rel _) _)"} => 
-            resolve_tac @{thms ROI_i_of_rel} i st
-        | _ => resolve_tac @{thms ROI_const} i st
+            resolve_tac ctxt @{thms ROI_i_of_rel} i st
+        | _ => resolve_tac ctxt @{thms ROI_const} i st
       *)
       )
     )

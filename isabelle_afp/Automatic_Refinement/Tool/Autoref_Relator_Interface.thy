@@ -43,7 +43,7 @@ ML {*
     end
 
     fun intf_of_rel ctxt R = let
-      fun dest_ri thm = case prop_of thm of
+      fun dest_ri thm = case Thm.prop_of thm of
         @{mpat "Trueprop (REL_INTF ?R ?I)"} => SOME (R,I)
       | _ => NONE
 
@@ -64,7 +64,7 @@ ML {*
 
       fun r @{mpat "\<langle>?Ra\<rangle>?Rf"} i = mk_intfAPP (r Ra 0) (r Rf (i+1))
         | r R i = (case get_ri R of 
-            SOME I => I |> Logic.incr_indexes ([],idx)
+            SOME I => I |> Logic.incr_indexes ([], [], idx)
           | NONE => let
               val T = replicate i @{typ interface} ---> @{typ interface}
             in 

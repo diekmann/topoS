@@ -51,14 +51,14 @@ ML {*
     structure solvers = Generic_Data (
       type T = solver Item_Net.T * solver Symtab.table
       val empty = (Item_Net.init 
-        (op = o pairself #2) 
-        (fn p:solver => #1 p |> map concl_of)
+        (op = o apply2 #2) 
+        (fn p:solver => #1 p |> map Thm.concl_of)
       ,
         Symtab.empty
       )
   
       fun merge ((n1,t1),(n2,t2)) 
-        = (Item_Net.merge (n1,n2), Symtab.merge (op = o pairself #2) (t1,t2))
+        = (Item_Net.merge (n1,n2), Symtab.merge (op = o apply2 #2) (t1,t2))
       val extend = I 
     )
 
@@ -121,18 +121,18 @@ ML {*
     (* Get potential solvers. Overapproximation caused by net *)
     fun get_potential_solvers ctxt i st = 
       let
-        val concl = Logic.concl_of_goal (prop_of st) i
+        val concl = Logic.concl_of_goal (Thm.prop_of st) i
         val net = solvers.get (Context.Proof ctxt) |> #1
         val solvers = Item_Net.retrieve net concl
       in solvers end
 
     fun notrace_tac_of_solver ctxt (thms,_,_,tac) = 
-      match_tac thms THEN' tac ctxt
+      match_tac ctxt thms THEN' tac ctxt
 
     fun trace_tac_of_solver ctxt (thms,name,_,tac) i st = 
       let
         val _ = tracing ("Trying solver " ^ name)
-        val r = match_tac thms i st
+        val r = match_tac ctxt thms i st
       in
         case Seq.pull r of 
           NONE => (tracing "  No trigger"; Seq.empty)
@@ -152,7 +152,7 @@ ML {*
         notrace_tac_of_solver ctxt
     
     fun get_potential_tacs ctxt i st = 
-      if i <= nprems_of st then
+      if i <= Thm.nprems_of st then
         eq_assume_tac :: (
           get_potential_solvers ctxt i st
           |> map (tac_of_solver ctxt)

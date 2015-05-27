@@ -64,15 +64,14 @@ val map_apply_simproc =
       Const (@{const_name map_apply}, _) $ _ $ _ => NONE
     | f $ x => 
       let
-        val thy = Proof_Context.theory_of ctxt;
         val cTr = 
           redex
           |> fastype_of
           |> dest_Type
           |> snd |> hd
-          |> ctyp_of thy;
-        val cTx = ctyp_of thy (fastype_of x);
-        val cts = map (SOME o cterm_of thy) [f, x];
+          |> Thm.ctyp_of ctxt;
+        val cTx = Thm.ctyp_of ctxt (fastype_of x);
+        val cts = map (SOME o Thm.cterm_of ctxt) [f, x];
       in
         SOME (Drule.instantiate' [SOME cTr, SOME cTx] cts @{thm eq_map_apply})
       end
@@ -97,7 +96,7 @@ lemma map_update_parametric [transfer_rule]:
 unfolding map_update_def[abs_def] by transfer_prover
 
 context begin
-local_setup {* Local_Theory.map_naming (Name_Space.mandatory_path "Mapping") *}
+local_setup {* Local_Theory.map_background_naming (Name_Space.mandatory_path "Mapping") *}
 
 lift_definition update' :: "'a \<Rightarrow> 'b option \<Rightarrow> ('a, 'b) mapping \<Rightarrow> ('a, 'b) mapping"
 is map_update parametric map_update_parametric .
