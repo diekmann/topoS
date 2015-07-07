@@ -248,4 +248,20 @@ iterate_edges_ML @{context} @{term "stateless_flows"}
 *}
 
 
+text{*Finally, all the functions demonstrated here can be exported to several programming languages
+     to obtain a stand-alone tool.*}
+export_code
+  security_invariants
+  policy
+  all_security_requirements_fulfilled
+  implc_get_offending_flows
+  max_policy
+  my_policy
+  generate_valid_stateful_policy_IFSACS
+  stateful_policy
+  stateful_flows
+  stateless_flows
+in Scala
+
+
 end
