@@ -21,17 +21,24 @@ find access_control_abstraction/thy/ -iname '*.thy' | xargs grep 'offending_flow
 ## Repo Overview
 
 * Network_Security_Policy_Verification (former access_control_abstraction)
-  Theory for reasoning about logical access control abstraction (security policy, who can communicate with whom?)
+
+	Theory for reasoning about logical access control abstraction (security policy, who can communicate with whom?)
   All the the formal theory files for Isabelle/HOL
 
+
 * interface_abstraction
-  A model of networks
+	
+    A model of networks
+
 
 * isabelle_afp
-  A snapshot of some afp entries to use this repository without external dependencies.
+	
+    A snapshot of some afp entries to use this repository without external dependencies.
+
 
 * scala_tool
-  A stand-alone demonstration tool. It is quite unmaintained and out of sync with theory files!
+	
+    A stand-alone demonstration tool. It is quite unmaintained and out of sync with theory files!
   The Isabelle formalization now directly supports visualization.
   See Network_Security_Policy_Verification.thy for an example.
   If a new stand-alone tool is desired, we suggest to export the code directly from the Isabelle formalization.
