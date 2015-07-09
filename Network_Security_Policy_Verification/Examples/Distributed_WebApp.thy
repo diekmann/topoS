@@ -16,7 +16,7 @@ definition policy :: "vString list_graph" where
 
 text{*Sanity check*}
 lemma "wf_list_graph policy" by eval
-(*proof by eval means we have executable code to show the lemma.*)
+(*proof by eval means we have executable code to show the lemma. No need to show anything by hand*)
 
 
 text{*Defining the security invariants*}
