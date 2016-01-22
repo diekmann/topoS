@@ -1,4 +1,4 @@
-header {*\isaheader{Implementing Priority Queues by Annotated Lists}*}
+section {*\isaheader{Implementing Priority Queues by Annotated Lists}*}
 theory PrioByAnnotatedList
 imports 
   "../spec/AnnotatedListSpec"
@@ -116,7 +116,7 @@ subsubsection "Operations"
 definition alprio_\<alpha> :: "('s \<Rightarrow> (unit \<times> ('e,'a::linorder) Prio) list) 
   \<Rightarrow> 's \<Rightarrow> ('e \<times> 'a::linorder) multiset"
   where 
-  "alprio_\<alpha> \<alpha> al == (multiset_of (map p_unwrap (map snd (\<alpha> al))))"
+  "alprio_\<alpha> \<alpha> al == (mset (map p_unwrap (map snd (\<alpha> al))))"
 
 definition alprio_invar :: "('s \<Rightarrow> (unit \<times> ('c, 'd::linorder) Prio) list) 
   \<Rightarrow> ('s \<Rightarrow> bool) \<Rightarrow> 's \<Rightarrow> bool" 
@@ -368,7 +368,7 @@ proof -
 qed
 
 lemma  listsum_less_elems: "\<forall>x\<in>set xs. snd x \<noteq> Infty \<Longrightarrow>
-   \<forall>y\<in>set_of (multiset_of (map p_unwrap (map snd xs))).
+   \<forall>y\<in>set_mset (mset (map p_unwrap (map snd xs))).
               snd (p_unwrap (listsum (map snd xs))) \<le> snd y"          
     proof (induct xs)
     case Nil thus ?case by simp
@@ -417,7 +417,7 @@ proof (intro impI allI)
   fix a b 
   show "a \<le> y \<Longrightarrow> a + b \<le> y"
     apply (induct a b rule: p_less.induct)
-    apply (auto simp add: p_less_eq_def plus_def)
+    apply (auto simp add: plus_def)
     apply (metis linorder_linear order_trans 
       p_linear p_min.simps(4) p_min_mon plus_def prio_selects_one)
     apply (metis order_trans p_linear p_min_mon p_min_re_neut plus_def)

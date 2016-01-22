@@ -14,11 +14,11 @@ primrec map_index' :: "nat \<Rightarrow> (nat \<Rightarrow> 'a \<Rightarrow> 'b)
 lemma length_map_index'[simp]: "length (map_index' n f xs) = length xs"
   by (induct xs arbitrary: n) auto
 
-lemma map_index'_map_zip: "map_index' n f xs = map (split f) (zip [n ..< n + length xs] xs)"
+lemma map_index'_map_zip: "map_index' n f xs = map (case_prod f) (zip [n ..< n + length xs] xs)"
 proof (induct xs arbitrary: n)
   case (Cons x xs)
-  hence "map_index' n f (x#xs) = f n x # map (split f) (zip [Suc n ..< n + length (x # xs)] xs)" by simp
-  also have "\<dots> =  map (split f) (zip (n # [Suc n ..< n + length (x # xs)]) (x # xs))" by simp
+  hence "map_index' n f (x#xs) = f n x # map (case_prod f) (zip [Suc n ..< n + length (x # xs)] xs)" by simp
+  also have "\<dots> =  map (case_prod f) (zip (n # [Suc n ..< n + length (x # xs)]) (x # xs))" by simp
   also have "(n # [Suc n ..< n + length (x # xs)]) = [n ..< n + length (x # xs)]" by (induct xs) auto
   finally show ?case by simp
 qed simp
@@ -40,12 +40,12 @@ lemma map_index_map[simp]: "map_index f (map g xs) = map_index (\<lambda>n x. f 
   unfolding map_index by (auto simp: map_zip_map2)
 
 lemma set_map_index[simp]: "x \<in> set (map_index f xs) = (\<exists>i < length xs. f i (xs ! i) = x)"
-  unfolding map_index by (auto simp: set_zip intro!: image_eqI[of _ "split f"])
+  unfolding map_index by (auto simp: set_zip intro!: image_eqI[of _ "case_prod f"])
 
 lemma set_map_index'[simp]: "x\<in>set (map_index' n f xs) 
   \<longleftrightarrow> (\<exists>i<length xs. f (n+i) (xs!i) = x) "
   unfolding map_index'_map_zip 
-  by (auto simp: set_zip intro!: image_eqI[of _ "split f"])
+  by (auto simp: set_zip intro!: image_eqI[of _ "case_prod f"])
 
 
 lemma nth_map_index[simp]: "p < length xs \<Longrightarrow> map_index f xs ! p = f p (xs ! p)"
@@ -187,22 +187,22 @@ lemma remdups_concat_map_remdups:
   by (induct xs) (auto simp: remdups_append filter_empty_conv)
 
 (*multisets only needed below*)
-lemma multiset_concat_gen: "M + multiset_of (concat xs) = fold (\<lambda>x M. M + multiset_of x) xs M"
+lemma multiset_concat_gen: "M + mset (concat xs) = fold (\<lambda>x M. M + mset x) xs M"
   by (induct xs arbitrary: M) (auto, metis union_assoc)
 
-corollary multiset_concat: "multiset_of (concat xs) = fold (\<lambda>x M. M + multiset_of x) xs {#}"
+corollary multiset_concat: "mset (concat xs) = fold (\<lambda>x M. M + mset x) xs {#}"
   using multiset_concat_gen[of "{#}" xs] by simp
 
-lemma fold_multiset_of_insort[simp]: "fold (\<lambda>x M. M + multiset_of (f x)) (insort x xs) M =
-  fold (\<lambda>x M. M + multiset_of (f x)) xs (multiset_of (f x) + M)"
+lemma fold_mset_insort[simp]: "fold (\<lambda>x M. M + mset (f x)) (insort x xs) M =
+  fold (\<lambda>x M. M + mset (f x)) xs (mset (f x) + M)"
   by (induct xs arbitrary: M) (auto simp: ac_simps)
 
-lemma fold_multiset_of_sort[simp]:
-  "fold (\<lambda>x M. M + multiset_of (f x)) (sort xs) M = fold (\<lambda>x M. M + multiset_of (f x)) xs M"
+lemma fold_mset_sort[simp]:
+  "fold (\<lambda>x M. M + mset (f x)) (sort xs) M = fold (\<lambda>x M. M + mset (f x)) xs M"
   by (induct xs arbitrary: M) (auto simp: ac_simps)
 
 lemma multiset_concat_map_sort[simp]:
-  "multiset_of (concat (map f (sort xs))) = multiset_of (concat (map f xs))"
+  "mset (concat (map f (sort xs))) = mset (concat (map f xs))"
   by (auto simp: multiset_concat fold_map o_def)
 
 lemma sort_concat_map_sort[simp]: "sort (concat (map f (sort xs))) = sort (concat (map f xs))"

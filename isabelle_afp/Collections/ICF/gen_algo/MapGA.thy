@@ -9,7 +9,7 @@
 
 *)
 
-header {* \isaheader{Generic Algorithms for Maps} *}
+section {* \isaheader{Generic Algorithms for Maps} *}
 theory MapGA
 imports SetIteratorCollectionsGA
 begin
@@ -199,7 +199,7 @@ begin
       unfolding A
       apply (simp add: Bex_def Ball_def image_iff map_to_set_def)
       apply clarify
-      apply (metis option.exhaust PairE)
+      apply (metis option.exhaust prod.exhaust)
       apply (simp add: Bex_def Ball_def image_iff map_to_set_def)
       done
   qed
@@ -519,7 +519,7 @@ begin
   
   lemma dflt_oops_impl: "StdOMap dflt_oops"
   proof -
-    interpret aux!: StdMap dflt_ops by (rule dflt_ops_impl)
+    interpret aux: StdMap dflt_ops by (rule dflt_ops_impl)
 
     show ?thesis
       apply (rule StdOMap_intro)
@@ -535,8 +535,8 @@ begin
 end
 
 locale g_image_filter_defs_loc = 
-  m1!: StdMapDefs ops1 + 
-  m2!: StdMapDefs ops2
+  m1: StdMapDefs ops1 + 
+  m2: StdMapDefs ops2
   for ops1 :: "('k1,'v1,'s1,'m1) map_ops_scheme"
   and ops2 :: "('k2,'v2,'s2,'m2) map_ops_scheme"
 begin
@@ -547,8 +547,8 @@ begin
 end
 
 locale g_image_filter_loc = g_image_filter_defs_loc ops1 ops2 + 
-  m1!: StdMap ops1 + 
-  m2!: StdMap ops2
+  m1: StdMap ops1 + 
+  m2: StdMap ops2
   for ops1 :: "('k1,'v1,'s1,'m1) map_ops_scheme"
   and ops2 :: "('k2,'v2,'s2,'m2) map_ops_scheme"
 begin
@@ -581,7 +581,7 @@ begin
       have "Eps_Opt (vP k) = Some v \<longleftrightarrow> vP k v"
         using unique_f unfolding vP_def transforms_to_unique_keys_def 
         apply (rule_tac Eps_Opt_eq_Some)
-        apply (metis Pair_eq option.inject)
+        apply (metis prod.inject option.inject)
       done
     } note Eps_vP_elim[simp] = this
     have map_intro: "{y. \<exists>x. x \<in> map_to_set (m1.\<alpha> m) \<and> f x = Some y} 
@@ -612,8 +612,8 @@ sublocale g_image_filter_loc
 
 
 locale g_value_image_filter_defs_loc = 
-  m1!: StdMapDefs ops1 + 
-  m2!: StdMapDefs ops2
+  m1: StdMapDefs ops1 + 
+  m2: StdMapDefs ops2
   for ops1 :: "('k,'v1,'s1,'m1) map_ops_scheme"
   and ops2 :: "('k,'v2,'s2,'m2) map_ops_scheme"
 begin
@@ -635,8 +635,8 @@ lemma restrict_map_dom_subset: "\<lbrakk> dom m \<subseteq> R\<rbrakk> \<Longrig
 
 
 locale g_value_image_filter_loc = g_value_image_filter_defs_loc ops1 ops2 + 
-  m1!: StdMap ops1 + 
-  m2!: StdMap ops2
+  m1: StdMap ops1 + 
+  m2: StdMap ops2
   for ops1 :: "('k,'v1,'s1,'m1) map_ops_scheme"
   and ops2 :: "('k,'v2,'s2,'m2) map_ops_scheme"
 begin

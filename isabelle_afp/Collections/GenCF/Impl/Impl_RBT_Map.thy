@@ -1,4 +1,4 @@
-header {* \isaheader{Red-Black Tree based Maps} *}
+section {* \isaheader{Red-Black Tree based Maps} *}
 theory Impl_RBT_Map
 imports 
   "~~/src/HOL/Library/RBT_Impl"
@@ -79,8 +79,8 @@ subsection {* Standard Setup *}
   lemma param_rec_rbt[param]: "(rec_rbt, rec_rbt) \<in> 
     Ra \<rightarrow> (color_rel \<rightarrow> \<langle>Rb,Rc\<rangle>rbt_rel \<rightarrow> Rb \<rightarrow> Rc \<rightarrow> \<langle>Rb,Rc\<rangle>rbt_rel
      \<rightarrow> Ra \<rightarrow> Ra \<rightarrow> Ra) \<rightarrow> \<langle>Rb,Rc\<rangle>rbt_rel \<rightarrow> Ra"
-  proof (intro fun_relI)
-    case (goal1 s s' f f' t t') from goal1(3,1,2) show ?case
+  proof (intro fun_relI, goal_cases)
+    case (1 s s' f f' t t') from this(3,1,2) show ?case
       apply (induct arbitrary: s s')
       apply simp
       apply simp
@@ -96,8 +96,8 @@ subsection {* Standard Setup *}
   lemma param_balance[param]: 
     shows "(balance,balance) \<in> 
       \<langle>Ra,Rb\<rangle>rbt_rel \<rightarrow> Ra \<rightarrow> Rb \<rightarrow> \<langle>Ra,Rb\<rangle>rbt_rel \<rightarrow> \<langle>Ra,Rb\<rangle>rbt_rel"
-  proof (intro fun_relI)
-    case (goal1 t1 t1' a a' b b' t2 t2')
+  proof (intro fun_relI, goal_cases)
+    case (1 t1 t1' a a' b b' t2 t2')
     thus ?case
       apply (induct t1' a' b' t2' arbitrary: t1 a b t2 rule: balance.induct)
       apply (elim_all rbt_rel_elims color_rel_elims)
@@ -112,8 +112,8 @@ subsection {* Standard Setup *}
     assumes param_less[param]: "(less,less') \<in> Ra \<rightarrow> Ra \<rightarrow> Id"
     shows "(ord.rbt_ins less,ord.rbt_ins less') \<in> 
              (Ra\<rightarrow>Rb\<rightarrow>Rb\<rightarrow>Rb) \<rightarrow> Ra \<rightarrow> Rb \<rightarrow> \<langle>Ra,Rb\<rangle>rbt_rel \<rightarrow> \<langle>Ra,Rb\<rangle>rbt_rel"
-  proof (intro fun_relI)
-    case (goal1 f f' a a' b b' t t')
+  proof (intro fun_relI, goal_cases)
+    case (1 f f' a a' b b' t t')
     thus ?case
       apply (induct f' a' b' t' arbitrary: f a b t rule: ord.rbt_ins.induct)
       apply (elim_all rbt_rel_elims color_rel_elims)
@@ -145,8 +145,8 @@ subsection {* Standard Setup *}
   lemma param_balance_left[param]: 
     "(balance_left, balance_left) \<in> 
       \<langle>Ra,Rb\<rangle>rbt_rel \<rightarrow> Ra \<rightarrow> Rb \<rightarrow> \<langle>Ra,Rb\<rangle>rbt_rel \<rightarrow> \<langle>Ra,Rb\<rangle>rbt_rel"
-  proof (intro fun_relI)
-    case (goal1 l l' a a' b b' r r')
+  proof (intro fun_relI, goal_cases)
+    case (1 l l' a a' b b' r r')
     thus ?case
       apply (induct l a b r arbitrary: l' a' b' r' rule: balance_left.induct)
       apply (elim_all rbt_rel_elims color_rel_elims)
@@ -159,8 +159,8 @@ subsection {* Standard Setup *}
   lemma param_balance_right[param]: 
     "(balance_right, balance_right) \<in> 
       \<langle>Ra,Rb\<rangle>rbt_rel \<rightarrow> Ra \<rightarrow> Rb \<rightarrow> \<langle>Ra,Rb\<rangle>rbt_rel \<rightarrow> \<langle>Ra,Rb\<rangle>rbt_rel"
-  proof (intro fun_relI)
-    case (goal1 l l' a a' b b' r r')
+  proof (intro fun_relI, goal_cases)
+    case (1 l l' a a' b b' r r')
     thus ?case
       apply (induct l a b r arbitrary: l' a' b' r' rule: balance_right.induct)
       apply (elim_all rbt_rel_elims color_rel_elims)
@@ -171,8 +171,8 @@ subsection {* Standard Setup *}
 
   lemma param_combine[param]:
     "(combine,combine)\<in>\<langle>Ra,Rb\<rangle>rbt_rel \<rightarrow> \<langle>Ra,Rb\<rangle>rbt_rel \<rightarrow> \<langle>Ra,Rb\<rangle>rbt_rel"
-  proof (intro fun_relI)
-    case (goal1 t1 t1' t2 t2')
+  proof (intro fun_relI, goal_cases)
+    case (1 t1 t1' t2 t2')
     thus ?case
       apply (induct t1 t2 arbitrary: t1' t2' rule: combine.induct)
       apply (elim_all rbt_rel_elims color_rel_elims)
@@ -452,7 +452,7 @@ subsection {* Standard Setup *}
       rule: compare_height.induct)
     apply (subst (2) compare_height.simps)
     apply (subst compare_height.simps)
-    apply (parametricity add: param_case_prod' param_case_rbt', (simp only: Pair_eq)+) []
+    apply (parametricity add: param_case_prod' param_case_rbt', (simp only: prod.inject)+) []
     done
 
   lemma compare_height_param[param]:
@@ -946,7 +946,6 @@ qed
 
 lemma autoref_rbt_is_iterator[autoref_ga_rules]: 
   assumes ELO: "GEN_ALGO_tag (eq_linorder cmp')"
-  (*assumes [relator_props]: "single_valued Rk"   "single_valued Rv"*)
   shows "is_map_to_sorted_list (comp2le cmp') Rk Rv (rbt_map_rel (comp2lt cmp'))
     rbt_to_list"
 proof -
@@ -1055,8 +1054,8 @@ abbreviation
 lemmas [autoref_post_simps] = dflt_cmp_inv2 dflt_cmp_2inv
 
 lemma [simp,autoref_post_simps]: "ord.rbt_ins op < = rbt_ins"
-proof (intro ext)
-  case goal1 thus ?case
+proof (intro ext, goal_cases)
+  case (1 x xa xb xc) thus ?case
     apply (induct x xa xb xc rule: rbt_ins.induct)
     apply (simp_all add: ord.rbt_ins.simps)
     done

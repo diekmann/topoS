@@ -2,7 +2,7 @@
     Author:      Thomas Tuerk <tuerk@in.tum.de>
     Maintainer:  Thomas Tuerk <tuerk@in.tum.de>
 *)
-header {* \isaheader{Set Implementation by sorted Lists} *}
+section {* \isaheader{Set Implementation by sorted Lists} *}
 theory ListSetImpl_Sorted
 imports 
   "../spec/SetSpec"
@@ -42,7 +42,7 @@ where "lss_iteratei l = foldli l"
 definition lss_isEmpty :: "'a lss \<Rightarrow> bool" where "lss_isEmpty s == s=[]"
 
 definition lss_union :: "'a::{linorder} lss \<Rightarrow> 'a lss \<Rightarrow> 'a lss" 
-  where "lss_union s1 s2 == merge s1 s2"
+  where "lss_union s1 s2 == Misc.merge s1 s2"
 definition lss_union_list :: "'a::{linorder} lss list \<Rightarrow> 'a lss" 
   where "lss_union_list l == merge_list [] l"
 definition lss_inter :: "'a::{linorder} lss \<Rightarrow> 'a lss \<Rightarrow> 'a lss" 
@@ -218,7 +218,7 @@ definition lss_basic_ops :: "('x::linorder,'x lss) oset_basic_ops"
   \<rparr>"
 
 setup Locale_Code.open_block
-interpretation lss_basic!: StdBasicOSet lss_basic_ops
+interpretation lss_basic: StdBasicOSet lss_basic_ops
   apply (rule StdBasicOSet.intro)
   apply (rule StdBasicSet.intro)
   apply (simp_all add: icf_rec_unf)
@@ -238,8 +238,8 @@ definition [icf_rec_def]: "lss_ops \<equiv> lss_basic.dflt_oops \<lparr>
   \<rparr>"
 
 setup Locale_Code.open_block
-interpretation lss!: StdOSetDefs lss_ops .
-interpretation lss!: StdOSet lss_ops
+interpretation lss: StdOSetDefs lss_ops .
+interpretation lss: StdOSet lss_ops
 proof -
   interpret aux: StdOSet lss_basic.dflt_oops
     by (rule lss_basic.dflt_oops_impl)

@@ -84,8 +84,8 @@ setup {*
             |> Thm.cterm_of ctxt
 
           val res_thm = Goal.prove_internal ctxt [] goal (fn _ => 
-            REPEAT (rtac @{thm fun_relI} 1)
-            THEN (rtac thm 1)
+            REPEAT (resolve_tac ctxt @{thms fun_relI} 1)
+            THEN (resolve_tac ctxt [thm] 1)
             THEN (ALLGOALS (assume_tac ctxt))
           )
         in
@@ -95,7 +95,7 @@ setup {*
     | _ => raise THM("Expected autoref rule",~1,[thm])
 
     val higher_order_rl_attr = 
-      Thm.rule_attribute (higher_order_rl_of o Context.proof_of)
+      Thm.rule_attribute [] (higher_order_rl_of o Context.proof_of)
   in
     Attrib.setup @{binding autoref_higher_order_rule} 
       (Scan.succeed higher_order_rl_attr) "Autoref: Convert rule to higher-order form"
@@ -139,6 +139,13 @@ method_setup autoref_id_op = {*
   ))
 *}
 
+method_setup autoref_solve_id_op = {*
+  Scan.succeed (fn ctxt => SIMPLE_METHOD' (
+    Autoref_Id_Ops.id_tac (Config.put Autoref_Id_Ops.cfg_ss_id_op false ctxt)
+  ))
+*}
+
+
 
 ML {*
   structure Autoref_Debug = struct
@@ -168,6 +175,24 @@ ML {*
     end
   end
 *}
+
+
+text {* General casting-tag, that allows type-casting on concrete level, while 
+  being identity on abstract level. *}
+definition [simp]: "CAST \<equiv> id"
+lemma [autoref_itype]: "CAST ::\<^sub>i I \<rightarrow>\<^sub>i I" by simp
+
+(* TODO: This idea does currently not work, b/c a homogeneity rule
+  will be created from the (\<lambda>x. x, CAST)\<in>R \<rightarrow> R rule, which will always
+  be applied first! As a workaround, we make the cast mandatory!
+*)
+(*lemma [autoref_rules]: 
+  assumes "PRIO_TAG_GEN_ALGO"
+  shows "(\<lambda>x. x,CAST) \<in> R \<rightarrow> R"
+  by auto
+*)
+
+
 
 text {* Hide internal stuff *}
 

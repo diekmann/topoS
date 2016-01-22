@@ -29,15 +29,15 @@ lift_definition plus_uint32 :: "uint32 \<Rightarrow> uint32 \<Rightarrow> uint32
 lift_definition minus_uint32 :: "uint32 \<Rightarrow> uint32 \<Rightarrow> uint32" is "op -" .
 lift_definition uminus_uint32 :: "uint32 \<Rightarrow> uint32" is uminus .
 lift_definition times_uint32 :: "uint32 \<Rightarrow> uint32 \<Rightarrow> uint32" is "op *" .
-lift_definition div_uint32 :: "uint32 \<Rightarrow> uint32 \<Rightarrow> uint32" is "op div" .
+lift_definition divide_uint32 :: "uint32 \<Rightarrow> uint32 \<Rightarrow> uint32" is "op div" .
 lift_definition mod_uint32 :: "uint32 \<Rightarrow> uint32 \<Rightarrow> uint32" is "op mod" .
-instance by default (transfer, simp add: algebra_simps)+
+instance by standard (transfer, simp add: algebra_simps)+
 end
 
 instantiation uint32 :: linorder begin
 lift_definition less_uint32 :: "uint32 \<Rightarrow> uint32 \<Rightarrow> bool" is "op <" .
 lift_definition less_eq_uint32 :: "uint32 \<Rightarrow> uint32 \<Rightarrow> bool" is "op \<le>" .
-instance by(default)(transfer, simp add: less_le_not_le linear)+
+instance by standard (transfer, simp add: less_le_not_le linear)+
 end
 
 lemmas [code] = less_uint32.rep_eq less_eq_uint32.rep_eq
@@ -61,7 +61,7 @@ lemmas [code] = test_bit_uint32.rep_eq lsb_uint32.rep_eq msb_uint32.rep_eq
 
 instantiation uint32 :: equal begin
 lift_definition equal_uint32 :: "uint32 \<Rightarrow> uint32 \<Rightarrow> bool" is "equal_class.equal" .
-instance by default(transfer, simp add: equal_eq)
+instance by standard (transfer, simp add: equal_eq)
 end
 
 lemmas [code] = equal_uint32.rep_eq
@@ -399,11 +399,11 @@ where "uint32_mod x y = snd (uint32_divmod x y)"
 
 lemma div_uint32_code [code]: "x div y = (if y = 0 then 0 else uint32_div x y)"
 including undefined_transfer unfolding uint32_divmod_def uint32_div_def
-by transfer(simp add: word_div_def)
+by transfer (simp add: word_div_def)
 
 lemma mod_uint32_code [code]: "x mod y = (if y = 0 then x else uint32_mod x y)"
 including undefined_transfer unfolding uint32_mod_def uint32_divmod_def
-by transfer(simp add: word_mod_def)
+by transfer (simp add: word_mod_def)
 
 definition uint32_sdiv :: "uint32 \<Rightarrow> uint32 \<Rightarrow> uint32"
 where [code del]:

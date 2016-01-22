@@ -221,7 +221,7 @@ ML {*
       val fT = fastype_of f |> Thm.ctyp_of ctxt
       val f = Thm.cterm_of ctxt f
       val I = Thm.cterm_of ctxt I
-      val thm = Drule.instantiate' [SOME fT] [SOME f, SOME I] @{thm itypeI}
+      val thm = Thm.instantiate' [SOME fT] [SOME f, SOME I] @{thm itypeI}
     in
       thm
     end
@@ -307,7 +307,7 @@ ML {*
 
       fun pretty_typ_thms l = 
         l
-        |> map (Display.pretty_thm ctxt)
+        |> map (Thm.pretty_thm ctxt)
         |> Pretty.fbreaks |> Pretty.block
 
 
@@ -351,10 +351,10 @@ ML {*
 
       val id_abs = CONVERSION (HOL_concl_conv 
         (fn ctxt => id_op_lhs_conv (mk_ABS_conv ctxt)) ctxt)
-        THEN' rtac @{thm ID_abs}
+        THEN' resolve_tac ctxt @{thms ID_abs}
       val id_app = CONVERSION (HOL_concl_conv 
         (fn _ => id_op_lhs_conv (mk_APP_conv)) ctxt)
-        THEN' rtac @{thm ID_app}
+        THEN' resolve_tac ctxt @{thms ID_app}
 
       val id_tag_tac = let
         val trace = Config.get ctxt cfg_trace_id_tags
@@ -376,20 +376,20 @@ ML {*
               Seq.single st'
             end
           in
-            (rtac @{thm ID_const_any} THEN' tr_tac) i st
+            (resolve_tac ctxt @{thms ID_const_any} THEN' tr_tac) i st
           end) 
         else
-          rtac @{thm ID_const_any}
+          resolve_tac ctxt @{thms ID_const_any}
 
       end
 
       val id_const = 
         LHS_COND' (fn t => is_Const t orelse is_Free t)
         THEN' (
-          (rtac @{thm ID_const} THEN' id_typ) (* Try to find type *)
+          (resolve_tac ctxt @{thms ID_const} THEN' id_typ) (* Try to find type *)
           ORELSE' (
             if Config.get ctxt cfg_use_id_tags then
-              CAN' (rtac @{thm ID_const_check_known} THEN' id_typ)
+              CAN' (resolve_tac ctxt @{thms ID_const_check_known} THEN' id_typ)
               THEN_ELSE' (
                 K no_tac,
                 id_tag_tac
@@ -451,10 +451,10 @@ ML {*
         FIRST' [
           assume_tac ctxt,
           id_tagged,
-          rtac @{thm ID_is_tagged_OP} THEN_ELSE' (
-            rtac @{thm ID_tagged_OP_no_annot} THEN' id_typ,
+          resolve_tac ctxt @{thms ID_is_tagged_OP} THEN_ELSE' (
+            resolve_tac ctxt @{thms ID_tagged_OP_no_annot} THEN' id_typ,
             FIRST' [
-              Indep_Vars.indep_tac,
+              Indep_Vars.indep_tac ctxt,
               id_annotated,
               def_id_pat,
               id_pat APPEND' id_dflt,
@@ -481,7 +481,7 @@ ML {*
 
     val id_phase = {
       init = I,
-      tac = (fn ctxt => Seq.INTERVAL (rtac @{thm ID_init} THEN' id_tac ctxt)),
+      tac = (fn ctxt => Seq.INTERVAL (resolve_tac ctxt @{thms ID_init} THEN' id_tac ctxt)),
       analyze = id_analyze,
       pretty_failure = id_pretty_failure
     }
@@ -504,7 +504,7 @@ ML {*
           Pretty.block [
             Pretty.str "Adding overloaded interface type to constant:",
             Pretty.brk 1,
-            Display.pretty_thm ctxt thm
+            Thm.pretty_thm ctxt thm
           ] |> Pretty.string_of
         ); true);
         intf_types.add_thm thm context 
@@ -628,7 +628,7 @@ structure Autoref_Rel_Inf :AUTOREF_REL_INF = struct
       |> HOLogic.mk_Trueprop
       |> Thm.cterm_of ctxt
 
-    val thm = Goal.prove_internal ctxt [] res (fn _ => rtac @{thm REL_OF_INTF_I} 1)
+    val thm = Goal.prove_internal ctxt [] res (fn _ => resolve_tac ctxt @{thms REL_OF_INTF_I} 1)
   in thm end
 
 
@@ -638,7 +638,7 @@ structure Autoref_Rel_Inf :AUTOREF_REL_INF = struct
     IF_EXGOAL (
       assume_tac ctxt
       ORELSE'
-      Indep_Vars.indep_tac
+      Indep_Vars.indep_tac ctxt
       ORELSE' resolve_from_net_tac ctxt ind_net
       ORELSE'
       (fn i => fn st => 
@@ -646,7 +646,7 @@ structure Autoref_Rel_Inf :AUTOREF_REL_INF = struct
           @{mpat "Trueprop (CNV_ANNOT _ _ _)"} => 
             resolve_tac ctxt @{thms CNV_ANNOT} i st
         | @{mpat "Trueprop (REL_OF_INTF ?I _)"} => 
-            rtac (rel_of_intf_thm ctxt I) i st
+            resolve_tac ctxt [rel_of_intf_thm ctxt I] i st
         | _ => Seq.empty
       
 
@@ -677,7 +677,7 @@ structure Autoref_Rel_Inf :AUTOREF_REL_INF = struct
 
   val roi_phase = {
     init = I,
-    tac = (fn ctxt => Seq.INTERVAL (rtac @{thm ROI_init} THEN' roi_tac ctxt)),
+    tac = (fn ctxt => Seq.INTERVAL (resolve_tac ctxt @{thms ROI_init} THEN' roi_tac ctxt)),
     analyze = roi_analyze,
     pretty_failure = roi_pretty_failure
   }

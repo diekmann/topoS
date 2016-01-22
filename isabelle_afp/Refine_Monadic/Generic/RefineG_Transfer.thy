@@ -95,7 +95,7 @@ structure RefineG_Transfer = struct
 
   fun transfer_tac thms ctxt i st = let 
     val thms = thms @ transfer.get ctxt;
-    val ss = put_simpset HOL_basic_ss ctxt addsimps @{thms nested_prod_case_simp}
+    val ss = put_simpset HOL_basic_ss ctxt addsimps @{thms nested_case_prod_simp}
   in
     REPEAT_DETERM1 (
       COND (has_fewer_prems (Thm.nprems_of st)) no_tac (
@@ -108,28 +108,27 @@ structure RefineG_Transfer = struct
   end
 
   (* Adjust right term to have same structure as left one *)
-  val align_tac = IF_EXGOAL (fn i => fn st =>
+  fun align_tac ctxt = IF_EXGOAL (fn i => fn st =>
     case Logic.concl_of_goal (Thm.prop_of st) i of
       @{mpat "Trueprop (REFINEG_TRANSFER_ALIGN ?c _)"} => let
-        val thy = Thm.theory_of_thm st
-        val c = Thm.global_cterm_of thy c
+        val c = Thm.cterm_of ctxt c
         val cT = Thm.ctyp_of_cterm c
         
         val rl = @{thm REFINEG_TRANSFER_ALIGNI}
           |> Thm.incr_indexes (Thm.maxidx_of st + 1)
-          |> instantiate' [NONE,SOME cT] [NONE,SOME c]
+          |> Thm.instantiate' [NONE,SOME cT] [NONE,SOME c]
         (*val _ = tracing (@{make_string} rl)*)
       in
-        rtac rl i st
+        resolve_tac ctxt [rl] i st
       end
     | _ => Seq.empty
   )
 
   fun post_transfer_tac thms ctxt = let open Autoref_Tacticals in
-    rtac @{thm START_REFINEG_TRANSFER} 
-    THEN' align_tac 
+    resolve_tac ctxt @{thms START_REFINEG_TRANSFER} 
+    THEN' align_tac ctxt 
     THEN' IF_SOLVED (transfer_tac thms ctxt)
-      (post_process_tac ctxt THEN' rtac @{thm STOP_REFINEG_TRANSFER})
+      (post_process_tac ctxt THEN' resolve_tac ctxt @{thms STOP_REFINEG_TRANSFER})
       (K all_tac)
 
   end
@@ -197,6 +196,12 @@ lemma transfer_option[refine_transfer]:
   assumes "\<And>x. \<alpha> (fb x) \<le> Fb x"
   shows "\<alpha> (case_option fa fb x) \<le> case_option Fa Fb x"
   using assms by (auto split: option.split)
+
+lemma transfer_sum[refine_transfer]:
+  assumes "\<And>l. \<alpha> (fl l) \<le> Fl l"
+  assumes "\<And>r. \<alpha> (fr r) \<le> Fr r"
+  shows "\<alpha> (case_sum fl fr x) \<le> (case_sum Fl Fr x)"
+  using assms by (auto split: sum.split)
 
 lemma transfer_list[refine_transfer]:
   assumes "\<alpha> fn \<le> Fn"

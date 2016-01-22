@@ -6,8 +6,9 @@ definition conv_tag where "conv_tag n x == x"
   -- {* Used internally for @{text "pat_conv"}-conversion *}
 
 ML {*
-  infix 0 RSm THEN_ELSE' THEN_ELSE_COMB'
-  infix 1 THEN_ALL_NEW_FWD THEN_INTERVAL;
+  infix 0 THEN_ELSE' THEN_ELSE_COMB'
+  infix 1 THEN_ALL_NEW_FWD THEN_INTERVAL
+  infix 2 ORELSE_INTERVAL
   infix 3 ->>
   infix 1 ##
 
@@ -24,7 +25,7 @@ ML {*
     val seq_is_empty: 'a Seq.seq -> bool * 'a Seq.seq
 
     (* Resolution with matching *)
-    val RSm: thm * thm -> thm
+    val RSm: Proof.context -> thm -> thm -> thm
 
     val is_Abs: term -> bool
     val is_Comb: term -> bool
@@ -58,6 +59,7 @@ ML {*
 
     val SINGLE_INTERVAL: itactic -> tactic'
     val THEN_INTERVAL: itactic * itactic -> itactic
+    val ORELSE_INTERVAL: itactic * itactic -> itactic
 
     val CAN': tactic' -> tactic'
 
@@ -103,8 +105,6 @@ ML {*
     val import_cterms: bool -> cterm list -> Proof.context -> 
       cterm list * Proof.context
 
-    val cterm_instantiate': cterm option list -> thm -> thm
-
     val subsume_sort: ('a -> term) -> theory -> 'a list -> 'a list
     val subsume_sort_gen: ('a -> term) -> Context.generic 
       -> 'a list -> 'a list
@@ -129,7 +129,7 @@ ML {*
 
     val import_conv: (Proof.context -> conv) -> Proof.context -> conv
 
-    val fix_conv: conv -> conv
+    val fix_conv: Proof.context -> conv -> conv
     val ite_conv: conv -> conv -> conv -> conv
 
     val cfg_trace_f_tac_conv: bool Config.T
@@ -166,17 +166,14 @@ ML {*
       NONE => (true, seq)
     | SOME (a,seq) => (false, Seq.cons a seq)
 
-    fun (thA RSm thB) = let
-      val thy = Context.merge (apply2 Thm.theory_of_thm (thA,thB))
-      val ctxt = Proof_Context.init_global thy
-      val octxt = ctxt
-      val ctxt = Variable.declare_thm thA ctxt
-      val ctxt = Variable.declare_thm thB ctxt
-      val (thA,ctxt) = 
-        yield_singleton (apfst snd oo Variable.import true) thA ctxt
+    fun RSm ctxt thA thB = let
+      val (thA, ctxt') = ctxt
+        |> Variable.declare_thm thA
+        |> Variable.declare_thm thB
+        |> yield_singleton (apfst snd oo Variable.import true) thA
       val thm = thA RS thB
-      val thm = singleton (Variable.export ctxt octxt) thm
-      |> Drule.zero_var_indexes
+      val thm = singleton (Variable.export ctxt' ctxt) thm
+        |> Drule.zero_var_indexes
     in 
       thm
     end
@@ -293,6 +290,8 @@ ML {*
         ) st
       ):itactic
 
+    fun tac1 ORELSE_INTERVAL tac2 = (fn i => fn j => tac1 i j ORELSE tac2 i j)
+
     (* Fail if tac fails, otherwise do nothing *)
     fun CAN' tac i st = 
       case tac i st |> Seq.pull of
@@ -305,12 +304,12 @@ ML {*
 
     (* Resolve with rule. Use first-order unification.
       From cookbook, added exception handling *)
-    fun fo_rtac thm = Subgoal.FOCUS (fn {concl, ...} => 
+    fun fo_rtac thm = Subgoal.FOCUS (fn {context = ctxt, concl, ...} => 
     let
       val concl_pat = Drule.strip_imp_concl (Thm.cprop_of thm)
       val insts = Thm.first_order_match (concl_pat, concl)
     in
-      rtac (Drule.instantiate_normalize insts thm) 1
+      resolve_tac ctxt [Drule.instantiate_normalize insts thm] 1
     end handle Pattern.MATCH => no_tac )
 
     fun fo_resolve_tac thms ctxt = 
@@ -323,7 +322,7 @@ ML {*
           | non_atomic (Const (@{const_name Pure.all}, _) $ _) = true
           | non_atomic _ = false;
 
-        val ((_, goal'), ctxt') = Variable.focus_cterm goal ctxt;
+        val ((_, goal'), ctxt') = Variable.focus_cterm NONE goal ctxt;
         val goal'' = Drule.cterm_rule 
           (singleton (Variable.export ctxt' ctxt)) goal';
         val Rs = filter (non_atomic o Thm.term_of) 
@@ -337,14 +336,14 @@ ML {*
     (* Resolve with premise. Copied and adjusted from Goal.assume_rule_tac. *)
     fun rprem_tac n ctxt = Goal.norm_hhf_tac ctxt THEN' CSUBGOAL (fn (goal, i) =>
       let
-        val ((_, goal'), ctxt') = Variable.focus_cterm goal ctxt;
+        val ((_, goal'), ctxt') = Variable.focus_cterm NONE goal ctxt;
         val goal'' = Drule.cterm_rule 
           (singleton (Variable.export ctxt' ctxt)) goal';
 
         val R = nth (Drule.strip_imp_prems goal'') (n - 1)
         val rl = Simplifier.norm_hhf ctxt (Thm.trivial R)
       in
-        etac rl i
+        eresolve_tac ctxt [rl] i
       end
       );
 
@@ -390,11 +389,11 @@ ML {*
       (fn (((quant, (asm, occL)), insts), thms) => fn ctxt => METHOD 
         (fn facts =>
           if null insts then 
-            quant (Method.insert_tac facts THEN' tac ctxt asm occL thms)
+            quant (Method.insert_tac ctxt facts THEN' tac ctxt asm occL thms)
           else
             (case thms of
               [thm] => quant (
-                Method.insert_tac facts THEN' inst_tac ctxt asm occL insts thm)
+                Method.insert_tac ctxt facts THEN' inst_tac ctxt asm occL insts thm)
             | _ => error "Cannot have instantiations with multiple rules")));
 
   in
@@ -452,32 +451,6 @@ ML {*
     in (cts', ctxt') end
 
 
-    (*
-      Instantiate variables by left-to-right order of occurrence, 
-      inferring type instantiations
-    *)
-    fun cterm_instantiate' instl thm = let
-      fun err msg =
-        raise TERM ("instantiate': " ^ msg,
-          map_filter (map_option Thm.term_of) instl);
-
-      fun inst_of (v, ct) =
-        (Thm.global_cterm_of (Thm.theory_of_cterm ct) (Var v), ct)
-          handle TYPE (msg, _, _) => err msg;
-
-      fun zip_vars xs ys =
-        zip_options xs ys handle ListPair.UnequalLengths =>
-          err "more instantiations than variables in thm";
-
-      val vars = rev (Thm.fold_terms Term.add_vars thm [])
-      val insts = zip_vars vars instl |> map inst_of
-
-      val thm' = cterm_instantiate insts thm
-    in 
-      thm' 
-    end
-
-
     (* Order a list of items such that more specific items come
        before less specific ones. The term to be compared is
        extracted by a function that is given as parameter.
@@ -529,32 +502,22 @@ ML {*
     fun fixup_vars_conv' conv ctxt = fixup_vars_conv (conv ctxt)
 
     local
-      fun mk_equals_ct (ct,ct') = let
-        val thy = Context.merge (Thm.theory_of_cterm ct, Thm.theory_of_cterm ct');
-      in
-        Logic.mk_equals (Thm.term_of ct, Thm.term_of ct') |> Thm.global_cterm_of thy
-      end
-
-      fun tag_ct name ct = let
-        val thy = Thm.theory_of_cterm ct;
+      fun tag_ct ctxt name ct = let
         val t = Thm.term_of ct;
         val ty = fastype_of t;
         val t' = Const (@{const_name conv_tag},@{typ unit}-->ty-->ty)
           $Free (name,@{typ unit})$t;
-        val ct' = Thm.global_cterm_of thy t';
+        val ct' = Thm.cterm_of ctxt t';
       in ct' end
 
       fun mpat_conv pat ctxt ct = let
         val (tym,tm) = Thm.first_order_match (pat,ct);
-        val tm' = map (fn (pt,ot) =>
-          case Thm.term_of pt of
-            (Var ((name,_),_)) => (pt,tag_ct name ot)
-          | _ => (pt,ot)
-        ) tm;
+        val tm' = map (fn (pt as ((name, _), _),ot) => (pt, tag_ct ctxt name ot)) tm;
         val ct' = Thm.instantiate_cterm (tym,tm') pat;
-
-        val rthm = Goal.prove_internal ctxt [] (mk_equals_ct (ct,ct'))
-          (K (simp_tac (put_simpset HOL_basic_ss ctxt addsimps @{thms conv_tag_def}) 1))
+        val rthm =
+          Goal.prove_internal ctxt []
+            (Thm.cterm_of ctxt (Logic.mk_equals (apply2 Thm.term_of (ct, ct'))))
+            (K (simp_tac (put_simpset HOL_basic_ss ctxt addsimps @{thms conv_tag_def}) 1))
         |> Goal.norm_result ctxt
       in 
         fixup_vars ct rthm 
@@ -591,13 +554,12 @@ ML {*
     in res' end
 
 
-    fun fix_conv conv ct = let
+    fun fix_conv ctxt conv ct = let
       val thm = conv ct
       val eq = Logic.mk_equals (Thm.term_of ct, Thm.term_of ct) |> head_of
     in if (Thm.term_of (Thm.lhs_of thm) aconv Thm.term_of ct)
       then thm
-      else thm RS Thm.trivial
-        (Thm.mk_binop (Thm.global_cterm_of (Thm.theory_of_cterm ct) eq) ct (Thm.rhs_of thm)) 
+      else thm RS Thm.trivial (Thm.mk_binop (Thm.cterm_of ctxt eq) ct (Thm.rhs_of thm))
     end
 
     fun ite_conv cv cv1 cv2 ct =
@@ -689,5 +651,9 @@ ML {*
   open Basic_Refine_Util
 
 *}
+
+attribute_setup zero_var_indexes = {*
+  Scan.succeed (Thm.rule_attribute [] (K Drule.zero_var_indexes))
+*} "Set variable indexes to zero, renaming to avoid clashes"
 
 end

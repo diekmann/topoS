@@ -21,7 +21,7 @@ by(induct xs)(auto simp add: map_of_eq_None_iff split: option.split)
 
 subsection {* Type definition *}
 
-typedef ('a, 'b) mapping_rbt
+typedef (overloaded) ('a, 'b) mapping_rbt
   = "{t :: ('a :: ccompare, 'b) RBT_Impl.rbt. ord.is_rbt cless t \<or> ID CCOMPARE('a) = None}"
   morphisms impl_of Mapping_RBT'
 proof
@@ -255,7 +255,7 @@ by transfer(simp split: option.split add: ID_ccompare_neq_None linorder.rbt_look
 
 lemma all_conv_all_lookup:
   "all P t \<longleftrightarrow> (\<forall>(k :: 'a) v. lookup t k = Some v \<longrightarrow> P k v)"
-by transfer(auto simp add: ID_ccompare_neq_None linorder.rbt_lookup_keys[OF mapping_linorder] ord.is_rbt_rbt_sorted RBT_Impl.keys_def RBT_Impl_rbt_all_def linorder.map_of_entries[OF mapping_linorder, symmetric] linorder.distinct_entries[OF mapping_linorder] dest: map_of_is_SomeD intro: map_of_is_SomeI)
+by transfer(auto simp add: ID_ccompare_neq_None linorder.rbt_lookup_keys[OF mapping_linorder] ord.is_rbt_rbt_sorted RBT_Impl.keys_def RBT_Impl_rbt_all_def linorder.map_of_entries[OF mapping_linorder, symmetric] linorder.distinct_entries[OF mapping_linorder] dest: map_of_SomeD intro: map_of_is_SomeI)
 
 lemma ex_conv_ex_lookup:
   "ex P t \<longleftrightarrow> (\<exists>(k :: 'a) v. lookup t k = Some v \<and> P k v)"

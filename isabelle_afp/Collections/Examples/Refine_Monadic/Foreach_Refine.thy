@@ -1,4 +1,4 @@
-header {* \isaheader{Example for Foreach-Loops} *}
+section {* \isaheader{Example for Foreach-Loops} *}
 theory Foreach_Refine
 imports 
   "../../Refine_Dflt_Only_ICF" 
@@ -90,7 +90,7 @@ text {*
   Next, we use automatic data refinement and transfer to generate an
   executable algorithm using a red-black-tree. 
 *}
-schematic_lemma find_max_impl_refine_aux:
+schematic_goal find_max_impl_refine_aux:
   assumes invar_S: "rs.invar S"
   shows "RETURN (?f) \<le> (find_max P (rs.\<alpha> S))"
   unfolding find_max_def

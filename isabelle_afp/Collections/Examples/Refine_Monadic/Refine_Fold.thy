@@ -1,4 +1,4 @@
-header {* \isaheader{Fold-Combinator} *}
+section {* \isaheader{Fold-Combinator} *}
 theory Refine_Fold
 imports "../../Refine_Dflt_Only_ICF"
 begin
@@ -30,7 +30,6 @@ begin
     done
 
   lemma rfoldl_refines[refine]:
-    assumes SV: "single_valued Rs"
     assumes REFF: "\<And>x x' s s'. \<lbrakk> (s,s')\<in>Rs; (x,x')\<in>Rl \<rbrakk> 
       \<Longrightarrow> f s x \<le> \<Down>Rs (f' s' x')"
     assumes REF0: "(s0,s0')\<in>Rs"
@@ -38,7 +37,7 @@ begin
     shows "rfoldl f s0 l \<le> \<Down>Rs (rfoldl f' s0' l')"
     using REFL[unfolded list_rel_def, simplified] REF0
     apply (induct arbitrary: s0 s0' rule: list_all2_induct)
-    apply (simp add: REF0 RETURN_refine_sv[OF SV])
+    apply (simp add: REF0 RETURN_refine)
     apply (simp only: rfoldl_simps)
     apply (refine_rcg)
     apply (rule REFF)
@@ -127,7 +126,7 @@ begin
     apply (simp_all add: refine_hsimp refine_rel_defs)
     done
 
-  schematic_lemma pick_sum_code_aux: "RETURN ?f \<le> pick_sum_impl s0 l"
+  schematic_goal pick_sum_code_aux: "RETURN ?f \<le> pick_sum_impl s0 l"
     unfolding pick_sum_impl_def
     apply refine_transfer
     done

@@ -289,7 +289,7 @@ next
         from Some Cons "2.prems"(1) have "AList.delete_aux k ts = []"
           by(clarsimp simp add: Let_def split: split_if_asm)
         with False have "map_of ts k' = None"
-          by(cases "map_of ts k'")(auto dest: map_of_is_SomeD simp add: delete_aux_eq_Nil_conv)
+          by(cases "map_of ts k'")(auto dest: map_of_SomeD simp add: delete_aux_eq_Nil_conv)
         thus ?thesis using False Some Cons "2.prems"(1) by simp
       next
         case True
@@ -313,13 +313,13 @@ next
   proof(cases ks')
     case Nil thus ?thesis by(simp split: option.split add: Let_def)
   next
-    case (Cons k' ks'')[simp]
+    case [simp]: (Cons k' ks'')
     show ?thesis
     proof(cases "k' = k")
       case False thus ?thesis using "2.prems"
         by(auto simp add: Let_def update_conv' map_of_delete_aux split: option.split)
     next
-      case True[simp]
+      case [simp]: True
       show ?thesis
       proof(cases "map_of ts k")
         case None thus ?thesis by simp

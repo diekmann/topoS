@@ -79,10 +79,12 @@ lemma nres_correctD:
   done
 
 subsubsection {* Transfer Theorems Setup*}
-interpretation dres!: dist_transfer nres_of 
+interpretation dres: dist_transfer nres_of 
   apply unfold_locales
   apply (simp add: nres_transfer)
   done
+
+lemma nres_of_transfer[refine_transfer]: "nres_of x \<le> nres_of x" by simp
 
 lemma det_FAIL[refine_transfer]: "nres_of (dFAIL) \<le> FAIL" by auto
 lemma det_SUCCEED[refine_transfer]: "nres_of (dSUCCEED) \<le> SUCCEED" by auto
@@ -98,12 +100,12 @@ lemma det_bind[refine_transfer]:
   apply (auto simp: pw_le_iff refine_pw_simps)
   done
 
-interpretation det_assert!: transfer_generic_Assert_remove 
+interpretation det_assert: transfer_generic_Assert_remove 
   bind RETURN ASSERT ASSUME
   nres_of
   by unfold_locales
 
-interpretation det_while!: transfer_WHILE
+interpretation det_while: transfer_WHILE
   dbind dRETURN dWHILEIT dWHILEI dWHILET dWHILE 
   bind RETURN WHILEIT WHILEI WHILET WHILE nres_of
   apply unfold_locales
@@ -111,7 +113,7 @@ interpretation det_while!: transfer_WHILE
   done
 
 (*
-interpretation det_foreach!: 
+interpretation det_foreach: 
   transfer_FOREACH nres_of dRETURN dbind "case_dres True True"
   apply unfold_locales
   apply (blast intro: det_bind)
@@ -145,23 +147,23 @@ lemma det_rec_nat[refine_transfer]:
 
 subsection {* Transfer to Plain Function *}
 
-interpretation plain!: transfer RETURN .
+interpretation plain: transfer RETURN .
 
 lemma plain_RETURN[refine_transfer]: "RETURN a \<le> RETURN a" by simp
 lemma plain_bind[refine_transfer]: 
   "\<lbrakk>RETURN x \<le> M; \<And>x. RETURN (f x) \<le> F x\<rbrakk> \<Longrightarrow> RETURN (Let x f) \<le> bind M F"
-  apply (erule order_trans[rotated,OF bind_mono])
+  apply (erule order_trans[rotated,OF bind_mono(1)])
   apply assumption
   apply simp
   done
 
-interpretation plain_assert!: transfer_generic_Assert_remove 
+interpretation plain_assert: transfer_generic_Assert_remove 
   bind RETURN ASSERT ASSUME
   RETURN
   by unfold_locales
 
 (*
-interpretation plain!: transfer_FOREACH RETURN "(\<lambda>x. x)" Let "(\<lambda>x. x)"
+interpretation plain: transfer_FOREACH RETURN "(\<lambda>x. x)" Let "(\<lambda>x. x)"
   apply (unfold_locales)
   apply (erule plain_bind, assumption)
   apply simp
@@ -249,5 +251,16 @@ lemma plain_nres_rel_as_br_conv:
 (* TODO: Refine_Transfer could be expressed also just as a 
     parametricity based transfer, and based on the same infrastructure
     as autoref *)
+
+subsection \<open>Post-Simplification Setup\<close>
+lemma dres_unit_simps[refine_transfer_post_simp]:
+  "dbind (dRETURN (u::unit)) f = f ()"
+  by auto
+
+lemma Let_dRETURN_simp[refine_transfer_post_simp]:
+  "Let m dRETURN = dRETURN m" by auto
+
+lemmas [refine_transfer_post_simp] = dres_monad_laws
+
 
 end
