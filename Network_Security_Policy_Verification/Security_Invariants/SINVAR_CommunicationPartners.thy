@@ -109,7 +109,7 @@ interpretation CommunicationPartners: SecurityInvariant_ACS
 where default_node_properties = default_node_properties
 and sinvar = sinvar
 and verify_globals = verify_globals
-where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = CommunicationPartners_offending_set"
+rewrites "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = CommunicationPartners_offending_set"
   unfolding receiver_violation_def
   unfolding default_node_properties_def
   apply unfold_locales
@@ -125,12 +125,12 @@ where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = Communi
   apply(case_tac otherbot, simp_all)
    apply(rule_tac x="(\<lambda> x. DontCare)(vertex_1 := DontCare, vertex_2 := Master [vertex_1])" in exI, simp)
    apply(rule_tac x="vertex_1" in exI, simp)
-   apply(simp split: split_split)
+   apply(simp split: prod.split)
    apply(clarify)
    apply force
   apply(rename_tac M) (*case Master M*)
   apply(rule_tac x="(\<lambda> x. DontCare)(vertex_1 := DontCare, vertex_2 := (Master (vertex_1#M')))" in exI, simp)
-  apply(simp split: split_split)
+  apply(simp split: prod.split)
   apply(clarify)
   apply force
  apply(fact CommunicationPartners_offending_set)

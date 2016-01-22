@@ -113,6 +113,7 @@ subsection {*ENF*}
    
 
   interpretation BLPstrict: SecurityInvariant_ACS sinvar verify_globals default_node_properties
+  (*TODO: why is there a where and no "rewrites" in the afp?*)
   where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = BLP_offending_set"
     unfolding receiver_violation_def
     unfolding default_node_properties_def

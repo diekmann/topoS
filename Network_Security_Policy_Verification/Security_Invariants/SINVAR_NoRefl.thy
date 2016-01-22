@@ -80,7 +80,7 @@ interpretation NoRefl: SecurityInvariant_ACS
 where default_node_properties = default_node_properties
 and sinvar = sinvar
 and verify_globals = verify_globals
-where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = NoRefl_offending_set"
+rewrites "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = NoRefl_offending_set"
   unfolding default_node_properties_def
   apply unfold_locales
     apply(rule ballI)
@@ -92,7 +92,7 @@ where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = NoRefl_
       SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def
       SecurityInvariant_withOffendingFlows.is_offending_flows_def)
    apply (simp add:graph_ops)
-   apply (simp split: split_split_asm split_split)
+   apply (simp split: prod.split_asm prod.split)
    apply(rule_tac x="\<lparr> nodes={vertex_1}, edges = {(vertex_1,vertex_1)} \<rparr>" in exI, simp)
    apply(rule conjI)
     apply(simp add: wf_graph_def)

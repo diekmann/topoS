@@ -95,6 +95,7 @@ where default_node_properties = default_node_properties
 and sinvar = sinvar
 and verify_globals = verify_globals
 and receiver_violation = receiver_violation
+(*TODO: why is there a where and no "rewrites" in the afp?*)
 where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = SecurityGatewayExtended_offending_set"
   unfolding receiver_violation_def
   unfolding default_node_properties_def
@@ -113,7 +114,7 @@ where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = Securit
       SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def
       SecurityInvariant_withOffendingFlows.is_offending_flows_def)
   apply (simp add:graph_ops)
-  apply (simp split: split_split_asm split_split add:prod_case_beta)
+  apply (simp split: prod.split_asm prod.split add:case_prod_beta)
   apply(rule_tac x="\<lparr> nodes={vertex_1,vertex_2}, edges = {(vertex_1,vertex_2)} \<rparr>" in exI, simp)
   apply(rule conjI)
    apply(simp add: wf_graph_def)
