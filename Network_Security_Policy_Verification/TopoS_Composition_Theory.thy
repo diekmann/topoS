@@ -581,9 +581,7 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
          (F' \<in> get_offending_flows M \<lparr>nodes = V, edges = E'\<rparr>)"
        by(simp add: get_offending_flows_def)
       from this show ?case
-       apply -
-       apply(erule disjE)
-       proof(goal_cases)
+       proof(elim disjE, goal_cases)
        case 1
          with `configured_SecurityInvariant m` Cons.prems(2,3,4) obtain F where
            "F\<in>c_offending_flows m \<lparr>nodes = V, edges = E\<rparr>" and "F' \<subseteq> F"
