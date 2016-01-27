@@ -483,9 +483,9 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
     from validRs have valid_mD:"\<And>m. m \<in> set M \<Longrightarrow> configured_SecurityInvariant m " 
       by(simp add: valid_reqs_def)
 
-    from c_offending_flows_subseteq_edges[where G="?G"] have hlp1: "(\<Union>m\<in>set M. \<Union>c_offending_flows m ?G) \<subseteq> V \<times> V"
+    from c_offending_flows_subseteq_edges[where G="?G"] validRs have hlp1: "(\<Union>m\<in>set M. \<Union>c_offending_flows m ?G) \<subseteq> V \<times> V"
       apply(simp add: fully_connected_def V_prop)
-      by (metis (lifting, no_types) UN_least validRs valid_reqs_def)
+      using valid_reqs_def by blast
     have "\<And>A B. A - (A - B) = B \<inter> A" by fast 
     from this[of "V \<times> V"] E_prop hlp1 have "V \<times> V - E = (\<Union>m\<in>set M. \<Union>c_offending_flows m ?G)" by force
 
@@ -505,8 +505,7 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
          from enf_offending_flows[OF `configured_SecurityInvariant m` `\<forall>G. c_sinvar m G = (\<forall>e\<in>edges G. P e)`] have
           offending: "\<And>G. c_offending_flows m G = (if c_sinvar m G then {} else {{e \<in> edges G. \<not> P e}})" by simp
          from `F \<in> c_offending_flows m ?G` `F \<noteq> {}` have "F = {e \<in> edges ?G. \<not> P e}"
-           apply(subst(asm) offending)
-           by (metis (full_types) empty_iff singleton_iff)
+           by(simp split: split_if_asm add: offending)
          from this `(v1, v2) \<in> F`  have "\<not> P (v1, v2)" by simp
 
          from this enf_m have "\<not> c_sinvar m \<lparr>nodes = V, edges = insert (v1, v2) E\<rparr>" by(simp)
@@ -529,9 +528,9 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
         apply(simp)
         apply(rule ballI)
         apply(erule_tac x=x and A="V \<times> V - E" in ballE)
-         prefer 2 apply simp
+         prefer 2 apply(simp; fail)
         apply(erule_tac x=x and A="V \<times> V - E" in ballE)
-         prefer 2 apply(simp)
+         prefer 2 apply(simp; fail)
         apply(clarify)
         by presburger
     qed
@@ -549,13 +548,12 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
 
      lemma all_security_requirements_fulfilled_imp_no_offending_flows:
         "valid_reqs M \<Longrightarrow> all_security_requirements_fulfilled M G \<Longrightarrow> (\<Union>m\<in>set M. \<Union>c_offending_flows m G) = {}"
-        apply(induction M)
-         apply(simp_all)
-        apply(simp add: all_security_requirements_fulfilled_def)
-        apply(clarify)
-        apply(frule valid_reqs2, drule valid_reqs1)
-        apply(drule(1) configured_SecurityInvariant.c_sinvar_valid_imp_no_offending_flows)
-        by simp
+        proof(induction M)
+        case Cons thus ?case
+          unfolding all_security_requirements_fulfilled_def
+          apply(simp)
+          by(blast dest: valid_reqs2 valid_reqs1 configured_SecurityInvariant.c_sinvar_valid_imp_no_offending_flows)
+        qed(simp)
 
     corollary all_security_requirements_fulfilled_imp_get_offending_empty:
       "valid_reqs M \<Longrightarrow> all_security_requirements_fulfilled M G \<Longrightarrow> get_offending_flows M G = {}"
@@ -564,8 +562,7 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
       apply(thin_tac "all_security_requirements_fulfilled M G")
       apply(simp add: valid_reqs_def)
       apply(clarify)
-      using configured_SecurityInvariant.empty_offending_contra
-      by fastforce
+      using configured_SecurityInvariant.empty_offending_contra by fastforce
   
     corollary generate_valid_topology_does_nothing_if_valid:
       "\<lbrakk> valid_reqs M; all_security_requirements_fulfilled M G\<rbrakk> \<Longrightarrow> 
