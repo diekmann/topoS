@@ -570,17 +570,22 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
          E' \<subseteq> E;
          F' \<in> get_offending_flows M \<lparr>nodes = V, edges = E'\<rparr> \<rbrakk> \<Longrightarrow>
        \<exists>F\<in>get_offending_flows M \<lparr>nodes = V, edges = E\<rparr>. F' \<subseteq> F"
-     apply(induction M)
-      apply(simp add: get_offending_flows_def)
-     apply(frule valid_reqs2, drule valid_reqs1)
-     apply(simp add: get_offending_flows_def)
-     apply(erule disjE)
-      apply(drule(3) configured_SecurityInvariant.mono_extend_set_offending_flows)
-      apply(erule bexE, rename_tac F)
-      apply(rule_tac x="F" in bexI)
-       apply(simp_all)
-     apply blast
-     done
+     proof(induction M)
+     case Nil thus ?case by(simp add: get_offending_flows_def)
+     next
+     case (Cons m M)
+      from Cons.prems have "configured_SecurityInvariant m"
+                       and "valid_reqs M" using valid_reqs2 valid_reqs1 by blast+
+      with Cons.prems(2,3,4) Cons.IH show ?case
+       apply(simp add: get_offending_flows_def)
+       apply(erule disjE)
+        apply(drule(3) configured_SecurityInvariant.mono_extend_set_offending_flows)
+        apply(erule bexE, rename_tac F)
+        apply(rule_tac x="F" in bexI)
+         apply(simp_all)
+       apply blast
+       done
+     qed
 
      lemma get_offending_flows_subseteq_edges: "valid_reqs M \<Longrightarrow> F \<in> get_offending_flows M \<lparr>nodes = V, edges = E\<rparr> \<Longrightarrow> F \<subseteq> E"
       apply(induction M)
