@@ -437,21 +437,20 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
     assumes vm: "configured_SecurityInvariant m" and enf: "\<forall>G. c_sinvar m G = (\<forall>e \<in> edges G. P e)"
     shows "\<forall>G. c_offending_flows m G = (if c_sinvar m G then {} else {{e \<in> edges G. \<not> P e}})"
     proof -
-      from vm configured_SecurityInvariant.valid_c_offending_flows have offending_formaldef: "\<And>G.
-      c_offending_flows m G =
-      {F. F \<subseteq> edges G \<and> \<not> c_sinvar m G \<and> c_sinvar m (delete_edges G F) \<and> (\<forall>(e1, e2)\<in>F. \<not> c_sinvar m (add_edge e1 e2 (delete_edges G F)))}"
-      by auto
-
-      show "\<forall>G. c_offending_flows m G = (if c_sinvar m G then {} else {{e \<in> edges G. \<not> P e}})"
-        apply(rule allI)
-        apply(case_tac "c_sinvar m G")
-         apply(simp add: offending_formaldef) --{*@{term "{}"}*}
-        apply(simp only: offending_formaldef graph_ops enf)
-        apply(simp)
-        apply(rule Set.equalityI)
-         apply(blast)
-        apply(blast)
-        done 
+      { fix G
+        from vm configured_SecurityInvariant.valid_c_offending_flows have offending_formaldef:
+          "c_offending_flows m G =
+            {F. F \<subseteq> edges G \<and> \<not> c_sinvar m G \<and> c_sinvar m (delete_edges G F) \<and>
+                (\<forall>(e1, e2)\<in>F. \<not> c_sinvar m (add_edge e1 e2 (delete_edges G F)))}"
+        by auto
+        have "c_offending_flows m G = (if c_sinvar m G then {} else {{e \<in> edges G. \<not> P e}})"
+          proof(cases "c_sinvar m G")
+          case True thus ?thesis --{*@{term "{}"}*}
+            by(simp add: offending_formaldef)
+          next
+          case False thus ?thesis by(auto simp add: offending_formaldef graph_ops enf)
+        qed
+      } thus ?thesis by simp
       qed
 
  theorem generate_valid_topology_max_topo: "\<lbrakk> valid_reqs M; wf_graph G;
