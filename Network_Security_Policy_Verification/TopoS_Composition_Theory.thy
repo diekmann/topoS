@@ -112,19 +112,16 @@ locale configured_SecurityInvariant =
     text{* all the @{term SecurityInvariant_preliminaries} stuff must hold, for an arbitrary @{term nP} *}
     lemma SecurityInvariant_preliminariesD:
       "SecurityInvariant_preliminaries (\<lambda> (G::('v::vertex) graph) (nP::'v \<Rightarrow> 'a). c_sinvar m G)"
-      apply(unfold_locales)
-        apply(simp add: subst_offending_flows)
-        apply(fact defined_offending')
-       apply(fact mono_sinvar)
-      apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_monoI])
-      done
+      proof(unfold_locales, goal_cases)
+      case 1 thus ?case using defined_offending' by(simp add: subst_offending_flows)
+      next case 2 thus ?case by(fact mono_sinvar)
+      next case 3 thus ?case by(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_monoI])
+      qed
 
     lemma negative_mono:
      "\<And> N E' E. wf_graph \<lparr> nodes = N, edges = E \<rparr> \<Longrightarrow> 
         E' \<subseteq> E \<Longrightarrow> \<not> c_sinvar m \<lparr> nodes = N, edges = E' \<rparr> \<Longrightarrow> \<not> c_sinvar m \<lparr> nodes = N, edges = E \<rparr>"
-     apply(clarify)
-     apply(drule(2) mono_sinvar)
-     by(blast)
+     by(blast dest: mono_sinvar)
 
     
     subsection{*Reusing Lemmata*}
@@ -300,23 +297,21 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
         qed
     
       lemma wf_graph_generate_valid_topology: "wf_graph G \<Longrightarrow> wf_graph (generate_valid_topology M G)"
-        apply(induction M arbitrary: G)
-        by(simp_all)
+        proof(induction M arbitrary: G)
+        qed(simp_all)
   
      lemma generate_valid_topology_mono_models:
       "edges (generate_valid_topology (m#M) \<lparr> nodes = V, edges = E \<rparr>) \<subseteq> edges (generate_valid_topology M \<lparr> nodes = V, edges = E \<rparr>)"
-        apply(induction M arbitrary: E m)
-         apply(simp add: delete_edges_simp2)
-         apply fastforce
-        apply(simp add: delete_edges_simp2)
-        by blast
+        proof(induction M arbitrary: E m)
+        case Nil thus ?case by(simp add: delete_edges_simp2) fastforce
+        case Cons thus ?case by(simp add: delete_edges_simp2) blast
+      qed
      
       lemma generate_valid_topology_subseteq_edges:
       "edges (generate_valid_topology M G) \<subseteq> (edges G)"
-        apply(induction M arbitrary: G)
-         apply(simp_all)
-        apply(simp add: delete_edges_simp2)
-        by blast
+        proof(induction M arbitrary: G)
+        case Cons thus ?case by (simp add: delete_edges_simp2) blast
+        qed(simp)
 
       text{* @{term generate_valid_topology} generates a valid topology (Policy)! *}
       theorem generate_valid_topology_sound:
