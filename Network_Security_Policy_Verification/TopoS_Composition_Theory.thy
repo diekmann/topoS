@@ -441,8 +441,7 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
         from vm configured_SecurityInvariant.valid_c_offending_flows have offending_formaldef:
           "c_offending_flows m G =
             {F. F \<subseteq> edges G \<and> \<not> c_sinvar m G \<and> c_sinvar m (delete_edges G F) \<and>
-                (\<forall>(e1, e2)\<in>F. \<not> c_sinvar m (add_edge e1 e2 (delete_edges G F)))}"
-        by auto
+                (\<forall>(e1, e2)\<in>F. \<not> c_sinvar m (add_edge e1 e2 (delete_edges G F)))}" by auto
         have "c_offending_flows m G = (if c_sinvar m G then {} else {{e \<in> edges G. \<not> P e}})"
           proof(cases "c_sinvar m G")
           case True thus ?thesis --{*@{term "{}"}*}
@@ -468,8 +467,8 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
       by(simp add: fully_connected_def generate_valid_topology_as_set delete_edges_simp2)
 
     from VE_prop_asset have E_prop: "E =  V \<times> V - (\<Union>m\<in>set M. \<Union>c_offending_flows m ?G)" by fast
-    from VE_prop have V_prop: "nodes G =  V"
-      apply(simp add: fully_connected_def) using generate_valid_topology_nodes by (metis graph.select_convs(1))
+    from VE_prop have V_prop: "nodes G = V"
+      by (simp add: fully_connected_def delete_edges_simp2 generate_valid_topology_def_alt)
     from VE_prop have V_full_prop: "nodes (generate_valid_topology M ?G) = V" by (metis graph.select_convs(1))
     from VE_prop have E_full_prop: "edges (generate_valid_topology M ?G) = E" by (metis graph.select_convs(2))
 
