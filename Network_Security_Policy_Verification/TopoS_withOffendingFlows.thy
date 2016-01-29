@@ -725,7 +725,7 @@ subsection {* Monotonicity of offending flows *}
           apply(subgoal_tac "E - (F' \<union> Eadd) = E' - F'")
            apply(simp)
           apply(subst Eadd_prop[symmetric])
-          using `E' \<inter> Eadd = {}` by auto
+          using `E' \<inter> Eadd = {}` Eadd_prop by auto
   
   
         show "\<exists> F \<in> set_offending_flows \<lparr> nodes = V, edges = E \<rparr> nP. F' \<subseteq> F"
@@ -733,11 +733,11 @@ subsection {* Monotonicity of offending flows *}
           assume assumption_new_violation: "\<not> sinvar \<lparr>nodes = V, edges = E' - F' \<union> Eadd\<rparr> nP"
           from a1 have "finite Eadd"
             apply(simp add: wf_graph_def)
-            using Eadd_prop by (metis finite_Un)
+            using Eadd_prop wf_graph.finiteE by blast
           from this obtain Eadd_list where Eadd_list_prop: "set Eadd_list = Eadd" and "distinct Eadd_list" by (metis finite_distinct_list)
           from a1 have "finite E'"
             apply(simp add: wf_graph_def)
-            using Eadd_prop by (metis finite_Un)
+            using Eadd_prop by blast
           from this obtain E'_list where E'_list_prop: "set E'_list = E'" and "distinct E'_list" by (metis finite_distinct_list)
           from `finite E'` `F' \<subseteq> E'` obtain F'_list where "set F'_list = F'" and "distinct F'_list" by (metis finite_distinct_list rev_finite_subset)
     
@@ -745,10 +745,9 @@ subsection {* Monotonicity of offending flows *}
             apply(simp add: is_offending_flows_def E'_list_prop Eadd_list_prop Eadd_prop delete_edges_simp2)
             apply(rule conjI)
              apply(fact assumption_new_violation)
-            apply(subgoal_tac "E' - F' \<union> Eadd - Eadd = E' - F'", simp)
-             apply(simp add: eval_E_minus_FEadd_simp)
-            using  Eadd_prop `E' \<inter> Eadd = {}` `F' \<subseteq> E'` apply blast
-            done
+            apply(subgoal_tac "E' - F' \<union> Eadd - Eadd = E' - F'")
+             apply(simp add: eval_E_minus_FEadd_simp; fail)
+            using  Eadd_prop `E' \<inter> Eadd = {}` `F' \<subseteq> E'` by blast
         
         
           from minimalize_offending_overapprox_sound[OF wf2 this _ `distinct Eadd_list`]
@@ -759,7 +758,7 @@ subsection {* Monotonicity of offending flows *}
           obtain Fadd where Fadd_prop: "is_offending_flows_min_set Fadd \<lparr>nodes = V, edges = E' - F' \<union> Eadd\<rparr> nP" and "Fadd \<subseteq> Eadd" by auto
         
           have graph_edges_simp_helper: "E' - F' \<union> Eadd - Fadd =  E - (F' \<union> Fadd)"
-              using `E' \<inter> Eadd = {}` Eadd_prop `F' \<subseteq> E'` by blast
+            using `E' \<inter> Eadd = {}` Eadd_prop `F' \<subseteq> E'` by blast
         
           from Fadd_prop[simplified is_offending_flows_min_set_def is_offending_flows_def] have
               "Fadd \<subseteq> Eadd" and 
@@ -771,7 +770,7 @@ subsection {* Monotonicity of offending flows *}
                apply(thin_tac "\<not> sinvar X y" for X y)
                apply(thin_tac "\<forall> x\<in> Fadd. X x" for X)
                apply(insert graph_edges_simp_helper, simp)
-              apply(erule conjE)+
+              apply(elim conjE)
               apply(thin_tac "\<not> sinvar X y" for X y)
               apply(thin_tac "sinvar X y" for X y)
               apply(simp add: delete_edges_simp2)
@@ -865,23 +864,12 @@ subsection {* Monotonicity of offending flows *}
 
        from sinvar_no_offending a2 have goal_not_eval: "\<not> sinvar \<lparr>nodes = V, edges = insert e E\<rparr> nP" by blast
 
+       obtain a b where e: "e = (a,b)" by (cases e) blast
+       with wfG have insert_e_V: "insert a (insert b V) = V" by(auto simp add: wf_graph_def)
+
        from a1' a2' have min_set_e: "is_offending_flows_min_set {e} \<lparr>nodes = V, edges = insert e E\<rparr> nP"
-        apply(simp add: is_offending_flows_min_set_def is_offending_flows_def delete_edges_simp2 add_edge_def)
-        apply(rule conjI)
-         apply(clarify)
-        apply(rule conjI)
-         apply(simp add: goal_eval)
-        apply(case_tac e)
-        apply(simp)
-        apply(subgoal_tac "insert a (insert b V) = V")
-         apply(simp)
-         using goal_not_eval apply fastforce
-        apply(thin_tac "\<forall>F \<subseteq> E. X F" for X)
-        apply(thin_tac "\<exists>F \<subseteq> E. X F" for E X)
-        apply(insert wfG)
-        apply(simp add: wf_graph_def)
-        apply(fastforce)
-        done
+        apply(simp add: is_offending_flows_min_set_def is_offending_flows_def add_edge_def delete_edges_simp2 goal_not_eval goal_eval)
+        using goal_not_eval by(simp add: e insert_e_V)
 
        thus "{e} \<in> set_offending_flows \<lparr>nodes = V, edges = insert e E\<rparr> nP"
         by(simp add: set_offending_flows_def)
