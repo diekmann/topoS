@@ -19,7 +19,7 @@ cd "$TOPOS_HOME"
 export AFP="${TOPOS_HOME}/isabelle_afp"
 
 #ISABELLE="isabelle"
-ISABELLE="/home/diekmann/Downloads/Isabelle2016-RC2/bin/isabelle"
+ISABELLE="/home/diekmann/Downloads/Isabelle2016-RC3/bin/isabelle"
 
 if sh -c "$ISABELLE version" | grep 'Isabelle2016'; then
     echo "Isabelle 2016"
@@ -29,5 +29,5 @@ else
 fi
 
 #RC3 fix
-$ISABELLE build -d $AFP -v -b Collections
-$ISABELLE jedit -d $AFP -l Collections
+#$ISABELLE build -d $AFP -v -b Collections
+$ISABELLE jedit -d $AFP -l Automatic_Refinement #Collections
