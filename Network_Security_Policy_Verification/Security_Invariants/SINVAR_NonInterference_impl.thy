@@ -170,13 +170,15 @@ subsubsection {* NonInterference packing *}
 
 
 text {*Example: *}
-
-  definition "example_graph  = \<lparr> nodesL = [1::nat,2,3,4,5, 8,9,10], edgesL = [(1,2), (2,3), (3,4), (5,4), (8,9),(9,8)] \<rparr>"
-  definition"example_conf = ((\<lambda>e. SINVAR_NonInterference.default_node_properties)(1:= Interfering, 2:= Unrelated, 3:= Unrelated, 4:= Unrelated, 8:= Unrelated, 9:= Unrelated))"
+context begin
+  private definition "example_graph = \<lparr> nodesL = [1::nat,2,3,4,5, 8,9,10], edgesL = [(1,2), (2,3), (3,4), (5,4), (8,9), (9,8)] \<rparr>"
+  private definition"example_conf = ((\<lambda>e. SINVAR_NonInterference.default_node_properties)
+      (1:= Interfering, 2:= Unrelated, 3:= Unrelated, 4:= Unrelated, 8:= Unrelated, 9:= Unrelated))"
   
-  value "sinvar example_graph example_conf"
-  value "NonInterference_offending_list example_graph example_conf"
-
+  private lemma "\<not> sinvar example_graph example_conf" by eval
+  private lemma "NonInterference_offending_list example_graph example_conf =
+                     [[(1, 2)], [(2, 3)], [(3, 4)], [(5, 4)]]" by eval
+end
 
 
 hide_const (open) NetModel_node_props

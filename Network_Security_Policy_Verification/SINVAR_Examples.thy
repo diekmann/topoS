@@ -28,3 +28,5 @@ definition CommWith_m::"(nat SecurityInvariant)" where
           \<rparr>"
 
 value[code] "make_max_policy [CommWith_m] [1,2,3]"
+value[code] "implc_offending_flows CommWith_m \<lparr>nodesL = [1,2,3,4], edgesL = List.product [1,2,3,4] [1,2,3,4] \<rparr>"
+value[code] "make_max_policy [CommWith_m] [1,2,3,4]"
