@@ -131,7 +131,8 @@ subsubsection {*ENF*}
 
 text{*Alternate definition of the @{const sinvar}:
       For all reachable nodes, the security clearance is higher*}
-lemma "wf_graph G \<Longrightarrow> sinvar G nP = (\<forall> v \<in> nodes G. \<forall>v' \<in> succ_tran G v. (nP v) \<le> (nP v'))"
+lemma sinvar_BLPbasic_tancl:
+  "wf_graph G \<Longrightarrow> sinvar G nP = (\<forall> v \<in> nodes G. \<forall>v' \<in> succ_tran G v. (nP v) \<le> (nP v'))"
   proof(unfold sinvar.simps, rule iffI, goal_cases)
   case 1
       have "(v, v') \<in> (edges G)\<^sup>+ \<Longrightarrow> nP v \<le> nP v'" for v v'
