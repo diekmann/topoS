@@ -132,24 +132,21 @@ subsubsection {*ENF*}
 text{*Alternate definition of the @{const sinvar}:
       For all reachable nodes, the security clearance is higher*}
 lemma "wf_graph G \<Longrightarrow> sinvar G nP = (\<forall> v \<in> nodes G. \<forall>v' \<in> succ_tran G v. (nP v) \<le> (nP v'))"
-  proof(unfold sinvar.simps, rule iffI)
-    assume a1: "wf_graph G"
-      and  a2: "\<forall>(e1, e2)\<in>edges G. nP e1 \<le> nP e2"
+  proof(unfold sinvar.simps, rule iffI, goal_cases)
+  case 1
       have "(v, v') \<in> (edges G)\<^sup>+ \<Longrightarrow> nP v \<le> nP v'" for v v'
         proof(induction rule: trancl_induct)
-        case base thus ?case using a2 by fastforce
+        case base thus ?case using 1(2) by fastforce
         next
-        case step thus ?case using a2 by fastforce
+        case step thus ?case using 1(2) by fastforce
         qed
-      thus "\<forall>v\<in>nodes G. \<forall>v'\<in>succ_tran G v. nP v \<le> nP v'"
+      thus ?case
       by(simp add: succ_tran_def)
     next
-    assume a1: "wf_graph G"
-      and  a2: "\<forall>v\<in>nodes G. \<forall>v'\<in>succ_tran G v. nP v \<le> nP v'"
-      from a1[simplified wf_graph_def] have f1: "fst ` edges G \<subseteq> nodes G" by simp
-      from f1 a2 have "\<forall>v \<in> (fst ` edges G). \<forall>v'\<in>succ_tran G v. nP v \<le> nP v'" by auto
-      thus " \<forall>(e1, e2)\<in>edges G. nP e1 \<le> nP e2"
-        unfolding succ_tran_def by fastforce
+    case 2
+      from 2(1)[simplified wf_graph_def] have f1: "fst ` edges G \<subseteq> nodes G" by simp
+      from f1 2(2) have "\<forall>v \<in> (fst ` edges G). \<forall>v'\<in>succ_tran G v. nP v \<le> nP v'" by auto
+      thus ?case unfolding succ_tran_def by fastforce
   qed
 
    
