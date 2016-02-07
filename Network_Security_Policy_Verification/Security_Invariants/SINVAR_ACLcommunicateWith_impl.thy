@@ -7,14 +7,14 @@ code_identifier code_module SINVAR_ACLcommunicateWith_impl => (Scala) SINVAR_ACL
 
 subsubsection {* List Implementation *}
 
-fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> 'v access_list) \<Rightarrow> bool" where
-  "sinvar G nP = (\<forall> v \<in> set (nodesL G). accesses_okay (nP v) (set (succ_tran G v)))"
+fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> 'v list) \<Rightarrow> bool" where
+  "sinvar G nP = (\<forall> v \<in> set (nodesL G). \<forall>a \<in> (set (succ_tran G v)). a \<in> set (nP v))"
 
-fun verify_globals :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> 'v access_list) \<Rightarrow> unit \<Rightarrow> bool" where
+fun verify_globals :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> 'v list) \<Rightarrow> unit \<Rightarrow> bool" where
   "verify_globals _ _ _ = True"
 
 
-definition "NetModel_node_props (P::('v::vertex, 'v access_list, 'b) TopoS_Params) = 
+definition "NetModel_node_props (P::('v::vertex, 'v list, 'b) TopoS_Params) = 
   (\<lambda> i. (case (node_properties P) i of Some property \<Rightarrow> property | None \<Rightarrow> SINVAR_ACLcommunicateWith.default_node_properties))"
 lemma[code_unfold]: "SecurityInvariant.node_props SINVAR_ACLcommunicateWith.default_node_properties P = NetModel_node_props P"
 apply(simp add: NetModel_node_props_def)
@@ -68,7 +68,7 @@ done
 
 
 subsubsection {* packing *}
-  definition SINVAR_LIB_ACLcommunicateWith:: "('v::vertex, 'v access_list, unit) TopoS_packed" where
+  definition SINVAR_LIB_ACLcommunicateWith:: "('v::vertex, 'v list, unit) TopoS_packed" where
     "SINVAR_LIB_ACLcommunicateWith \<equiv> 
     \<lparr> nm_name = ''ACLcommunicateWith'', 
       nm_receiver_violation = SINVAR_ACLcommunicateWith.receiver_violation,
@@ -99,10 +99,10 @@ context begin
     1 can access 2 and 3
     2 can access 3
   *}
-  private definition examplenP :: "nat \<Rightarrow> nat access_list" where
+  private definition examplenP :: "nat \<Rightarrow> nat list" where
     "examplenP \<equiv> ((\<lambda>v. SINVAR_ACLcommunicateWith.default_node_properties)
-                    (1 := AccessList [2,3]))
-                    (2 := AccessList [3])"
+                    (1 := [2,3]))
+                    (2 := [3])"
 
   private lemma "sinvar exampleG examplenP" by eval
   value "ACLcommunicateWith_offending_list exampleG examplenP"

@@ -22,8 +22,8 @@ definition exampleG :: "nat list_graph" where
 definition CommWith_m::"(nat SecurityInvariant)" where
     "CommWith_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_ACLcommunicateWith \<lparr> 
           node_properties = [
-                  1 \<mapsto> AccessList [2,3],
-                  2 \<mapsto> AccessList [3]], 
+                  1 \<mapsto> [2,3],
+                  2 \<mapsto> [3]], 
           model_global_properties = () 
           \<rparr>"
 
