@@ -6,14 +6,10 @@ text{*An access control list strategy that says that hosts must only transitivel
 
 
 text{*Warning: this transitive model has exponential computational complexity*}
-(*TODO: can we get it better?*)
 
 definition default_node_properties :: "'v list"
   where  "default_node_properties \<equiv> []"
 
-(*
-fun accesses_okay :: "'v list \<Rightarrow> 'v set \<Rightarrow> bool" where
-  "accesses_okay (AccessList ACL) accesses = (\<forall> a \<in> accesses. a \<in> set ACL)"*)
 
 fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> 'v list) \<Rightarrow> bool" where
   "sinvar G nP = (\<forall> v \<in> nodes G. (\<forall>a \<in> (succ_tran G v). a \<in> set (nP v)))"
@@ -25,35 +21,24 @@ definition receiver_violation :: "bool" where
   "receiver_violation \<equiv> False"
 
 
-
-(*TODO:
-  prove: cannot be enf
-  there may be efficient offending flows:
-    construct everything that is allowed \<forall> r \<in> nP s. (s, r) is allowed
-    remove allowed from given graph
-    this should be the offending flows*)
-(*
-lemma 
-  "wf_graph G \<Longrightarrow> sinvar G nP = (\<forall> (e1,e2) \<in> edges G. case (nP e1) of AccessList acl \<Rightarrow> e2 \<in> set acl)"
+(*Alternative definition*)
+lemma
+  "wf_graph G \<Longrightarrow> sinvar G nP = (\<forall> (e1,e2) \<in> (edges G)\<^sup>+. e2 \<in> set (nP e1))"
   proof(unfold sinvar.simps, rule iffI, goal_cases)
   case 1
-      from 1(2) have x
-      apply(simp add: succ_tran_def)
-      have "(v, v') \<in> (edges G)\<^sup>+ \<Longrightarrow> nP v \<le> nP v'" for v v'
-        proof(induction rule: trancl_induct)
-        case base thus ?case using 1(2) by fastforce
-        next
-        case step thus ?case using 1(2) by fastforce
-        qed
-      thus ?case
-      by(simp add: succ_tran_def)
+      from 1(1) have e1_nodes: "(e1, e2) \<in> edges G \<Longrightarrow> e1 \<in> nodes G" for e1 e2
+        by (simp add: wf_graph.E_wfD(1)) 
+      from 1(2) have "\<forall>v\<in>nodes G. \<forall>a. (v, a) \<in> (edges G)\<^sup>+ \<longrightarrow> a \<in> set (nP v)"
+        by(simp add: succ_tran_def)
+      with e1_nodes have "(e1, e2)\<in>(edges G)\<^sup>+ \<Longrightarrow> e2 \<in> set (nP e1)" for e1 e2
+        by (meson tranclD)
+      thus ?case by blast
     next
     case 2
-      from 2(1)[simplified wf_graph_def] have f1: "fst ` edges G \<subseteq> nodes G" by simp
-      from f1 2(2) have "\<forall>v \<in> (fst ` edges G). \<forall>v'\<in>succ_tran G v. nP v \<le> nP v'" by auto
-      thus ?case unfolding succ_tran_def by fastforce
+      from 2(1) have e1_nodes: "(v, a) \<in> edges G \<Longrightarrow> v \<in> nodes G" for v a
+        by (simp add: wf_graph.E_wfD(1))
+      with 2(2) show ?case by(auto simp add: succ_tran_def)
   qed
-*)
 
 lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
   unfolding SecurityInvariant_withOffendingFlows.sinvar_mono_def
@@ -68,11 +53,7 @@ lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
       using succ_tran_mono[OF a1] by blast
     thus "sinvar \<lparr>nodes = N, edges = E'\<rparr> nP" by simp
 qed
-  
-(*
-lemma accesses_okay_empty: "accesses_okay (nP v) {}"
-  by(case_tac "nP v", simp_all)
-*)
+
 
 interpretation SecurityInvariant_preliminaries
 where sinvar = sinvar

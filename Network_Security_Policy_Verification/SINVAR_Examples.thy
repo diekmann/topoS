@@ -11,8 +11,8 @@ imports
   TopoS_Impl
 begin
 
-definition make_max_policy :: "('a SecurityInvariant) list \<Rightarrow> 'a list \<Rightarrow> 'a list_graph" where
-  "make_max_policy sinvars V \<equiv> generate_valid_topology sinvars \<lparr>nodesL = V, edgesL = List.product V V \<rparr>"
+definition make_policy :: "('a SecurityInvariant) list \<Rightarrow> 'a list \<Rightarrow> 'a list_graph" where
+  "make_policy sinvars V \<equiv> generate_valid_topology sinvars \<lparr>nodesL = V, edgesL = List.product V V \<rparr>"
 
 
 definition exampleG :: "nat list_graph" where
@@ -27,6 +27,6 @@ definition CommWith_m::"(nat SecurityInvariant)" where
           model_global_properties = () 
           \<rparr>"
 
-value[code] "make_max_policy [CommWith_m] [1,2,3]"
+value[code] "make_policy [CommWith_m] [1,2,3]"
 value[code] "implc_offending_flows CommWith_m \<lparr>nodesL = [1,2,3,4], edgesL = List.product [1,2,3,4] [1,2,3,4] \<rparr>"
-value[code] "make_max_policy [CommWith_m] [1,2,3,4]"
+value[code] "make_policy [CommWith_m] [1,2,3,4]"
