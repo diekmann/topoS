@@ -90,24 +90,23 @@ subsubsection {* packing *}
 
 
 text {* Examples*}
+context begin
+  private definition exampleG :: "nat list_graph" where
+    "exampleG \<equiv> \<lparr> nodesL = [1, 2, 3],
+                  edgesL = [(1,2), (2,3)]\<rparr>"
+
   text{*
-    1 can acceess 2 and 3
+    1 can access 2 and 3
     2 can access 3
   *}
-  definition exampleG :: "nat list_graph" where
-    "exampleG \<equiv> \<lparr> nodesL = [1, 2, 3],
-                    edgesL = [(1,2), (2,3)]\<rparr>"
-
-  definition examplenP :: "nat \<Rightarrow> nat access_list" where
+  private definition examplenP :: "nat \<Rightarrow> nat access_list" where
     "examplenP \<equiv> ((\<lambda>v. SINVAR_ACLcommunicateWith.default_node_properties)
                     (1 := AccessList [2,3]))
                     (2 := AccessList [3])"
 
-  lemma "sinvar exampleG examplenP" by eval
+  private lemma "sinvar exampleG examplenP" by eval
   value "ACLcommunicateWith_offending_list exampleG examplenP"
-
-  hide_const exampleG examplenP
-
+end
 
 
 hide_const (open) NetModel_node_props
