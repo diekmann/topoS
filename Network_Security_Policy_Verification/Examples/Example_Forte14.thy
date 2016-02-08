@@ -36,7 +36,7 @@ definition DomainHierarchy_m::"(vString SecurityInvariant)" where
             V ''P1'' \<mapsto> DN (''aircraft''--''entertain''--''POD''--Leaf, 0),
             V ''P2'' \<mapsto> DN (''aircraft''--''entertain''--''POD''--Leaf, 0)
                             ], 
-                          (*At the moment, there is no check whether the assigned node_properties comply with the tree in model_global_properties*)
+         (*At the moment, there is no check whether the assigned node_properties comply with the tree in model_global_properties*)
           model_global_properties = (
             Department ''aircraft'' [
               Department ''entertain'' [
