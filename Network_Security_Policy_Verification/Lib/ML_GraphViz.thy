@@ -82,7 +82,7 @@ local
   val sanitize_string_html =
     String.map (fn c => if (is_valid_char c orelse c = #" " orelse (c <= #"/" andalso c >= #"(")
                             orelse c = #"|" orelse c = #"=" orelse c = #"?" orelse c = #"!" orelse c = #"_"
-                            orelse c = #"[" orelse c = #"}") then c else #"_")
+                            orelse c = #"[" orelse c = #"]") then c else #"_")
 in
   fun term_to_string_html ctxt (n: term) : string = 
     let

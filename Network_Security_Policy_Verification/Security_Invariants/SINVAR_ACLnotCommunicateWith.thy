@@ -23,7 +23,7 @@ definition receiver_violation :: "bool" where
 text{*It is the inverse of @{const SINVAR_ACLcommunicateWith.sinvar}*}
 lemma "\<forall>v. UNIV - nP' v = set (nP v) \<Longrightarrow> SINVAR_ACLcommunicateWith.sinvar G nP \<longleftrightarrow> sinvar G nP'"
   by auto
-  
+
 
 lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
   unfolding SecurityInvariant_withOffendingFlows.sinvar_mono_def

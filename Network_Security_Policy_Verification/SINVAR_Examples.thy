@@ -27,6 +27,13 @@ definition CommWith_m::"(nat SecurityInvariant)" where
           model_global_properties = () 
           \<rparr>"
 
+
+text{*Experimental: the config (only one) can be added to the end.*}
+ML_val{*
+visualize_graph_header @{context} @{term "security_invariants"} @{term "policy"} @{term "BLP_security_clearances"};
+*}
+
+
 value[code] "make_policy [CommWith_m] [1,2,3]"
 value[code] "implc_offending_flows CommWith_m \<lparr>nodesL = [1,2,3,4], edgesL = List.product [1,2,3,4] [1,2,3,4] \<rparr>"
 value[code] "make_policy [CommWith_m] [1,2,3,4]"
