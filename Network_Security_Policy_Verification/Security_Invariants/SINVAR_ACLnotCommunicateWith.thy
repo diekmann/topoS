@@ -1,5 +1,5 @@
 theory SINVAR_ACLnotCommunicateWith
-imports "../TopoS_Helper"
+imports "../TopoS_Helper" SINVAR_ACLcommunicateWith
 begin
 
 subsection {* SecurityInvariant ACLnotCommunicateWith*}
@@ -20,6 +20,10 @@ fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> 'v set) \<Righta
 definition receiver_violation :: "bool" where 
   "receiver_violation \<equiv> False"
 
+text{*It is the inverse of @{const SINVAR_ACLcommunicateWith.sinvar}*}
+lemma "\<forall>v. UNIV - nP' v = set (nP v) \<Longrightarrow> SINVAR_ACLcommunicateWith.sinvar G nP \<longleftrightarrow> sinvar G nP'"
+  by auto
+  
 
 lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
   unfolding SecurityInvariant_withOffendingFlows.sinvar_mono_def

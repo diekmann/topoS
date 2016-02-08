@@ -22,7 +22,7 @@ definition receiver_violation :: "bool" where
 
 
 (*Alternative definition*)
-lemma
+lemma ACLcommunicateWith_sinvar_alternative:
   "wf_graph G \<Longrightarrow> sinvar G nP = (\<forall> (e1,e2) \<in> (edges G)\<^sup>+. e2 \<in> set (nP e1))"
   proof(unfold sinvar.simps, rule iffI, goal_cases)
   case 1
