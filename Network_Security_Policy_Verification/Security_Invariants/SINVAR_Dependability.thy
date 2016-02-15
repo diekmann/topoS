@@ -65,16 +65,16 @@ text{* It does not matter whether we iterate over all edges or all nodes. We cho
 
   text{* Generate a valid configuration to start from: *}
    text{* Takes arbitrary configuration, returns a valid one *}
-   fun fix_nP :: "'v graph \<Rightarrow> ('v \<Rightarrow> dependability_level) \<Rightarrow> ('v \<Rightarrow> dependability_level)" where
-      "fix_nP G nP = (\<lambda>v. if num_reachable G v \<le> (nP v) then (nP v) else num_reachable G v)"
+   fun dependability_fix_nP :: "'v graph \<Rightarrow> ('v \<Rightarrow> dependability_level) \<Rightarrow> ('v \<Rightarrow> dependability_level)" where
+      "dependability_fix_nP G nP = (\<lambda>v. if num_reachable G v \<le> (nP v) then (nP v) else num_reachable G v)"
   
-   text{* @{const fix_nP} always gives you a valid solution *}
-   lemma fix_nP_valid: "\<lbrakk> wf_graph G \<rbrakk> \<Longrightarrow> sinvar G (fix_nP G nP)"
+   text{* @{const dependability_fix_nP} always gives you a valid solution *}
+   lemma dependability_fix_nP_valid: "\<lbrakk> wf_graph G \<rbrakk> \<Longrightarrow> sinvar G (dependability_fix_nP G nP)"
       by(subst sinvar_edges_nodes_iff[symmetric], simp_all)
   
    text{* furthermore, it gives you a minimal solution, i.e. if someone supplies a configuration with a value lower than
-          calculated by @{const fix_nP}, this is invalid! *}
-   lemma fix_nP_minimal_solution: "\<lbrakk> wf_graph G; \<exists> v \<in> nodes G. (nP v) < (fix_nP G (\<lambda>_. 0)) v \<rbrakk> \<Longrightarrow> \<not> sinvar G nP"
+          calculated by @{const dependability_fix_nP}, this is invalid! *}
+   lemma dependability_fix_nP_minimal_solution: "\<lbrakk> wf_graph G; \<exists> v \<in> nodes G. (nP v) < (dependability_fix_nP G (\<lambda>_. 0)) v \<rbrakk> \<Longrightarrow> \<not> sinvar G nP"
       apply(subst sinvar_edges_nodes_iff[symmetric], simp)
       apply(simp)
       apply(clarify)
@@ -130,9 +130,9 @@ and verify_globals = verify_globals
     apply(rename_tac list_edges)
     apply(rule_tac ff="list_edges" in SecurityInvariant_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF sinvar_mono])
         apply(auto)[4]
-   apply(auto simp add: SecurityInvariant_withOffendingFlows.is_offending_flows_def graph_ops)[1]
-  apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_sinvar_mono[OF sinvar_mono])
- apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_mono])
+    apply(auto simp add: SecurityInvariant_withOffendingFlows.is_offending_flows_def graph_ops)[1]
+   apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_sinvar_mono[OF sinvar_mono])
+  apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_mono])
 done
 
 

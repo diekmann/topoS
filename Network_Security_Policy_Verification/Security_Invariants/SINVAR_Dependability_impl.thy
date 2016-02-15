@@ -29,16 +29,16 @@ value "sinvar
 
 
 text{* Generate a valid configuration to start from: *}
-   fun fix_nP :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> dependability_level) \<Rightarrow> ('v \<Rightarrow> dependability_level)" where
-      "fix_nP G nP = (\<lambda>v. let nr = num_reachable G v in (if nr \<le> (nP v) then (nP v) else nr))"
+   fun dependability_fix_nP :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> dependability_level) \<Rightarrow> ('v \<Rightarrow> dependability_level)" where
+      "dependability_fix_nP G nP = (\<lambda>v. let nr = num_reachable G v in (if nr \<le> (nP v) then (nP v) else nr))"
 
-   theorem fix_nP_impl_correct: "wf_list_graph G \<Longrightarrow> fix_nP G nP  = SINVAR_Dependability.fix_nP (list_graph_to_graph G) nP"
+   theorem dependability_fix_nP_impl_correct: "wf_list_graph G \<Longrightarrow> dependability_fix_nP G nP  = SINVAR_Dependability.dependability_fix_nP (list_graph_to_graph G) nP"
    by(simp add: num_reachable_correct fun_eq_iff)
 
-   value "let G = \<lparr> nodesL = [1::nat,2,3,4], edgesL = [(1,1), (2,1), (3,1), (4,1), (1,2), (1,3)] \<rparr> in (let nP = fix_nP G (\<lambda>e. 0) in map (\<lambda>v. nP v) (nodesL G))"
+   value "let G = \<lparr> nodesL = [1::nat,2,3,4], edgesL = [(1,1), (2,1), (3,1), (4,1), (1,2), (1,3)] \<rparr> in (let nP = dependability_fix_nP G (\<lambda>e. 0) in map (\<lambda>v. nP v) (nodesL G))"
 
 
-   value "let G = \<lparr> nodesL = [1::nat,2,3,4], edgesL = [(1,1)] \<rparr> in (let nP = fix_nP G (\<lambda>e. 0) in map (\<lambda>v. nP v) (nodesL G))"
+   value "let G = \<lparr> nodesL = [1::nat,2,3,4], edgesL = [(1,1)] \<rparr> in (let nP = dependability_fix_nP G (\<lambda>e. 0) in map (\<lambda>v. nP v) (nodesL G))"
 
 
 
