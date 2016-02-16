@@ -129,6 +129,24 @@ context begin
     @{term "Some \<circ> dependability_fix_nP (G_dep\<lparr>edgesL := (3,4)#edgesL G_dep\<rparr>) (\<lambda>_. 0)"};
   *}
 
+  text{*Dependability is reflexive, a host can depend on itself.*}
+  ML_val{*
+  visualize_graph_header @{context} @{term "[new_configured_list_SecurityInvariant SINVAR_LIB_Dependability \<lparr> 
+          node_properties = Some \<circ> dependability_fix_nP \<lparr>nodesL = [1::nat], edgesL = [(1,1)] \<rparr> (\<lambda>_. 0),
+          model_global_properties = () 
+          \<rparr>]"}
+    @{term "\<lparr>nodesL = [1::nat], edgesL = [(1,1)] \<rparr>"}
+    @{term "Some \<circ> dependability_fix_nP \<lparr>nodesL = [1::nat], edgesL = [(1,1)] \<rparr> (\<lambda>_. 0)"};
+  *}
+  ML_val{*
+  visualize_graph_header @{context} @{term "[new_configured_list_SecurityInvariant SINVAR_LIB_Dependability_norefl \<lparr> 
+          node_properties = (\<lambda>_::nat. Some 0),
+          model_global_properties = () 
+          \<rparr>]"}
+    @{term "\<lparr>nodesL = [1::nat], edgesL = [(1,1)] \<rparr>"}
+    @{term "(\<lambda>_::nat. Some (0::nat))"};
+  *}
+
 end
 
 
