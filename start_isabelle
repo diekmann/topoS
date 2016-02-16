@@ -19,7 +19,7 @@ cd "$TOPOS_HOME"
 export AFP="${TOPOS_HOME}/isabelle_afp"
 
 #ISABELLE="isabelle"
-ISABELLE="/home/diekmann/Downloads/Isabelle2016-RC4/bin/isabelle"
+ISABELLE="/home/diekmann/Downloads/Isabelle2016-RC5/bin/isabelle"
 
 if sh -c "$ISABELLE version" | grep 'Isabelle2016'; then
     echo "Isabelle 2016"

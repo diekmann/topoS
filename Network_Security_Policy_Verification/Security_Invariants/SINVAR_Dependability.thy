@@ -51,8 +51,8 @@ text{* It does not matter whether we iterate over all edges or all nodes. We cho
 
 
   lemma num_reachable_le_nodes: "\<lbrakk> wf_graph G \<rbrakk> \<Longrightarrow> num_reachable G v \<le> card (nodes G)"
-    apply(simp add: num_reachable_def)
-    using succ_tran_subseteq_nodes card_seteq  nat_le_linear wf_graph.finiteV by metis
+    unfolding num_reachable_def
+    using succ_tran_subseteq_nodes card_seteq nat_le_linear wf_graph.finiteV by metis
 
 
   text{* nP is valid if all dependability level are greater equal the total number of nodes in the graph *}
@@ -85,19 +85,8 @@ text{* It does not matter whether we iterate over all edges or all nodes. We cho
 
 
 
-lemma unique_default_example: "succ_tran \<lparr>nodes = {vertex_1, vertex_2}, edges = {(vertex_1, vertex_2)}\<rparr> vertex_1 = {vertex_2}"
-apply (simp add: succ_tran_def)
-by (metis (lifting, no_types) Collect_cong Range.intros Range_empty Range_insert mem_Collect_eq singleton_conv singleton_iff trancl.r_into_trancl trancl_range)
-lemma unique_default_example_simp1: "{(e1, e2). e1 = vertex_1 \<and> e2 = vertex_2 \<and> (e1 = vertex_1 \<longrightarrow> e2 \<noteq> vertex_2)} = {}" by blast
-lemma unique_default_example_simp2: "{(vertex_1, vertex_2)}\<^sup>+ = {(vertex_1, vertex_2)}"
-  apply(rule)
-   apply(rule)
-   apply(clarify)
-   apply(rule_tac P="\<lambda> a b. a = vertex_1 \<and> b = vertex_2" in trancl.induct)
-     apply auto
- done
-
-
+lemma unique_default_example_succ_tran: "succ_tran \<lparr>nodes = {vertex_1, vertex_2}, edges = {(vertex_1, vertex_2)}\<rparr> vertex_1 = {vertex_2}"
+using unique_default_example1 by blast
 (*
 lemma card_less_equal_trancl: "finite A \<Longrightarrow> card {e2. (aa, e2) \<in> (A - X)\<^sup>+} \<le> card {e2. (aa, e2) \<in> (A)\<^sup>+}"
 apply(subgoal_tac "{e2. (aa, e2) \<in> (A - X)\<^sup>+} \<subseteq> {e2. (aa, e2) \<in> (A)\<^sup>+}")
@@ -162,10 +151,10 @@ and verify_globals = verify_globals
    apply(simp add: wf_graph_def)
   apply(rule_tac x="(\<lambda> x. 0)(vertex_1 := 0, vertex_2 := 0)" in exI, simp)
   apply(rule conjI)
-   apply(simp add: unique_default_example num_reachable_def)
+   apply(simp add: unique_default_example_succ_tran num_reachable_def)
   apply(rule_tac x="vertex_1" in exI, simp)
   apply(rule_tac x="{(vertex_1,vertex_2)}" in exI, simp)
-  apply(simp add: unique_default_example num_reachable_def)
+  apply(simp add: unique_default_example_succ_tran num_reachable_def)
   apply(simp add: succ_tran_def unique_default_example_simp1 unique_default_example_simp2)
   done
 
