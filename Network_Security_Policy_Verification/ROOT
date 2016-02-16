@@ -1,6 +1,6 @@
 chapter TopoS
 
-session "Network_Security_Policy_Verification" = HOL + 
+session "Network_Security_Policy_Verification" = HOL +
   options [timeout = 600]
   theories [document = false]
     "Lib/ML_GraphViz_Disable"

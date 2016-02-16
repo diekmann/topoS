@@ -23,8 +23,7 @@ context begin
                              V ''db2'' \<mapsto> Master [V ''db1''],
                              V ''h1'' \<mapsto> Care,
                              V ''h2'' \<mapsto> Care
-                             ], 
-          model_global_properties = () 
+                             ]
           \<rparr>" 
   value[code] "make_policy [ACL_m] [V ''db1'', V ''db2'', V ''h1'', V ''h2'', V ''h3'']"
   ML_val{*
@@ -45,8 +44,7 @@ definition CommWith_m::"(nat SecurityInvariant)" where
     "CommWith_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_ACLcommunicateWith \<lparr> 
           node_properties = [
                   1 \<mapsto> [2,3],
-                  2 \<mapsto> [3]], 
-          model_global_properties = () 
+                  2 \<mapsto> [3]]
           \<rparr>"
 
 
@@ -70,8 +68,7 @@ visualize_graph @{context} @{term "[ new_configured_list_SecurityInvariant SINVA
                   1::nat \<mapsto> [1,2,3],
                   2 \<mapsto> [1,2,3,4], 
                   3 \<mapsto> [1,2,3,4], 
-                  4 \<mapsto> [1,2,3,4]],
-          model_global_properties = () 
+                  4 \<mapsto> [1,2,3,4]]
           \<rparr>]"} @{term "\<lparr>nodesL = [1::nat,2,3,4], edgesL = [(1,2), (1,3), (2,3), (3, 4)] \<rparr>"};
 *}
 
@@ -84,8 +81,7 @@ context begin
   private lemma "wf_list_graph G_dep" by eval
 
   private definition "DEP_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_Dependability \<lparr> 
-          node_properties = Some \<circ> dependability_fix_nP G_dep (\<lambda>_. 0),
-          model_global_properties = () 
+          node_properties = Some \<circ> dependability_fix_nP G_dep (\<lambda>_. 0)
           \<rparr>"
   ML_val{* 
   visualize_graph_header @{context} @{term "[DEP_m]"}
@@ -102,15 +98,13 @@ context begin
   text{*We try to increase the dependability level at @{term 3}. Suddenly, offending flows everywhere.*}
   ML_val{*
   visualize_graph_header @{context} @{term "[new_configured_list_SecurityInvariant SINVAR_LIB_Dependability \<lparr> 
-          node_properties = Some \<circ> ((dependability_fix_nP G_dep (\<lambda>_. 0))(3 := 2)),
-          model_global_properties = () 
+          node_properties = Some \<circ> ((dependability_fix_nP G_dep (\<lambda>_. 0))(3 := 2))
           \<rparr>]"}
     @{term "G_dep\<lparr>edgesL := (3,4)#edgesL G_dep\<rparr>"}
     @{term "Some \<circ> ((dependability_fix_nP G_dep (\<lambda>_. 0))(3 := 2))"};
   *}
   lemma "implc_offending_flows (new_configured_list_SecurityInvariant SINVAR_LIB_Dependability \<lparr> 
-                          node_properties = Some \<circ> ((dependability_fix_nP G_dep (\<lambda>_. 0))(3 := 2)),
-                          model_global_properties = () 
+                          node_properties = Some \<circ> ((dependability_fix_nP G_dep (\<lambda>_. 0))(3 := 2))
                           \<rparr>)
              (G_dep\<lparr>edgesL := (3,4)#edgesL G_dep\<rparr>) = 
            [[(3, 4)], [(1, 2), (2, 1), (5, 6)], [(1, 2), (4, 5)], [(2, 1), (4, 5)], [(2, 3), (4, 5)], [(2, 3), (5, 6)]]"
@@ -122,8 +116,7 @@ context begin
         may be able to peek much deeper into the network.*}
   ML_val{*
   visualize_graph_header @{context} @{term "[new_configured_list_SecurityInvariant SINVAR_LIB_Dependability \<lparr> 
-          node_properties = Some \<circ> dependability_fix_nP (G_dep\<lparr>edgesL := (3,4)#edgesL G_dep\<rparr>) (\<lambda>_. 0),
-          model_global_properties = () 
+          node_properties = Some \<circ> dependability_fix_nP (G_dep\<lparr>edgesL := (3,4)#edgesL G_dep\<rparr>) (\<lambda>_. 0)
           \<rparr>]"}
     @{term "G_dep\<lparr>edgesL := (3,4)#edgesL G_dep\<rparr>"}
     @{term "Some \<circ> dependability_fix_nP (G_dep\<lparr>edgesL := (3,4)#edgesL G_dep\<rparr>) (\<lambda>_. 0)"};
@@ -132,16 +125,14 @@ context begin
   text{*Dependability is reflexive, a host can depend on itself.*}
   ML_val{*
   visualize_graph_header @{context} @{term "[new_configured_list_SecurityInvariant SINVAR_LIB_Dependability \<lparr> 
-          node_properties = Some \<circ> dependability_fix_nP \<lparr>nodesL = [1::nat], edgesL = [(1,1)] \<rparr> (\<lambda>_. 0),
-          model_global_properties = () 
+          node_properties = Some \<circ> dependability_fix_nP \<lparr>nodesL = [1::nat], edgesL = [(1,1)] \<rparr> (\<lambda>_. 0)
           \<rparr>]"}
     @{term "\<lparr>nodesL = [1::nat], edgesL = [(1,1)] \<rparr>"}
     @{term "Some \<circ> dependability_fix_nP \<lparr>nodesL = [1::nat], edgesL = [(1,1)] \<rparr> (\<lambda>_. 0)"};
   *}
   ML_val{*
   visualize_graph_header @{context} @{term "[new_configured_list_SecurityInvariant SINVAR_LIB_Dependability_norefl \<lparr> 
-          node_properties = (\<lambda>_::nat. Some 0),
-          model_global_properties = () 
+          node_properties = (\<lambda>_::nat. Some 0)
           \<rparr>]"}
     @{term "\<lparr>nodesL = [1::nat], edgesL = [(1,1)] \<rparr>"}
     @{term "(\<lambda>_::nat. Some (0::nat))"};

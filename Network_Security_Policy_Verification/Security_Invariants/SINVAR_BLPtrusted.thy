@@ -16,8 +16,6 @@ definition default_node_properties :: "node_config"
 fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow>  bool" where
   "sinvar G nP = (\<forall> (e1,e2) \<in> edges G. (if trusted (nP e2) then True else privacy_level (nP e1) \<le> privacy_level (nP e2) ))"
 
-fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> 'b \<Rightarrow> bool" where
-  "verify_globals _ _ _ = True"
 
 definition receiver_violation :: "bool" where "receiver_violation \<equiv> True"
 
@@ -31,7 +29,6 @@ lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
 
 interpretation SecurityInvariant_preliminaries
 where sinvar = sinvar
-and verify_globals = verify_globals
   apply unfold_locales
     apply(frule_tac finite_distinct_list[OF wf_graph.finiteE])
     apply(erule_tac exE)
@@ -109,7 +106,6 @@ subsubsection {*ENF*}
 interpretation BLPtrusted: SecurityInvariant_IFS 
   where default_node_properties = default_node_properties
   and sinvar = sinvar
-  and verify_globals = verify_globals
   rewrites "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = BLP_offending_set"
     apply unfold_locales
       apply(rule ballI)
@@ -132,6 +128,6 @@ hide_const (open) sinvar_mono
 hide_const (open) BLP_P
 hide_fact BLP_def_unique zero_default_candidate  privacylevel_refl BLP_ENF BLP_ENF_refl
 
-hide_const (open) sinvar verify_globals receiver_violation default_node_properties
+hide_const (open) sinvar receiver_violation default_node_properties
 
 end

@@ -27,7 +27,6 @@ section{*Summarizing the Security Invariant Library*}
 (*none of those should be defined or a hide_const is missing at the end of a SINVAR_*.thy file*)
 term sinvar
 term receiver_violation
-term verify_globals
 term eval
 
 (*TODO check all before export*)

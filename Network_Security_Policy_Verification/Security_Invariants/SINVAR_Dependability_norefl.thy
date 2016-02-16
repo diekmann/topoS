@@ -16,8 +16,6 @@ text {* Less-equal other nodes depend on the output of a node than its dependabi
 fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> dependability_level) \<Rightarrow> bool" where
   "sinvar G nP = (\<forall> (e1,e2) \<in> edges G. (num_reachable_norefl G e1) \<le> (nP e1))"
 
-fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> dependability_level) \<Rightarrow> 'b \<Rightarrow> bool" where
-  "verify_globals _ _ _ = True"
 
 definition receiver_violation :: "bool" where 
   "receiver_violation \<equiv> False"
@@ -40,7 +38,6 @@ lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
 
 interpretation SecurityInvariant_preliminaries
 where sinvar = sinvar
-and verify_globals = verify_globals
   apply unfold_locales
     apply(frule_tac finite_distinct_list[OF wf_graph.finiteE])
     apply(erule_tac exE)
@@ -57,7 +54,6 @@ and verify_globals = verify_globals
 interpretation Dependability: SecurityInvariant_ACS
 where default_node_properties = SINVAR_Dependability_norefl.default_node_properties
 and sinvar = SINVAR_Dependability_norefl.sinvar
-and verify_globals = verify_globals
   unfolding SINVAR_Dependability_norefl.default_node_properties_def
   proof
     fix G::"'a graph" and f nP
@@ -103,6 +99,6 @@ and verify_globals = verify_globals
   lemma TopoS_Dependability_norefl: "SecurityInvariant sinvar default_node_properties receiver_violation"
   unfolding receiver_violation_def by unfold_locales  
 
-hide_const (open) sinvar verify_globals receiver_violation default_node_properties
+hide_const (open) sinvar receiver_violation default_node_properties
 
 end

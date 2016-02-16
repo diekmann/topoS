@@ -10,11 +10,8 @@ subsubsection {* List Implementation *}
 fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> 'v list) \<Rightarrow> bool" where
   "sinvar G nP = (\<forall> v \<in> set (nodesL G). \<forall>a \<in> (set (succ_tran G v)). a \<in> set (nP v))"
 
-fun verify_globals :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> 'v list) \<Rightarrow> unit \<Rightarrow> bool" where
-  "verify_globals _ _ _ = True"
 
-
-definition "NetModel_node_props (P::('v::vertex, 'v list, 'b) TopoS_Params) = 
+definition "NetModel_node_props (P::('v::vertex, 'v list) TopoS_Params) = 
   (\<lambda> i. (case (node_properties P) i of Some property \<Rightarrow> property | None \<Rightarrow> SINVAR_ACLcommunicateWith.default_node_properties))"
 lemma[code_unfold]: "SecurityInvariant.node_props SINVAR_ACLcommunicateWith.default_node_properties P = NetModel_node_props P"
 by(simp add: NetModel_node_props_def)
@@ -22,7 +19,6 @@ by(simp add: NetModel_node_props_def)
 definition "ACLcommunicateWith_offending_list = Generic_offending_list sinvar"
 
 definition "ACLcommunicateWith_eval G P = (wf_list_graph G \<and> 
-  verify_globals G (SecurityInvariant.node_props SINVAR_ACLcommunicateWith.default_node_properties P) (model_global_properties P) \<and> 
   sinvar G (SecurityInvariant.node_props SINVAR_ACLcommunicateWith.default_node_properties P))"
 
 
@@ -34,8 +30,6 @@ interpretation SINVAR_ACLcommunicateWith_impl:TopoS_List_Impl
   where default_node_properties=SINVAR_ACLcommunicateWith.default_node_properties
   and sinvar_spec=SINVAR_ACLcommunicateWith.sinvar
   and sinvar_impl=sinvar
-  and verify_globals_spec=SINVAR_ACLcommunicateWith.verify_globals
-  and verify_globals_impl=verify_globals
   and receiver_violation=SINVAR_ACLcommunicateWith.receiver_violation
   and offending_flows_impl=ACLcommunicateWith_offending_list
   and node_props_impl=NetModel_node_props
@@ -44,10 +38,8 @@ interpretation SINVAR_ACLcommunicateWith_impl:TopoS_List_Impl
  apply(rule conjI)
   apply(rule conjI)
    apply(simp add: TopoS_ACLcommunicateWith; fail)
-  apply(rule conjI)
-   apply(intro allI impI)
-   apply(fact sinvar_correct)
-  apply(simp; fail)
+  apply(intro allI impI)
+  apply(fact sinvar_correct)
  apply(rule conjI)
   apply(unfold ACLcommunicateWith_offending_list_def)
   apply(intro allI impI)
@@ -61,25 +53,23 @@ interpretation SINVAR_ACLcommunicateWith_impl:TopoS_List_Impl
  apply(simp only: ACLcommunicateWith_eval_def)
  apply(intro allI impI)
  apply(rule TopoS_eval_impl_proofrule[OF TopoS_ACLcommunicateWith])
-  apply(simp only: sinvar_correct; fail)
- apply(simp)
+ apply(simp only: sinvar_correct; fail)
 done
 
 
 subsubsection {* packing *}
-  definition SINVAR_LIB_ACLcommunicateWith:: "('v::vertex, 'v list, unit) TopoS_packed" where
+  definition SINVAR_LIB_ACLcommunicateWith:: "('v::vertex, 'v list) TopoS_packed" where
     "SINVAR_LIB_ACLcommunicateWith \<equiv> 
     \<lparr> nm_name = ''ACLcommunicateWith'', 
       nm_receiver_violation = SINVAR_ACLcommunicateWith.receiver_violation,
       nm_default = SINVAR_ACLcommunicateWith.default_node_properties, 
       nm_sinvar = sinvar,
-      nm_verify_globals = verify_globals,
       nm_offending_flows = ACLcommunicateWith_offending_list, 
       nm_node_props = NetModel_node_props,
       nm_eval = ACLcommunicateWith_eval
       \<rparr>"
   interpretation SINVAR_LIB_ACLcommunicateWith_interpretation: TopoS_modelLibrary SINVAR_LIB_ACLcommunicateWith
-      SINVAR_ACLcommunicateWith.sinvar SINVAR_ACLcommunicateWith.verify_globals
+      SINVAR_ACLcommunicateWith.sinvar
     apply(unfold TopoS_modelLibrary_def SINVAR_LIB_ACLcommunicateWith_def)
     apply(rule conjI)
      apply(simp)
@@ -132,6 +122,6 @@ end
 
 
 hide_const (open) NetModel_node_props
-hide_const (open) sinvar verify_globals
+hide_const (open) sinvar
 
 end
