@@ -11,12 +11,29 @@ fun sinvar :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> domainNameTrust) \<
   "sinvar G nP = (\<forall> (s, r) \<in> set (edgesL G). (nP r) \<sqsubseteq>\<^sub>t\<^sub>r\<^sub>u\<^sub>s\<^sub>t (nP s))"
 
 
+definition DomainHierarchyNG_sanity_check_config :: "domainNameTrust list \<Rightarrow> domainTree \<Rightarrow> bool" where
+  "DomainHierarchyNG_sanity_check_config host_attributes tree = (\<forall> c \<in> set host_attributes.
+    case c of Unassigned \<Rightarrow> True
+            | DN (level, trust) \<Rightarrow> valid_hierarchy_pos tree level
+   )"
+
 fun verify_globals :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> domainNameTrust) \<Rightarrow> domainTree \<Rightarrow> bool" where
   "verify_globals G nP tree = (\<forall> v \<in> set (nodesL G). 
     case (nP v) of Unassigned \<Rightarrow> True | DN (level, trust) \<Rightarrow> valid_hierarchy_pos tree level
    )"
 
-
+(*TODO: to get rid of verify_globals
+  this stronger DomainHierarchyNG_sanity_check_config sanity checker checks the config
+  for all graphs!*)
+lemma "DomainHierarchyNG_sanity_check_config c tree \<Longrightarrow>
+    {x. \<exists>v. nP v = x} = set c \<Longrightarrow>
+    verify_globals G nP tree"
+  apply(simp add: DomainHierarchyNG_sanity_check_config_def split: split_if_asm)
+  apply(clarify)
+  apply(case_tac "nP v")
+   apply(simp_all)
+  apply(clarify)
+  by force
 
 
 definition DomainHierarchyNG_offending_list:: "'v list_graph \<Rightarrow> ('v \<Rightarrow> domainNameTrust) \<Rightarrow> ('v \<times> 'v) list list" where

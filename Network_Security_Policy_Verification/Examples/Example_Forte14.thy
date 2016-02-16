@@ -43,9 +43,29 @@ definition DomainHierarchy_m::"(vString SecurityInvariant)" where
                 Department ''POD'' [], Department ''INET'' []
               ],
               Department ''crew'' []
-            ]) 
+            ])
           \<rparr>"
-
+  text{*sanity check that the host attributes correspond to the desired hierarchy*}
+  lemma "DomainHierarchyNG_sanity_check_config
+    (map snd [
+            (V ''CC'', DN (''aircraft''--''crew''--Leaf, 1)),
+            (V ''C1'', DN (''aircraft''--''crew''--Leaf, 0)),
+            (V ''C2'', DN (''aircraft''--''crew''--Leaf, 0)),
+            (V ''IFEsrv'', DN (''aircraft''--''entertain''--Leaf, 0)),
+            (V ''IFE1'', DN (''aircraft''--''entertain''--Leaf, 0)),
+            (V ''IFE2'', DN (''aircraft''--''entertain''--Leaf, 0)),
+            (V ''SAT'', DN (''aircraft''--''entertain''--''INET''--Leaf, 0)),
+            (V ''Wifi'', DN (''aircraft''--''entertain''--''POD''--Leaf, 1)),
+            (V ''P1'', DN (''aircraft''--''entertain''--''POD''--Leaf, 0)),
+            (V ''P2'', DN (''aircraft''--''entertain''--''POD''--Leaf, 0))
+                            ])
+            (
+            Department ''aircraft'' [
+              Department ''entertain'' [
+                Department ''POD'' [], Department ''INET'' []
+              ],
+              Department ''crew'' []
+            ])" by eval
 
 definition SecurityGateway_m::"(vString SecurityInvariant)" where
   "SecurityGateway_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_SecurityGatewayExtended \<lparr> 
