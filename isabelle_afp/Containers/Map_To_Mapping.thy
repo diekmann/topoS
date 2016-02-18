@@ -59,23 +59,25 @@ text {* We cannot use @{thm [source] eq_map_apply} as a fold rule for operator i
   because it would loop. We use a simproc instead. *}
 ML {*
 val map_apply_simproc = 
-  Simplifier.simproc_global_i @{theory} "map_apply" [@{term "f x :: 'a option"}]
-    (fn ctxt => fn redex => case redex of
-      Const (@{const_name map_apply}, _) $ _ $ _ => NONE
-    | f $ x => 
-      let
-        val cTr = 
-          redex
-          |> fastype_of
-          |> dest_Type
-          |> snd |> hd
-          |> Thm.ctyp_of ctxt;
-        val cTx = Thm.ctyp_of ctxt (fastype_of x);
-        val cts = map (SOME o Thm.cterm_of ctxt) [f, x];
-      in
-        SOME (Drule.instantiate' [SOME cTr, SOME cTx] cts @{thm eq_map_apply})
-      end
-    | _ => NONE);
+  Simplifier.make_simproc @{context} "map_apply"
+   {lhss = [@{term "f x :: 'a option"}],
+    proc = fn _ => fn ctxt => fn ct =>
+      (case Thm.term_of ct of
+        Const (@{const_name map_apply}, _) $ _ $ _ => NONE
+      | f $ x => 
+          let
+            val cTr = 
+              Thm.typ_of_cterm ct
+              |> dest_Type
+              |> snd |> hd
+              |> Thm.ctyp_of ctxt;
+            val cTx = Thm.ctyp_of ctxt (fastype_of x);
+            val cts = map (SOME o Thm.cterm_of ctxt) [f, x];
+          in
+            SOME (Thm.instantiate' [SOME cTr, SOME cTx] cts @{thm eq_map_apply})
+          end
+      | _ => NONE),
+    identifier = []}
 *}
 
 lemma map_apply_parametric [transfer_rule]:
@@ -139,23 +141,23 @@ end
 structure Containers: CONTAINERS =
 struct
 
-fun identify ctxt thm =
+fun identify context thm =
   let
-    val ctxt' = Context.proof_of ctxt
+    val ctxt' = Context.proof_of context
     val ss = put_simpset HOL_basic_ss ctxt'
     val ctxt1 = ss addsimps Containers_Pre.get ctxt' addsimprocs [map_apply_simproc]
     val ctxt2 = ss addsimps Containers_Post.get ctxt'
 
     (* Hack to recover Transfer.transferred function from attribute *)
-    fun transfer_transferred ctxt thm = Transfer.transferred_attribute [] (ctxt, thm) |> snd |> the
+    fun transfer_transferred thm = Transfer.transferred_attribute [] (context, thm) |> snd |> the
   in
     thm
     |> full_simplify ctxt1
-    |> transfer_transferred ctxt
+    |> transfer_transferred
     |> full_simplify ctxt2
   end
 
-val identify_attribute = Thm.rule_attribute identify
+val identify_attribute = Thm.rule_attribute [] identify
 
 end
 *}

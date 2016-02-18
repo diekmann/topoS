@@ -45,15 +45,15 @@ lift_definition plus_uint16 :: "uint16 \<Rightarrow> uint16 \<Rightarrow> uint16
 lift_definition minus_uint16 :: "uint16 \<Rightarrow> uint16 \<Rightarrow> uint16" is "op -" .
 lift_definition uminus_uint16 :: "uint16 \<Rightarrow> uint16" is uminus .
 lift_definition times_uint16 :: "uint16 \<Rightarrow> uint16 \<Rightarrow> uint16" is "op *" .
-lift_definition div_uint16 :: "uint16 \<Rightarrow> uint16 \<Rightarrow> uint16" is "op div" .
+lift_definition divide_uint16 :: "uint16 \<Rightarrow> uint16 \<Rightarrow> uint16" is "op div" .
 lift_definition mod_uint16 :: "uint16 \<Rightarrow> uint16 \<Rightarrow> uint16" is "op mod" .
-instance by default (transfer, simp add: algebra_simps)+
+instance by standard (transfer, simp add: algebra_simps)+
 end
 
 instantiation uint16 :: linorder begin
 lift_definition less_uint16 :: "uint16 \<Rightarrow> uint16 \<Rightarrow> bool" is "op <" .
 lift_definition less_eq_uint16 :: "uint16 \<Rightarrow> uint16 \<Rightarrow> bool" is "op \<le>" .
-instance by(default)(transfer, simp add: less_le_not_le linear)+
+instance by standard (transfer, simp add: less_le_not_le linear)+
 end
 
 lemmas [code] = less_uint16.rep_eq less_eq_uint16.rep_eq
@@ -77,7 +77,7 @@ lemmas [code] = test_bit_uint16.rep_eq lsb_uint16.rep_eq msb_uint16.rep_eq
 
 instantiation uint16 :: equal begin
 lift_definition equal_uint16 :: "uint16 \<Rightarrow> uint16 \<Rightarrow> bool" is "equal_class.equal" .
-instance by default(transfer, simp add: equal_eq)
+instance by standard (transfer, simp add: equal_eq)
 end
 
 lemmas [code] = equal_uint16.rep_eq
@@ -316,10 +316,10 @@ where "uint16_mod x y = (if y = 0 then undefined (op mod :: uint16 \<Rightarrow>
 context includes undefined_transfer begin
 
 lemma div_uint16_code [code]: "x div y = (if y = 0 then 0 else uint16_div x y)"
-unfolding uint16_div_def by transfer(simp add: word_div_def)
+unfolding uint16_div_def by transfer (simp add: word_div_def)
 
 lemma mod_uint16_code [code]: "x mod y = (if y = 0 then x else uint16_mod x y)"
-unfolding uint16_mod_def by transfer(simp add: word_mod_def)
+unfolding uint16_mod_def by transfer (simp add: word_mod_def)
 
 lemma uint16_div_code [code abstract]:
   "Rep_uint16 (uint16_div x y) =

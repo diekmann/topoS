@@ -20,14 +20,15 @@ export AFP="${TOPOS_HOME}/isabelle_afp"
 
 ISABELLE="isabelle"
 
-if $ISABELLE version | grep 'Isabelle2015: May 2015'; then
-    echo "Isabelle 2015"
+if sh -c "$ISABELLE version" | grep '^Isabelle2016:'; then
+    echo "Isabelle 2016"
 else
-    echo "Isabelle 2015 is required"
+    echo "Isabelle 2016 is required"
     exit -1
 fi
 
-#$ISABELLE build -d isabelle_afp/ -b Collections &&
-#$ISABELLE jedit -d isabelle_afp/ -l Collections
-#collections does not load ATM, waiting for new version
-$ISABELLE jedit -d isabelle_afp/ -l Collections
+$ISABELLE build -d $AFP -v -b Automatic_Refinement
+# Building Collections may require some RAM (sometimes, my 8GB RAM are not enough)
+# using "-o threads=1" to limit memory during build
+$ISABELLE build -o threads=1 -d $AFP -v -b Collections
+$ISABELLE jedit -d $AFP -l Collections

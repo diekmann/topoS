@@ -82,7 +82,7 @@ local
   val sanitize_string_html =
     String.map (fn c => if (is_valid_char c orelse c = #" " orelse (c <= #"/" andalso c >= #"(")
                             orelse c = #"|" orelse c = #"=" orelse c = #"?" orelse c = #"!" orelse c = #"_"
-                            orelse c = #"[" orelse c = #"}") then c else #"_")
+                            orelse c = #"[" orelse c = #"]") then c else #"_")
 in
   fun term_to_string_html ctxt (n: term) : string = 
     let
@@ -120,7 +120,7 @@ local
           Hence, we cd to the tmp directory and only use relative filenames henceforth.*)
         (writeln ("cding to "^(File.shell_path (Path.dir f))); File.cd (Path.dir f));
         (writeln ("executing: "^cmd); Isabelle_System.bash cmd; ());
-        Isabelle_System.bash ("rm "^file) (*cleanup dot file, PDF file will still exist*)
+        0 (*Isabelle_System.bash ("rm "^file) (*cleanup dot file, PDF file will still exist*)*)
         (*some pdf viewers do not like it if we delete the pdf file they are currently displaying*)
       end
 

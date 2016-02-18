@@ -8,10 +8,10 @@ subsection {* SecurityInvariant CommunicationPartners *}
 text{*
 Idea of this securityinvariant:
   Only some nodes can communicate with Master nodes.
-    It constraints who may access master nodes, Master nodes can access the world (except other prohibited master nodes).
+    It constrains who may access master nodes, Master nodes can access the world (except other prohibited master nodes).
   A node configured as Master has a list of nodes that can access it.
   Also, in order to be able to access a Master node, the sender must be denoted as a node we Care about.
-  By default, all nodes are set to DonTCare, thus they can not access Master nodes. But they can access 
+  By default, all nodes are set to DontCare, thus they cannot access Master nodes. But they can access 
   all other DontCare nodes and Care nodes.
 
   TL;DR: An access control list determines who can access a master node.
@@ -24,22 +24,19 @@ definition default_node_properties :: "'v node_config"
 text{* Unrestricted accesses among DontCare nodes! *}
 
 fun allowed_flow :: "'v node_config \<Rightarrow> 'v \<Rightarrow> 'v node_config \<Rightarrow> 'v \<Rightarrow> bool" where
-  "allowed_flow DontCare s DontCare r = True" |
-  "allowed_flow DontCare s Care r = True" |
-  "allowed_flow DontCare s (Master _) r = False" |
-  "allowed_flow Care s Care r = True" |
-  "allowed_flow Care s DontCare r = True" |
+  "allowed_flow DontCare _ DontCare _ = True" |
+  "allowed_flow DontCare _ Care _ = True" |
+  "allowed_flow DontCare _ (Master _) _ = False" |
+  "allowed_flow Care _ Care _ = True" |
+  "allowed_flow Care _ DontCare _ = True" |
   "allowed_flow Care s (Master M) r = (s \<in> set M)" |
   "allowed_flow (Master _) s (Master M) r = (s \<in> set M)" |
-  "allowed_flow (Master _) s Care r = True" |
-  "allowed_flow (Master _) s DontCare r = True" 
+  "allowed_flow (Master _) _ Care _ = True" |
+  "allowed_flow (Master _) _ DontCare _ = True" 
 
 
 fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> 'v node_config) \<Rightarrow> bool" where
   "sinvar G nP = (\<forall> (s,r) \<in> edges G. s \<noteq> r \<longrightarrow> allowed_flow (nP s) s (nP r) r)"
-
-fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> 'v node_config) \<Rightarrow> 'b \<Rightarrow> bool" where
-  "verify_globals _ _ _ = True"
 
 definition receiver_violation :: "bool" where "receiver_violation = False"
 
@@ -53,7 +50,6 @@ subsubsection {*Preliminaries*}
   
   interpretation SecurityInvariant_preliminaries
   where sinvar = sinvar
-  and verify_globals = verify_globals
     apply unfold_locales
       apply(frule_tac finite_distinct_list[OF wf_graph.finiteE])
       apply(erule_tac exE)
@@ -78,11 +74,12 @@ subsubsection {*ENRnr*}
       apply(simp_all)
     done
   lemma  "\<not> allowed_flow DontCare s (Master M) r" by(simp)
+  lemma  "\<not> allowed_flow any s (Master []) r" by(cases any, simp_all)
     
   lemma All_to_Unassigned: "\<forall> s r. allowed_flow (nP s) s DontCare r"
     by (rule allI, rule allI, case_tac "nP s", simp_all)
   lemma Unassigned_default_candidate: "\<forall> s r. \<not> allowed_flow (nP s) s (nP r) r \<longrightarrow> \<not> allowed_flow DontCare s (nP r) r"
-    apply(rule allI)+
+    apply(intro allI, rename_tac s r)+
     apply(case_tac "nP s")
       apply(simp_all)
      apply(case_tac "nP r")
@@ -108,8 +105,7 @@ subsubsection {*ENRnr*}
 interpretation CommunicationPartners: SecurityInvariant_ACS
 where default_node_properties = default_node_properties
 and sinvar = sinvar
-and verify_globals = verify_globals
-where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = CommunicationPartners_offending_set"
+rewrites "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = CommunicationPartners_offending_set"
   unfolding receiver_violation_def
   unfolding default_node_properties_def
   apply unfold_locales
@@ -125,12 +121,12 @@ where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = Communi
   apply(case_tac otherbot, simp_all)
    apply(rule_tac x="(\<lambda> x. DontCare)(vertex_1 := DontCare, vertex_2 := Master [vertex_1])" in exI, simp)
    apply(rule_tac x="vertex_1" in exI, simp)
-   apply(simp split: split_split)
+   apply(simp split: prod.split)
    apply(clarify)
    apply force
   apply(rename_tac M) (*case Master M*)
   apply(rule_tac x="(\<lambda> x. DontCare)(vertex_1 := DontCare, vertex_2 := (Master (vertex_1#M')))" in exI, simp)
-  apply(simp split: split_split)
+  apply(simp split: prod.split)
   apply(clarify)
   apply force
  apply(fact CommunicationPartners_offending_set)
@@ -141,8 +137,16 @@ done
   unfolding receiver_violation_def by unfold_locales
 
 
+text{*Example: *}
+lemma "sinvar \<lparr>nodes = {''db1'', ''db2'', ''h1'', ''h2'', ''foo'', ''bar''},
+               edges = {(''h1'', ''db1''), (''h2'', ''db1''), (''h1'', ''h2''),
+                        (''db1'', ''h1''), (''db1'', ''foo''), (''db1'', ''db2''), (''db1'', ''db1''),
+                        (''h1'', ''foo''), (''foo'', ''h1''), (''foo'', ''bar'')}\<rparr>
+    (((((\<lambda>h. default_node_properties)(''h1'' := Care))(''h2'' := Care))
+        (''db1'' := Master [''h1'', ''h2'']))(''db2'' := Master [''db1'']))" by eval
+
 hide_fact (open) sinvar_mono   
-hide_const (open) sinvar verify_globals receiver_violation default_node_properties
+hide_const (open) sinvar receiver_violation default_node_properties
 
 
 end

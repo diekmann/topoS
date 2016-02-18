@@ -36,7 +36,7 @@ begin
 
       val adjust_arity: int -> thm -> thm
       val adjust_arity_tac: int -> Proof.context -> tactic'
-      val unlambda_tac: tactic'
+      val unlambda_tac: Proof.context -> tactic'
       val prepare_tac: Proof.context -> tactic'
 
       val fo_rule: thm -> thm
@@ -52,8 +52,8 @@ begin
       val net_empty: param_net
       val net_add: thm -> param_net -> param_net
       val net_del: thm -> param_net -> param_net
-      val net_add_int: thm -> param_net -> param_net
-      val net_del_int: thm -> param_net -> param_net
+      val net_add_int: Context.generic -> thm -> param_net -> param_net
+      val net_del_int: Context.generic -> thm -> param_net -> param_net
       val net_tac: param_net -> Proof.context -> tactic'
     
       (*** Default parametricity rules ***)
@@ -105,13 +105,13 @@ begin
 
 
       fun safe_fun_relD_tac ctxt = let
-        fun t a b = fo_resolve_tac [a] ctxt THEN' rtac b
+        fun t a b = fo_resolve_tac [a] ctxt THEN' resolve_tac ctxt [b]
       in
         DETERM o (
           t @{thm tag_both} @{thm tagged_fun_relD_both} ORELSE'
           t @{thm tag_rhs} @{thm tagged_fun_relD_rhs} ORELSE'
           t @{thm tag_lhs} @{thm tagged_fun_relD_lhs} ORELSE'
-          rtac @{thm tagged_fun_relD_none}
+          resolve_tac ctxt @{thms tagged_fun_relD_none}
         )
       end
 
@@ -126,19 +126,19 @@ begin
 
       fun adjust_arity_tac n ctxt i st = 
         (if n = 0 then K all_tac
-        else if n>0 then NTIMES n (DETERM o rtac @{thm fun_relI})
+        else if n>0 then NTIMES n (DETERM o resolve_tac ctxt @{thms fun_relI})
         else NTIMES (~n) (safe_fun_relD_tac ctxt)) i st
 
-      fun unlambda_tac i st = 
+      fun unlambda_tac ctxt i st = 
         case try (dest_param_goal i) st of
           NONE => Seq.empty
         | SOME g => let
             val n = Term.strip_abs (#rhs_head g) |> #1 |> length
-          in NTIMES n (rtac @{thm fun_relI}) i st end
+          in NTIMES n (resolve_tac ctxt @{thms fun_relI}) i st end
 
       fun prepare_tac ctxt = 
         Subgoal.FOCUS (K (PRIMITIVE (Drule.eta_contraction_rule))) ctxt
-        THEN' unlambda_tac
+        THEN' unlambda_tac ctxt
 
 
       fun could_param_rl rl i st = 
@@ -154,7 +154,7 @@ begin
 
       fun param_rule_tac_aux ctxt rl i st = 
         case could_param_rl (Thm.prop_of rl) i st of
-          SOME adj => (adjust_arity_tac adj ctxt THEN' rtac rl) i st
+          SOME adj => (adjust_arity_tac adj ctxt THEN' resolve_tac ctxt [rl]) i st
         | _ => Seq.empty
 
       fun param_rule_tac ctxt rl = 
@@ -185,11 +185,11 @@ begin
         val net_empty = Item_Net.init (Thm.eq_thm o apply2 #2) param_get_key
       end
 
-      fun wrap_pr_op f thm = case try (`dest_param_rule) thm of
+      fun wrap_pr_op f context thm = case try (`dest_param_rule) thm of
         NONE => 
           let 
             val msg = "Ignoring invalid parametricity theorem: "
-              ^ Display.string_of_thm_without_context thm
+              ^ Thm.string_of_thm (Context.proof_of context) thm
             val _ = warning msg
           in I end
       | SOME p => f p
@@ -210,8 +210,7 @@ begin
         
             fun tac (r,thm) = 
               adjust_arity_tac (#arity r - #arity g) ctxt 
-              THEN' DETERM o rtac thm
-        
+              THEN' DETERM o resolve_tac ctxt [thm]
           in 
             FIRST' (map tac rls) i st
           end
@@ -225,8 +224,8 @@ begin
         val merge = Item_Net.merge
       )
         
-      fun add_dflt thm = dflt_rules.map (net_add_int thm)
-      fun del_dflt thm = dflt_rules.map (net_del_int thm)
+      fun add_dflt thm context = dflt_rules.map (net_add_int context thm) context
+      fun del_dflt thm context = dflt_rules.map (net_del_int context thm) context
       val add_dflt_attr = Thm.declaration_attribute add_dflt
       val del_dflt_attr = Thm.declaration_attribute del_dflt
 
@@ -283,7 +282,7 @@ begin
             @{mpat "Trueprop ((_,_)\<in>_\<rightarrow>_)"} => fo_rule (thm RS @{thm fun_relD})
           | _ => thm 
           
-      val param_fo_attr = Scan.succeed (Thm.rule_attribute (K fo_rule))
+      val param_fo_attr = Scan.succeed (Thm.rule_attribute [] (K fo_rule))
 
       val setup = I
         #> Attrib.setup @{binding param} 
@@ -300,5 +299,50 @@ begin
     *}
 
   setup Parametricity.setup
+
+
+
+  subsection \<open>Convenience Tools\<close>
+
+  ML {*
+    (* Prefix p_ or wrong type supresses generation of relAPP *)
+  
+    fun cnv_relAPP t = let
+      fun consider (Var ((name,_),T)) =
+        if String.isPrefix "p_" name then false   
+        else (
+          case T of
+            Type(@{type_name set},[Type(@{type_name prod},_)]) => true
+          | _ => false)
+      | consider _ = true
+  
+      fun strip_rcomb u : term * term list =
+        let 
+          fun stripc (x as (f$t, ts)) = 
+            if consider t then stripc (f, t::ts) else x
+          | stripc  x =  x
+        in  stripc(u,[])  end;
+  
+      val (f,a) = strip_rcomb t
+    in 
+      Relators.list_relAPP a f
+    end
+  
+    fun to_relAPP_conv ctxt = Refine_Util.f_tac_conv ctxt 
+      cnv_relAPP 
+      (ALLGOALS (simp_tac 
+        (put_simpset HOL_basic_ss ctxt addsimps @{thms relAPP_def})))
+  
+  
+    val to_relAPP_attr = Thm.rule_attribute [] (fn context => let
+      val ctxt = Context.proof_of context
+    in
+      Conv.fconv_rule (Conv.arg1_conv (to_relAPP_conv ctxt))
+    end)
+  *}
+  
+  attribute_setup to_relAPP = {* Scan.succeed (to_relAPP_attr) *} 
+    "Convert relator definition to prefix-form"
+
 
 end

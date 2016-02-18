@@ -1,4 +1,4 @@
-header {* \isaheader{Orderings By Comparison Operator} *}
+section {* \isaheader{Orderings By Comparison Operator} *}
 theory Intf_Comp
 imports 
   "../../../Automatic_Refinement/Automatic_Refinement"
@@ -547,8 +547,8 @@ lemma map_ord_linear[intro?]:
   assumes B: "linorder cmpv" 
   shows "linorder (cmp_map cmpk cmpv)"
 proof -
-  interpret lk!: linorder_on UNIV cmpk by fact
-  interpret lv!: linorder_on UNIV cmpv by fact
+  interpret lk: linorder_on UNIV cmpk by fact
+  interpret lv: linorder_on UNIV cmpv by fact
   
   show ?thesis
     unfolding cmp_map_def
@@ -736,13 +736,11 @@ proof -
     apply (rule eq_linorder_on.intro)
     apply rule
     apply unfold_locales
-  proof -
-    case (goal1 l m)
-    thus ?case 
+    subgoal for l m
       apply (induct cmp\<equiv>cmp l m rule: cmp_lex.induct)
       apply (auto split: comp_res.splits)
       done
-  qed
+    done
 qed
 
 lemma prod_eq_linorder[intro?]:

@@ -8,7 +8,7 @@ text{*Several invariants may apply to one policy. *}
 
 
 (*the packed network model record from the list implementation*)
-term "X::('v::vertex, 'a, 'b) TopoS_packed"
+term "X::('v::vertex, 'a) TopoS_packed"
 
 
 subsection{*Generating instantiated (configured) network security invariants*}
@@ -31,7 +31,7 @@ subsection{*Generating instantiated (configured) network security invariants*}
     
 
   fun new_configured_list_SecurityInvariant :: 
-    "('v::vertex, 'a, 'b) TopoS_packed \<Rightarrow> ('v::vertex, 'a, 'b) TopoS_Params \<Rightarrow> 
+    "('v::vertex, 'a) TopoS_packed \<Rightarrow> ('v::vertex, 'a) TopoS_Params \<Rightarrow> 
         ('v SecurityInvariant)" where 
       "new_configured_list_SecurityInvariant m C = 
         (let nP = nm_node_props m C in
@@ -42,9 +42,10 @@ subsection{*Generating instantiated (configured) network security invariants*}
             implc_isIFS = nm_receiver_violation m
           \<rparr>)"
 
-  text{* the @{term TopoS_Composition_Theory.new_configured_SecurityInvariant} must give a result if we have the SecurityInvariant modelLibrary*}
+  text{* the @{term TopoS_Composition_Theory.new_configured_SecurityInvariant} must give a
+         result if we have the SecurityInvariant modelLibrary*}
   lemma TopoS_modelLibrary_yields_new_configured_SecurityInvariant:
-    assumes NetModelLib: "TopoS_modelLibrary m sinvar_spec verify_gloabls_spec"
+    assumes NetModelLib: "TopoS_modelLibrary m sinvar_spec"
     and     nPdef:       "nP = nm_node_props m C"
     and formalSpec:      "Spec = \<lparr> 
                               c_sinvar = (\<lambda>G. sinvar_spec G nP),
@@ -69,7 +70,7 @@ subsection{*Generating instantiated (configured) network security invariants*}
 
   (* The new_* functions comply, i.e. we can instance network security models that are executable. *)
   lemma new_configured_list_SecurityInvariant_complies:
-    assumes NetModelLib: "TopoS_modelLibrary m sinvar_spec verify_gloabls_spec"
+    assumes NetModelLib: "TopoS_modelLibrary m sinvar_spec"
     and     nPdef:       "nP = nm_node_props m C"
     and formalSpec:      "Spec = new_configured_SecurityInvariant (sinvar_spec, nm_default m, nm_receiver_violation m, nP)"
     and implSpec:        "Impl = new_configured_list_SecurityInvariant m C"
@@ -91,10 +92,10 @@ subsection{*Generating instantiated (configured) network security invariants*}
 
 
   corollary new_configured_list_SecurityInvariant_complies':
-    "\<lbrakk> TopoS_modelLibrary m sinvar_spec verify_gloabls_spec \<rbrakk> \<Longrightarrow> 
-    SecurityInvariant_complies_formal_def (new_configured_list_SecurityInvariant m C) (the (new_configured_SecurityInvariant (sinvar_spec, nm_default m, nm_receiver_violation m,  nm_node_props m C)))"
-    apply(drule new_configured_list_SecurityInvariant_complies)
-    by(simp_all)
+    "\<lbrakk> TopoS_modelLibrary m sinvar_spec \<rbrakk> \<Longrightarrow> 
+    SecurityInvariant_complies_formal_def (new_configured_list_SecurityInvariant m C)
+      (the (new_configured_SecurityInvariant (sinvar_spec, nm_default m, nm_receiver_violation m, nm_node_props m C)))"
+    by(blast dest: new_configured_list_SecurityInvariant_complies)
 
   --"From"
   thm new_configured_SecurityInvariant_sound
@@ -266,7 +267,7 @@ subsection{*All security requirements fulfilled*}
   lemma all_security_requirements_fulfilled_complies:
     "\<lbrakk> \<forall> (m_impl, m_spec) \<in> set M. SecurityInvariant_complies_formal_def m_impl m_spec; 
        wf_list_graph (G::('v::vertex) list_graph) \<rbrakk> \<Longrightarrow>
-    all_security_requirements_fulfilled (get_impl M) G <-> TopoS_Composition_Theory.all_security_requirements_fulfilled (get_spec M) (list_graph_to_graph G)"
+    all_security_requirements_fulfilled (get_impl M) G \<longleftrightarrow> TopoS_Composition_Theory.all_security_requirements_fulfilled (get_spec M) (list_graph_to_graph G)"
     apply(simp add: all_security_requirements_fulfilled_def TopoS_Composition_Theory.all_security_requirements_fulfilled_def)
     apply(simp add: get_impl_def get_spec_def)
     using SecurityInvariant_complies_formal_def_def by fastforce

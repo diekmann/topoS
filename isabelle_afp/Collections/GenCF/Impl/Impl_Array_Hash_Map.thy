@@ -1,4 +1,4 @@
-header {* \isaheader{Array Based Hash-Maps} *}
+section {* \isaheader{Array Based Hash-Maps} *}
 theory Impl_Array_Hash_Map imports 
   "../../../Automatic_Refinement/Automatic_Refinement"
   "../../Iterator/Array_Iterator"
@@ -371,7 +371,7 @@ lemma ahm_invar_aux_card_dom_ahm_\<alpha>_auxD:
   assumes inv: "ahm_invar_aux bhc n a"
   shows "card (dom (ahm_\<alpha>_aux bhc a)) = n"
 proof(cases a)
-  case (Array xs)[simp]
+  case [simp]: (Array xs)
   from inv have "card (dom (ahm_\<alpha>_aux bhc (Array xs))) = card (dom (map_of (concat xs)))"
     by(simp add: ahm_\<alpha>_aux_conv_map_of_concat[OF bhc])
   also from inv have "distinct (map fst (concat xs))"
@@ -567,28 +567,28 @@ proof-
 
   show ?thesis unfolding it_to_list_def \<alpha> ahm_\<alpha>_def ahm_iteratei_def
       apply (simp add: list_map_lookup_is_map_of)
-  proof (intro equalityI subsetI)
-    case (goal1 x)
-      let ?m = "\<lambda>k. map_of (l ! bhc (length l) k) k"
-      obtain k v where [simp]: "x = (k, v)" by (cases x)
-      from goal1 have "set_to_map (map_to_set ?m) k = Some v"
-          by (simp add: set_to_map_simp inj_on_fst_map_to_set)
-      also note map_to_set_inverse
-      finally have "map_of (l ! bhc (length l) k) k = Some v" .
-      hence "(k,v) \<in> set (l ! bhc (length l) k)"
-          by (simp add: map_of_is_SomeD)
-      moreover have "bhc (length l) k < length l" using bhc length ..
-      ultimately show ?case by force
+  proof (intro equalityI subsetI, goal_cases)
+    case prems: (1 x)
+    let ?m = "\<lambda>k. map_of (l ! bhc (length l) k) k"
+    obtain k v where [simp]: "x = (k, v)" by (cases x)
+    from prems have "set_to_map (map_to_set ?m) k = Some v"
+      by (simp add: set_to_map_simp inj_on_fst_map_to_set)
+    also note map_to_set_inverse
+    finally have "map_of (l ! bhc (length l) k) k = Some v" .
+    hence "(k,v) \<in> set (l ! bhc (length l) k)"
+      by (simp add: map_of_SomeD)
+    moreover have "bhc (length l) k < length l" using bhc length ..
+    ultimately show ?case by force
   next
-    case (goal2 x)
-      obtain k v where [simp]: "x = (k, v)" by (cases x)
-      from goal2 obtain h where h_props: "(k,v) \<in> set (l!h)" "h < length l"
-          by (force simp: set_conv_nth)
-      moreover from h_props and buckets_ok
-          have "bhc (length l) k = h" "distinct (map fst (l!h))" by auto
-      ultimately have "map_of (l ! bhc (length l) k) k = Some v"
-          by (force intro: map_of_is_SomeI)
-      thus ?case by simp
+    case prems: (2 x)
+    obtain k v where [simp]: "x = (k, v)" by (cases x)
+    from prems obtain h where h_props: "(k,v) \<in> set (l!h)" "h < length l"
+      by (force simp: set_conv_nth)
+    moreover from h_props and buckets_ok
+    have "bhc (length l) k = h" "distinct (map fst (l!h))" by auto
+    ultimately have "map_of (l ! bhc (length l) k) k = Some v"
+      by (force intro: map_of_is_SomeI)
+    thus ?case by simp
   qed
 qed
 
@@ -651,7 +651,7 @@ lemma ahm_iteratei_aux_code[code]:
   "ahm_iteratei_aux a c f \<sigma> = idx_iteratei array_get array_length a c 
        (\<lambda>x. foldli x c f) \<sigma>"
 proof(cases a)
-  case (Array xs)[simp]
+  case [simp]: (Array xs)
   have "ahm_iteratei_aux a c f \<sigma> = foldli (concat xs) c f \<sigma>" by simp
   also have "\<dots> = foldli xs c (\<lambda>x. foldli x c f) \<sigma>" by (simp add: foldli_concat)
   also have "\<dots> = idx_iteratei op ! length xs c (\<lambda>x. foldli x c f) \<sigma>" 
@@ -993,7 +993,7 @@ proof (cases "list_map_lookup op= k xs", simp_all)
 next
   case (Some v')
     hence "(k,v') \<in> set xs" unfolding list_map_lookup_is_map_of
-        by (rule map_of_is_SomeD)
+        by (rule map_of_SomeD)
     hence "\<And>a. length (list_map_update_aux op= k v xs a) = 
         length xs + length a" by (induction xs, auto)
     thus "?l_new = length xs" unfolding list_map_update_def by simp
@@ -1012,7 +1012,7 @@ proof (cases "list_map_lookup op= k xs", simp_all)
 next
   case (Some v')
     hence "(k,v') \<in> set xs" unfolding list_map_lookup_is_map_of
-        by (rule map_of_is_SomeD)
+        by (rule map_of_SomeD)
     hence "\<And>a. k \<notin> fst`set a \<Longrightarrow> length (list_map_delete_aux op= k xs a) = 
         length xs + length a - 1" by (induction xs, auto)
     thus "?l_new = length xs - Suc 0" unfolding list_map_delete_def by simp
@@ -1071,12 +1071,12 @@ proof (intro fun_relI, clarsimp)
       next
         case True
           show ?thesis
-          proof (insert True, simp, intro bucket_okI)
-            case (goal1 k')
+          proof (insert True, simp, intro bucket_okI, goal_cases)
+            case prems: (1 k')
               show ?case
               proof (cases "k = k'")
                 case False
-                  from goal1 have "k' \<in> dom ?list_new'"
+                  from prems have "k' \<in> dom ?list_new'"
                       by (simp only: dom_map_of_conv_image_fst 
                           list_updated(1)[symmetric])
                   hence "k' \<in> fst`set ?list" using False
@@ -1284,12 +1284,12 @@ proof (intro fun_relI, clarsimp)
             by (simp add: array_get_array_set_other)
       next
         case True thus ?thesis
-        proof (simp, intro bucket_okI)
-          case (goal1 k')
+        proof (simp, intro bucket_okI, goal_cases)
+          case prems: (1 k')
               show ?case
               proof (cases "k = k'")
                 case False
-                  from goal1 have "k' \<in> dom ?list_new'"
+                  from prems have "k' \<in> dom ?list_new'"
                       by (simp only: dom_map_of_conv_image_fst 
                           list_updated(1)[symmetric])
                   hence "k' \<in> fst`set ?list" using False

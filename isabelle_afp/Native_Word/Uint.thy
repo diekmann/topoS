@@ -76,15 +76,15 @@ lift_definition plus_uint :: "uint \<Rightarrow> uint \<Rightarrow> uint" is "op
 lift_definition minus_uint :: "uint \<Rightarrow> uint \<Rightarrow> uint" is "op -" .
 lift_definition uminus_uint :: "uint \<Rightarrow> uint" is uminus .
 lift_definition times_uint :: "uint \<Rightarrow> uint \<Rightarrow> uint" is "op *" .
-lift_definition div_uint :: "uint \<Rightarrow> uint \<Rightarrow> uint" is "op div" .
+lift_definition divide_uint :: "uint \<Rightarrow> uint \<Rightarrow> uint" is "op div" .
 lift_definition mod_uint :: "uint \<Rightarrow> uint \<Rightarrow> uint" is "op mod" .
-instance by default (transfer, simp add: algebra_simps)+
+instance by standard (transfer, simp add: algebra_simps)+
 end
 
 instantiation uint :: linorder begin
 lift_definition less_uint :: "uint \<Rightarrow> uint \<Rightarrow> bool" is "op <" .
 lift_definition less_eq_uint :: "uint \<Rightarrow> uint \<Rightarrow> bool" is "op \<le>" .
-instance by(default)(transfer, simp add: less_le_not_le linear)+
+instance by standard (transfer, simp add: less_le_not_le linear)+
 end
 
 lemmas [code] = less_uint.rep_eq less_eq_uint.rep_eq
@@ -108,7 +108,7 @@ lemmas [code] = test_bit_uint.rep_eq lsb_uint.rep_eq msb_uint.rep_eq
 
 instantiation uint :: equal begin
 lift_definition equal_uint :: "uint \<Rightarrow> uint \<Rightarrow> bool" is "equal_class.equal" .
-instance by default(transfer, simp add: equal_eq)
+instance by standard (transfer, simp add: equal_eq)
 end
 
 lemmas [code] = equal_uint.rep_eq
@@ -196,6 +196,7 @@ code_reserved SML Uint
 
 code_printing code_module Uint \<rightharpoonup> (Haskell)
 {*
+import qualified Prelude;
 import qualified Data.Word;
 import qualified Data.Int;
 import qualified Data.Bits;
@@ -204,16 +205,16 @@ type Int = Data.Int.Int;
 
 type Word = Data.Word.Word;
 
-dflt_size :: Integer;
+dflt_size :: Prelude.Integer;
 dflt_size = Prelude.toInteger (bitSize_aux (0::Word))
   where {
-    bitSize_aux :: (Data.Bits.Bits a, Bounded a) => a -> Uint.Int;
+    bitSize_aux :: (Data.Bits.Bits a, Prelude.Bounded a) => a -> Uint.Int;
     bitSize_aux = Data.Bits.bitSize
   };
-
 *}
   and (Haskell_Quickcheck)
 {*
+import qualified Prelude;
 import qualified Data.Word;
 import qualified Data.Int;
 import qualified Data.Bits;
@@ -225,7 +226,7 @@ type Word = Data.Word.Word;
 dflt_size :: Prelude.Int;
 dflt_size = bitSize_aux (0::Word)
   where {
-    bitSize_aux :: (Data.Bits.Bits a, Bounded a) => a -> Prelude.Int;
+    bitSize_aux :: (Data.Bits.Bits a, Prelude.Bounded a) => a -> Uint.Int;
     bitSize_aux = Data.Bits.bitSize
   };
 *}

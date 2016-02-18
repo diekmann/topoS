@@ -28,15 +28,6 @@ text_raw {*\label{thy:Misc}*}
 text {* Here we provide a collection of miscellaneous definitions and helper lemmas *}
 
 subsection "Miscellaneous (1)"
-(* TODO: To be moved to List.thy, Option.thy *)
-lemma equal_Nil_null [code_unfold]:
-  "HOL.equal [] = List.null"
-  by (auto simp add: List.null_def equal)
-
-lemma equal_None_is_none [code_unfold]:
-  "HOL.equal None = Option.is_none"
-  by (auto simp add: Option.is_none_def equal)
-
 
 text {* This stuff is used in this theory itself, and thus occurs in first place or is simply not sorted into any other section of this theory. *}
 
@@ -142,6 +133,14 @@ subsection {* Sets *}
 
   lemma inter_compl_diff_conv[simp]: "A \<inter> -B = A - B" by auto
 
+  lemma subset_Collect_conv: "S \<subseteq> Collect P \<longleftrightarrow> (\<forall>x\<in>S. P x)"
+    by auto
+
+  lemma memb_imp_not_empty: "x\<in>S \<Longrightarrow> S\<noteq>{}"
+    by auto
+
+
+  (* TODO: Groups_Big.comm_monoid_add_class.setsum.subset_diff*)
   lemma setsum_subset_split: assumes P: "finite A" "B\<subseteq>A" shows T: "setsum f A = setsum f (A-B) + setsum f B" proof -
     from P have 1: "A = (A-B) \<union> B" by auto
     have 2: "(A-B) \<inter> B = {}" by auto
@@ -221,11 +220,11 @@ qed
   subsubsection {* Finite Sets *}
 
   lemma card_1_singletonI: "\<lbrakk>finite S; card S = 1; x\<in>S\<rbrakk> \<Longrightarrow> S={x}"
-  proof (safe, rule ccontr)
-    case (goal1 x')
+  proof (safe, rule ccontr, goal_cases)
+    case prems: (1 x')
     hence "finite (S-{x})" "S-{x} \<noteq> {}" by auto
     hence "card (S-{x}) \<noteq> 0" by auto
-    moreover from goal1(1-3) have "card (S-{x}) = 0" by auto
+    moreover from prems(1-3) have "card (S-{x}) = 0" by auto
     ultimately have False by simp
     thus ?case ..
   qed
@@ -253,47 +252,11 @@ qed
   
   lemmas length_remdups_card = length_remdups_concat[of "[l]", simplified] for l
 
-lemma card_Plus:
-  assumes fina: "finite (A::'a set)" and finb: "finite (B::'b set)"
-  shows "card (A <+> B) = (card A) + (card B)"
-proof -
-  from fina finb
-  have "card ((Inl ` A) \<union> (Inr ` B)) =
-        (card ((Inl ` A)::('a+'b)set)) + (card ((Inr ` B)::('a+'b)set))"
-    by (auto intro: card_Un_disjoint finite_imageI)
-  thus ?thesis
-    by (simp add: Plus_def card_image inj_on_def)
-qed
-
-
   lemma fs_contract: "fst ` { p | p. f (fst p) (snd p) \<in> S } = { a . \<exists>b. f a b \<in> S }"
     by (simp add: image_Collect)
 
-    (* Nice lemma thanks to Andreas Lochbihler *)
-  lemma finite_Collect:
-    assumes fin: "finite S" and inj: "inj f"
-    shows "finite {a. f a : S}"
-  proof -
-    def S' == "S \<inter> range f"
-    hence "{a. f a : S} = {a. f a : S'}" by auto
-    also have "... = (inv f) ` S'"
-    proof
-      show "{a. f a : S'} <= inv f ` S'"
-        using inj by(force intro: image_eqI)
-      show "inv f ` S' <= {a. f a : S'}"
-      proof
-        fix x
-        assume "x : inv f ` S'"
-        then obtain y where "y : S'" "x = inv f y" by blast
-        moreover from `y : S'` obtain x' where "f x' = y"
-          unfolding S'_def by blast
-        hence "f (inv f y) = y" unfolding inv_def by(rule someI)
-        ultimately show "x : {a. f a : S'}" by simp
-      qed
-    qed
-    also have "finite S'" using fin unfolding S'_def by blast
-    ultimately show ?thesis by simp
-  qed 
+lemma finite_Collect: "finite S \<Longrightarrow> inj f \<Longrightarrow> finite {a. f a : S}"
+by(simp add: finite_vimageI vimage_def[symmetric])
 
   -- "Finite sets have an injective mapping to an initial segments of the 
       natural numbers"
@@ -368,16 +331,10 @@ text {*
   if the index set is finite and if for every index the component
   set is itself finite. Conversely, we show that every component
   set must be finite when the union is finite.
-*} (* Author: Stefan Merz? *)
+*}
 lemma finite_UNION_then_finite:
-  assumes hyp: "finite (UNION A B)" and a: "a \<in> A"
-  shows "finite (B a)"
-proof (rule ccontr)
-  assume cc: "\<not>finite (B a)"
-  from a have "B a \<subseteq> UNION A B" by auto
-  from this cc have "\<not>finite (UNION A B)" by (auto intro: finite_subset)
-  from this hyp show "False" ..
-qed
+  "finite (UNION A B) \<Longrightarrow> a \<in> A \<Longrightarrow> finite (B a)"
+by (metis Set.set_insert UN_insert Un_infinite)
 
 lemma finite_if_eq_beyond_finite: "finite S \<Longrightarrow> finite {s. s - S = s' - S}"
 proof (rule finite_subset[where B="(\<lambda>s. s \<union> (s' - S)) ` Pow S"], clarsimp)
@@ -475,6 +432,14 @@ lemma comp_cong_left: "x = y \<Longrightarrow> x o f = y o f" by (simp)
 lemma fun_comp_eq_conv: "f o g = fg \<longleftrightarrow> (\<forall>x. f (g x) = fg x)"
   by auto
 
+abbreviation comp2 (infixl "oo" 55) where "f oo g \<equiv> \<lambda>x. f o (g x)"
+abbreviation comp3 (infixl "ooo" 55) where "f ooo g \<equiv> \<lambda>x. f oo (g x)"
+
+notation
+  comp2  (infixl "\<circ>\<circ>" 55) and
+  comp3  (infixl "\<circ>\<circ>\<circ>" 55)
+
+
 subsection {* Multisets *}
 
 (*
@@ -503,26 +468,12 @@ subsection {* Multisets *}
 (*declare union_ac[simp] -- don't do it !*)
 
 
-thm count_multiset_of_set
-
-lemma count_multiset_of_set_finite_iff:
-  "finite S \<Longrightarrow> count (multiset_of_set S) a = (if a \<in> S then 1 else 0)"
+lemma count_mset_set_finite_iff:
+  "finite S \<Longrightarrow> count (mset_set S) a = (if a \<in> S then 1 else 0)"
   by simp
 
-lemma in_multiset_of_set[simp]:
-  "finite S \<Longrightarrow> x \<in># (multiset_of_set S) \<longleftrightarrow> x \<in> S"
-  by (simp add: count_multiset_of_set_finite_iff)
-
-declare Multiset.finite_set_of_multiset_of_set[simp]
-
-lemma multiset_of_insert: "finite S \<Longrightarrow>
-  multiset_of_set (insert e S) =
-  multiset_of_set (S - {e}) + {#e#}"
-  by (metis multiset_of_set.insert_remove union_commute)
-
-lemma multiset_of_set_set :
-  "distinct l \<Longrightarrow>
-   multiset_of_set (set l) = multiset_of l"
+lemma mset_set_set :
+  "distinct l \<Longrightarrow> mset_set (set l) = mset l"
 proof (induct l)
   case Nil thus ?case by simp
 next
@@ -530,31 +481,14 @@ next
   from Cons(2) have e_nin_l : "e \<notin> set l" by simp
   from Cons(2) have dist_l: "distinct l" by simp
   note ind_hyp = Cons(1)[OF dist_l]
-
   from e_nin_l have "set l - {e} = set l" by auto
   with ind_hyp show ?case
-    by (simp add: multiset_of_insert)
+    by (simp add: mset_set.insert_remove ac_simps)
 qed
 
 lemma ex_Melem_conv: "(\<exists>x. x \<in># A) = (A \<noteq> {#})"
-  by (metis all_not_in_conv mem_set_of_iff set_of_eq_empty_iff)
+  by (metis all_not_in_conv mem_set_mset_iff set_mset_eq_empty_iff)
 
-subsubsection {* Case distinction *}
-text {* Install a (new) default case-distinction lemma for multisets, that distinguishes between empty multiset and multiset that is the union of of some multiset and a singleton multiset. 
-  This is the same case distinction as done by the @{thm [source] multiset_induct} rule that is installed as default induction rule for multisets by Multiset.thy. *}
-lemma mset_cases[case_names empty add, cases type: multiset]: "\<lbrakk> M={#} \<Longrightarrow> P; !!x M'. M=M'+{#x#} \<Longrightarrow> P \<rbrakk> \<Longrightarrow> P"
-  apply (induct M)
-  apply auto
-done
-
-lemma multiset_induct'[case_names empty add]: "\<lbrakk>P {#}; \<And>M x. P M \<Longrightarrow> P ({#x#}+M)\<rbrakk> \<Longrightarrow> P M"
-  by (induct rule: multiset_induct) (auto simp add: union_commute)
-
-lemma mset_cases'[case_names empty add]: "\<lbrakk> M={#} \<Longrightarrow> P; !!x M'. M={#x#}+M' \<Longrightarrow> P \<rbrakk> \<Longrightarrow> P"
-  apply (induct M rule: multiset_induct')
-  apply auto
-done
-  
 subsubsection {* Count *}
         lemma count_ne_remove: "\<lbrakk> x ~= t\<rbrakk> \<Longrightarrow> count S x = count (S-{#t#}) x"
           by (auto)
@@ -564,31 +498,31 @@ subsubsection {* Count *}
 subsubsection {* Union, difference and intersection *}
 
   lemma size_diff_se: "\<lbrakk>t :# S\<rbrakk> \<Longrightarrow> size S = size (S - {#t#}) + 1" proof (unfold size_multiset_overloaded_eq)
-                let ?SIZE = "setsum (count S) (set_of S)"
+                let ?SIZE = "setsum (count S) (set_mset S)"
                 assume A: "t :# S"
-                from A have SPLITPRE: "finite (set_of S) & {t}\<subseteq>(set_of S)" by auto
-                hence "?SIZE = setsum (count S) (set_of S - {t}) + setsum (count S) {t}" by (blast dest: setsum_subset_split)
-                hence "?SIZE = setsum (count S) (set_of S - {t}) + count (S) t" by auto
+                from A have SPLITPRE: "finite (set_mset S) & {t}\<subseteq>(set_mset S)" by auto
+                hence "?SIZE = setsum (count S) (set_mset S - {t}) + setsum (count S) {t}" by (blast dest: setsum_subset_split)
+                hence "?SIZE = setsum (count S) (set_mset S - {t}) + count (S) t" by auto
                 moreover with A have "count S t = count (S-{#t#}) t + 1" by auto
-                ultimately have D: "?SIZE = setsum (count S) (set_of S - {t}) + count (S-{#t#}) t + 1" by (arith)
-                moreover have "setsum (count S) (set_of S - {t}) = setsum (count (S-{#t#})) (set_of S - {t})" proof -
-                        have "ALL x:(set_of S - {t}) . count S x = count (S-{#t#}) x" by (auto iff add: count_ne_remove)
+                ultimately have D: "?SIZE = setsum (count S) (set_mset S - {t}) + count (S-{#t#}) t + 1" by (arith)
+                moreover have "setsum (count S) (set_mset S - {t}) = setsum (count (S-{#t#})) (set_mset S - {t})" proof -
+                        have "ALL x:(set_mset S - {t}) . count S x = count (S-{#t#}) x" by (auto iff add: count_ne_remove)
                         thus ?thesis by simp
                 qed
-                ultimately have D: "?SIZE = setsum (count (S-{#t#})) (set_of S - {t}) + count (S-{#t#}) t + 1" by (simp)
+                ultimately have D: "?SIZE = setsum (count (S-{#t#})) (set_mset S - {t}) + count (S-{#t#}) t + 1" by (simp)
                 moreover
                 { assume CASE: "count (S-{#t#}) t = 0"
-                        from CASE have "set_of S - {t} = set_of (S-{#t#})" by (auto iff add: set_of_def)
-                        with CASE D have "?SIZE = setsum (count (S-{#t#})) (set_of (S - {#t#})) + 1" by simp
+                        from CASE have "set_mset S - {t} = set_mset (S-{#t#})" by (auto iff add: set_mset_def)
+                        with CASE D have "?SIZE = setsum (count (S-{#t#})) (set_mset (S - {#t#})) + 1" by simp
                 }
                 moreover
                 { assume CASE: "count (S-{#t#}) t ~= 0"
-                        from CASE have 1: "set_of S = set_of (S-{#t#})" by (auto iff add: set_of_def)
-                        moreover from D have "?SIZE = setsum (count (S-{#t#})) (set_of S - {t}) + setsum (count (S-{#t#})) {t} + 1" by simp
-                        moreover from SPLITPRE setsum_subset_split have "setsum (count (S-{#t#})) (set_of S) = setsum (count (S-{#t#})) (set_of S - {t}) + setsum (count (S-{#t#})) {t}" by (blast)
-                        ultimately have "?SIZE = setsum (count (S-{#t#})) (set_of (S-{#t#})) + 1" by simp
+                        from CASE have 1: "set_mset S = set_mset (S-{#t#})" by (auto iff add: set_mset_def)
+                        moreover from D have "?SIZE = setsum (count (S-{#t#})) (set_mset S - {t}) + setsum (count (S-{#t#})) {t} + 1" by simp
+                        moreover from SPLITPRE setsum_subset_split have "setsum (count (S-{#t#})) (set_mset S) = setsum (count (S-{#t#})) (set_mset S - {t}) + setsum (count (S-{#t#})) {t}" by (blast)
+                        ultimately have "?SIZE = setsum (count (S-{#t#})) (set_mset (S-{#t#})) + 1" by simp
                 }
-                ultimately show "?SIZE = setsum (count (S-{#t#})) (set_of (S - {#t#})) + 1" by blast
+                ultimately show "?SIZE = setsum (count (S-{#t#})) (set_mset (S - {#t#})) + 1" by blast
         qed
 
   (* TODO: Check whether this proof can be done simpler *)
@@ -618,8 +552,8 @@ subsubsection {* Union, difference and intersection *}
   lemma mset_diff_same_empty[simp]: "(S::'a multiset) - S = {#}"
   proof -
     have "ALL e . count (S-S) e = 0" by auto
-    hence "ALL e . ~ (e : set_of (S-S))" by auto
-    hence "set_of (S-S) = {}" by blast
+    hence "ALL e . ~ (e : set_mset (S-S))" by auto
+    hence "set_mset (S-S) = {}" by blast
     thus ?thesis by (auto)
   qed
 *)
@@ -696,9 +630,6 @@ subsubsection {* Union, difference and intersection *}
     thus ?thesis by (simp add: multiset_inter_commute)
   qed
 
-  lemmas mset_inter_1elem = mset_inter_1elem1 mset_inter_1elem2
-
-
   lemmas mset_neutral_cancel1 = union_left_cancel[where N="{#}", simplified] union_right_cancel[where N="{#}", simplified]
   declare mset_neutral_cancel1[simp]
 
@@ -725,8 +656,8 @@ subsubsection {* Union, difference and intersection *}
       assume NEQ: "c~=b & a~=c"
       from A have "{#a#}+{#b#}-{#c#} = M + {#c#}-{#c#}" by auto
       hence "{#a#}+{#b#}-{#c#} = M" by (auto simp add: union_assoc)
-      with NEQ have "{#a#}-{#c#}+{#b#} = M" by (subgoal_tac "~ (c :# {#b#})", auto simp add: mset_inter_1elem multiset_union_diff_commute)
-      with NEQ have "{#a#}+{#b#} = M" by (subgoal_tac "~(a :# {#c#})", auto simp add: mset_diff_cancel1elem)
+      with NEQ have "{#a#}-{#c#}+{#b#} = M" by (subgoal_tac "~ (c :# {#b#})", auto simp add: multiset_union_diff_commute)
+      with NEQ have "{#a#}+{#b#} = M" by (subgoal_tac "~(a :# {#c#})", auto)
       hence S1: "size M = 2" by auto
       moreover from A have "size ({#a#}+{#b#}) = size (M + {#c#})" by auto
       hence "size M = 1" by auto
@@ -906,110 +837,110 @@ subsubsection {* Pointwise ordering *}
 
   (*declare mset_le_trans[trans] Seems to be in there now. Why is this not done in Multiset.thy or order-class ? *)
 
-  lemma mset_empty_minimal[simp, intro!]: "{#} \<le> c"
-    by (unfold mset_le_def, auto)
-  lemma mset_empty_least[simp]: "c \<le> {#} = (c={#})"
-    by (unfold mset_le_def, auto)
-  lemma mset_empty_leastI[intro!]: "c={#} \<Longrightarrow> c \<le> {#}"
+  lemma mset_empty_minimal[simp, intro!]: "{#} \<le># c"
+    using empty_le .
+  lemma mset_empty_least[simp]: "c \<le># {#} = (c={#})"
+    using le_empty .
+  lemma mset_empty_leastI[intro!]: "c={#} \<Longrightarrow> c \<le># {#}"
     by (simp only: mset_empty_least)
 
-  lemma mset_le_incr_right1: "a\<le>(b::'a multiset) \<Longrightarrow> a\<le>b+c" using mset_le_mono_add[of a b "{#}" c, simplified] .
-  lemma mset_le_incr_right2: "a\<le>(b::'a multiset) \<Longrightarrow> a\<le>c+b" using mset_le_incr_right1
+  lemma mset_le_incr_right1: "a\<le>#(b::'a multiset) \<Longrightarrow> a\<le>#b+c" using mset_le_mono_add[of a b "{#}" c, simplified] .
+  lemma mset_le_incr_right2: "a\<le>#(b::'a multiset) \<Longrightarrow> a\<le>#c+b" using mset_le_incr_right1
     by (auto simp add: union_commute)
   lemmas mset_le_incr_right = mset_le_incr_right1 mset_le_incr_right2
 
-  lemma mset_le_decr_left1: "a+c\<le>(b::'a multiset) \<Longrightarrow> a\<le>b" using mset_le_incr_right1 mset_le_mono_add_right_cancel
+  lemma mset_le_decr_left1: "a+c\<le>#(b::'a multiset) \<Longrightarrow> a\<le>#b" using mset_le_incr_right1 mset_le_mono_add_right_cancel
     by blast
-  lemma mset_le_decr_left2: "c+a\<le>(b::'a multiset) \<Longrightarrow> a\<le>b" using mset_le_decr_left1
+  lemma mset_le_decr_left2: "c+a\<le>#(b::'a multiset) \<Longrightarrow> a\<le>#b" using mset_le_decr_left1
     by (auto simp add: union_ac)
   lemmas mset_le_decr_left = mset_le_decr_left1 mset_le_decr_left2
   
-  lemma mset_le_single_conv[simp]: "({#e#}\<le>M) = (e:#M)"
-    by (unfold mset_le_def) auto
+  lemma mset_le_single_conv[simp]: "({#e#}\<le>#M) = (e:#M)"
+    by (unfold subseteq_mset_def) auto
 
-  lemma mset_le_trans_elem: "\<lbrakk>e :# c; c \<le> c'\<rbrakk> \<Longrightarrow> e :# c'" using order_trans[of "{#e#}" c c', simplified]
+  lemma mset_le_trans_elem: "\<lbrakk>e :# c; c \<le># c'\<rbrakk> \<Longrightarrow> e :# c'" using subset_mset.order_trans[of "{#e#}" c c', simplified]
     by assumption
 
-  lemma mset_le_subtract: "A\<le>B \<Longrightarrow> A-C \<le> B-(C::'a multiset)"
-    apply (unfold mset_le_def) 
+  lemma mset_le_subtract: "A\<le>#B \<Longrightarrow> A-C \<le># B-(C::'a multiset)"
+    apply (unfold subseteq_mset_def)
     apply auto
     apply (subgoal_tac "count A a \<le> count B a")
     apply arith
     apply simp
     done
 
-  lemma mset_le_union: "A+B \<le> C \<Longrightarrow> A\<le>C \<and> B\<le>(C::'a multiset)"
+  lemma mset_le_union: "A+B \<le># C \<Longrightarrow> A\<le>#C \<and> B\<le>#(C::'a multiset)"
     by (auto dest: mset_le_decr_left)
 
-  lemma mset_le_subtract_left: "A+B \<le> (X::'a multiset) \<Longrightarrow> B \<le> X-A \<and> A\<le>X"
+  lemma mset_le_subtract_left: "A+B \<le># (X::'a multiset) \<Longrightarrow> B \<le># X-A \<and> A\<le>#X"
     by (auto dest: mset_le_subtract[of "A+B" "X" "A"] mset_le_union)
-  lemma mset_le_subtract_right: "A+B \<le> (X::'a multiset) \<Longrightarrow> A \<le> X-B \<and> B\<le>X"
+  lemma mset_le_subtract_right: "A+B \<le># (X::'a multiset) \<Longrightarrow> A \<le># X-B \<and> B\<le>#X"
     by (auto dest: mset_le_subtract[of "A+B" "X" "B"] mset_le_union)
   
-  lemma mset_le_addE: "\<lbrakk> xs \<le> (ys::'a multiset); !!zs. ys=xs+zs \<Longrightarrow> P \<rbrakk> \<Longrightarrow> P" using mset_le_exists_conv
+  lemma mset_le_addE: "\<lbrakk> xs \<le># (ys::'a multiset); !!zs. ys=xs+zs \<Longrightarrow> P \<rbrakk> \<Longrightarrow> P" using mset_le_exists_conv
     by blast
 
-  lemma mset_le_sub_add_eq[simp,intro]: "A\<le>(B::'a multiset) \<Longrightarrow> B-A+A = B"
+  lemma mset_le_sub_add_eq[simp,intro]: "A\<le>#(B::'a multiset) \<Longrightarrow> B-A+A = B"
     by (auto elim: mset_le_addE simp add: union_ac)
 
   lemma mset_2dist2_cases:
-    assumes A: "{#a#}+{#b#} \<le> A+B"
-    assumes CASES: "{#a#}+{#b#} \<le> A \<Longrightarrow> P" "{#a#}+{#b#} \<le> B \<Longrightarrow> P" "\<lbrakk>a :# A; b :# B\<rbrakk> \<Longrightarrow> P" "\<lbrakk>a :# B; b :# A\<rbrakk> \<Longrightarrow> P"
+    assumes A: "{#a#}+{#b#} \<le># A+B"
+    assumes CASES: "{#a#}+{#b#} \<le># A \<Longrightarrow> P" "{#a#}+{#b#} \<le># B \<Longrightarrow> P" "\<lbrakk>a :# A; b :# B\<rbrakk> \<Longrightarrow> P" "\<lbrakk>a :# B; b :# A\<rbrakk> \<Longrightarrow> P"
     shows "P"
   proof -
     { assume C: "a :# A" "b :# A-{#a#}" 
-      with mset_le_mono_add[of "{#a#}" "{#a#}" "{#b#}" "A-{#a#}"] have "{#a#}+{#b#} \<le> A" by auto
+      with mset_le_mono_add[of "{#a#}" "{#a#}" "{#b#}" "A-{#a#}"] have "{#a#}+{#b#} \<le># A" by auto
     } moreover {
       assume C: "a :# A" "\<not> (b :# A-{#a#})"
-      with A have "b:#B" by (unfold mset_le_def) (auto split: split_if_asm)
+      with A have "b:#B" by (unfold subseteq_mset_def) (auto split: split_if_asm)
     } moreover {
       assume C: "\<not> (a :# A)" "b :# B-{#a#}"
-      with A have "a :# B" by (unfold mset_le_def) (auto split: split_if_asm)
-      with C mset_le_mono_add[of "{#a#}" "{#a#}" "{#b#}" "B-{#a#}"] have "{#a#}+{#b#} \<le> B" by auto
+      with A have "a :# B" by (unfold subseteq_mset_def) (auto split: split_if_asm)
+      with C mset_le_mono_add[of "{#a#}" "{#a#}" "{#b#}" "B-{#a#}"] have "{#a#}+{#b#} \<le># B" by auto
     } moreover {
       assume C: "\<not> (a :# A)" "\<not> (b :# B-{#a#})"
-      with A have "a:#B \<and> b:#A" by (unfold mset_le_def) (auto split: split_if_asm)
+      with A have "a:#B \<and> b:#A" by (unfold subseteq_mset_def) (auto split: split_if_asm)
     } ultimately show P using CASES by blast
   qed
 
-  lemma mset_union_subset: "A+B \<le> (C::'a multiset) \<Longrightarrow> A\<le>C \<and> B\<le>C" 
-    apply (unfold mset_le_def)
+  lemma mset_union_subset: "A+B \<le># (C::'a multiset) \<Longrightarrow> A\<le>#C \<and> B\<le>#C"
+    apply (unfold subseteq_mset_def)
     apply auto
     apply (subgoal_tac "count A a + count B a \<le> count C a", arith, simp)+
     done
 
-  lemma mset_union_subset_s: "{#a#}+B \<le> C \<Longrightarrow> a :# C \<and> B \<le> C"
+  lemma mset_union_subset_s: "{#a#}+B \<le># C \<Longrightarrow> a :# C \<and> B \<le># C"
     by (auto dest: mset_union_subset)
 
   (* TODO: Check which of these lemmas are already introduced by order-classes ! *)
-  lemma mset_le_eq_refl: "a=(b::'a multiset) \<Longrightarrow> a\<le>b"
+  lemma mset_le_eq_refl: "a=(b::'a multiset) \<Longrightarrow> a\<le>#b"
     by simp
 
   lemma mset_singleton_eq[simplified,simp]: "a :# {#b#} = (a=b)"
     by auto -- {* The simplification is here due to the lemma @{thm [source] "Multiset.count_single"}, that will be applied first deleting any application potential for this rule*}
-  lemma mset_le_single_single[simp]: "({#a#} \<le> {#b#}) = (a=b)"
+  lemma mset_le_single_single[simp]: "({#a#} \<le># {#b#}) = (a=b)"
     by auto
 
-  lemma mset_le_single_conv1[simp]: "(M+{#a#} \<le> {#b#}) = (M={#} \<and> a=b)"
+  lemma mset_le_single_conv1[simp]: "(M+{#a#} \<le># {#b#}) = (M={#} \<and> a=b)"
   proof (auto) 
-    assume A: "M+{#a#} \<le> {#b#}" thus "a=b" by (auto dest: mset_le_decr_left2)
+    assume A: "M+{#a#} \<le># {#b#}" thus "a=b" by (auto dest: mset_le_decr_left2)
     with A mset_le_mono_add_right_cancel[of M "{#a#}" "{#}", simplified] show "M={#}" by blast
   qed
   
-  lemma mset_le_single_conv2[simp]: "({#a#}+M \<le> {#b#}) = (M={#} \<and> a=b)"
+  lemma mset_le_single_conv2[simp]: "({#a#}+M \<le># {#b#}) = (M={#} \<and> a=b)"
     by (simp add: union_ac)
   
-  lemma mset_le_single_cases[consumes 1, case_names empty singleton]: "\<lbrakk>M\<le>{#a#}; M={#} \<Longrightarrow> P; M={#a#} \<Longrightarrow> P\<rbrakk> \<Longrightarrow> P"
+  lemma mset_le_single_cases[consumes 1, case_names empty singleton]: "\<lbrakk>M\<le>#{#a#}; M={#} \<Longrightarrow> P; M={#a#} \<Longrightarrow> P\<rbrakk> \<Longrightarrow> P"
     by (induct M) auto
       
-  lemma mset_le_distrib[consumes 1, case_names dist]: "\<lbrakk>(X::'a multiset)\<le>A+B; !!Xa Xb. \<lbrakk>X=Xa+Xb; Xa\<le>A; Xb\<le>B\<rbrakk> \<Longrightarrow> P \<rbrakk> \<Longrightarrow> P"
+  lemma mset_le_distrib[consumes 1, case_names dist]: "\<lbrakk>(X::'a multiset)\<le>#A+B; !!Xa Xb. \<lbrakk>X=Xa+Xb; Xa\<le>#A; Xb\<le>#B\<rbrakk> \<Longrightarrow> P \<rbrakk> \<Longrightarrow> P"
     by (auto elim!: mset_le_addE mset_distrib)
 
-  lemma mset_le_mono_add_single: "\<lbrakk>a :# ys; b :# ws\<rbrakk> \<Longrightarrow> {#a#} + {#b#} \<le> ys + ws" using mset_le_mono_add[of "{#a#}" _ "{#b#}", simplified] .
+  lemma mset_le_mono_add_single: "\<lbrakk>a :# ys; b :# ws\<rbrakk> \<Longrightarrow> {#a#} + {#b#} \<le># ys + ws" using mset_le_mono_add[of "{#a#}" _ "{#b#}", simplified] .
 
   lemma mset_size1elem: "\<lbrakk>size P \<le> 1; q :# P\<rbrakk> \<Longrightarrow> P={#q#}"
     by (auto elim: mset_size_le1_cases)
-  lemma mset_size2elem: "\<lbrakk>size P \<le> 2; {#q#}+{#q'#} \<le> P\<rbrakk> \<Longrightarrow> P={#q#}+{#q'#}"
+  lemma mset_size2elem: "\<lbrakk>size P \<le> 2; {#q#}+{#q'#} \<le># P\<rbrakk> \<Longrightarrow> P={#q#}+{#q'#}"
     by (auto elim: mset_le_addE)
 
 
@@ -1107,20 +1038,17 @@ lemma mset_map_size: "size A = size (f `# A)"
 lemma mset_map_empty_eq[simp]: "(f `# P = {#}) = (P={#})" using mset_map_size[of P f]
   by auto
 
-lemma mset_map_le: "!!B. A \<le> B \<Longrightarrow> f `# A \<le> f `# B" proof (induct A)
+lemma mset_map_le: "!!B. A \<le># B \<Longrightarrow> f `# A \<le># f `# B" proof (induct A)
   case empty thus ?case by simp
 next
   case (add A x B)
-  hence "A\<le>B-{#x#}" and SM: "{#x#}\<le>B" using mset_le_subtract_right by (fastforce+)
-  with "add.hyps" have "f `# A \<le> f `# (B-{#x#})" by blast
-  hence "f `# (A+{#x#}) \<le> f `# (B-{#x#}) + {#f x#}" by auto
+  hence "A\<le>#B-{#x#}" and SM: "{#x#}\<le>#B" using mset_le_subtract_right by (fastforce+)
+  with "add.hyps" have "f `# A \<le># f `# (B-{#x#})" by blast
+  hence "f `# (A+{#x#}) \<le># f `# (B-{#x#}) + {#f x#}" by auto
   also have "\<dots> = f `# (B-{#x#}+{#x#})" by simp
   also with SM have "\<dots> = f `# B" by simp
   finally show ?case .
 qed
-
-lemma mset_map_set_of: "set_of (f `# A) = f ` set_of A"
-  by (induct A) auto
 
 lemma mset_map_split_orig: "!!M1 M2. \<lbrakk>f `# P = M1+M2; !!P1 P2. \<lbrakk>P=P1+P2; f `# P1 = M1; f `# P2 = M2\<rbrakk> \<Longrightarrow> Q \<rbrakk> \<Longrightarrow> Q"
   apply (induct P)
@@ -1137,7 +1065,7 @@ text {* The following is a very specialized lemma. Intuitively, it splits the or
   Application:
   This lemma came in handy when proving the correctness of a constraint system that collects at most k sized submultisets of the sets of spawned threads.
 *}
-lemma mset_map_split_orig_le: assumes A: "f `# P \<le> M1+M2" and EX: "!!P1 P2. \<lbrakk>P=P1+P2; f `# P1 \<le> M1; f `# P2 \<le> M2\<rbrakk> \<Longrightarrow> Q" shows "Q" 
+lemma mset_map_split_orig_le: assumes A: "f `# P \<le># M1+M2" and EX: "!!P1 P2. \<lbrakk>P=P1+P2; f `# P1 \<le># M1; f `# P2 \<le># M2\<rbrakk> \<Longrightarrow> Q" shows "Q"
   using A EX by (auto elim: mset_le_distrib mset_map_split_orig)
 
 
@@ -1198,6 +1126,16 @@ lemma find_SomeD:
   "List.find P xs = Some x \<Longrightarrow> P x"
   "List.find P xs = Some x \<Longrightarrow> x\<in>set xs"
   by (auto simp add: find_Some_iff)
+
+lemma in_hd_or_tl_conv[simp]: "l\<noteq>[] \<Longrightarrow> x=hd l \<or> x\<in>set (tl l) \<longleftrightarrow> x\<in>set l"
+  by (cases l) auto
+
+lemma length_dropWhile_takeWhile:
+  assumes "x < length (dropWhile P xs)"
+  shows "x + length (takeWhile P xs) < length xs"
+  using assms
+  by (induct xs) auto
+
 
 subsubsection {* List Destructors *}
 lemma not_hd_in_tl:
@@ -1324,6 +1262,58 @@ fun revg where
 lemma revg_fun[simp]: "revg a b = rev a @ b"
   by (induct a arbitrary: b)
       auto
+
+lemma rev_split_conv[simp]:
+  "l \<noteq> [] \<Longrightarrow> rev (tl l) @ [hd l] = rev l"
+by (induct l) simp_all
+
+lemma neq_Nil_rev_conv: "l\<noteq>[] \<longleftrightarrow> (\<exists>xs x. l = xs@[x])"
+  by (cases l rule: rev_cases) auto
+
+lemma rev_butlast_is_tl_rev: "rev (butlast l) = tl (rev l)"
+  by (induct l) auto
+
+lemma hd_last_singletonI:
+  "\<lbrakk>xs \<noteq> []; hd xs = last xs; distinct xs\<rbrakk> \<Longrightarrow> xs = [hd xs]"
+  by (induct xs rule: list_nonempty_induct) auto
+
+lemma last_filter:
+  "\<lbrakk>xs \<noteq> []; P (last xs)\<rbrakk> \<Longrightarrow> last (filter P xs) = last xs"
+  by (induct xs rule: rev_nonempty_induct) simp_all
+
+(* As the following two rules are similar in nature to list_induct2',
+   they are named accordingly. *)
+lemma rev_induct2' [case_names empty snocl snocr snoclr]: 
+  assumes empty: "P [] []"
+  and snocl: "\<And>x xs. P (xs@[x]) []"
+  and snocr: "\<And>y ys. P [] (ys@[y])"
+  and snoclr: "\<And>x xs y ys.  P xs ys  \<Longrightarrow> P (xs@[x]) (ys@[y])"
+  shows "P xs ys"
+proof (induct xs arbitrary: ys rule: rev_induct)
+  case Nil thus ?case using empty snocr 
+    by (cases ys rule: rev_exhaust) simp_all
+next
+  case snoc thus ?case using snocl snoclr
+    by (cases ys rule: rev_exhaust) simp_all
+qed
+
+lemma rev_nonempty_induct2' [case_names single snocl snocr snoclr, consumes 2]: 
+  assumes "xs \<noteq> []" "ys \<noteq> []"
+  assumes single': "\<And>x y. P [x] [y]"
+  and snocl: "\<And>x xs y. xs \<noteq> [] \<Longrightarrow> P (xs@[x]) [y]"
+  and snocr: "\<And>x y ys. ys \<noteq> [] \<Longrightarrow> P [x] (ys@[y])"
+  and snoclr: "\<And>x xs y ys. \<lbrakk>P xs ys; xs \<noteq> []; ys\<noteq>[]\<rbrakk>  \<Longrightarrow> P (xs@[x]) (ys@[y])"
+  shows "P xs ys"
+  using assms(1,2)
+proof (induct xs arbitrary: ys rule: rev_nonempty_induct)
+  case single then obtain z zs where "ys = zs@[z]" by (metis rev_exhaust)
+  thus ?case using single' snocr
+    by (cases "zs = []") simp_all
+next
+  case (snoc x xs) then obtain z zs where zs: "ys = zs@[z]" by (metis rev_exhaust)
+  thus ?case using snocl snoclr snoc
+    by (cases "zs = []") simp_all
+qed
 
 
 subsubsection "Folding"
@@ -1582,13 +1572,14 @@ lemma (in linorder) sorted_hd_min:
 
 lemma sorted_append_bigger: 
   "\<lbrakk>sorted xs; \<forall>x \<in> set xs. x \<le> y\<rbrakk> \<Longrightarrow> sorted (xs @ [y])"
-  apply (induct xs)
-  apply simp
-proof -
-  case goal1
-  from goal1 have s: "sorted xs" by (cases xs) simp_all
-  from goal1 have a: "\<forall>x\<in>set xs. x \<le> y" by simp
-  from goal1(1)[OF s a] goal1(2-) show ?case by (cases xs) simp_all
+proof (induct xs)
+  case Nil
+  then show ?case by simp
+next
+  case (Cons x xs)
+  then have s: "sorted xs" by (cases xs) simp_all
+  from Cons have a: "\<forall>x\<in>set xs. x \<le> y" by simp
+  from Cons(1)[OF s a] Cons(2-) show ?case by (cases xs) simp_all
 qed
 
 lemma sorted_filter':
@@ -1650,7 +1641,7 @@ qed
 
 lemma map_upd_eq:
   "\<lbrakk>i<length l \<Longrightarrow> f (l!i) = f x\<rbrakk> \<Longrightarrow> map f (l[i:=x]) = map f l"
-  by (metis list_update_beyond list_update_id map_update not_leE)
+  by (metis list_update_beyond list_update_id map_update not_le_imp_less)
 
 
 
@@ -1782,13 +1773,14 @@ lemma zip_inj: "\<lbrakk>length a = length b; length a' = length b'; zip a b = z
   apply simp
   apply (case_tac b')
   apply simp
-proof -
-  case goal1
-  note [simp] = goal1(5,6)
-  from goal1(4) have C: "x=a" "y=aa" "zip xs ys = zip list lista" by simp_all
-  from goal1(2)[OF _ C(3)] goal1(3) have "xs=list \<and> ys = lista" by simp_all
-  thus ?case using C(1,2) by simp
-qed
+  subgoal premises prems for x xs y ys a' b' a list aa lista
+  proof -
+    note [simp] = prems(5,6)
+    from prems(4) have C: "x=a" "y=aa" "zip xs ys = zip list lista" by simp_all
+    from prems(2)[OF _ C(3)] prems(3) have "xs=list \<and> ys = lista" by simp_all
+    thus ?thesis using C(1,2) by simp
+  qed
+  done
 
 lemma zip_eq_zip_same_len[simp]: 
   "\<lbrakk> length a = length b; length a' = length b' \<rbrakk> \<Longrightarrow> 
@@ -2021,7 +2013,7 @@ proof (induct xs arbitrary: sl rule: measure_induct_rule[of "length"])
     case (Cons x xs') note xs_eq[simp] = this
 
     obtain xs1 xs2 where part_rev_eq[simp]: "partition_rev (\<lambda>y. R y x) ([], []) xs' = (xs1, xs2)"
-      by (rule PairE)
+      by (rule prod.exhaust)
 
     from part_rev_eq[symmetric]
     have length_le: "length xs1 < length xs" "length xs2 < length xs"
@@ -2040,7 +2032,7 @@ lemma quicksort_by_rel_remove_acc_guared :
 by (metis quicksort_by_rel_remove_acc)
 
 lemma quicksort_by_rel_permutes [simp]:
-  "multiset_of (quicksort_by_rel R sl xs) = multiset_of (xs @ sl)"
+  "mset (quicksort_by_rel R sl xs) = mset (xs @ sl)"
 proof (induct xs arbitrary: sl rule: measure_induct_rule[of "length"]) 
   case (less xs)
   note ind_hyp = this
@@ -2052,11 +2044,11 @@ proof (induct xs arbitrary: sl rule: measure_induct_rule[of "length"])
     case (Cons x xs') note xs_eq[simp] = this
 
     obtain xs1 xs2 where part_rev_eq[simp]: "partition_rev (\<lambda>y. R y x) ([], []) xs' = (xs1, xs2)"
-      by (rule PairE)
+      by (rule prod.exhaust)
 
-    from part_rev_eq[symmetric] have xs'_multi_eq : "multiset_of xs' = multiset_of xs1 + multiset_of xs2"
+    from part_rev_eq[symmetric] have xs'_multi_eq : "mset xs' = mset xs1 + mset xs2"
       unfolding partition_rev_filter_conv
-      by (simp add: multiset_of_filter multiset_partition)
+      by (simp add: mset_filter multiset_partition)
 
     from part_rev_eq[symmetric]
     have length_le: "length xs1 < length xs" "length xs2 < length xs"
@@ -2086,7 +2078,7 @@ proof (induct xs rule: measure_induct_rule[of "length"])
     case (Cons x xs') note xs_eq[simp] = this
 
     obtain xs1 xs2 where part_rev_eq[simp]: "partition_rev (\<lambda>y. R y x) ([], []) xs' = (xs1, xs2)"
-      by (rule PairE)
+      by (rule prod.exhaust)
 
     from part_rev_eq[symmetric] have xs1_props: "\<And>y. y \<in> set xs1 \<Longrightarrow> (R y x)" and 
                                      xs2_props: "\<And>y. y \<in> set xs2 \<Longrightarrow> \<not>(R y x)"
@@ -2164,10 +2156,10 @@ lemma mergesort_by_rel_split_length :
 by (induct xs arbitrary: xs1 xs2 rule: list_induct_first2)
    (simp_all)
 
-lemma multiset_of_mergesort_by_rel_split [simp]:
-  "multiset_of (fst (mergesort_by_rel_split (xs1, xs2) xs)) +
-   multiset_of (snd (mergesort_by_rel_split (xs1, xs2) xs)) = 
-   multiset_of xs + multiset_of xs1 + multiset_of xs2"
+lemma mset_mergesort_by_rel_split [simp]:
+  "mset (fst (mergesort_by_rel_split (xs1, xs2) xs)) +
+   mset (snd (mergesort_by_rel_split (xs1, xs2) xs)) = 
+   mset xs + mset xs1 + mset xs2"
   apply (induct xs arbitrary: xs1 xs2 rule: list_induct_first2)
   apply (simp_all add: ac_simps)
 done
@@ -2209,8 +2201,8 @@ next
   qed
 qed
 
-lemma multiset_of_mergesort_by_rel_merge [simp]:
-  "multiset_of (mergesort_by_rel_merge R xs ys) = multiset_of xs + multiset_of ys"
+lemma mset_mergesort_by_rel_merge [simp]:
+  "mset (mergesort_by_rel_merge R xs ys) = mset xs + mset ys"
 by (induct R xs ys rule: mergesort_by_rel_merge.induct) (simp_all add: ac_simps)
 
 lemma set_mergesort_by_rel_merge [simp]:
@@ -2273,7 +2265,7 @@ apply (simp add: mergesort_by_rel.simps[of _ "x1 # x2 # xs"] split: prod.splits)
 done
 
 lemma mergesort_by_rel_permutes [simp]:
-  "multiset_of (mergesort_by_rel R xs) = multiset_of xs"
+  "mset (mergesort_by_rel R xs) = mset xs"
 proof (induct xs rule: length_induct)
   case (1 xs) note ind_hyp = this
 
@@ -2734,7 +2726,7 @@ lemma in_set_upd_eq:
       case Nil with Cprems have False by auto
       thus ?thesis ..
     next
-      case (Cons a' all')[simp]
+      case [simp]: (Cons a' all')
       with Cprems have [simp]: "a=a'" and P: "al@e#bl = all'@e#bl'" by auto
       from Cprems(1) have D: "distinct (al@e#bl)" by auto
       from Chyps[OF D P] have [simp]: "al=all'" "bl=bl'" by auto
@@ -3025,12 +3017,12 @@ next
   case (snoc x xs)
   show ?case
   proof(cases "P x")
-    case False[simp]
+    case [simp]: False
     from `n < length (filter P (xs @ [x]))` have "n < length (filter P xs)" by simp
     hence "\<exists>m\<ge>n. m < length xs \<and> filter P xs ! n = xs ! m \<and> filter P (take m xs) = take n (filter P xs)" by(rule snoc)
     thus ?thesis by(auto simp add: nth_append)
   next
-    case True[simp]
+    case [simp]: True
     show ?thesis
     proof(cases "n = length (filter P xs)")
       case False
@@ -3039,7 +3031,7 @@ next
         by(rule snoc)
       ultimately show ?thesis by(auto simp add: nth_append)
     next
-      case True[simp]
+      case [simp]: True
       hence "filter P (xs @ [x]) ! n = (xs @ [x]) ! length xs" by simp
       moreover have "length xs < length (xs @ [x])" by simp
       moreover have "length xs \<ge> n" by simp
@@ -3345,7 +3337,7 @@ by (metis option.inject option.simps(2) someI_ex)
 
 subsection {* Product Type *}
 
-lemma nested_prod_case_simp: "(\<lambda>(a,b) c. f a b c) x y = 
+lemma nested_case_prod_simp: "(\<lambda>(a,b) c. f a b c) x y = 
   (case_prod (\<lambda>a b. f a b y) x)"
   by (auto split: prod.split)
 
@@ -3422,6 +3414,23 @@ subsection {* Directed Graphs and Relations *}
   subsubsection "Reflexive-Transitive Closure"
   lemma r_le_rtrancl[simp]: "S\<subseteq>S\<^sup>*" by auto
   lemma rtrancl_mono_rightI: "S\<subseteq>S' \<Longrightarrow> S\<subseteq>S'\<^sup>*" by auto
+
+  lemma trancl_sub:
+    "R \<subseteq> R\<^sup>+"
+  by auto
+  
+  lemma trancl_single[simp]:
+    "{(a,b)}\<^sup>+ = {(a,b)}"
+  proof -
+    {
+      fix x y
+      assume "(x,y) \<in> {(a,b)}\<^sup>+"
+      hence "(x,y) \<in> {(a,b)}"
+        by (induct rule: trancl.induct) auto
+    }
+    with trancl_sub show ?thesis by auto
+  qed
+
 
   text {* Pick first non-reflexive step *}
   lemma converse_rtranclE'[consumes 1, case_names base step]:
@@ -3612,6 +3621,89 @@ lemma Image_absorb_rtrancl:
   "\<lbrakk> trans A; refl_on B A; C \<subseteq> B \<rbrakk> \<Longrightarrow> A^* `` C = A `` C"
   by (simp add: trans_rtrancl_eq_reflcl refl_on_reflcl_Image)
 
+lemma trancl_Image_unfold_left: "E\<^sup>+``S = E\<^sup>*``E``S"
+  by (auto simp: trancl_unfold_left)
+
+lemma trancl_Image_unfold_right: "E\<^sup>+``S = E``E\<^sup>*``S"
+  by (auto simp: trancl_unfold_right)
+
+lemma trancl_Image_advance_ss: "(u,v)\<in>E \<Longrightarrow> E\<^sup>+``{v} \<subseteq> E\<^sup>+``{u}"
+  by auto
+
+lemma rtrancl_Image_advance_ss: "(u,v)\<in>E \<Longrightarrow> E\<^sup>*``{v} \<subseteq> E\<^sup>*``{u}"
+  by auto
+
+(* FIXME: nicer name *)
+lemma trancl_union_outside:
+  assumes "(v,w) \<in> (E\<union>U)\<^sup>+"
+  and "(v,w) \<notin> E\<^sup>+"
+  shows "\<exists>x y. (v,x) \<in> (E\<union>U)\<^sup>* \<and> (x,y) \<in> U \<and> (y,w) \<in> (E\<union>U)\<^sup>*" 
+using assms
+proof (induction)
+  case base thus ?case by auto
+next
+  case (step w x)
+  show ?case
+  proof (cases "(v,w)\<in>E\<^sup>+")
+    case True 
+    from step have "(v,w)\<in>(E\<union>U)\<^sup>*" by simp
+    moreover from True step have "(w,x) \<in> U" by (metis Un_iff trancl.simps)
+    moreover have "(x,x) \<in> (E\<union>U)\<^sup>*" by simp
+    ultimately show ?thesis by blast
+  next
+    case False with step.IH obtain a b where "(v,a) \<in> (E\<union>U)\<^sup>*" "(a,b) \<in> U" "(b,w) \<in> (E\<union>U)\<^sup>*" by blast
+    moreover with step have "(b,x) \<in> (E\<union>U)\<^sup>*" by (metis rtrancl_into_rtrancl)
+    ultimately show ?thesis by blast
+  qed
+qed
+
+lemma trancl_restrict_reachable:
+  assumes "(u,v) \<in> E\<^sup>+"
+  assumes "E``S \<subseteq> S"
+  assumes "u\<in>S"
+  shows "(u,v) \<in> (E\<inter>S\<times>S)\<^sup>+"
+  using assms
+  by (induction rule: converse_trancl_induct)
+     (auto intro: trancl_into_trancl2)
+
+lemma rtrancl_image_unfold_right: "E``E\<^sup>*``V \<subseteq> E\<^sup>*``V"
+  by (auto intro: rtrancl_into_rtrancl)
+
+
+lemma trancl_Image_in_Range:
+  "R\<^sup>+ `` V \<subseteq> Range R"
+by (auto elim: trancl.induct)
+  
+lemma rtrancl_Image_in_Field:
+  "R\<^sup>* `` V \<subseteq> Field R \<union> V"
+proof -
+  from trancl_Image_in_Range have "R\<^sup>+ `` V \<subseteq> Field R" 
+    unfolding Field_def by fast
+  hence "R\<^sup>+ `` V \<union> V \<subseteq> Field R \<union> V" by blast
+  with trancl_image_by_rtrancl show ?thesis by metis
+qed
+
+lemma rtrancl_sub_insert_rtrancl:
+  "R\<^sup>* \<subseteq> (insert x R)\<^sup>*"
+by (auto elim: rtrancl.induct rtrancl_into_rtrancl)
+
+lemma trancl_sub_insert_trancl:
+  "R\<^sup>+ \<subseteq> (insert x R)\<^sup>+"
+by (auto elim: trancl.induct trancl_into_trancl)
+
+lemma Restr_rtrancl_mono:
+  "(v,w) \<in> (Restr E U)\<^sup>* \<Longrightarrow> (v,w) \<in> E\<^sup>*"
+  by (metis inf_le1 rtrancl_mono subsetCE)
+
+lemma Restr_trancl_mono:
+  "(v,w) \<in> (Restr E U)\<^sup>+ \<Longrightarrow> (v,w) \<in> E\<^sup>+"
+  by (metis inf_le1 trancl_mono)
+
+
+
+
+
+
 
 
   subsubsection "Converse Relation"
@@ -3690,16 +3782,24 @@ lemma dom_ran_disj_comp[simp]: "Domain R \<inter> Range R = {} \<Longrightarrow>
     *}
   lemma trancl_multi_insert2[cases set, case_names orig via]: 
     "\<lbrakk>(a,b)\<in>(r\<union>{m}\<times>X)\<^sup>+; (a,b)\<in>r\<^sup>+ \<Longrightarrow> P; !!x. \<lbrakk> x\<in>X; (a,m)\<in>r\<^sup>*; (x,b)\<in>r\<^sup>* \<rbrakk> \<Longrightarrow> P \<rbrakk> \<Longrightarrow> P"
-  proof -
-    case goal1 from goal1(1) have "(b,a)\<in>((r\<union>{m}\<times>X)\<^sup>+)\<inverse>" by simp
+  proof goal_cases
+    case prems: 1 from prems(1) have "(b,a)\<in>((r\<union>{m}\<times>X)\<^sup>+)\<inverse>" by simp
     also have "((r\<union>{m}\<times>X)\<^sup>+)\<inverse> = (r\<inverse>\<union>X\<times>{m})\<^sup>+" by (simp add: converse_add_simps)
     finally have "(b, a) \<in> (r\<inverse> \<union> X \<times> {m})\<^sup>+" .
     thus ?case 
       by (auto elim!: trancl_multi_insert 
-               intro: goal1(2,3) 
+               intro: prems(2,3) 
             simp add: trancl_converse rtrancl_converse
     )
   qed
+
+lemma cyclic_subset:
+  "\<lbrakk> \<not> acyclic R; R \<subseteq> S \<rbrakk> \<Longrightarrow> \<not> acyclic S"
+  unfolding acyclic_def
+  by (blast intro: trancl_mono)
+
+
+
 
   
   subsubsection {* Wellfoundedness *}
@@ -3892,6 +3992,83 @@ proof -
   finally (finite_subset) show ?thesis .
 qed
 
+context begin
+  private lemma rtrancl_restrictI_aux:
+    assumes "(u,v)\<in>(E-UNIV\<times>R)\<^sup>*"
+    assumes "u\<notin>R"
+    shows "(u,v)\<in>(rel_restrict E R)\<^sup>* \<and> v\<notin>R"
+    using assms
+    by (induction) (auto simp: rel_restrict_def intro: rtrancl.intros)
+  
+  corollary rtrancl_restrictI: 
+    assumes "(u,v)\<in>(E-UNIV\<times>R)\<^sup>*"
+    assumes "u\<notin>R"
+    shows "(u,v)\<in>(rel_restrict E R)\<^sup>*"
+    using rtrancl_restrictI_aux[OF assms] ..
+end
+
+lemma E_closed_restr_reach_cases:
+  assumes P: "(u,v)\<in>E\<^sup>*"
+  assumes CL: "E``R \<subseteq> R"
+  obtains "v\<in>R" | "u\<notin>R" "(u,v)\<in>(rel_restrict E R)\<^sup>*"
+  using P
+proof (cases rule: rtrancl_last_visit[where S=R])
+  case no_visit
+  show ?thesis proof (cases "u\<in>R")
+    case True with P have "v\<in>R" 
+      using rtrancl_reachable_induct[OF _ CL, where I="{u}"] 
+      by auto
+    thus ?thesis ..
+  next
+    case False with no_visit have "(u,v)\<in>(rel_restrict E R)\<^sup>*" 
+      by (rule rtrancl_restrictI)
+    with False show ?thesis ..
+  qed
+next
+  case (last_visit_point x)
+  from \<open>(x, v) \<in> (E - UNIV \<times> R)\<^sup>*\<close> have "(x,v)\<in>E\<^sup>*" 
+    by (rule rtrancl_mono_mp[rotated]) auto
+  with \<open>x\<in>R\<close> have "v\<in>R" 
+    using rtrancl_reachable_induct[OF _ CL, where I="{x}"] 
+    by auto
+  thus ?thesis ..
+qed
+
+lemma rel_restrict_trancl_notR:
+  assumes "(v,w) \<in> (rel_restrict E R)\<^sup>+"
+  shows "v \<notin> R" and "w \<notin> R"
+  using assms
+  by (metis rel_restrict_trancl_mem rel_restrict_notR)+
+
+lemma rel_restrict_tranclI:
+  assumes "(x,y) \<in> E\<^sup>+"
+  and "x \<notin> R" "y \<notin> R"
+  and "E `` R \<subseteq> R"
+  shows "(x,y) \<in> (rel_restrict E R)\<^sup>+"
+  using assms
+  proof (induct)
+    case base thus ?case by (metis r_into_trancl rel_restrictI)
+  next
+    case (step y z) hence "y \<notin> R" by auto
+    with step show ?case by (metis trancl_into_trancl rel_restrictI)
+  qed
+
+
+
+
+subsubsection {* Bijective Relations *}
+definition "bijective R \<equiv> 
+  (\<forall>x y z. (x,y)\<in>R \<and> (x,z)\<in>R \<longrightarrow> y=z) \<and>
+  (\<forall>x y z. (x,z)\<in>R \<and> (y,z)\<in>R \<longrightarrow> x=y)"
+
+lemma bijective_alt: "bijective R \<longleftrightarrow> single_valued R \<and> single_valued (R\<inverse>)"
+  unfolding bijective_def single_valued_def by blast
+
+lemma bijective_Id[simp, intro!]: "bijective Id"
+  by (auto simp: bijective_def)
+
+lemma bijective_Empty[simp, intro!]: "bijective {}"
+  by (auto simp: bijective_def)
 
 subsubsection {* Miscellaneous *}
 
@@ -3918,8 +4095,9 @@ subsubsection {* Miscellaneous *}
   proof -
     assume A: "finite R" "finite A"
     have "(R\<^sup>* `` A) \<subseteq> Range R \<union> A"
-    proof safe
-      case goal1 thus ?case by (induct rule: rtrancl_induct) auto
+    proof (safe, goal_cases)
+      case prems: 1
+      thus ?case by (induct rule: rtrancl_induct) auto
     qed
     thus ?thesis
       apply (erule_tac finite_subset)
@@ -3949,7 +4127,22 @@ lemma finite_Image_subset:
   "finite (A `` B) \<Longrightarrow> C \<subseteq> A \<Longrightarrow> finite (C `` B)"
 by (metis Image_mono order_refl rev_finite_subset)
 
+lemma finite_Field_eq_finite[simp]: "finite (Field R) \<longleftrightarrow> finite R"
+  by (metis finite_cartesian_product finite_subset R_subset_Field finite_Field)
 
+
+
+definition "fun_of_rel R x \<equiv> SOME y. (x,y)\<in>R"
+
+lemma for_in_RI(*[intro]*): "x\<in>Domain R \<Longrightarrow> (x,fun_of_rel R x)\<in>R"
+  unfolding fun_of_rel_def
+  by (auto intro: someI)
+
+lemma Field_not_elem:
+  "v \<notin> Field R \<Longrightarrow> \<forall>(x,y) \<in> R. x \<noteq> v \<and> y \<noteq> v"
+unfolding Field_def by auto
+
+lemma Sigma_UNIV_cancel[simp]: "(A \<times> X - A \<times> UNIV) = {}" by auto
 
 
 subsection {* @{text "option"} Datatype *}
@@ -4121,6 +4314,16 @@ lemma map_dom_ran_finite:
   "finite (dom M) \<Longrightarrow> finite (ran M)"
 by (simp add: ran_is_image)
 
+lemma map_update_eta_repair[simp]:
+  (* An update operation may get simplified, if it happens to be eta-expanded.
+    This lemma tries to repair some common expressions *)
+  "dom (\<lambda>x. if x=k then Some v else m x) = insert k (dom m)"
+  "m k = None \<Longrightarrow> ran (\<lambda>x. if x=k then Some v else m x) = insert v (ran m)"
+  apply auto []
+  apply (force simp: ran_def)
+  done
+
+
 subsection{* Connection between Maps and Sets of Key-Value Pairs *}
 
 definition map_to_set where
@@ -4219,7 +4422,7 @@ assumes k_nin: "fst kv \<notin> fst ` S"
 shows "set_to_map (insert kv S) = (set_to_map S) (fst kv \<mapsto> snd kv)"
 proof 
   fix k'
-  obtain k v where kv_eq[simp]: "kv = (k, v)" by (rule PairE)
+  obtain k v where kv_eq[simp]: "kv = (k, v)" by (rule prod.exhaust)
 
   from k_nin have k_nin': "\<And>v'. (k, v') \<notin> S" 
     by (auto simp add: image_iff Ball_def)
@@ -4273,7 +4476,7 @@ proof (induct l arbitrary: m)
   case Nil thus ?case by (simp add: map_to_set_empty_iff) blast
 next
   case (Cons kv l m)
-  obtain k v where kv_eq[simp]: "kv = (k, v)" by (rule PairE)
+  obtain k v where kv_eq[simp]: "kv = (k, v)" by (rule prod.exhaust)
 
   from Cons(2) have dist_l: "distinct (map fst l)" and kv'_nin: "\<And>v'. (k, v') \<notin> set l"
     by (auto simp add: image_iff)

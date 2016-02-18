@@ -2,7 +2,7 @@
     Author:      Peter Lammich <peter dot lammich at uni-muenster.de>
     Maintainer:  Peter Lammich <peter dot lammich at uni-muenster.de>
 *)
-header {* \isaheader{State Space Exploration} *}
+section {* \isaheader{State Space Exploration} *}
 theory Exploration
 imports Main "../../ICF/Collections"
 begin
@@ -289,7 +289,7 @@ proof -
 qed
 
   -- "The result of the DFS-algorithm is correct"
-theorems dfs_invar_final = 
+lemmas dfs_invar_final = 
   wa_precise_refine.transfer_correctness[OF dfs_pref_sse sse_invar_final]
 
 end

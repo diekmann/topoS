@@ -65,9 +65,8 @@ lemma param_case_nat[param]:
 
 lemma param_rec_nat[param]: 
   "(rec_nat,rec_nat) \<in> R \<rightarrow> (Id \<rightarrow> R \<rightarrow> R) \<rightarrow> Id \<rightarrow> R"
-  apply (intro fun_relI)
-proof -
-  case (goal1 s s' f f' n n') thus ?case
+proof (intro fun_relI, goal_cases)
+  case (1 s s' f f' n n') thus ?case
     apply (induct n' arbitrary: n s s')
     apply (fastforce simp: fun_rel_def)+
     done
@@ -105,6 +104,13 @@ lemma param_case_prod':
       \<Longrightarrow> (f a b, f' a' b')\<in>R
     \<rbrakk> \<Longrightarrow> (case_prod f p, case_prod f' p') \<in> R"
   by (auto split: prod.split)
+
+lemma param_case_prod'': (* TODO: Really needed? *)
+  "\<lbrakk> 
+    \<And>a b a' b'. \<lbrakk>p=(a,b); p'=(a',b')\<rbrakk> \<Longrightarrow> (f a b,f' a' b')\<in>R  
+  \<rbrakk> \<Longrightarrow> (case_prod f p, case_prod f' p')\<in>R"
+  by (auto split: prod.split)
+
 
 lemma param_map_prod[param]: 
   "(map_prod, map_prod) 
@@ -213,7 +219,19 @@ lemma sum_projr_param[param]:
   apply (auto elim: sum_relE)
   done
 
+lemma list_rel_append1: "(as @ bs, l) \<in> \<langle>R\<rangle>list_rel 
+  \<longleftrightarrow> (\<exists>cs ds. l = cs@ds \<and> (as,cs)\<in>\<langle>R\<rangle>list_rel \<and> (bs,ds)\<in>\<langle>R\<rangle>list_rel)"
+  apply (simp add: list_rel_def list_all2_append1)
+  apply auto
+  apply (metis list_all2_lengthD)
+  done
 
+lemma list_rel_append2: "(l,as @ bs) \<in> \<langle>R\<rangle>list_rel 
+  \<longleftrightarrow> (\<exists>cs ds. l = cs@ds \<and> (cs,as)\<in>\<langle>R\<rangle>list_rel \<and> (ds,bs)\<in>\<langle>R\<rangle>list_rel)"
+  apply (simp add: list_rel_def list_all2_append2)
+  apply auto
+  apply (metis list_all2_lengthD)
+  done
 
 
 lemma param_append[param]: 
@@ -230,10 +248,10 @@ lemma param_list1[param]:
 lemma param_rec_list[param]: 
   "(rec_list,rec_list) 
   \<in> Ra \<rightarrow> (Rb \<rightarrow> \<langle>Rb\<rangle>list_rel \<rightarrow> Ra \<rightarrow> Ra) \<rightarrow> \<langle>Rb\<rangle>list_rel \<rightarrow> Ra"
-proof (intro fun_relI)
-  case (goal1 a a' f f' l l')
-  from goal1(3) show ?case
-    using goal1(1,2)
+proof (intro fun_relI, goal_cases)
+  case prems: (1 a a' f f' l l')
+  from prems(3) show ?case
+    using prems(1,2)
     apply (induct arbitrary: a a')
     apply simp
     apply (fastforce dest: fun_relD)
@@ -259,15 +277,15 @@ lemma param_fold[param]:
   unfolding List.fold_def List.foldr_def List.foldl_def
   by (parametricity)+
 
-schematic_lemma param_take[param]: "(take,take)\<in>(?R::(_\<times>_) set)"
+schematic_goal param_take[param]: "(take,take)\<in>(?R::(_\<times>_) set)"
   unfolding take_def 
   by (parametricity)
 
-schematic_lemma param_drop[param]: "(drop,drop)\<in>(?R::(_\<times>_) set)"
+schematic_goal param_drop[param]: "(drop,drop)\<in>(?R::(_\<times>_) set)"
   unfolding drop_def 
   by (parametricity)
 
-schematic_lemma param_length[param]: 
+schematic_goal param_length[param]: 
   "(length,length)\<in>(?R::(_\<times>_) set)"
   unfolding size_list_overloaded_def size_list_def 
   by (parametricity)
@@ -281,15 +299,14 @@ fun list_eq :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> 'a list \
 lemma param_list_eq[param]: "
   (list_eq,list_eq) \<in> 
     (R \<rightarrow> R \<rightarrow> Id) \<rightarrow> \<langle>R\<rangle>list_rel \<rightarrow> \<langle>R\<rangle>list_rel \<rightarrow> Id"
-proof (intro fun_relI)
-  case (goal1 eq eq' l1 l1' l2 l2')
+proof (intro fun_relI, goal_cases)
+  case prems: (1 eq eq' l1 l1' l2 l2')
   thus ?case
     apply -
     apply (induct eq' l1' l2' arbitrary: l1 l2 rule: list_eq.induct)
     apply (simp_all only: list_eq.simps |
       elim list_relE |
-      parametricity 
-    )+
+      parametricity)+
     done
 qed
 
@@ -403,6 +420,14 @@ lemma param_all_interval_nat[param]:
   apply simp
   done
 
+lemma param_dropWhile[param]: 
+  "(dropWhile, dropWhile) \<in> (a \<rightarrow> bool_rel) \<rightarrow> \<langle>a\<rangle>list_rel \<rightarrow> \<langle>a\<rangle>list_rel"
+  unfolding dropWhile_def by parametricity
+
+lemma param_takeWhile[param]: 
+  "(takeWhile, takeWhile) \<in> (a \<rightarrow> bool_rel) \<rightarrow> \<langle>a\<rangle>list_rel \<rightarrow> \<langle>a\<rangle>list_rel"
+  unfolding takeWhile_def by parametricity
+
 
 subsection {*Sets*}
 
@@ -427,6 +452,18 @@ lemma param_diff[param]:
   shows "(op -, op -) \<in> \<langle>R\<rangle>set_rel \<rightarrow> \<langle>R\<rangle>set_rel \<rightarrow> \<langle>R\<rangle>set_rel"
   using assms 
   by (auto dest: single_valuedD simp: set_rel_def)
+
+lemma param_subseteq[param]: 
+  "\<lbrakk>single_valued (R\<inverse>)\<rbrakk> \<Longrightarrow> (op \<subseteq>, op \<subseteq>) \<in> \<langle>R\<rangle>set_rel \<rightarrow> \<langle>R\<rangle>set_rel \<rightarrow> bool_rel"
+  by (clarsimp simp: set_rel_def single_valued_def) blast
+
+lemma param_subset[param]: 
+  "\<lbrakk>single_valued (R\<inverse>)\<rbrakk> \<Longrightarrow> (op \<subset>, op \<subset>) \<in> \<langle>R\<rangle>set_rel \<rightarrow> \<langle>R\<rangle>set_rel \<rightarrow> bool_rel"
+  (* Fine-tuned proof for speed *)
+  apply (simp add: set_rel_def single_valued_def)
+  apply safe
+  apply blast+
+  done
 
 lemma param_set[param]: 
   "single_valued Ra \<Longrightarrow> (set,set)\<in>\<langle>Ra\<rangle>list_rel \<rightarrow> \<langle>Ra\<rangle>set_rel"

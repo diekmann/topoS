@@ -12,9 +12,6 @@ definition default_node_properties :: "privacy_level"
 fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> privacy_level) \<Rightarrow> bool" where
   "sinvar G nP = (\<forall> (e1,e2) \<in> edges G. (nP e1) \<le> (nP e2))"
 
-fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> privacy_level) \<Rightarrow> 'b \<Rightarrow> bool" where
-  "verify_globals _ _ _ = True"
-
 definition receiver_violation :: "bool" where "receiver_violation \<equiv> True"
 
 
@@ -26,7 +23,6 @@ lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
 
 interpretation SecurityInvariant_preliminaries
 where sinvar = sinvar
-and verify_globals = verify_globals
   apply unfold_locales
     apply(frule_tac finite_distinct_list[OF wf_graph.finiteE])
     apply(erule_tac exE)
@@ -47,7 +43,7 @@ lemma BLP_def_unique: "otherbot \<noteq> 0 \<Longrightarrow>
       SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def
       SecurityInvariant_withOffendingFlows.is_offending_flows_def)
   apply (simp add:graph_ops)
-  apply (simp split: split_split_asm split_split)
+  apply (simp split: prod.split_asm prod.split)
   apply(rule_tac x="\<lparr> nodes=set [vertex_1,vertex_2], edges = set [(vertex_1,vertex_2)] \<rparr>" in exI, simp)
   apply(rule conjI)
    apply(simp add: wf_graph_def)
@@ -62,7 +58,6 @@ lemma BLP_def_unique: "otherbot \<noteq> 0 \<Longrightarrow>
 interpretation SecurityInvariant
 where default_node_properties = default_node_properties
 and sinvar = sinvar
-and verify_globals = verify_globals
 and receiver_violation = receiver_violation
   unfolding default_node_properties_def
   unfolding receiver_violation_def
@@ -73,9 +68,9 @@ and receiver_violation = receiver_violation
       SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def
       SecurityInvariant_withOffendingFlows.is_offending_flows_def)
   apply (simp add:graph_ops)
-  apply (simp split: split_split_asm split_split add:prod_case_beta)
+  apply (simp split: prod.split_asm prod.split add:case_prod_beta)
    apply(auto intro!:bexI)[1]
-   (*apply (smt image_iff offending_in_edges pair_collapse)*)
+   (*apply (smt image_iff offending_in_edges prod.collapse)*)
   apply(blast intro: BLP_def_unique)
 done
 *)
@@ -111,8 +106,8 @@ subsubsection {*ENF*}
   done
    
 
-  interpretation BLPbasic: SecurityInvariant_IFS sinvar verify_globals default_node_properties
-  where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = BLP_offending_set"
+  interpretation BLPbasic: SecurityInvariant_IFS sinvar default_node_properties
+  rewrites "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = BLP_offending_set"
     unfolding receiver_violation_def
     unfolding default_node_properties_def
     apply(unfold_locales)
@@ -127,10 +122,33 @@ subsubsection {*ENF*}
 
   lemma TopoS_BLPBasic: "SecurityInvariant sinvar default_node_properties receiver_violation"
   unfolding receiver_violation_def by unfold_locales
+
+
+text{*Alternate definition of the @{const sinvar}:
+      For all reachable nodes, the security clearance is higher*}
+lemma sinvar_BLPbasic_tancl:
+  "wf_graph G \<Longrightarrow> sinvar G nP = (\<forall> v \<in> nodes G. \<forall>v' \<in> succ_tran G v. (nP v) \<le> (nP v'))"
+  proof(unfold sinvar.simps, rule iffI, goal_cases)
+  case 1
+      have "(v, v') \<in> (edges G)\<^sup>+ \<Longrightarrow> nP v \<le> nP v'" for v v'
+        proof(induction rule: trancl_induct)
+        case base thus ?case using 1(2) by fastforce
+        next
+        case step thus ?case using 1(2) by fastforce
+        qed
+      thus ?case
+      by(simp add: succ_tran_def)
+    next
+    case 2
+      from 2(1)[simplified wf_graph_def] have f1: "fst ` edges G \<subseteq> nodes G" by simp
+      from f1 2(2) have "\<forall>v \<in> (fst ` edges G). \<forall>v'\<in>succ_tran G v. nP v \<le> nP v'" by auto
+      thus ?case unfolding succ_tran_def by fastforce
+  qed
+
    
 hide_fact (open) sinvar_mono
 hide_fact BLP_def_unique zero_default_candidate zero_default_candidate_rule privacylevel_refl BLP_ENF BLP_ENF_refl
 
-hide_const (open) sinvar verify_globals receiver_violation default_node_properties
+hide_const (open) sinvar receiver_violation default_node_properties
 
 end

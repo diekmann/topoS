@@ -236,7 +236,7 @@ section{*Correctness lemmata*}
       apply (cases f)
       apply (simp add: delete_edges_delete_edge_commute)
       apply (simp add: delete_edge_def)
-      apply (metis (lifting, full_types) prod.exhaust splitI split_conv)
+      apply (metis (lifting, full_types) prod.exhaust case_prodI split_conv)
       done
   qed simp
 
@@ -339,7 +339,7 @@ section{*Correctness lemmata*}
   lemma backlinks_distinct: "distinct E \<Longrightarrow> distinct (backlinks E)"
   by (induction E) (auto simp: backlinks_alt)
 
-  lemma backlinks_subset: "set (backlinks X) \<subseteq> set (backlinks Y) <-> set X \<subseteq> set Y"
+  lemma backlinks_subset: "set (backlinks X) \<subseteq> set (backlinks Y) \<longleftrightarrow> set X \<subseteq> set Y"
   by (auto simp: backlinks_set)
 
   lemma backlinks_correct: "FiniteGraph.backflows (set E) = set (backlinks E)"

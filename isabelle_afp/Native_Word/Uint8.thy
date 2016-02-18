@@ -36,15 +36,15 @@ lift_definition plus_uint8 :: "uint8 \<Rightarrow> uint8 \<Rightarrow> uint8" is
 lift_definition minus_uint8 :: "uint8 \<Rightarrow> uint8 \<Rightarrow> uint8" is "op -" .
 lift_definition uminus_uint8 :: "uint8 \<Rightarrow> uint8" is uminus .
 lift_definition times_uint8 :: "uint8 \<Rightarrow> uint8 \<Rightarrow> uint8" is "op *" .
-lift_definition div_uint8 :: "uint8 \<Rightarrow> uint8 \<Rightarrow> uint8" is "op div" .
+lift_definition divide_uint8 :: "uint8 \<Rightarrow> uint8 \<Rightarrow> uint8" is "op div" .
 lift_definition mod_uint8 :: "uint8 \<Rightarrow> uint8 \<Rightarrow> uint8" is "op mod" .
-instance by default (transfer, simp add: algebra_simps)+
+instance by standard (transfer, simp add: algebra_simps)+
 end
 
 instantiation uint8 :: linorder begin
 lift_definition less_uint8 :: "uint8 \<Rightarrow> uint8 \<Rightarrow> bool" is "op <" .
 lift_definition less_eq_uint8 :: "uint8 \<Rightarrow> uint8 \<Rightarrow> bool" is "op \<le>" .
-instance by(default)(transfer, simp add: less_le_not_le linear)+
+instance by standard (transfer, simp add: less_le_not_le linear)+
 end
 
 lemmas [code] = less_uint8.rep_eq less_eq_uint8.rep_eq
@@ -68,7 +68,7 @@ lemmas [code] = test_bit_uint8.rep_eq lsb_uint8.rep_eq msb_uint8.rep_eq
 
 instantiation uint8 :: equal begin
 lift_definition equal_uint8 :: "uint8 \<Rightarrow> uint8 \<Rightarrow> bool" is "equal_class.equal" .
-instance by default(transfer, simp add: equal_eq)
+instance by standard (transfer, simp add: equal_eq)
 end
 
 lemmas [code] = equal_uint8.rep_eq
@@ -321,11 +321,11 @@ where "uint8_mod x y = snd (uint8_divmod x y)"
 
 lemma div_uint8_code [code]: "x div y = (if y = 0 then 0 else uint8_div x y)"
 including undefined_transfer unfolding uint8_divmod_def uint8_div_def
-by transfer(simp add: word_div_def)
+by transfer (simp add: word_div_def)
 
 lemma mod_uint8_code [code]: "x mod y = (if y = 0 then x else uint8_mod x y)"
 including undefined_transfer unfolding uint8_mod_def uint8_divmod_def
-by transfer(simp add: word_mod_def)
+by transfer (simp add: word_mod_def)
 
 definition uint8_sdiv :: "uint8 \<Rightarrow> uint8 \<Rightarrow> uint8"
 where

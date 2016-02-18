@@ -24,8 +24,7 @@ subsection{*Our security requirements*}
       "ConfidentialChairData \<equiv> new_configured_list_SecurityInvariant SINVAR_BLPtrusted_impl.SINVAR_LIB_BLPtrusted \<lparr> 
           node_properties = [V ''FilesSrv'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
                              V ''Employees'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>,
-                             V ''EReachable'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>], 
-          model_global_properties = () 
+                             V ''EReachable'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>]
           \<rparr>"
 
 
@@ -41,37 +40,28 @@ subsection{*Our security requirements*}
                   Department ''Printer'' []]]"
     definition PrintingHierarchy::"vString SecurityInvariant" where
       "PrintingHierarchy \<equiv> new_configured_list_SecurityInvariant SINVAR_DomainHierarchyNG_impl.SINVAR_LIB_DomainHierarchyNG \<lparr> 
-        node_properties = PrintingHierarchy_nodes,
-        model_global_properties = PrintingHierarchy_tree
-        \<rparr>"
-  
-    --"verify globals, I admit, not very elegant"
-    lemma "nm_verify_globals SINVAR_DomainHierarchyNG_impl.SINVAR_LIB_DomainHierarchyNG ChairNetwork_empty 
-          (nm_node_props SINVAR_DomainHierarchyNG_impl.SINVAR_LIB_DomainHierarchyNG \<lparr> node_properties = PrintingHierarchy_nodes, model_global_properties = PrintingHierarchy_tree \<rparr>) PrintingHierarchy_tree" by eval
-  *)
+        node_properties = PrintingHierarchy_nodes
+        \<rparr>"  *)
   subsubsection{* The color printer is only accessibly by employees, The black.white printer by employees and students*}
     definition "PrintingACL \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
           node_properties = [V ''PrinterColor'' \<mapsto> Master [V ''Employees'', V ''EReachable''],
                              V ''PrinterBW'' \<mapsto> Master [V ''Employees'', V ''EReachable'', V ''Students''],
                              V ''Employees'' \<mapsto> Care,
                              V ''EReachable'' \<mapsto> Care,
-                             V ''Students'' \<mapsto> Care], 
-          model_global_properties = () 
+                             V ''Students'' \<mapsto> Care]
           \<rparr>"
 
   subsubsection{* Printers are information sinks *}
     definition "PrintingSink \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_Sink \<lparr> 
           node_properties = [V ''PrinterColor'' \<mapsto> Sink,
-                             V ''PrinterBW'' \<mapsto> Sink], 
-          model_global_properties = () 
+                             V ''PrinterBW'' \<mapsto> Sink]
           \<rparr>"
 
 
 
   subsubsection{*Students may access each other but are not accessible from the outside*}
     definition "StudentSubnet \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_SubnetsInGW \<lparr> 
-          node_properties = [V ''Students'' \<mapsto> Member, V ''Employees'' \<mapsto> Member, V ''EReachable'' \<mapsto> InboundGateway], 
-          model_global_properties = () 
+          node_properties = [V ''Students'' \<mapsto> Member, V ''Employees'' \<mapsto> Member, V ''EReachable'' \<mapsto> InboundGateway]
           \<rparr>"
 
 
@@ -79,8 +69,7 @@ subsection{*Our security requirements*}
     definition "FilesSrcACL \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
           node_properties = [V ''FilesSrv'' \<mapsto> Master [V ''Employees'', V ''EReachable''],
                              V ''Employees'' \<mapsto> Care,
-                             V ''EReachable'' \<mapsto> Care], 
-          model_global_properties = () 
+                             V ''EReachable'' \<mapsto> Care]
           \<rparr>"
 
 

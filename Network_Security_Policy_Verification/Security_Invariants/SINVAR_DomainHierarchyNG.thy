@@ -473,6 +473,7 @@ fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> domainNameTrust) \<Right
 
 
 
+(*TODO: old legacy function!*)
 text{* a domain name must be in the supplied tree *}
 fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> domainNameTrust) \<Rightarrow> domainTree \<Rightarrow> bool" where
   "verify_globals G nP tree = (\<forall> v \<in> nodes G. 
@@ -500,7 +501,6 @@ lemma sinvar_mono: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
 
 interpretation SecurityInvariant_preliminaries
 where sinvar = sinvar
-and verify_globals = verify_globals
   apply unfold_locales
     apply(frule_tac finite_distinct_list[OF wf_graph.finiteE])
     apply(erule_tac exE)
@@ -537,7 +537,7 @@ subsubsection {*ENF*}
     apply(simp only: fun_eq_iff SecurityInvariant_withOffendingFlows.ENF_offending_set[OF DomainHierarchyNG_ENF] DomainHierarchyNG_offending_set_def)
     apply(rule allI)+
     apply(rename_tac G nP)
-    apply(auto split:split_split_asm split_split simp add: Let_def)
+    apply(auto split:prod.split_asm prod.split simp add: Let_def)
   done
 
 
@@ -552,7 +552,7 @@ subsubsection {*ENF*}
         SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def
         SecurityInvariant_withOffendingFlows.is_offending_flows_def)
     apply (simp add:graph_ops)
-    apply (simp split: split_split_asm split_split domainNameTrust.split)
+    apply (simp split: prod.split_asm prod.split domainNameTrust.split)
     apply(rule_tac x="\<lparr> nodes={vertex_1,vertex_2}, edges = {(vertex_1,vertex_2)} \<rparr>" in exI, simp)
     apply(rule conjI)
      apply(simp add: wf_graph_def)
@@ -585,8 +585,7 @@ subsubsection {*ENF*}
 interpretation DomainHierarchyNG: SecurityInvariant_ACS
 where default_node_properties = default_node_properties
 and sinvar = sinvar
-and verify_globals = verify_globals
-where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = DomainHierarchyNG_offending_set"
+rewrites "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = DomainHierarchyNG_offending_set"
   apply unfold_locales
     apply(rule ballI)
     apply(drule SecurityInvariant_withOffendingFlows.ENF_fsts_refl_instance[OF DomainHierarchyNG_ENF_refl unassigned_default_candidate], simp_all)[1]
@@ -605,6 +604,6 @@ lemma TopoS_DomainHierarchyNG: "SecurityInvariant sinvar default_node_properties
 
 
 
-hide_const (open) sinvar verify_globals receiver_violation
+hide_const (open) sinvar receiver_violation
 
 end

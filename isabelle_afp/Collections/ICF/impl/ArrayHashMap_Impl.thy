@@ -2,7 +2,7 @@
     Author:      Andreas Lochbihler <andreas dot lochbihler at kit.edu>
     Maintainer:  Andreas Lochbihler <andreas dot lochbihler at kit.edu>
 *)
-header {* \isaheader{Array-based hash map implementation} *}
+section {* \isaheader{Array-based hash map implementation} *}
 theory ArrayHashMap_Impl imports 
   "../../Lib/HashCode"
   "../../Lib/Diff_Array"
@@ -14,7 +14,7 @@ begin
 text {*  Misc. *}
 
 setup Locale_Code.open_block
-interpretation a_idx_it!: 
+interpretation a_idx_it: 
   idx_iteratei_loc list_of_array "\<lambda>_. True" array_length array_get
   apply unfold_locales
   apply (case_tac [!] s) [2]
@@ -332,7 +332,7 @@ lemma ahm_invar_aux_card_dom_ahm_\<alpha>_auxD:
   assumes inv: "ahm_invar_aux n a"
   shows "card (dom (ahm_\<alpha>_aux a)) = n"
 proof(cases a)
-  case (Array xs)[simp]
+  case [simp]: (Array xs)
   from inv have "card (dom (ahm_\<alpha>_aux (Array xs))) = card (dom (map_of (concat xs)))"
     by(simp add: ahm_\<alpha>_aux_conv_map_of_concat)
   also from inv have "distinct (map fst (concat xs))"
@@ -423,7 +423,7 @@ qed
 lemma ahm_iteratei_aux_code [code]:
   "ahm_iteratei_aux a c f \<sigma> = a_idx_it.idx_iteratei a c (\<lambda>x. foldli x c f) \<sigma>"
 proof(cases a)
-  case (Array xs)[simp]
+  case [simp]: (Array xs)
 
   have "ahm_iteratei_aux a c f \<sigma> = foldli (concat xs) c f \<sigma>" by simp
   also have "\<dots> = foldli xs c (\<lambda>x. foldli x c f) \<sigma>" by (simp add: foldli_concat)
@@ -488,7 +488,7 @@ lemma ahm_rehash_aux_correct:
   shows "ahm_invar_aux n (ahm_rehash_aux a sz)" (is "?thesis1")
   and "ahm_\<alpha>_aux (ahm_rehash_aux a sz) = ahm_\<alpha>_aux a" (is "?thesis2")
 proof -
-  (*interpret ahm!: map_iterator "ahm_\<alpha>_aux" "ahm_invar_aux n" "ahm_iteratei_aux"
+  (*interpret ahm: map_iterator "ahm_\<alpha>_aux" "ahm_invar_aux n" "ahm_iteratei_aux"
     by(rule ahm_iteratei_aux_impl)*)
   let ?a = "ahm_rehash_aux a sz"
   let ?I = "\<lambda>it a'. ahm_invar_aux (n - card it) a' \<and> array_length a' = sz \<and> (\<forall>k. if k \<in> it then ahm_\<alpha>_aux a' k = None else ahm_\<alpha>_aux a' k = ahm_\<alpha>_aux a k)"

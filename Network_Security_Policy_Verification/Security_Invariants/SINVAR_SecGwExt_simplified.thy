@@ -36,9 +36,6 @@ fun allowed_secgw_flow :: "secgw_member \<Rightarrow> secgw_member \<Rightarrow>
 fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> secgw_member) \<Rightarrow> bool" where
   "sinvar G nP = (\<forall> (e1,e2) \<in> edges G. e1 \<noteq> e2 \<longrightarrow> allowed_secgw_flow (nP e1) (nP e2))"
 
-fun verify_globals :: "'v graph \<Rightarrow> ('v \<Rightarrow> secgw_member) \<Rightarrow> 'b \<Rightarrow> bool" where
-  "verify_globals _ _ _ = True"
-
 definition receiver_violation :: "bool" where "receiver_violation = False"
 
 subsubsection {*Preliminaries*}
@@ -49,14 +46,13 @@ subsubsection {*Preliminaries*}
   
   interpretation SecurityInvariant_preliminaries
   where sinvar = sinvar
-  and verify_globals = verify_globals
     apply unfold_locales
-    apply(frule_tac finite_distinct_list[OF wf_graph.finiteE])
-    apply(erule_tac exE)
-    apply(rename_tac list_edges)
-    apply(rule_tac ff="list_edges" in SecurityInvariant_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF sinvar_mono])
-    apply(auto)[6]
-    apply(auto simp add: SecurityInvariant_withOffendingFlows.is_offending_flows_def graph_ops)[1]
+      apply(frule_tac finite_distinct_list[OF wf_graph.finiteE])
+      apply(erule_tac exE)
+      apply(rename_tac list_edges)
+      apply(rule_tac ff="list_edges" in SecurityInvariant_withOffendingFlows.mono_imp_set_offending_flows_not_empty[OF sinvar_mono])
+         apply(auto)[6]
+     apply(auto simp add: SecurityInvariant_withOffendingFlows.is_offending_flows_def graph_ops)[1]
     apply(fact SecurityInvariant_withOffendingFlows.sinvar_mono_imp_is_offending_flows_mono[OF sinvar_mono])
   done
 
@@ -93,9 +89,9 @@ subsection{*ENF*}
 interpretation SecurityGatewayExtended_simplified: SecurityInvariant
 where default_node_properties = default_node_properties
 and sinvar = sinvar
-and verify_globals = verify_globals
 and receiver_violation = receiver_violation
-where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = SecurityGatewayExtended_offending_set"
+(*TODO: why is there a where and no "rewrites" in the afp?*)
+rewrites "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = SecurityGatewayExtended_offending_set"
   unfolding receiver_violation_def
   unfolding default_node_properties_def
   apply unfold_locales
@@ -113,7 +109,7 @@ where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = Securit
       SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_def
       SecurityInvariant_withOffendingFlows.is_offending_flows_def)
   apply (simp add:graph_ops)
-  apply (simp split: split_split_asm split_split add:prod_case_beta)
+  apply (simp split: prod.split_asm prod.split add:case_prod_beta)
   apply(rule_tac x="\<lparr> nodes={vertex_1,vertex_2}, edges = {(vertex_1,vertex_2)} \<rparr>" in exI, simp)
   apply(rule conjI)
    apply(simp add: wf_graph_def)
@@ -133,6 +129,6 @@ where "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = Securit
 
 
 
-hide_const (open) sinvar verify_globals receiver_violation
+hide_const (open) sinvar receiver_violation
 
 end

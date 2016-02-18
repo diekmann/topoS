@@ -22,8 +22,7 @@ lemma "wf_list_graph policy" by eval
 text{*Defining the security invariants*}
 definition LogSink_m::"(vString SecurityInvariant)" where
   "LogSink_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_Sink \<lparr> 
-          node_properties = [V ''Log'' \<mapsto> Sink], 
-          model_global_properties = () 
+          node_properties = [V ''Log'' \<mapsto> Sink]
           \<rparr>"
 
 text{*
@@ -36,8 +35,7 @@ definition BLP_m::"(vString SecurityInvariant)" where
           node_properties = [V ''DB'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
                              V ''Log'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
                              V ''WebApp'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr> 
-                             ], 
-          model_global_properties = () 
+                             ]
           \<rparr>"
 
 definition Subnet_m::"(vString SecurityInvariant)" where
@@ -46,8 +44,7 @@ definition Subnet_m::"(vString SecurityInvariant)" where
                              V ''Log'' \<mapsto> Member,
                              V ''WebApp'' \<mapsto> Member,
                              V ''WebFrnt'' \<mapsto> InboundGateway (*DMZ*)
-                             ], 
-          model_global_properties = () 
+                             ]
           \<rparr>"
 
 
@@ -55,8 +52,7 @@ definition DBACL_m::"(vString SecurityInvariant)" where
     "DBACL_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
           node_properties = [V ''DB'' \<mapsto> Master [V ''WebApp''],
                              V ''WebApp'' \<mapsto> Care
-                             ], 
-          model_global_properties = () 
+                             ]
           \<rparr>"
 
 text{*The list of security invariants*}

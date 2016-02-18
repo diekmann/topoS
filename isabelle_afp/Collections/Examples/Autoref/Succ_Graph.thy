@@ -1,4 +1,4 @@
-header {* Graphs defined by Successor Functions *}
+section {* Graphs defined by Successor Functions *}
 theory Succ_Graph
 imports 
   "../../Refine_Dflt"
@@ -35,8 +35,10 @@ context begin interpretation autoref_syn .
 lemma [autoref_op_pat]: "E``{v} \<equiv> slg_succs$E$v" by simp
 end
 
+definition [code_unfold, simp]: "slg_succs_impl succs v \<equiv> succs v"
+
 lemma refine_slg_succs[autoref_rules_raw]: 
-  "(\<lambda>succs v. succs v,slg_succs)\<in>\<langle>Id\<rangle>slg_rel\<rightarrow>Id\<rightarrow>\<langle>Id\<rangle>list_set_rel"
+  "(slg_succs_impl,slg_succs)\<in>\<langle>Id\<rangle>slg_rel\<rightarrow>Id\<rightarrow>\<langle>Id\<rangle>list_set_rel"
   apply (intro fun_relI)
   apply (simp add: slg_succs_def slg_rel_def)
   done
@@ -58,7 +60,7 @@ definition succ_of_list :: "(nat\<times>nat) list \<Rightarrow> nat \<Rightarrow
     
 "
     
-schematic_lemma succ_of_list_impl:
+schematic_goal succ_of_list_impl:
   notes [autoref_tyrel] = 
     ty_REL[where 'a="nat\<rightharpoonup>nat set" and R="\<langle>nat_rel,R\<rangle>iam_map_rel" for R]
     ty_REL[where 'a="nat set" and R="\<langle>nat_rel\<rangle>list_set_rel"]
@@ -74,7 +76,7 @@ export_code succ_of_list_impl in SML
 definition acc_of_list :: "nat list \<Rightarrow> nat set" 
   where "acc_of_list l \<equiv> fold insert l {}"
 
-schematic_lemma acc_of_list_impl:
+schematic_goal acc_of_list_impl:
   notes [autoref_tyrel] = 
     ty_REL[where 'a="nat set" and R="\<langle>nat_rel\<rangle>iam_set_rel" for R]
 

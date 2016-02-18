@@ -2,7 +2,7 @@
     Author:      Thomas Tuerk <tuerk@in.tum.de>
     Maintainer:  Thomas Tuerk <tuerk@in.tum.de>
 *)
-header {* \isaheader{Iterators over Finite Sets} *}
+section {* \isaheader{Iterators over Finite Sets} *}
 theory SetIterator
 imports 
   "../../Automatic_Refinement/Lib/Misc" 
@@ -117,7 +117,7 @@ begin
           have "I {} (foldli l0 c f (f x \<sigma>0)) \<or> 
                 (\<exists>S. S \<subseteq> set l0 \<and> S \<noteq> {} \<and>
                 \<not> c (foldli l0 c f (f x \<sigma>0)) \<and> I S (foldli l0 c f (f x \<sigma>0)))" 
-            by (simp_all add: subset_iff)
+            by (fastforce)
           thus ?thesis
             by (simp add: c_\<sigma>0 subset_iff) metis
         qed
@@ -333,7 +333,7 @@ next
          R_S: "\<forall>kv'\<in>S - {kv}. R kv kv'" and
          R_not_S: "\<forall>kv'\<in>map_to_set m - S. R kv' kv"
   let ?S' = "fst ` S" 
-  obtain k v where kv_eq[simp]: "kv = (k, v)" by (rule PairE)
+  obtain k v where kv_eq[simp]: "kv = (k, v)" by (rule prod.exhaust)
 
   have "I (fst ` S - {k}) (f (k, v) \<sigma>)"
   proof (rule IP)
