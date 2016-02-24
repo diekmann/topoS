@@ -310,6 +310,50 @@ visualize_edges @{context} @{term "flows_fixL (generate_valid_stateful_policy_IF
 
 (*TODO: show how to tune the invariants*)
 
+text{*Bot1 and Bot2 have different security clearances. If Watchdog wants to get information from both,
+      it needs to be trusted.*}
+
+lemma "all_security_requirements_fulfilled [BLP_privacy_m,  BLP_employee_export_m,
+                          ACL_bot2_m, Control_hierarchy_m, 
+                          SecurityGateway_m,  Subnets_m, SubnetsInGW_m,
+      new_configured_list_SecurityInvariant
+                                  SINVAR_LIB_Sink
+                                    \<lparr> node_properties = [V ''MissionControl1'' \<mapsto> SinkPool,
+                 V ''MissionControl2'' \<mapsto> SinkPool,
+                 V ''Bot1'' \<mapsto> SinkPool,
+                 V ''Bot2'' \<mapsto> SinkPool,
+                 V ''Watchdog'' \<mapsto> SinkPool
+                 ] \<rparr>,
+       new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr> 
+        node_properties = [V ''MissionControl1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
+                           V ''MissionControl2'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
+                           V ''Bot1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
+                           V ''Bot2'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
+                           V ''Watchdog'' \<mapsto> \<lparr> privacy_level = 1, trusted = True \<rparr>
+                                (*trust because bot2 must send to it. privacy_level 1 to interact with bot 1*)
+                           ] \<rparr>
+                 ]
+       policy" by eval
+
+value[code] "generate_valid_stateful_policy_IFSACS policy [BLP_privacy_m,  BLP_employee_export_m,
+                          ACL_bot2_m, Control_hierarchy_m, 
+                          SecurityGateway_m,  Subnets_m, SubnetsInGW_m,
+      new_configured_list_SecurityInvariant
+                                  SINVAR_LIB_Sink
+                                    \<lparr> node_properties = [V ''MissionControl1'' \<mapsto> SinkPool,
+                 V ''MissionControl2'' \<mapsto> SinkPool,
+                 V ''Bot1'' \<mapsto> SinkPool,
+                 V ''Bot2'' \<mapsto> SinkPool,
+                 V ''Watchdog'' \<mapsto> SinkPool
+                 ] \<rparr>,
+       new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr> 
+        node_properties = [V ''MissionControl1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
+                           V ''MissionControl2'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
+                           V ''Bot1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
+                           V ''Bot2'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
+                           V ''Watchdog'' \<mapsto> \<lparr> privacy_level = 1, trusted = True \<rparr>
+                           ] \<rparr>
+                 ]"
 end
 
 
