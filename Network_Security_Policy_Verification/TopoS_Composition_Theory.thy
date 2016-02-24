@@ -208,7 +208,7 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
 
 
     text{*Get all possible offending flows from all security requirements *}
-    definition get_offending_flows :: "('v::vertex) SecurityInvariant_configured list \<Rightarrow> 'v graph \<Rightarrow> (('v \<times> 'v) set set)" where
+    definition get_offending_flows :: "'v SecurityInvariant_configured list \<Rightarrow> 'v graph \<Rightarrow> (('v \<times> 'v) set set)" where
       "get_offending_flows M G = (\<Union>m\<in>set M. c_offending_flows m G)"  
 
     (*Note: only checks sinvar, not eval!! No 'a 'b type variables here*)
@@ -671,4 +671,26 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
  qed
  (*TODO: generate_valid_topology_max_topo for sinvars with unique offending flows in general*)
 
+
+
+
+  (*
+  (*TODO: this would allow to execute expensive invariants at the end*)
+    fun generate_valid_topology2 :: "'v SecurityInvariant_configured list \<Rightarrow> 'v graph \<Rightarrow> 'v graph" where
+      "generate_valid_topology2 [] G = G" |
+      "generate_valid_topology2 (m#Ms) G = generate_valid_topology2 Ms (delete_edges G (\<Union> (c_offending_flows m G)))"
+
+    lemma "generate_valid_topology2 M G = generate_valid_topology M G"
+    proof(induction M arbitrary: G)
+      case Nil
+        thus ?case by(simp add: get_offending_flows_def)
+      next
+      case (Cons m M)
+        from Cons show ?case
+          unfolding generate_valid_topology_def_alt
+          apply simp
+          apply(simp add: get_offending_flows_def delete_edges_simp2)
+          oops
+    qed
+   *)
 end

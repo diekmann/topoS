@@ -21,6 +21,10 @@ by (fastforce intro: trancl_mono)
 fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarrow> bool" where
   "sinvar G nP = (\<forall> n \<in> (nodes G). (nP n) = Interfering \<longrightarrow> (nP ` (undirected_reachable G n)) \<subseteq> {Unrelated})"
 
+lemma "sinvar G nP \<longleftrightarrow> 
+  (\<forall> n \<in> {v' \<in> (nodes G). (nP v') = Interfering}. {nP v' | v'. v' \<in> undirected_reachable G n} \<subseteq> {Unrelated})"
+by auto
+
 definition receiver_violation :: "bool" where 
   "receiver_violation = True"
 

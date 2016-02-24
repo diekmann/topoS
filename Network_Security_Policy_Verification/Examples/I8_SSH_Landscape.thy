@@ -2,6 +2,8 @@ theory I8_SSH_Landscape
 imports "../TopoS_Impl"
 begin
 
+
+(*generated with ITval (spurious)*)
 definition I8SSHgraph :: "nat list_graph" where
     "I8SSHgraph \<equiv> \<lparr> nodesL = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
     edgesL = [(7, 3), (16, 9), (19, 4), (22, 19), (20, 7), (18, 19), (21, 6), (8, 5), (9, 0), (10, 7), (11, 22), (14, 1), 

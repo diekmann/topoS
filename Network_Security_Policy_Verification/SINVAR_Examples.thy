@@ -17,6 +17,33 @@ definition make_policy :: "('a SecurityInvariant) list \<Rightarrow> 'a list \<R
 
 abbreviation "V\<equiv>TopoS_Vertices.V"
 
+
+
+context begin
+  private definition "SINK_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_Sink \<lparr> 
+          node_properties = [V ''Bot1'' \<mapsto> Sink,
+                             V ''Bot2'' \<mapsto> Sink,
+                             V ''MissionControl1'' \<mapsto> SinkPool,
+                             V ''MissionControl2'' \<mapsto> SinkPool
+                             ]
+          \<rparr>" 
+  value[code] "make_policy [SINK_m] [V ''INET'', V ''Supervisor'', V ''Bot1'', V ''Bot2'', V ''MissionControl1'', V ''MissionControl2'']"
+  ML_val{*
+  visualize_graph_header @{context} @{term "[SINK_m]"}
+    @{term "make_policy [SINK_m] [V ''INET'', V ''Supervisor'', V ''Bot1'', V ''Bot2'', V ''MissionControl1'', V ''MissionControl2'']"}
+    @{term "[V ''Bot1'' \<mapsto> Sink,
+             V ''Bot2'' \<mapsto> Sink,
+             V ''MissionControl1'' \<mapsto> SinkPool,
+             V ''MissionControl2'' \<mapsto> SinkPool
+             ]"};
+  *}
+end
+
+
+
+
+
+
 context begin
   private definition "ACL_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
           node_properties = [V ''db1'' \<mapsto> Master [V ''h1'', V ''h2''],

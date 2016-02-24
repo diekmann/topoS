@@ -103,7 +103,7 @@ rewrites "SecurityInvariant_withOffendingFlows.set_offending_flows sinvar = NoRe
   done
 
 text{*It can also be interpreted as IFS*}
-lemma "SecurityInvariant_IFS sinvar default_node_properties"
+lemma NoRefl_SecurityInvariant_IFS: "SecurityInvariant_IFS sinvar default_node_properties"
   unfolding default_node_properties_def
   apply unfold_locales
     apply(rule ballI)
