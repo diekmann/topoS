@@ -674,23 +674,4 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
 
 
 
-  (*
-  (*TODO: this would allow to execute expensive invariants at the end*)
-    fun generate_valid_topology2 :: "'v SecurityInvariant_configured list \<Rightarrow> 'v graph \<Rightarrow> 'v graph" where
-      "generate_valid_topology2 [] G = G" |
-      "generate_valid_topology2 (m#Ms) G = generate_valid_topology2 Ms (delete_edges G (\<Union> (c_offending_flows m G)))"
-
-    lemma "generate_valid_topology2 M G = generate_valid_topology M G"
-    proof(induction M arbitrary: G)
-      case Nil
-        thus ?case by(simp add: get_offending_flows_def)
-      next
-      case (Cons m M)
-        from Cons show ?case
-          unfolding generate_valid_topology_def_alt
-          apply simp
-          apply(simp add: get_offending_flows_def delete_edges_simp2)
-          oops
-    qed
-   *)
 end

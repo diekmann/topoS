@@ -2,27 +2,6 @@ theory Imaginary_Factory_Network
 imports "../TopoS_Impl"
 begin
 
-
-(* scala_tool said:
->>> eval
-
-Overview:
-[valid] BLPbasic: Privacy for employees
-[valid] BLPbasic: Secret corporate knowledge and intellectual propertiy
-[valid] BLPtrusted: Privacy for employees, exporting aggregated data
-[valid] CommunicationPartners: we subnet the whole fab!
-[valid] Dependability: blubb
-[valid] DomainHierarchy: Hierarchy of fab robots
-[valid] NonInterference: NonInterference of something
-[valid] SecurityGateway: Sensor Gateway
-[valid] Sink: Robots are sink
-[valid] Subnets: we subnet the whole fab!
-[valid] SubnetsInGW: SubnetsInGW
-
-maximum policy takes like forever ;-)
-without dependability, results almost instant
-*)
-
 abbreviation "V\<equiv>TopoS_Vertices.V"
 
 definition policy :: "vString list_graph" where
@@ -263,14 +242,14 @@ end
 definition "invariants \<equiv> [BLP_privacy_m, BLP_tradesecrets_m, BLP_employee_export_m,
                           ACL_bot2_m, Control_hierarchy_m,
                           SecurityGateway_m, SinkRobots_m, Subnets_m, SubnetsInGW_m]"
- (*NonInterference_m*)
+text{*We have excluded @{const NonInterference_m} because of its infeasible runtime.*}
 
-(*TODO: add noninterference*)
+
 lemma "length invariants = 9" by eval
 
 
-(*this*)
-lemma "all_security_requirements_fulfilled invariants policy" by eval
+text{*All security requirements (including @{const NonInterference_m}) are fulfilled.*}
+lemma "all_security_requirements_fulfilled (NonInterference_m#invariants) policy" by eval
 ML{*
 visualize_graph @{context} @{term "invariants"} @{term "policy"};
 *}
@@ -282,16 +261,13 @@ definition make_policy :: "('a SecurityInvariant) list \<Rightarrow> 'a list \<R
 
 value[code] "make_policy invariants (nodesL policy)" (*15s without NonInterference*)
 
-(*TODO:*)
-(*
-value[code] "make_policy (invariants@[NonInterference_m]) (nodesL policy)"
-value[code] "make_policy (NonInterference_m#invariants) (nodesL policy)"
-*)
+text{*but even the maximum policy is valid without @{const NonInterference_m} *}
+lemma "all_security_requirements_fulfilled (NonInterference_m#invariants) (make_policy invariants (nodesL policy))" by eval
+
 
 text{*
-The diff to the maximum
-  (*?? well, there is NonInterference in it, but it should not matter here because the two parts
-   *?? of the graph are separated anyway*) policy.
+The diff to the maximum policy.
+Since we excluded @{const NonInterference_m}, it should be the maximum.
 *}
 ML_val{*
 visualize_edges @{context} @{term "edgesL policy"} 
@@ -311,6 +287,28 @@ visualize_edges @{context} @{term "flows_fixL stateful_policy"}
 *}
 
 
+text{*Because @{const BLP_tradesecrets_m} and @{const SinkRobots_m} restrict information leakage,
+     @{term "''Watchdog''"} cannot establish a stateful connection to the bots.
+     The invariants clearly state that the bots must not leak information, and Watchdog
+     was never given permission to get any information back.*}
+value[code] "generate_valid_stateful_policy_IFSACS policy [BLP_privacy_m,  BLP_employee_export_m,
+                          ACL_bot2_m, Control_hierarchy_m, 
+                          SecurityGateway_m,  Subnets_m, SubnetsInGW_m]"
+
+text{*Without those two invariants, also AdminPc can set up stateful connections to the machines
+      it is inteneded to administer.*}
+
+ML_val{*
+visualize_edges @{context} @{term "flows_fixL (generate_valid_stateful_policy_IFSACS policy [BLP_privacy_m,  BLP_employee_export_m,
+                          ACL_bot2_m, Control_hierarchy_m, 
+                          SecurityGateway_m,  Subnets_m, SubnetsInGW_m])"} 
+    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
+      @{term "flows_stateL (generate_valid_stateful_policy_IFSACS policy [BLP_privacy_m,  BLP_employee_export_m,
+                          ACL_bot2_m, Control_hierarchy_m, 
+                          SecurityGateway_m,  Subnets_m, SubnetsInGW_m])"})] ""; 
+*}
+
+(*TODO: show how to tune the invariants*)
 
 end
 
