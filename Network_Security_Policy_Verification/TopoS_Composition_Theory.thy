@@ -137,6 +137,10 @@ locale configured_SecurityInvariant =
       SecurityInvariant_preliminaries.sinvar_valid_remove_flattened_offending_flows[OF SecurityInvariant_preliminariesD, simplified subst_offending_flows]
       text{*@{thm sinvar_valid_remove_flattened_offending_flows [no_vars]}*}
 
+      lemmas sinvar_valid_remove_SOME_offending_flows =
+      SecurityInvariant_preliminaries.sinvar_valid_remove_SOME_offending_flows[OF SecurityInvariant_preliminariesD, simplified subst_offending_flows]
+      text{*@{thm sinvar_valid_remove_SOME_offending_flows [no_vars]}*}
+
       lemmas empty_offending_contra =
       SecurityInvariant_withOffendingFlows.empty_offending_contra[where sinvar="(\<lambda>G nP. c_sinvar m G)", simplified subst_offending_flows]
       text{*@{thm empty_offending_contra [no_vars]}*}
@@ -672,6 +676,89 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
  (*TODO: generate_valid_topology_max_topo for sinvars with unique offending flows in general*)
 
 
+
+    (* TODO: finish! Write code using minimalize_offending_overapprox
+    text{*Only removing one offending flow should be enough*}
+    fun generate_valid_topology3 :: "'v SecurityInvariant_configured list \<Rightarrow> 'v graph \<Rightarrow> 'v graph" where
+      "generate_valid_topology3 [] G = G" |
+      "generate_valid_topology3 (m#Ms) G = (let OFF = c_offending_flows m G in
+        if OFF = {} then generate_valid_topology3 Ms G
+        else delete_edges (generate_valid_topology3 Ms G) (SOME F. F \<in> OFF)
+        )"
+
+    theorem generate_valid_topology3_sound:
+      "\<lbrakk> valid_reqs M; wf_graph \<lparr>nodes = V, edges = E\<rparr> \<rbrakk> \<Longrightarrow> 
+      all_security_requirements_fulfilled M (generate_valid_topology3 M \<lparr>nodes = V, edges = E\<rparr>)"
+        proof(induction M arbitrary: V E)
+          case Nil
+          thus ?case by(simp add: all_security_requirements_fulfilled_def)
+        next
+          case (Cons m M)
+          from valid_reqs1[OF Cons(2)] have validReq: "configured_SecurityInvariant m" .
+
+          from Cons(3) have valid_rmUnOff: "wf_graph \<lparr>nodes = V, edges = E - (\<Union>c_offending_flows m \<lparr>nodes = V, edges = E\<rparr>) \<rparr>"
+            by(simp add: wf_graph_remove_edges)
+          
+          from configured_SecurityInvariant.sinvar_valid_remove_SOME_offending_flows[OF validReq] have
+           "c_offending_flows m \<lparr>nodes = V, edges = E\<rparr> \<noteq> {} \<Longrightarrow>
+             c_sinvar m \<lparr>nodes = V, edges = E - (SOME F. F \<in> c_offending_flows m \<lparr>nodes = V, edges = E\<rparr>)\<rparr>" .
+
+          have generate_valid_topology3_nodes: "nodes (generate_valid_topology3 M \<lparr>nodes = V, edges = E\<rparr>) = V"
+            proof(induction M)
+            qed(simp_all add: Let_def delete_edges_simp2)
+
+
+          have generate_valid_topology3_edges: "edges (generate_valid_topology3 M \<lparr>nodes = V, edges = E\<rparr>) \<subseteq> E"
+            apply(induction M)
+             apply(simp_all add: Let_def delete_edges_simp2)
+            by blast
+
+          from validReq
+          have goal_sinvar_m: "c_offending_flows m \<lparr>nodes = V, edges = E\<rparr> = {} \<Longrightarrow> 
+                c_sinvar m (generate_valid_topology3 M \<lparr>nodes = V, edges = E\<rparr>)"
+            (*TODO: tune!*)
+            by (metis Cons.prems(2) configured_SecurityInvariant.defined_offending' 
+              configured_SecurityInvariant.mono_sinvar generate_valid_topology3_edges
+              generate_valid_topology3_nodes graph.surjective old.unit.exhaust)
+            
+    
+          from valid_reqs2[OF Cons(2)] have "valid_reqs M" .
+          from Cons.IH[OF `valid_reqs M` Cons(3)] have IH:
+            "all_security_requirements_fulfilled M (generate_valid_topology3 M \<lparr>nodes = V, edges = E\<rparr>)" .
+
+    
+          have goal_rm_SOME_m: "c_offending_flows m \<lparr>nodes = V, edges = E\<rparr> \<noteq> {} \<Longrightarrow>
+              c_sinvar m (delete_edges (generate_valid_topology3 M \<lparr>nodes = V, edges = E\<rparr>)
+                                        (SOME F. F \<in> c_offending_flows m \<lparr>nodes = V, edges = E\<rparr>))"
+          proof -
+            assume a1: "c_offending_flows m \<lparr>nodes = V, edges = E\<rparr> \<noteq> {}"
+            have f2: "(\<forall>r ra p. \<not> r \<subseteq> ra \<or> (p::'a \<times> 'a) \<notin> r \<or> p \<in> ra) = (\<forall>r ra p. \<not> r \<subseteq> ra \<or> (p::'a \<times> 'a) \<notin> r \<or> p \<in> ra)"
+              by meson
+            have f3: "wf_graph \<lparr>nodes = V, edges = E - (SOME r. r \<in> c_offending_flows m \<lparr>nodes = V, edges = E\<rparr>)\<rparr>"
+              by (simp add: Cons.prems(2) wf_graph_remove_edges)
+            have "edges (generate_valid_topology3 M \<lparr>nodes = V, edges = E\<rparr>) - (SOME r. r \<in> c_offending_flows m \<lparr>nodes = V, edges = E\<rparr>) \<subseteq> E - (SOME r. r \<in> c_offending_flows m \<lparr>nodes = V, edges = E\<rparr>)"
+              using f2 generate_valid_topology3_edges by blast
+            then have "c_sinvar m \<lparr>nodes = V, edges = edges (generate_valid_topology3 M \<lparr>nodes = V, edges = E\<rparr>) - (SOME r. r \<in> c_offending_flows m \<lparr>nodes = V, edges = E\<rparr>)\<rparr>"
+              using f3 a1 \<open>c_offending_flows m \<lparr>nodes = V, edges = E\<rparr> \<noteq> {} \<Longrightarrow> c_sinvar m \<lparr>nodes = V, edges = E - (SOME F. F \<in> c_offending_flows m \<lparr>nodes = V, edges = E\<rparr>)\<rparr>\<close> configured_SecurityInvariant.negative_mono validReq by blast
+            then show "c_sinvar m (delete_edges (generate_valid_topology3 M \<lparr>nodes = V, edges = E\<rparr>) (SOME r. r \<in> c_offending_flows m \<lparr>nodes = V, edges = E\<rparr>))"
+              by (simp add: generate_valid_topology3_nodes graph_ops(5))
+          qed
+    
+          show  "all_security_requirements_fulfilled (m # M) (generate_valid_topology3 (m # M) \<lparr>nodes = V, edges = E\<rparr>)" 
+          apply(simp)
+          apply(simp add: Let_def)
+          apply(intro conjI)
+           apply (simp add: all_security_requirements_fulfilled_def)
+           apply(intro impI conjI)
+            using goal_sinvar_m apply blast
+           using IH all_security_requirements_fulfilled_def apply blast
+          apply(simp add: all_security_requirements_fulfilled_def)
+          apply(intro impI conjI)
+           using goal_rm_SOME_m apply blast
+          oops
+           
+           
+       qed*)
 
 
 end
