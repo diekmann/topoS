@@ -212,7 +212,8 @@ begin
   theorem is_offending_flows_min_set_minimalize_offending_overapprox:
       assumes mono: "sinvar_mono"
       and vG: "wf_graph G" and iO: "is_offending_flows (set ff) G nP" and sF: "set ff \<subseteq> edges G" and dF: "distinct ff"
-      shows "is_offending_flows_min_set (set (minimalize_offending_overapprox ff [] G nP)) G nP" (is "is_offending_flows_min_set ?minset G nP")
+      shows "is_offending_flows_min_set (set (minimalize_offending_overapprox ff [] G nP)) G nP"
+              (is "is_offending_flows_min_set ?minset G nP")
   proof -
     from iO have "sinvar (delete_edges G (set ff)) nP" by (metis is_offending_flows_def)
 

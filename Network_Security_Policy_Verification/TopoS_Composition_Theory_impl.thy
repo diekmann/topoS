@@ -275,13 +275,13 @@ subsection{*All security requirements fulfilled*}
 subsection{*generate valid topology*}
   value "concat [[1::int,2,3], [4,6,5]]"
 
-  fun generate_valid_topology :: "('v) SecurityInvariant list \<Rightarrow> 'v list_graph \<Rightarrow> ('v list_graph)" where
+  fun generate_valid_topology :: "'v SecurityInvariant list \<Rightarrow> 'v list_graph \<Rightarrow> ('v list_graph)" where
     "generate_valid_topology M G = delete_edges G (concat (implc_get_offending_flows M G))"
 
 
   lemma generate_valid_topology_complies:
     "\<lbrakk> \<forall> (m_impl, m_spec) \<in> set M. SecurityInvariant_complies_formal_def m_impl m_spec;
-       wf_list_graph (G::('v::vertex) list_graph) \<rbrakk> \<Longrightarrow> 
+       wf_list_graph (G::('v list_graph)) \<rbrakk> \<Longrightarrow> 
        list_graph_to_graph (generate_valid_topology (get_impl M) G) = 
        TopoS_Composition_Theory.generate_valid_topology (get_spec M) (list_graph_to_graph G)"
     apply(subst generate_valid_topology_def_alt)

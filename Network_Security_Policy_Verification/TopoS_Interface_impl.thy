@@ -169,6 +169,90 @@ subsection {*Helper lemmata*}
 
 
 
+
+
+  (*TODO TODO TODO*)
+  fun minimalize_offending_overapprox :: "('v list_graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> bool) \<Rightarrow> 
+    ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> 'v list_graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> ('v \<times> 'v) list" where
+  "minimalize_offending_overapprox _ [] keep _ _ = keep" |
+  "minimalize_offending_overapprox m (f#fs) keep G nP = (if m (delete_edges G (fs@keep)) nP then
+      minimalize_offending_overapprox m fs keep G nP
+    else
+      minimalize_offending_overapprox m fs (f#keep) G nP
+    )"
+
+  lemma minimalize_offending_overapprox_spec_impl:
+    assumes valid: "wf_list_graph G"
+        and spec_impl: "\<And>G nP. wf_list_graph G \<Longrightarrow> sinvar_spec (list_graph_to_graph G) nP = sinvar_impl G nP"
+    shows "minimalize_offending_overapprox sinvar_impl fs keeps G nP =
+       SecurityInvariant_withOffendingFlows.minimalize_offending_overapprox sinvar_spec fs keeps (list_graph_to_graph G) nP"
+    using valid spec_impl apply(induction fs arbitrary: keeps)
+     apply(simp add: SecurityInvariant_withOffendingFlows.minimalize_offending_overapprox.simps; fail)
+    apply(simp add: SecurityInvariant_withOffendingFlows.minimalize_offending_overapprox.simps)
+    apply (metis FiniteListGraph.delete_edges_wf delete_edges_list_set list_graph_correct(5))
+    done
+
+  text{*With @{const minimalize_offending_overapprox}, we can get one offending flow*}
+  lemma 
+    assumes wf: "wf_list_graph G"
+        and spec_impl: "\<And>G nP. wf_list_graph G \<Longrightarrow> sinvar_spec (list_graph_to_graph G) nP = sinvar_impl G nP"
+        and howdoIgetridofThis: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar_spec"
+        and not_sinvar_TODO_remove: "\<not> sinvar_impl G nP"
+        and this_needs_to_be_gone_too: "sinvar_spec \<lparr>nodes = set (nodesL G), edges = {}\<rparr> nP"
+    shows "set (minimalize_offending_overapprox sinvar_impl (edgesL G) [] G nP) \<in>
+            SecurityInvariant_withOffendingFlows.set_offending_flows sinvar_spec (list_graph_to_graph G) nP"
+    proof -
+      from wf have wfG: "wf_graph (list_graph_to_graph G)"
+        by (simp add: wf_list_graph_def wf_list_graph_iff_wf_graph)
+      from wf have dist_edges: "distinct (edgesL G)" by (simp add: wf_list_graph_def)
+      from spec_impl not_sinvar_TODO_remove have
+        "SecurityInvariant_withOffendingFlows.is_offending_flows sinvar_spec (set (edgesL G)) (list_graph_to_graph G) nP"
+        apply(simp add: SecurityInvariant_withOffendingFlows.is_offending_flows_def)
+        apply(intro conjI)
+         apply (simp add: local.wf; fail)
+        apply(simp add: FiniteGraph.delete_edges_simp2 list_graph_to_graph_def)
+        apply(simp add: this_needs_to_be_gone_too)
+        done
+         
+      hence "SecurityInvariant_withOffendingFlows.is_offending_flows_min_set sinvar_spec
+        (set (SecurityInvariant_withOffendingFlows.minimalize_offending_overapprox sinvar_spec (edgesL G) [] (list_graph_to_graph G) nP))
+          (list_graph_to_graph G) nP"
+      apply(rule SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_minimalize_offending_overapprox[OF
+              howdoIgetridofThis wfG _ _ dist_edges])
+      apply(simp add: list_graph_to_graph_def)
+      done
+
+      from this show ?thesis
+        apply(simp add: SecurityInvariant_withOffendingFlows.set_offending_flows_def)
+        apply(intro conjI)
+         apply (metis SecurityInvariant_withOffendingFlows.minimalize_offending_overapprox_subseteq_input
+                empty_set graph.select_convs(2) list_graph_to_graph_def local.wf minimalize_offending_overapprox_spec_impl
+                spec_impl sup_bot.right_neutral)
+        apply (metis local.wf minimalize_offending_overapprox_spec_impl spec_impl)
+        done
+    qed
+
+ (* later: in composition theory, we want something like:
+  thm generate_valid_topology_SOME_sound
+    fun generate_valid_topology_SOME :: "'v SecurityInvariant list \<Rightarrow> 'v list_graph \<Rightarrow> ('v list_graph)" where
+      "generate_valid_topology_SOME [] G = G" |
+      "generate_valid_topology_SOME (m#Ms) G = (let OFF = c_offending_flows m G in
+        if OFF = {} then generate_valid_topology_SOME Ms G
+        else delete_edges (generate_valid_topology_SOME Ms G) (SOME F. F \<in> OFF)
+        )"
+  fun generate_valid_topology :: "('v) SecurityInvariant list \<Rightarrow> 'v list_graph \<Rightarrow> ('v list_graph)" where
+    "generate_valid_topology M G = delete_edges G (concat (implc_get_offending_flows M G))"*)
+
+
+
+
+
+
+
+
+
+
+
 (*TODO: this should be a header of TopoS_Libary. The header should be printed BEFORE the imports are processed. *)
 section{*Security Invariant Library*}
 (*The SINVAR_* theory files all use the "subsection" command. Here is the top-section.*)
