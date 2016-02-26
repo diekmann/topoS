@@ -16,10 +16,10 @@ subsection{*Generating instantiated (configured) network security invariants*}
   --"a configured network security invariant in list implementaion"
   (*very minimal version, no eval, ...*)
   record ('v) SecurityInvariant =
-    implc_type:: string
-    implc_sinvar::"('v) list_graph \<Rightarrow> bool"
-    implc_offending_flows::"('v) list_graph \<Rightarrow> ('v \<times> 'v) list list"
-    implc_isIFS::"bool"
+    implc_type :: string
+    implc_sinvar ::"('v) list_graph \<Rightarrow> bool"
+    implc_offending_flows ::"('v) list_graph \<Rightarrow> ('v \<times> 'v) list list"
+    implc_isIFS :: "bool"
 
   text{* Test if this definition is compliant with the formal definition on sets. *}
   definition SecurityInvariant_complies_formal_def :: 
