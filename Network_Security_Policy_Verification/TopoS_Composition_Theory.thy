@@ -679,6 +679,8 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
 
 
     (*TODO:  Write code using minimalize_offending_overapprox*)
+    (*TODO: remove the offending flows from the graph for each iteration. requires proof arbitrary: G
+            allows to put expensive invariants at back of list and hope that sinvar is true until the are evaluated*)
     text{*Only removing one offending flow should be enough*}
     fun generate_valid_topology_SOME :: "'v SecurityInvariant_configured list \<Rightarrow> 'v graph \<Rightarrow> 'v graph" where
       "generate_valid_topology_SOME [] G = G" |
@@ -690,7 +692,7 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
     theorem generate_valid_topology_SOME_sound:
       "\<lbrakk> valid_reqs M; wf_graph \<lparr>nodes = V, edges = E\<rparr> \<rbrakk> \<Longrightarrow> 
       all_security_requirements_fulfilled M (generate_valid_topology_SOME M \<lparr>nodes = V, edges = E\<rparr>)"
-        proof(induction M arbitrary: V E)
+        proof(induction M)
           case Nil
           thus ?case by(simp add: all_security_requirements_fulfilled_def)
         next
