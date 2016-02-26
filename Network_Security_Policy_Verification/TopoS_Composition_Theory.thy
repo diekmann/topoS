@@ -682,9 +682,9 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
     text{*Only removing one offending flow should be enough*}
     fun generate_valid_topology_SOME :: "'v SecurityInvariant_configured list \<Rightarrow> 'v graph \<Rightarrow> 'v graph" where
       "generate_valid_topology_SOME [] G = G" |
-      "generate_valid_topology_SOME (m#Ms) G = (let OFF = c_offending_flows m G in
-        if OFF = {} then generate_valid_topology_SOME Ms G
-        else delete_edges (generate_valid_topology_SOME Ms G) (SOME F. F \<in> OFF)
+      "generate_valid_topology_SOME (m#Ms) G = (if c_sinvar m G
+        then generate_valid_topology_SOME Ms G
+        else delete_edges (generate_valid_topology_SOME Ms G) (SOME F. F \<in> c_offending_flows m G)
         )"
 
     theorem generate_valid_topology_SOME_sound:
@@ -704,13 +704,13 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
           have generate_valid_topology_SOME_nodes: "nodes (generate_valid_topology_SOME M \<lparr>nodes = V, edges = E\<rparr>) = V"
             for M::"'a SecurityInvariant_configured list" and V E
             proof(induction M)
-            qed(simp_all add: Let_def delete_edges_simp2)
+            qed(simp_all add: delete_edges_simp2)
 
 
           have generate_valid_topology_SOME_edges: "edges (generate_valid_topology_SOME M \<lparr>nodes = V, edges = E\<rparr>) \<subseteq> E"
             for M::"'a SecurityInvariant_configured list" and V E
             proof(induction M)
-            qed(auto simp add: Let_def delete_edges_simp2)
+            qed(auto simp add: delete_edges_simp2)
 
           from configured_SecurityInvariant.mono_sinvar[OF validReq Cons.prems(2),
                 of "edges (generate_valid_topology_SOME M \<lparr>nodes = V, edges = E\<rparr>)"]
@@ -718,7 +718,7 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
             have "c_sinvar m \<lparr>nodes = V, edges = E\<rparr> \<Longrightarrow>
               c_sinvar m \<lparr>nodes = V, edges = edges (generate_valid_topology_SOME M \<lparr>nodes = V, edges = E\<rparr>)\<rparr>"
             by simp
-          moreover from configured_SecurityInvariant.defined_offending'[OF validReq Cons.prems(2)] have
+          moreover from configured_SecurityInvariant.defined_offending'[OF validReq Cons.prems(2)] have not_sinvar_off:
             "\<not> c_sinvar m \<lparr>nodes = V, edges = E\<rparr> \<Longrightarrow> c_offending_flows m \<lparr>nodes = V, edges = E\<rparr> \<noteq> {}" by blast
           ultimately have goal_sinvar_m:
             "c_offending_flows m \<lparr>nodes = V, edges = E\<rparr> = {} \<Longrightarrow> 
@@ -735,7 +735,7 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
           have goal_rm_SOME_m: "c_offending_flows m \<lparr>nodes = V, edges = E\<rparr> \<noteq> {} \<Longrightarrow>
               c_sinvar m (delete_edges (generate_valid_topology_SOME M \<lparr>nodes = V, edges = E\<rparr>)
                                         (SOME F. F \<in> c_offending_flows m \<lparr>nodes = V, edges = E\<rparr>))"
-          proof -
+          proof - (*sledgehammered*)
             assume a1: "c_offending_flows m \<lparr>nodes = V, edges = E\<rparr> \<noteq> {}"
             have f2: "(\<forall>r ra p. \<not> r \<subseteq> ra \<or> (p::'a \<times> 'a) \<notin> r \<or> p \<in> ra) = (\<forall>r ra p. \<not> r \<subseteq> ra \<or> (p::'a \<times> 'a) \<notin> r \<or> p \<in> ra)"
               by meson
@@ -760,7 +760,7 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
           { assume notempty: "c_offending_flows m \<lparr>nodes = V, edges = E\<rparr> \<noteq> {}"
             hence "\<exists> hypE. (generate_valid_topology_SOME M \<lparr>nodes = V, edges = E\<rparr>) = \<lparr>nodes = V, edges = hypE\<rparr>"
               proof(induction M arbitrary: V E)
-              qed(simp_all add: delete_edges_simp2 Let_def generate_valid_topology_SOME_nodes)
+              qed(simp_all add: delete_edges_simp2 generate_valid_topology_SOME_nodes)
             from this obtain E_IH where E_IH_prop:
               "(generate_valid_topology_SOME M \<lparr>nodes = V, edges = E\<rparr>) = \<lparr>nodes = V, edges = E_IH\<rparr>" by blast
       
@@ -776,9 +776,17 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
               unfolding E_IH_prop by(auto simp add: delete_edges_simp2 intro:mono_rule)
           } note goal_fulfilled_M=this
 
-          from goal_sinvar_m IH goal_rm_SOME_m goal_fulfilled_M
-          show "all_security_requirements_fulfilled (m # M) (generate_valid_topology_SOME (m # M) \<lparr>nodes = V, edges = E\<rparr>)" 
-          by(simp add: Let_def all_security_requirements_fulfilled_def)
+          have no_offending: "c_sinvar m \<lparr>nodes = V, edges = E\<rparr> \<Longrightarrow> c_offending_flows m \<lparr>nodes = V, edges = E\<rparr> = {}"
+            by (simp add: configured_SecurityInvariant.c_sinvar_valid_imp_no_offending_flows validReq)
+ 
+          show "all_security_requirements_fulfilled (m # M) (generate_valid_topology_SOME (m # M) \<lparr>nodes = V, edges = E\<rparr>)"
+          apply(simp add: all_security_requirements_fulfilled_def)
+          apply(intro conjI impI)
+             subgoal using goal_sinvar_m no_offending by blast
+            subgoal using IH by(simp add: all_security_requirements_fulfilled_def; fail)
+           subgoal using goal_rm_SOME_m not_sinvar_off by blast 
+          subgoal using goal_fulfilled_M not_sinvar_off by(simp add: all_security_requirements_fulfilled_def)
+          done
        qed
 
 
