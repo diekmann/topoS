@@ -684,6 +684,13 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
 
 
 
+   text{*Hilber's eps operator example*}
+   lemma "(SOME x. x : {1::nat, 2, 3}) = x \<Longrightarrow> x = 1 \<or> x = 2 \<or> x = 3"
+     proof -
+      have "(SOME x. x \<in> {1::nat, 2, 3}) \<in> {1::nat, 2, 3}" unfolding some_in_eq by simp
+      thus "(SOME x. x : {1::nat, 2, 3}) = x \<Longrightarrow> x = 1 \<or> x = 2 \<or> x = 3" by fast
+     qed
+
   (*TODO: remove the offending flows from the graph for each iteration. requires proof arbitrary: G
           allows to put expensive invariants at back of list and hope that sinvar is true until the are evaluated*)
   text{*Only removing one offending flow should be enough*}
@@ -790,6 +797,7 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
         done
      qed
 
+    
    lemma generate_valid_topology_SOME_def_alt:
       "generate_valid_topology_SOME M G = delete_edges G (\<Union>m \<in> set M. if c_sinvar m G then {} else (SOME F. F \<in> c_offending_flows m G))"
       proof(induction M arbitrary: G)
