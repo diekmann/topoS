@@ -293,6 +293,76 @@ subsection{*generate valid topology*}
     by blast
 
 
+
+subsection{*generate valid topology*}
+  text{*tuned for invariants where we don't want to calculate all offending flows*}
+
+  text{*Theoretic foundations: The algorithm @{const generate_valid_topology_SOME} picks
+        ONE offending flow non-deterministically.
+        This is sound: @{thm generate_valid_topology_SOME_sound}.
+        However, this non-deterministic choice is hard to implement. 
+        To pick one offending flow deterministically, we have implemented @{const minimalize_offending_overapprox}.
+        It gives back one offending flow:
+          @{thm SecurityInvariant_preliminaries.minimalize_offending_overapprox_gives_back_an_offending_flow}
+        The good thing about this function is, that it does not need to construct the complete
+        @{const SecurityInvariant_withOffendingFlows.set_offending_flows}. Therefore, 
+        it can be used for security invariants which may have an exponential number of offending flows. 
+        The corresponding algorithm that uses this function is @{const TopoS_Composition_Theory.generate_valid_topology_some}.
+        It is also sound: @{thm generate_valid_topology_some_sound}.*}
+
+  fun generate_valid_topology_some :: "'v SecurityInvariant list \<Rightarrow> 'v list_graph \<Rightarrow> ('v list_graph)" where
+    "generate_valid_topology_some [] G = G" |
+    "generate_valid_topology_some (m#Ms) G = (if implc_sinvar m G
+      then generate_valid_topology_some Ms G
+      else delete_edges (generate_valid_topology_some Ms G) (minimalize_offending_overapprox (implc_sinvar m) (edgesL G) [] G)
+      )"
+
+  thm TopoS_Composition_Theory.generate_valid_topology_some_sound
+
+  lemma generate_valid_topology_some_complies:
+    "\<lbrakk> \<forall> (m_impl, m_spec) \<in> set M. SecurityInvariant_complies_formal_def m_impl m_spec;
+       wf_list_graph (G::('v::vertex list_graph)) \<rbrakk> \<Longrightarrow> 
+       list_graph_to_graph (generate_valid_topology_some (get_impl M) G) = 
+       TopoS_Composition_Theory.generate_valid_topology_some (get_spec M) (edgesL G) (list_graph_to_graph G)"
+    proof(induction M)
+    case Nil thus ?case by(simp add: get_spec_def get_impl_def)
+    next
+    case (Cons m M)
+      obtain m_impl m_spec where m: "m = (m_impl, m_spec)" by(cases m) blast
+      from m have m_impl: "get_impl ((m_impl, m_spec) # M) = m_impl # (get_impl M)" by (simp add: get_impl_def) 
+      from m have m_spec: "get_spec ((m_impl, m_spec) # M) = m_spec # (get_spec M)" by (simp add: get_spec_def) 
+      
+      from Cons.prems(1) m have complies_formal_def: "SecurityInvariant_complies_formal_def m_impl m_spec" by simp
+      with Cons.prems(2) have impl_spec: "implc_sinvar m_impl G \<longleftrightarrow> c_sinvar m_spec (list_graph_to_graph G)"
+        by (simp add: SecurityInvariant_complies_formal_def_def)
+
+      from complies_formal_def
+      have "\<And>G nP. wf_list_graph G \<Longrightarrow>
+        (\<lambda>G nP. (c_sinvar m_spec) G) (list_graph_to_graph G) nP = (\<lambda>G nP. (implc_sinvar m_impl) G) G nP"
+        by (simp add: SecurityInvariant_complies_formal_def_def)
+
+      from minimalize_offending_overapprox_spec_impl[OF Cons.prems(2),
+          of "(\<lambda>G nP. (c_sinvar m_spec) G)" "(\<lambda>G nP. (implc_sinvar m_impl) G)", OF this]
+        (*TODO: because of funny type, horribly complex instantiation*)
+      have "TopoS_Interface_impl.minimalize_offending_overapprox (implc_sinvar m_impl) fs keeps G =
+            TopoS_withOffendingFlows.minimalize_offending_overapprox (c_sinvar m_spec) fs keeps (list_graph_to_graph G)"
+        for fs keeps by simp
+      from this[of "(edgesL G)"  "[]"] have minimalize_offending_overapprox_spec:
+         "TopoS_Interface_impl.minimalize_offending_overapprox (implc_sinvar m_impl) (edgesL G) [] G =
+          TopoS_withOffendingFlows.minimalize_offending_overapprox (c_sinvar m_spec) (edgesL G) [] (list_graph_to_graph G)" .
+      
+      from Cons show ?case
+        apply(simp)
+        apply(simp add: m m_impl m_spec)
+        apply(intro conjI impI)
+          apply (simp add: impl_spec; fail)
+         apply (simp add: impl_spec; fail)
+        apply(simp add: delete_edges_correct[symmetric])
+        apply(simp add: list_graph_to_graph_def FiniteGraph.delete_edges_simp2)
+        apply(simp add: minimalize_offending_overapprox_spec)
+        by (simp add: list_graph_to_graph_def)
+    qed
+
 (*
 subsection{*generate valid topology*}
   text{*tuned for invariants where we don't want to calculate all offending flows*}
