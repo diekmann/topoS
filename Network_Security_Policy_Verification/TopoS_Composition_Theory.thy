@@ -25,7 +25,8 @@ We need in instantiated security invariant, i.e.\ get rid of @{typ "'a"} and @{t
       
       TODO: probably check @{text "wf_graph"} here and optionally some host-attribute sanity checker as in DomainHierachy.
       *}
-  fun new_configured_SecurityInvariant :: "((('v::vertex) graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> bool) \<times> 'a \<times> bool \<times> ('v \<Rightarrow> 'a)) \<Rightarrow> ('v SecurityInvariant_configured) option" where 
+  fun new_configured_SecurityInvariant ::
+    "((('v::vertex) graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> bool) \<times> 'a \<times> bool \<times> ('v \<Rightarrow> 'a)) \<Rightarrow> ('v SecurityInvariant_configured) option" where 
       "new_configured_SecurityInvariant (sinvar, defbot, receiver_violation, nP) = 
         ( 
         if SecurityInvariant sinvar defbot receiver_violation then 
