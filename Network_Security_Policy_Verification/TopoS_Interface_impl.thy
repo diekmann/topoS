@@ -256,23 +256,6 @@ subsection {*Helper lemmata*}
         by(simp add: SecurityInvariant_withOffendingFlows.set_offending_flows_def alog_spec subset_edges)
     qed
 
-(* 
- (* later: in composition theory, we want something like:*)
-  thm generate_valid_topology_SOME_sound
-    fun generate_valid_topology_SOME :: "'v SecurityInvariant list \<Rightarrow> 'v list_graph \<Rightarrow> ('v list_graph)" where
-      "generate_valid_topology_SOME [] G = G" |
-      "generate_valid_topology_SOME (m#Ms) G = (let OFF = c_offending_flows m G in TODO if sinvar
-        if OFF = {} then generate_valid_topology_SOME Ms G
-        else delete_edges (generate_valid_topology_SOME Ms G) (SOME F. F \<in> OFF)
-        )"
-
-  TODO: minimalize_offending_overapprox must not have 'a in it
-    it must only accept curried (configured) sinvar
-
-  fun generate_valid_topology :: "('v) SecurityInvariant list \<Rightarrow> 'v list_graph \<Rightarrow> ('v list_graph)" where
-    "generate_valid_topology M G = delete_edges G (concat (implc_get_offending_flows M G))"*)
-
-
 
 
 

@@ -306,6 +306,10 @@ subsection{*generate valid topology*}
 
   thm TopoS_Composition_Theory.generate_valid_topology_SOME_sound
 
+  (*TODO: won't work because of the SOME!
+    I will probably have to show something like
+       all_security_requirements_fulfilled (get_impl M) (generate_valid_topology_SOME (get_impl M) G)
+    How can I do this without copy&pasting the proof of the spec?*)
   lemma generate_valid_topology_SOME_complies:
     "\<lbrakk> \<forall> (m_impl, m_spec) \<in> set M. SecurityInvariant_complies_formal_def m_impl m_spec;
        wf_list_graph (G::('v list_graph)) \<rbrakk> \<Longrightarrow> 
