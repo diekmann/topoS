@@ -193,7 +193,7 @@ subsection {*Helper lemmata*}
     done
 
   text{*With @{const minimalize_offending_overapprox}, we can get one offending flow*}
-  lemma 
+  lemma minimalize_offending_overapprox_gives_some_offending_flow:
     assumes wf: "wf_list_graph G"
         and NetModelLib: "TopoS_modelLibrary m sinvar_spec"
         and violation: "\<not> (nm_sinvar m) G nP"

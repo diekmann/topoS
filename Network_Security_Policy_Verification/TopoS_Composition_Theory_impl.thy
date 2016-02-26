@@ -293,8 +293,59 @@ subsection{*generate valid topology*}
     by blast
 
 
+(*
+subsection{*generate valid topology*}
+  text{*tuned for invariants where we don't want to calculate all offending flows*}
 
+  fun generate_valid_topology_SOME :: "'v SecurityInvariant list \<Rightarrow> 'v list_graph \<Rightarrow> ('v list_graph)" where
+    "generate_valid_topology_SOME [] G = G" |
+    "generate_valid_topology_SOME (m#Ms) G = (if implc_sinvar m G
+      then generate_valid_topology_SOME Ms G
+      else delete_edges (generate_valid_topology_SOME Ms G) (minimalize_offending_overapprox (implc_sinvar m) (edgesL G) [] G)
+      )"
 
+  thm TopoS_Composition_Theory.generate_valid_topology_SOME_sound
+
+  lemma generate_valid_topology_SOME_complies:
+    "\<lbrakk> \<forall> (m_impl, m_spec) \<in> set M. SecurityInvariant_complies_formal_def m_impl m_spec;
+       wf_list_graph (G::('v list_graph)) \<rbrakk> \<Longrightarrow> 
+       list_graph_to_graph (generate_valid_topology_SOME (get_impl M) G) = 
+       TopoS_Composition_Theory.generate_valid_topology_SOME (get_spec M) (list_graph_to_graph G)"
+    proof(induction M)
+    case Nil thus ?case by(simp add: get_spec_def get_impl_def)
+    next
+    case (Cons m M)
+      obtain m_impl m_spec where m: "m = (m_impl, m_spec)" by(cases m) blast
+      from m have m_impl: "get_impl ((m_impl, m_spec) # M) = m_impl # (get_impl M)" by (simp add: get_impl_def) 
+      from m have m_spec: "get_spec ((m_impl, m_spec) # M) = m_spec # (get_spec M)" by (simp add: get_spec_def) 
+      
+      from Cons.prems(1) m have complies_formal_def:  "SecurityInvariant_complies_formal_def m_impl m_spec" by simp
+      with Cons.prems(2) have impl_spec: "implc_sinvar m_impl G \<longleftrightarrow>  c_sinvar m_spec (list_graph_to_graph G)"
+        by (simp add: SecurityInvariant_complies_formal_def_def)
+      
+      (*from minimalize_offending_overapprox_gives_some_offending_flow
+      have "set (minimalize_offending_overapprox (implc_sinvar m_impl) (edgesL G) [] G)
+        \<in> SecurityInvariant_withOffendingFlows.set_offending_flows (c_sinvar_m_spec_bound_to_nP) (list_graph_to_graph G) nP" sorry
+      *)
+
+      have my_todo: "set (minimalize_offending_overapprox (implc_sinvar m_impl) (edgesL G) [] G)
+        \<in> c_offending_flows m_spec (list_graph_to_graph G)" sorry
+      
+      from my_todo[simplified list_graph_to_graph_def] have how_do_i_solve_this:
+      "set (minimalize_offending_overapprox (implc_sinvar m_impl) (edgesL G) [] G) =
+       (SOME F. F \<in> c_offending_flows m_spec \<lparr>nodes = set (nodesL G), edges = set (edgesL G)\<rparr>)" sorry
+      
+      from Cons show ?case
+        apply(simp)
+        apply(simp add: m m_impl m_spec)
+        apply(intro conjI impI)
+          apply (simp add: impl_spec; fail)
+         apply (simp add: impl_spec; fail)
+        apply(simp add: delete_edges_correct[symmetric])
+        apply(simp add: list_graph_to_graph_def FiniteGraph.delete_edges_simp2)
+        using how_do_i_solve_this by simp
+    qed
+*)
 
     
 end
