@@ -227,7 +227,7 @@ subsection {*Helper lemmata*}
         using NetModelLib TopoS_List_Impl.sinvar_spec_impl TopoS_modelLibrary.impl_spec by fastforce
       
       from minimalize_offending_overapprox_spec_impl[OF wf] spec_impl have alog_spec:
-        "minimalize_offending_overapprox (nm_sinvar m) fs keeps G nP =
+        "minimalize_offending_overapprox (\<lambda>G. (nm_sinvar m) G nP) fs keeps G =
          SecurityInvariant_withOffendingFlows.minimalize_offending_overapprox sinvar_spec fs keeps (list_graph_to_graph G) nP"
          for fs keeps by blast
 
@@ -261,7 +261,7 @@ subsection {*Helper lemmata*}
   thm generate_valid_topology_SOME_sound
     fun generate_valid_topology_SOME :: "'v SecurityInvariant list \<Rightarrow> 'v list_graph \<Rightarrow> ('v list_graph)" where
       "generate_valid_topology_SOME [] G = G" |
-      "generate_valid_topology_SOME (m#Ms) G = (let OFF = c_offending_flows m G in
+      "generate_valid_topology_SOME (m#Ms) G = (let OFF = c_offending_flows m G in TODO if sinvar
         if OFF = {} then generate_valid_topology_SOME Ms G
         else delete_edges (generate_valid_topology_SOME Ms G) (SOME F. F \<in> OFF)
         )"
