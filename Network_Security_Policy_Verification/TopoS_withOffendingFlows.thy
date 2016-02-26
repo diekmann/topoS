@@ -504,8 +504,27 @@ context SecurityInvariant_preliminaries
       done*)
 
     
- end
+end
 
+
+text{*A version which acts on configured security invariants.
+      I.e. there is no type @{typ 'a} for the host attributes in it.*}
+fun minimalize_offending_overapprox :: "('v graph \<Rightarrow> bool) \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> 
+'v graph \<Rightarrow>('v \<times> 'v) list" where
+"minimalize_offending_overapprox _ [] keep _ = keep" |
+"minimalize_offending_overapprox m (f#fs) keep G = (if m (delete_edges_list G (fs@keep)) then
+    minimalize_offending_overapprox m fs keep G
+  else
+    minimalize_offending_overapprox m fs (f#keep) G
+  )"
+
+lemma minimalize_offending_overapprox_boundnP:
+shows "minimalize_offending_overapprox (\<lambda>G. m G nP) fs keeps G =
+         SecurityInvariant_withOffendingFlows.minimalize_offending_overapprox m fs keeps G nP"
+  apply(induction fs arbitrary: keeps)
+   apply(simp add: SecurityInvariant_withOffendingFlows.minimalize_offending_overapprox.simps; fail)
+  apply(simp add: SecurityInvariant_withOffendingFlows.minimalize_offending_overapprox.simps)
+  done
 
 context SecurityInvariant_withOffendingFlows
 begin

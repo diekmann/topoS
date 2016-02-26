@@ -306,6 +306,7 @@ subsection{*generate valid topology*}
 
   thm TopoS_Composition_Theory.generate_valid_topology_SOME_sound
 
+  (*TODO: show conformance to generate_valid_topology_some_sound*)
   (*TODO: won't work because of the SOME!
     I will probably have to show something like
        all_security_requirements_fulfilled (get_impl M) (generate_valid_topology_SOME (get_impl M) G)

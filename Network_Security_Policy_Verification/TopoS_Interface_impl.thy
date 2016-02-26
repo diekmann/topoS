@@ -181,11 +181,14 @@ subsection {*Helper lemmata*}
       minimalize_offending_overapprox m fs (f#keep) G
     )"
 
+  (*TODO: show equivalence to other version of minimalize_offending_overapprox*)
+  thm minimalize_offending_overapprox_boundnP (*is usage of this one better?*)
   lemma minimalize_offending_overapprox_spec_impl:
-    assumes valid: "wf_list_graph G"
-        and spec_impl: "\<And>G nP. wf_list_graph G \<Longrightarrow> sinvar_spec (list_graph_to_graph G) nP = sinvar_impl G nP"
+    assumes valid: "wf_list_graph (G::'v::vertex list_graph)"
+        and spec_impl: "\<And>G nP::('v \<Rightarrow> 'a). wf_list_graph G \<Longrightarrow> sinvar_spec (list_graph_to_graph G) nP = sinvar_impl G nP"
     shows "minimalize_offending_overapprox (\<lambda>G. sinvar_impl G nP) fs keeps G =
-       SecurityInvariant_withOffendingFlows.minimalize_offending_overapprox sinvar_spec fs keeps (list_graph_to_graph G) nP"
+       TopoS_withOffendingFlows.minimalize_offending_overapprox (\<lambda>G. sinvar_spec G nP) fs keeps (list_graph_to_graph G)"
+    apply(subst minimalize_offending_overapprox_boundnP)
     using valid spec_impl apply(induction fs arbitrary: keeps)
      apply(simp add: SecurityInvariant_withOffendingFlows.minimalize_offending_overapprox.simps; fail)
     apply(simp add: SecurityInvariant_withOffendingFlows.minimalize_offending_overapprox.simps)
@@ -204,8 +207,8 @@ subsection {*Helper lemmata*}
         by (simp add: wf_list_graph_def wf_list_graph_iff_wf_graph)
       from wf have dist_edges: "distinct (edgesL G)" by (simp add: wf_list_graph_def)
 
-      let ?spec_algo="SecurityInvariant_withOffendingFlows.minimalize_offending_overapprox
-                          sinvar_spec (edgesL G) [] (list_graph_to_graph G) nP"
+      let ?spec_algo="TopoS_withOffendingFlows.minimalize_offending_overapprox
+                          (\<lambda>G. sinvar_spec G nP) (edgesL G) [] (list_graph_to_graph G)"
 
       note spec=TopoS_List_Impl.spec[OF TopoS_modelLibrary.impl_spec[OF NetModelLib]]
 
@@ -228,7 +231,7 @@ subsection {*Helper lemmata*}
       
       from minimalize_offending_overapprox_spec_impl[OF wf] spec_impl have alog_spec:
         "minimalize_offending_overapprox (\<lambda>G. (nm_sinvar m) G nP) fs keeps G =
-         SecurityInvariant_withOffendingFlows.minimalize_offending_overapprox sinvar_spec fs keeps (list_graph_to_graph G) nP"
+         TopoS_withOffendingFlows.minimalize_offending_overapprox (\<lambda>G. sinvar_spec G nP) fs keeps (list_graph_to_graph G)"
          for fs keeps by blast
 
       (*TODO: tune*)
@@ -242,14 +245,16 @@ subsection {*Helper lemmata*}
         done
       hence goal: "SecurityInvariant_withOffendingFlows.is_offending_flows_min_set sinvar_spec
         (set ?spec_algo) (list_graph_to_graph G) nP"
+      apply(subst minimalize_offending_overapprox_boundnP) (*we do this subst pretty often. is this the right abstraction here?*)
       apply(rule SecurityInvariant_withOffendingFlows.is_offending_flows_min_set_minimalize_offending_overapprox[OF
               mono wfG _ _ dist_edges])
-      apply(simp add: list_graph_to_graph_def)
+       apply(simp add: list_graph_to_graph_def)+
       done
 
       from SecurityInvariant_withOffendingFlows.minimalize_offending_overapprox_subseteq_input[of
         "sinvar_spec" "(edgesL G)" "[]"] have subset_edges:
         "set ?spec_algo \<subseteq> edges (list_graph_to_graph G)" 
+        apply(subst minimalize_offending_overapprox_boundnP)
         by(simp add: list_graph_to_graph_def)
 
       from goal show ?thesis
