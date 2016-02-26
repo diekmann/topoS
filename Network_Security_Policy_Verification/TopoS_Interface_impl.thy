@@ -172,19 +172,19 @@ subsection {*Helper lemmata*}
 
 
   (*TODO TODO TODO*)
-  fun minimalize_offending_overapprox :: "('v list_graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> bool) \<Rightarrow> 
-    ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> 'v list_graph \<Rightarrow> ('v \<Rightarrow> 'a) \<Rightarrow> ('v \<times> 'v) list" where
-  "minimalize_offending_overapprox _ [] keep _ _ = keep" |
-  "minimalize_offending_overapprox m (f#fs) keep G nP = (if m (delete_edges G (fs@keep)) nP then
-      minimalize_offending_overapprox m fs keep G nP
+  fun minimalize_offending_overapprox :: "('v list_graph \<Rightarrow> bool) \<Rightarrow> 
+    ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> 'v list_graph \<Rightarrow> ('v \<times> 'v) list" where
+  "minimalize_offending_overapprox _ [] keep _ = keep" |
+  "minimalize_offending_overapprox m (f#fs) keep G = (if m (delete_edges G (fs@keep)) then
+      minimalize_offending_overapprox m fs keep G
     else
-      minimalize_offending_overapprox m fs (f#keep) G nP
+      minimalize_offending_overapprox m fs (f#keep) G
     )"
 
   lemma minimalize_offending_overapprox_spec_impl:
     assumes valid: "wf_list_graph G"
         and spec_impl: "\<And>G nP. wf_list_graph G \<Longrightarrow> sinvar_spec (list_graph_to_graph G) nP = sinvar_impl G nP"
-    shows "minimalize_offending_overapprox sinvar_impl fs keeps G nP =
+    shows "minimalize_offending_overapprox (\<lambda>G. sinvar_impl G nP) fs keeps G =
        SecurityInvariant_withOffendingFlows.minimalize_offending_overapprox sinvar_spec fs keeps (list_graph_to_graph G) nP"
     using valid spec_impl apply(induction fs arbitrary: keeps)
      apply(simp add: SecurityInvariant_withOffendingFlows.minimalize_offending_overapprox.simps; fail)
@@ -197,7 +197,7 @@ subsection {*Helper lemmata*}
     assumes wf: "wf_list_graph G"
         and NetModelLib: "TopoS_modelLibrary m sinvar_spec"
         and violation: "\<not> (nm_sinvar m) G nP"
-    shows "set (minimalize_offending_overapprox (nm_sinvar m) (edgesL G) [] G nP) \<in>
+    shows "set (minimalize_offending_overapprox (\<lambda>G. (nm_sinvar m) G nP) (edgesL G) [] G) \<in>
             SecurityInvariant_withOffendingFlows.set_offending_flows sinvar_spec (list_graph_to_graph G) nP"
     proof -
       from wf have wfG: "wf_graph (list_graph_to_graph G)"
