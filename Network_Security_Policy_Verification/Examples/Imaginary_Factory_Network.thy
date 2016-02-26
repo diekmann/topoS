@@ -259,10 +259,41 @@ definition make_policy :: "('a SecurityInvariant) list \<Rightarrow> 'a list \<R
   "make_policy sinvars Vs \<equiv> generate_valid_topology sinvars \<lparr>nodesL = Vs, edgesL = List.product Vs Vs \<rparr>"
 
 
+definition make_policy_efficient :: "('a SecurityInvariant) list \<Rightarrow> 'a list \<Rightarrow> 'a list_graph" where
+  "make_policy_efficient sinvars Vs \<equiv> generate_valid_topology_some sinvars \<lparr>nodesL = Vs, edgesL = List.product Vs Vs \<rparr>"
+
+
+
 value[code] "make_policy invariants (nodesL policy)" (*15s without NonInterference*)
 
 text{*but even the maximum policy is valid without @{const NonInterference_m} *}
 lemma "all_security_requirements_fulfilled (NonInterference_m#invariants) (make_policy invariants (nodesL policy))" by eval
+
+
+text{*The more efficient algorithm does not need to construct the complete set of offending flows*}
+value[code] "make_policy_efficient (invariants@[NonInterference_m]) (nodesL policy)"
+value[code] "make_policy_efficient (NonInterference_m#invariants) (nodesL policy)"
+
+
+lemma "make_policy_efficient (invariants@[NonInterference_m]) (nodesL policy) = 
+      make_policy_efficient (NonInterference_m#invariants) (nodesL policy)" by eval
+
+text{*But @{const NonInterference_m} insists on removing something, which would not be necessary.*}
+lemma "make_policy invariants (nodesL policy) \<noteq> make_policy_efficient (NonInterference_m#invariants) (nodesL policy)" by eval
+
+lemma "set (edgesL (make_policy_efficient (NonInterference_m#invariants) (nodesL policy)))
+       \<subseteq>
+       set (edgesL (make_policy invariants (nodesL policy)))" by eval
+
+text{*This is what it wants to be gone.*} (*may take some minutes*)
+value[code] "[e \<leftarrow> edgesL (make_policy invariants (nodesL policy)).
+                e \<notin> set (edgesL (make_policy_efficient (NonInterference_m#invariants) (nodesL policy)))]"
+ML_val{*
+visualize_edges @{context} @{term "edgesL policy"} 
+    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
+     @{term "[e \<leftarrow> edgesL (make_policy invariants (nodesL policy)).
+                e \<notin> set (edgesL (make_policy_efficient (NonInterference_m#invariants) (nodesL policy)))]"})] ""; 
+*}
 
 
 text{*
