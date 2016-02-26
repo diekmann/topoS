@@ -291,5 +291,10 @@ subsection{*generate valid topology*}
     apply(simp add: list_graph_to_graph_def FiniteGraph.delete_edges_simp2)
     apply(simp)
     by blast
+
+
+
+
+
     
 end
