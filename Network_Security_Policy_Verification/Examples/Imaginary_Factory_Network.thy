@@ -25,6 +25,7 @@ definition policy :: "vString list_graph" where
                         (V ''Webcam'', V ''SensorSink''),
                         (V ''TempSensor'', V ''SensorSink''),
                         (V ''FireSensor'', V ''SensorSink''),
+                        (V ''SensorSink'', V ''Statistics''),
                         (V ''MissionControl1'', V ''Bot1''),
                         (V ''MissionControl1'', V ''Bot2''),
                         (V ''MissionControl2'', V ''Bot2''),
@@ -36,6 +37,10 @@ definition policy :: "vString list_graph" where
 
 lemma "wf_list_graph policy" by eval
 
+
+ML_val{*
+visualize_graph @{context} @{term "[]::vString SecurityInvariant list"} @{term "policy"};
+*}
 
 text{*Privacy for employees*}
 context begin

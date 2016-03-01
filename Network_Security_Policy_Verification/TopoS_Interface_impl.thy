@@ -171,7 +171,6 @@ subsection {*Helper lemmata*}
 
 
 
-  (*TODO TODO TODO*)
   fun minimalize_offending_overapprox :: "('v list_graph \<Rightarrow> bool) \<Rightarrow> 
     ('v \<times> 'v) list \<Rightarrow> ('v \<times> 'v) list \<Rightarrow> 'v list_graph \<Rightarrow> ('v \<times> 'v) list" where
   "minimalize_offending_overapprox _ [] keep _ = keep" |
@@ -181,7 +180,6 @@ subsection {*Helper lemmata*}
       minimalize_offending_overapprox m fs (f#keep) G
     )"
 
-  (*TODO: show equivalence to other version of minimalize_offending_overapprox*)
   thm minimalize_offending_overapprox_boundnP (*is usage of this one better?*)
   lemma minimalize_offending_overapprox_spec_impl:
     assumes valid: "wf_list_graph (G::'v::vertex list_graph)"

@@ -84,6 +84,7 @@ visualize_graph_header @{context} @{term "[CommWith_m]"}
                   2 \<mapsto> [3]]"};
 *}
 
+
 value[code] "make_policy [CommWith_m] [1,2,3]"
 value[code] "implc_offending_flows CommWith_m \<lparr>nodesL = [1,2,3,4], edgesL = List.product [1,2,3,4] [1,2,3,4] \<rparr>"
 value[code] "make_policy [CommWith_m] [1,2,3,4]"
@@ -93,11 +94,21 @@ ML_val{*
 visualize_graph @{context} @{term "[ new_configured_list_SecurityInvariant SINVAR_LIB_ACLcommunicateWith \<lparr> 
           node_properties = [
                   1::nat \<mapsto> [1,2,3],
-                  2 \<mapsto> [1,2,3,4], 
-                  3 \<mapsto> [1,2,3,4], 
+                  2 \<mapsto> [1,2,3,4],
+                  3 \<mapsto> [1,2,3,4],
                   4 \<mapsto> [1,2,3,4]]
           \<rparr>]"} @{term "\<lparr>nodesL = [1::nat,2,3,4], edgesL = [(1,2), (1,3), (2,3), (3, 4)] \<rparr>"};
 *}
+
+
+lemma "implc_offending_flows (new_configured_list_SecurityInvariant SINVAR_LIB_ACLcommunicateWith \<lparr> 
+          node_properties = [
+                  1::nat \<mapsto> [1,2,3],
+                  2 \<mapsto> [1,2,3,4],
+                  3 \<mapsto> [1,2,3,4],
+                  4 \<mapsto> [1,2,3,4]]
+          \<rparr>) \<lparr>nodesL = [1::nat,2,3,4], edgesL = [(1,2), (1,3), (2,3), (3, 4)] \<rparr> =
+        [[(1, 2), (1, 3)], [(1, 3), (2, 3)], [(3, 4)]]" by eval
 
 
 
@@ -168,3 +179,47 @@ context begin
 end
 
 
+
+context begin
+  private definition G_noninter :: "nat list_graph" where
+    "G_noninter \<equiv> \<lparr>nodesL = [1::nat,2,3,4], edgesL = [(1,2), (1,3), (2,3), (3, 4)] \<rparr>"
+  private lemma "wf_list_graph G_noninter" by eval
+
+  private definition "NonI_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_NonInterference \<lparr> 
+          node_properties = [
+                  1::nat \<mapsto> Interfering,
+                  2 \<mapsto> Unrelated, 
+                  3 \<mapsto> Unrelated, 
+                  4 \<mapsto> Interfering]
+          \<rparr>"
+  ML_val{*
+  visualize_graph @{context} @{term "[ NonI_m ]"} @{term "G_noninter"};
+  *}
+
+  (*The same as the CommWith example*)
+  lemma "implc_offending_flows NonI_m G_noninter = [[(1, 2), (1, 3)], [(1, 3), (2, 3)], [(3, 4)]]"
+           by eval
+
+
+  ML_val{*
+  visualize_graph @{context} @{term "[ NonI_m ]"} @{term "\<lparr>nodesL = [1::nat,2,3,4], edgesL = [(1,2), (1,3), (2,3), (4, 3)] \<rparr>"};
+  *}
+
+  lemma "implc_offending_flows NonI_m \<lparr>nodesL = [1::nat,2,3,4], edgesL = [(1,2), (1,3), (2,3), (4, 3)] \<rparr> =
+    [[(1, 2), (1, 3)], [(1, 3), (2, 3)], [(4, 3)]]"
+           by eval
+
+  text{*In comparison, @{const SINVAR_LIB_ACLcommunicateWith} is less strict. 
+        Changing the direction of the edge @{term "(3,4)"} removes the access from @{term 1} to @{term 4}
+        and the invariant holds. *}
+  lemma "implc_offending_flows (new_configured_list_SecurityInvariant SINVAR_LIB_ACLcommunicateWith \<lparr> 
+          node_properties = [
+                  1::nat \<mapsto> [1,2,3],
+                  2 \<mapsto> [1,2,3,4],
+                  3 \<mapsto> [1,2,3,4],
+                  4 \<mapsto> [1,2,3,4]]
+          \<rparr>) \<lparr>nodesL = [1::nat,2,3,4], edgesL = [(1,2), (1,3), (2,3), (4, 3)] \<rparr> = []" by eval
+end
+  
+
+end
