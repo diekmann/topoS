@@ -82,6 +82,7 @@ context begin
     by(simp add: BLP_employee_export_host_attributes_def policy_def)
   definition "BLP_employee_export_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr> 
         node_properties = BLP_employee_export_host_attributes \<rparr>"
+  (*TODO: what if Sensor sink were not trusted or had lower or higher clearance?*)
 end
 
 
@@ -101,6 +102,7 @@ context begin
     by(simp add: ACL_bot2_host_attributues_def policy_def)
   definition "ACL_bot2_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners
                              \<lparr>node_properties = ACL_bot2_host_attributues \<rparr>"
+  (*TODO: bot1 cannot access bot2 anyway!*)
 end
 
 
@@ -273,6 +275,16 @@ value[code] "make_policy invariants (nodesL policy)" (*15s without NonInterferen
 
 text{*but even the maximum policy is valid without @{const NonInterference_m} *}
 lemma "all_security_requirements_fulfilled (NonInterference_m#invariants) (make_policy invariants (nodesL policy))" by eval
+
+text{*what if we exclude subnets? it is deprecated and strange anyway ;-)*}
+ML_val{*
+visualize_edges @{context} @{term "edgesL (make_policy invariants (nodesL policy))"} 
+    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
+     @{term "[e \<leftarrow> edgesL (make_policy [BLP_privacy_m, BLP_tradesecrets_m, BLP_employee_export_m,
+                           ACL_bot2_m, Control_hierarchy_m,
+                           SecurityGateway_m, SinkRobots_m, (*Subnets_m, *)SubnetsInGW_m]  (nodesL policy)).
+                e \<notin> set (edgesL (make_policy invariants (nodesL policy)))]"})] ""; 
+*}
 
 
 text{*The more efficient algorithm does not need to construct the complete set of offending flows*}
