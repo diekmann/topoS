@@ -140,47 +140,64 @@ lemma violating_configurations: "\<not> sinvar G nP \<Longrightarrow>
   apply(simp add: All_to_Unassigned)
 done
 
-lemma violating_configurations_exhaust_Unassigned: "\<And>n1 n2. (n1, n2) \<in> (edges G) \<Longrightarrow> nP n1 = Unassigned \<Longrightarrow> \<not> allowed_subnet_flow (nP n1) (nP n2) \<Longrightarrow>
-    \<exists> (e1, e2) \<in> (edges G).  nP e1 = Unassigned \<and> nP e2 \<noteq> Unassigned "
-  apply simp
-  apply(case_tac "nP n2", simp_all)
-   apply force
-  apply force
- done
-lemma violating_configurations_exhaust_Subnet: "\<And>n1 n2. (n1, n2) \<in> (edges G) \<Longrightarrow> nP n1 = Subnet s1' \<Longrightarrow> \<not> allowed_subnet_flow (nP n1) (nP n2) \<Longrightarrow>
-  \<exists> (e1, e2) \<in> (edges G). \<exists> s1 s2. nP e1 = Subnet s1 \<and> s1 \<noteq> s2 \<and> (nP e2 = Subnet s2 \<or> nP e2 = BorderRouter s2)"
-  apply simp
-  apply(case_tac "nP n2", simp_all)
-   apply blast
-  apply blast
-done
-lemma violating_configurations_exhaust_BorderRouter: "\<And>n1 n2. (n1, n2) \<in> (edges G) \<Longrightarrow> nP n1 = BorderRouter s1' \<Longrightarrow> \<not> allowed_subnet_flow (nP n1) (nP n2) \<Longrightarrow>
-  \<exists> (e1, e2) \<in> (edges G). \<exists> s1 s2. nP e1 = BorderRouter s1 \<and> nP e2 = Subnet s2"
-  apply simp
-  apply(case_tac "nP n2")
-    apply simp_all
-  apply blast
-done
 
 text {* All cases where the model can become invalid: *}
-theorem violating_configurations_exhaust: "\<not> sinvar G nP \<Longrightarrow> 
-    \<exists> (e1, e2) \<in> (edges G). 
+theorem violating_configurations_exhaust: "\<not> sinvar G nP \<longleftrightarrow> 
+   (\<exists> (e1, e2) \<in> (edges G). 
       nP e1 = Unassigned \<and> nP e2 \<noteq> Unassigned \<or> 
       (\<exists> s1 s2. nP e1 = Subnet s1 \<and> s1 \<noteq> s2 \<and> (nP e2 = Subnet s2 \<or> nP e2 = BorderRouter s2)) \<or> 
-      (\<exists> s1 s2. nP e1 = BorderRouter s1 \<and> nP e2 = Subnet s2)"
-  apply simp
-  apply clarify
-  apply(rename_tac n1 n2)
-  apply(case_tac "nP n1", simp_all)
-    apply(rename_tac s1)
-    apply(drule_tac nP="nP" and s1'="s1" in violating_configurations_exhaust_Subnet, simp_all)
+      (\<exists> s1 s2. nP e1 = BorderRouter s1 \<and> nP e2 = Subnet s2)
+   )" (is "?l \<longleftrightarrow> ?r")
+ proof
+  assume ?l 
+    have violating_configurations_exhaust_Unassigned:
+      "(n1, n2) \<in> (edges G) \<Longrightarrow> nP n1 = Unassigned \<Longrightarrow> \<not> allowed_subnet_flow (nP n1) (nP n2) \<Longrightarrow>
+        \<exists> (e1, e2) \<in> (edges G).  nP e1 = Unassigned \<and> nP e2 \<noteq> Unassigned " for n1 n2
+      by(cases "nP n2", simp_all) force+
+
+    have violating_configurations_exhaust_Subnet:
+      "(n1, n2) \<in> (edges G) \<Longrightarrow> nP n1 = Subnet s1' \<Longrightarrow> \<not> allowed_subnet_flow (nP n1) (nP n2) \<Longrightarrow>
+      \<exists> (e1, e2) \<in> (edges G). \<exists> s1 s2. nP e1 = Subnet s1 \<and> s1 \<noteq> s2 \<and> (nP e2 = Subnet s2 \<or> nP e2 = BorderRouter s2)"
+      for n1 n2 s1' by(cases "nP n2", simp_all) blast+
+
+    have violating_configurations_exhaust_BorderRouter:
+    "(n1, n2) \<in> (edges G) \<Longrightarrow> nP n1 = BorderRouter s1' \<Longrightarrow> \<not> allowed_subnet_flow (nP n1) (nP n2) \<Longrightarrow>
+      \<exists> (e1, e2) \<in> (edges G). \<exists> s1 s2. nP e1 = BorderRouter s1 \<and> nP e2 = Subnet s2" for n1 n2 s1'
+      by(cases "nP n2", simp_all) blast+
+
+    from `?l` show ?r
+    apply simp
+    apply clarify
+    apply(rename_tac n1 n2)
+    apply(case_tac "nP n1", simp_all)
+      apply(rename_tac s1)
+      apply(drule_tac s1'="s1" in violating_configurations_exhaust_Subnet, simp_all)
+      apply blast
+     apply(rename_tac s1)
+     apply(drule_tac s1'="s1" in violating_configurations_exhaust_BorderRouter, simp_all)
+     apply blast
+    apply(drule_tac violating_configurations_exhaust_Unassigned, simp_all)
     apply blast
-   apply(rename_tac s1)
-   apply(drule_tac nP="nP" and s1'="s1" in violating_configurations_exhaust_BorderRouter, simp_all)
-   apply blast
-  apply(drule_tac nP="nP" in violating_configurations_exhaust_Unassigned, simp_all)
-  apply blast
-done
+    done
+  next
+  assume ?r thus ?l
+    apply simp
+    apply(clarify)
+    apply(safe)
+       apply(rule_tac x="(a,b)" in bexI)
+        apply (simp add: Unassigned_only_to_Unassigned; fail)
+       apply(simp; fail)
+      apply(rule_tac x="(a,b)" in bexI)
+       apply(simp; fail)
+      apply(simp; fail)
+     apply(rule_tac x="(a,b)" in bexI)
+      apply(simp; fail)
+     apply(simp; fail)
+    apply(rule_tac x="(a,b)" in bexI)
+     apply(simp; fail)
+    apply(simp; fail)
+   done
+ qed
 
 
 hide_fact (open) sinvar_mono   
