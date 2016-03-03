@@ -10,9 +10,12 @@ ML_val{*
 
 
 ML {*
+(*should we open a pdf viewer to display the generated graph?*)
+datatype open_viewer = DoNothing | OpenImmediately | AskTimeouted of real
+
 signature GRAPHVIZ =
 sig
-  val open_viewer: bool Unsynchronized.ref
+  val open_viewer: open_viewer Unsynchronized.ref
 
   (*function to modify the printing of a node name*)
   val default_tune_node_format: term -> string -> string
@@ -36,8 +39,8 @@ end
 structure Graphviz: GRAPHVIZ =
 struct
 
-(*if set to false, graphviz will not be run and not pdf will be opened. Include ML_GraphViz_Disable.thy to run in batch mode.*)
-val open_viewer = Unsynchronized.ref true
+(*if set to `DoNothing`, graphviz will not be run and not pdf will be opened. Include ML_GraphViz_Disable.thy to run in batch mode.*)
+val open_viewer = Unsynchronized.ref OpenImmediately
 
 val default_tune_node_format: term -> string -> string = (fn _ => I)
 
@@ -141,18 +144,27 @@ local
 in
   fun visualize_graph_pretty ctxt tune_node_format Es (header:string): int =
     let 
-      val evaluated_edges = map (fn (str, t) => (str, evaluate_term ctxt t)) Es
-      val edge_to_string = HOLogic.dest_list #> map HOLogic.dest_prod #> format_dot_edges ctxt tune_node_format #> implode
-      val formatted_edges = map (fn (str, t) => str ^ "\n" ^ edge_to_string t) evaluated_edges
-    in
-      if !open_viewer then (* only run the shell commands if not disabled by open_viewer *)
-        (
-          apply_dot_header header formatted_edges
+      val evaluated_edges = map (fn (str, t) => (str, evaluate_term ctxt t)) Es;
+      val edge_to_string = HOLogic.dest_list #> map HOLogic.dest_prod #> format_dot_edges ctxt tune_node_format #> implode;
+      val formatted_edges = map (fn (str, t) => str ^ "\n" ^ edge_to_string t) evaluated_edges;
+      val execute_command = fn _ => apply_dot_header header formatted_edges
           |> write_to_tmpfile
-          |> paint_graph Graphviz_Platform_Config.executable_pdf_viewer Graphviz_Platform_Config.executable_dot
-        )
-      else
-        (writeln "visualization disabled (Graphviz.open_viewer)"; 0)
+          |> paint_graph Graphviz_Platform_Config.executable_pdf_viewer Graphviz_Platform_Config.executable_dot;
+    in
+      case !open_viewer of
+          DoNothing => (writeln "visualization disabled (Graphviz.open_viewer)"; 0)
+        | OpenImmediately => execute_command ()
+        | AskTimeouted wait_seconds => let val (text, promise) = Active.dialog_text ();
+            val _ = writeln ("Run Grpahviz and display pdf? " ^ text "yes" ^ "/" ^ text "no" ^ " (execution paused)")
+            in
+              TimeLimit.timeLimit (seconds wait_seconds) (fn _ => 
+                let val m = (Future.join promise) in
+                (if m = "yes" then execute_command () else (writeln "no"; 0))
+                end
+              ) ()
+             end handle TimeLimit.TimeOut =>
+                  (writeln ("Timeouted. You did not klick yes/no. Killed to continue. " ^
+                            "If you want to see the pdf, just re-run this and klick yes."); 255)
     end
   end
 

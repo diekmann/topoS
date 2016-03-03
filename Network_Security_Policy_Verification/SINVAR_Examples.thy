@@ -11,6 +11,19 @@ imports
   TopoS_Impl
 begin
 
+
+(*Instead of opening a lot of pdfs now, ask whether to open them first.
+  If not clicked yes/no, it will wait 3 seconds until it continues.
+  Don't change other settings!
+  DoNothing must remain DoNothing for batch build.
+  Changing this reference will change the behavior of all other theories! Careful with this one ;-)*)
+ML{*
+case !Graphviz.open_viewer of
+    OpenImmediately => Graphviz.open_viewer := AskTimeouted 3.0
+  | AskTimeouted _ => ()
+  | DoNothing => ()
+*}
+
 definition make_policy :: "('a SecurityInvariant) list \<Rightarrow> 'a list \<Rightarrow> 'a list_graph" where
   "make_policy sinvars V \<equiv> generate_valid_topology sinvars \<lparr>nodesL = V, edgesL = List.product V V \<rparr>"
 
@@ -26,7 +39,7 @@ context begin
                              V ''MissionControl1'' \<mapsto> SinkPool,
                              V ''MissionControl2'' \<mapsto> SinkPool
                              ]
-          \<rparr>" 
+          \<rparr>"
   value[code] "make_policy [SINK_m] [V ''INET'', V ''Supervisor'', V ''Bot1'', V ''Bot2'', V ''MissionControl1'', V ''MissionControl2'']"
   ML_val{*
   visualize_graph_header @{context} @{term "[SINK_m]"}
