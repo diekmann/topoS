@@ -233,6 +233,36 @@ context begin
                   4 \<mapsto> [1,2,3,4]]
           \<rparr>) \<lparr>nodesL = [1::nat,2,3,4], edgesL = [(1,2), (1,3), (2,3), (4, 3)] \<rparr> = []" by eval
 end
-  
+
+
+
+context begin
+  private definition "subnets_host_attributes \<equiv> [
+                             V ''v11'' \<mapsto> Subnet 1,
+                             V ''v12'' \<mapsto> Subnet 1,
+                             V ''v13'' \<mapsto> Subnet 1,
+                             V ''v1b'' \<mapsto> BorderRouter 1,
+                             V ''v21'' \<mapsto> Subnet 2,
+                             V ''v22'' \<mapsto> Subnet 2,
+                             V ''v23'' \<mapsto> Subnet 2,
+                             V ''v2b'' \<mapsto> BorderRouter 2,
+                             V ''v3b'' \<mapsto> BorderRouter 3
+                             ]"
+  private definition "Subnets_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_Subnets \<lparr> 
+          node_properties = subnets_host_attributes
+          \<rparr>"
+  private definition "subnet_hosts \<equiv> [V ''v11'', V ''v12'', V ''v13'', V ''v1b'',
+                                      V ''v21'', V ''v22'', V ''v23'', V ''v2b'',
+                                      V ''v3b'', V ''vo'']"
+
+  private lemma "dom (subnets_host_attributes) \<subseteq> set (subnet_hosts)"
+    by(simp add: subnet_hosts_def subnets_host_attributes_def)
+  value[code] "make_policy [Subnets_m] subnet_hosts"
+  ML_val{*
+  visualize_graph_header @{context} @{term "[Subnets_m]"}
+    @{term "make_policy [Subnets_m] subnet_hosts"}
+    @{term "subnets_host_attributes"};
+  *}
+end
 
 end
