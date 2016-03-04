@@ -17,6 +17,17 @@ fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> node_config) \<Rightarro
   "sinvar G nP = (\<forall> (e1,e2) \<in> edges G. (if trusted (nP e2) then True else privacy_level (nP e1) \<le> privacy_level (nP e2) ))"
 
 
+text{*A simplified version of the Bell LaPadula model was presented in @{file "SINVAR_BLPbasic.thy"}. 
+In this theory, we extend this template with a notion of trust by adding a Boolean flag @{const trusted} to the host attributes. 
+This is a refinement to represent real-world scenarios more accurately and analogously happened to the 
+original Bell LaPadula model (see publication ``Looking Back at the Bell-La Padula Model''
+A trusted host can receive information of any security clearance and may declassify it, 
+i.e. distribute the information with its own security clearance. 
+For example, a @{term "trusted sc = True"} host is allowed to receive any information and with the @{term "0::privacy_level"} clearance, 
+it is allowed to reveal it to anyone. 
+*}
+
+
 definition receiver_violation :: "bool" where "receiver_violation \<equiv> True"
 
 
