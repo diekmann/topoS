@@ -23,8 +23,8 @@ This is a refinement to represent real-world scenarios more accurately and analo
 original Bell LaPadula model (see publication ``Looking Back at the Bell-La Padula Model''
 A trusted host can receive information of any security clearance and may declassify it, 
 i.e. distribute the information with its own security clearance. 
-For example, a @{term "trusted sc = True"} host is allowed to receive any information and with the @{term "0::privacy_level"} clearance, 
-it is allowed to reveal it to anyone. 
+For example, a @{term "trusted (sc::node_config) = True"} host is allowed to receive any information 
+and with the @{term "0::privacy_level"} clearance, it is allowed to reveal it to anyone. 
 *}
 
 
