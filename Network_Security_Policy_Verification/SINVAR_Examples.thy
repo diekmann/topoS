@@ -290,9 +290,9 @@ context begin
                              V ''v3b'' \<mapsto> Care
                              ]
           \<rparr>,
-          new_configured_list_SecurityInvariant SINVAR_LIB_SubnetsInGW \<lparr> 
+          (*new_configured_list_SecurityInvariant SINVAR_LIB_SubnetsInGW \<lparr> 
           node_properties = [V ''v3b'' \<mapsto> InboundGateway]
-          \<rparr>,
+          \<rparr>,*)
           new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
           node_properties = [V ''v3b'' \<mapsto> Master [V ''v1b'', V ''v2b''],
                              V ''v1b'' \<mapsto> Care,
@@ -301,11 +301,41 @@ context begin
           \<rparr>]"
   value[code] "make_policy SubnetsInGW_ACL_ms subnet_hosts"
   lemma "set (edgesL (make_policy [Subnets_m] subnet_hosts)) \<subseteq> set (edgesL (make_policy SubnetsInGW_ACL_ms subnet_hosts))" by eval
-  value[code] "[e <- edgesL (make_policy SubnetsInGW_ACL_ms subnet_hosts). e \<notin> set (edgesL (make_policy [Subnets_m] subnet_hosts))]"
+  lemma "[e <- edgesL (make_policy SubnetsInGW_ACL_ms subnet_hosts). e \<notin> set (edgesL (make_policy [Subnets_m] subnet_hosts))] =
+   [(V ''v1b'', V ''v11''), (V ''v1b'', V ''v12''), (V ''v1b'', V ''v13''), (V ''v2b'', V ''v21''), (V ''v2b'', V ''v22''), (V ''v2b'', V ''v23'')]" by eval
   ML_val{*
   visualize_graph @{context} @{term "SubnetsInGW_ACL_ms"}
     @{term "make_policy SubnetsInGW_ACL_ms subnet_hosts"};
   *}
 end
+
+
+
+
+context begin
+  private definition "secgwext_host_attributes \<equiv> [
+                             V ''hypervisor'' \<mapsto> SecurityGateway,
+                             V ''securevm1'' \<mapsto> DomainMember,
+                             V ''securevm2'' \<mapsto> DomainMember,
+                             V ''publicvm1'' \<mapsto> AccessibleMember,
+                             V ''publicvm2'' \<mapsto> AccessibleMember
+                             ]"
+  private definition "SecGwExt_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_SecurityGatewayExtended \<lparr> 
+          node_properties = secgwext_host_attributes
+          \<rparr>"
+  private definition "secgwext_hosts \<equiv> [V ''hypervisor'', V ''securevm1'', V ''securevm2'',
+                                      V ''publicvm1'', V ''publicvm2'',
+                                      V ''INET'']"
+
+  private lemma "dom (secgwext_host_attributes) \<subseteq> set (secgwext_hosts)"
+    by(simp add: secgwext_hosts_def secgwext_host_attributes_def)
+  value[code] "make_policy [SecGwExt_m] secgwext_hosts"
+  ML_val{*
+  visualize_graph_header @{context} @{term "[SecGwExt_m]"}
+    @{term "make_policy [SecGwExt_m] secgwext_hosts"}
+    @{term "secgwext_host_attributes"};
+  *}
+end
+
 
 end
