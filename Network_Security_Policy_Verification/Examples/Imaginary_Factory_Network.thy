@@ -117,7 +117,7 @@ context begin
                  (V ''MissionControl2'',
                     DN (''ControlTerminal''--''ControlDevices''--Leaf, 0)),
                  (V ''Watchdog'',
-                    DN (''ControlTerminal''--''ControlDevices''--''Robots''--Leaf, 0)),
+                    DN (''ControlTerminal''--''Supervision''--Leaf, 1)),
                  (V ''Bot1'',
                     DN (''ControlTerminal''--''ControlDevices''--''Robots''--Leaf, 0)),
                  (V ''Bot2'',
