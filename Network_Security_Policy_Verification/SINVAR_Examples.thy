@@ -336,11 +336,19 @@ context begin
     @{term "secgwext_host_attributes"};
   *}
 
-  definition "BLP_employee_export_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr> 
+  ML_val{*
+  visualize_graph_header @{context} @{term "[SecGwExt_m, new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr> 
         node_properties = [V ''hypervisor'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>,
                            V ''securevm1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
                            V ''securevm2'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>
-                           ] \<rparr>"
+                           ] \<rparr>]"}
+    @{term "make_policy [SecGwExt_m, new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr> 
+        node_properties = [V ''hypervisor'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>,
+                           V ''securevm1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
+                           V ''securevm2'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>
+                           ] \<rparr>] secgwext_hosts"}
+    @{term "secgwext_host_attributes"};
+  *}
 end
 
 
