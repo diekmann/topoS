@@ -17,10 +17,7 @@ definition policy :: "vString list_graph" where
                         V ''Bot1'',
                         V ''Bot2'',
                         V ''AdminPc'',
-                        V ''X1'',
-                        V ''X2'',
-                        V ''X3'',
-                        V ''X4''],
+                        V ''INET''],
               edgesL = [(V ''PresenceSensor'', V ''SensorSink''),
                         (V ''Webcam'', V ''SensorSink''),
                         (V ''TempSensor'', V ''SensorSink''),
@@ -165,10 +162,7 @@ context begin
                  V ''Bot1'' \<mapsto> Unrelated,
                  V ''Bot2'' \<mapsto> Unrelated,
                  V ''AdminPc'' \<mapsto> Interfering, (*!*)
-                 V ''X1'' \<mapsto> Unrelated,
-                 V ''X2'' \<mapsto> Unrelated,
-                 V ''X3'' \<mapsto> Unrelated,
-                 V ''X4'' \<mapsto> Unrelated
+                 V ''INET'' \<mapsto> Unrelated
                  ]"
   private lemma "dom NonInterference_host_attributes \<subseteq> set (nodesL policy)"
     by(simp add: NonInterference_host_attributes_def policy_def)
@@ -219,11 +213,7 @@ context begin
                  V ''Webcam'' \<mapsto> Subnet 1,
                  V ''TempSensor'' \<mapsto> Subnet 1,
                  V ''FireSensor'' \<mapsto> Subnet 1,
-                 V ''AdminPc'' \<mapsto> Subnet 4,
-                 V ''X1'' \<mapsto> Subnet 8,
-                 V ''X2'' \<mapsto> Subnet 8,
-                 V ''X3'' \<mapsto> Subnet 8,
-                 V ''X4'' \<mapsto> Subnet 8
+                 V ''AdminPc'' \<mapsto> Subnet 4
                  ]"
   private lemma "dom Subnets_host_attributes \<subseteq> set (nodesL policy)"
     by(simp add: Subnets_host_attributes_def policy_def)
@@ -273,8 +263,8 @@ definition make_policy_efficient :: "('a SecurityInvariant) list \<Rightarrow> '
 
 value[code] "make_policy invariants (nodesL policy)" (*15s without NonInterference*)
 
-text{*but even the maximum policy is valid without @{const NonInterference_m} *}
-lemma "all_security_requirements_fulfilled (NonInterference_m#invariants) (make_policy invariants (nodesL policy))" by eval
+text{* without @{const NonInterference_m} *}
+lemma "all_security_requirements_fulfilled invariants (make_policy invariants (nodesL policy))" by eval
 
 text{*what if we exclude subnets? it is deprecated and strange anyway ;-)*}
 ML_val{*
@@ -318,7 +308,7 @@ The diff to the maximum policy.
 Since we excluded @{const NonInterference_m}, it should be the maximum.
 *}
 ML_val{*
-visualize_edges @{context} @{term "edgesL policy"} 
+visualize_edges @{context} @{term "edgesL policy"}
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
      @{term "[e \<leftarrow> edgesL (make_policy invariants (nodesL policy)). e \<notin> set (edgesL policy)]"})] ""; 
 *}
