@@ -262,6 +262,12 @@ definition make_policy_efficient :: "('a SecurityInvariant) list \<Rightarrow> '
 
 
 value[code] "make_policy invariants (nodesL policy)" (*15s without NonInterference*)
+ML_val{*
+visualize_edges @{context} @{term "edgesL policy"} 
+    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
+     @{term "[e \<leftarrow> edgesL (make_policy invariants (nodesL policy)).
+                e \<notin> set (edgesL policy)]"})] ""; 
+*}
 
 text{* without @{const NonInterference_m} *}
 lemma "all_security_requirements_fulfilled invariants (make_policy invariants (nodesL policy))" by eval
