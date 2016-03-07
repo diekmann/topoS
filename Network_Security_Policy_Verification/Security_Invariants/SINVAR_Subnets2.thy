@@ -17,7 +17,7 @@ A new InboundRouter is accessible by anyone. It can access all other routers and
 datatype subnets = Subnet nat | BorderRouter nat | BorderRouter' nat | InboundRouter | Unassigned
 
 definition default_node_properties :: "subnets"
-  where  "default_node_properties \<equiv> Unassigned"
+  where "default_node_properties \<equiv> Unassigned"
 
 fun allowed_subnet_flow :: "subnets \<Rightarrow> subnets \<Rightarrow> bool" where
   "allowed_subnet_flow (Subnet s1) (Subnet s2) = (s1 = s2)" | 

@@ -9,6 +9,7 @@ session "Network_Security_Policy_Verification" = HOL +
     "Lib/Efficient_Distinct"
     "~~/src/HOL/Lattice/CompleteLattice"
   theories
+    SINVAR_Subnets2
     Network_Security_Policy_Verification
     TopoS_generateCode
   theories [document = false]

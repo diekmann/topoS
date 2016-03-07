@@ -263,6 +263,49 @@ context begin
     @{term "make_policy [Subnets_m] subnet_hosts"}
     @{term "subnets_host_attributes"};
   *}
+
+
+  text{*Emulating the same but with accessible members with SubnetsInGW and ACLs*}
+  private definition "SubnetsInGW_ACL_ms \<equiv> [new_configured_list_SecurityInvariant SINVAR_LIB_SubnetsInGW \<lparr> 
+          node_properties = [V ''v11'' \<mapsto> Member, V ''v12'' \<mapsto> Member, V ''v13'' \<mapsto> Member, V ''v1b'' \<mapsto> InboundGateway]
+          \<rparr>,
+          new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
+          node_properties = [V ''v1b'' \<mapsto> Master [V ''v11'', V ''v12'', V ''v13'', V ''v2b'', V ''v3b''],
+                             V ''v11'' \<mapsto> Care,
+                             V ''v12'' \<mapsto> Care,
+                             V ''v13'' \<mapsto> Care,
+                             V ''v2b'' \<mapsto> Care,
+                             V ''v3b'' \<mapsto> Care
+                             ]
+          \<rparr>,
+          new_configured_list_SecurityInvariant SINVAR_LIB_SubnetsInGW \<lparr> 
+          node_properties = [V ''v21'' \<mapsto> Member, V ''v22'' \<mapsto> Member, V ''v23'' \<mapsto> Member, V ''v2b'' \<mapsto> InboundGateway]
+          \<rparr>,
+          new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
+          node_properties = [V ''v2b'' \<mapsto> Master [V ''v21'', V ''v22'', V ''v23'', V ''v1b'', V ''v3b''],
+                             V ''v21'' \<mapsto> Care,
+                             V ''v22'' \<mapsto> Care,
+                             V ''v23'' \<mapsto> Care,
+                             V ''v1b'' \<mapsto> Care,
+                             V ''v3b'' \<mapsto> Care
+                             ]
+          \<rparr>,
+          new_configured_list_SecurityInvariant SINVAR_LIB_SubnetsInGW \<lparr> 
+          node_properties = [V ''v3b'' \<mapsto> InboundGateway]
+          \<rparr>,
+          new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
+          node_properties = [V ''v3b'' \<mapsto> Master [V ''v1b'', V ''v2b''],
+                             V ''v1b'' \<mapsto> Care,
+                             V ''v2b'' \<mapsto> Care
+                             ]
+          \<rparr>]"
+  value[code] "make_policy SubnetsInGW_ACL_ms subnet_hosts"
+  lemma "set (edgesL (make_policy [Subnets_m] subnet_hosts)) \<subseteq> set (edgesL (make_policy SubnetsInGW_ACL_ms subnet_hosts))" by eval
+  value[code] "[e <- edgesL (make_policy SubnetsInGW_ACL_ms subnet_hosts). e \<notin> set (edgesL (make_policy [Subnets_m] subnet_hosts))]"
+  ML_val{*
+  visualize_graph @{context} @{term "SubnetsInGW_ACL_ms"}
+    @{term "make_policy SubnetsInGW_ACL_ms subnet_hosts"};
+  *}
 end
 
 end
