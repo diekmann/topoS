@@ -157,7 +157,7 @@ writeln ("echo 1 > /proc/sys/net/ipv4/ip_forward"^"\n"^
          "iptables -P FORWARD DROP");
 
 iterate_edges_ML @{context}  @{term "flows_fixL stateful_policy"}
-  (fn (v1,v2) => writeln ("iptables -A FORWARD -i $"^v1^"_iface -s $"^v1^"_ipv4 -o "^v2^"_iface -d $"^v2^"_ipv4 -j ACCEPT"^" # "^v1^" -> "^v2) )
+  (fn (v1,v2) => writeln ("iptables -A FORWARD -i $"^v1^"_iface -s $"^v1^"_ipv4 -o $"^v2^"_iface -d $"^v2^"_ipv4 -j ACCEPT"^" # "^v1^" -> "^v2) )
   (fn _ => () )
   (fn _ => () );
 

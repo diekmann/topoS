@@ -483,6 +483,29 @@ lemma "generate_valid_stateful_policy_IFSACS policy
        (V ''Watchdog'', V ''Bot1''),
        (V ''Watchdog'', V ''Bot2'')]\<rparr>" by eval
 
+
+
+text{*firewall -- classical use case*}
+ML_val{*
+
+(*header*)
+writeln ("echo 1 > /proc/sys/net/ipv4/ip_forward"^"\n"^
+         "# flush all rules"^"\n"^
+         "iptables -F"^"\n"^
+         "#default policy for FORWARD chain:"^"\n"^
+         "iptables -P FORWARD DROP");
+
+iterate_edges_ML @{context}  @{term "flows_fixL stateful_policy"}
+  (fn (v1,v2) => writeln ("iptables -A FORWARD -i $"^v1^"_iface -s $"^v1^"_ipv4 -o $"^v2^"_iface -d $"^v2^"_ipv4 -j ACCEPT"^" # "^v1^" -> "^v2) )
+  (fn _ => () )
+  (fn _ => () );
+
+iterate_edges_ML @{context} @{term "flows_stateL stateful_policy"}
+  (fn (v1,v2) => writeln ("iptables -I FORWARD -m state --state ESTABLISHED -i $"^v2^"_iface -s $"^v2^"_ipv4 -o $"^v1^"_iface -d $"^v1^"_ipv4 # "^v2^" -> "^v1^" (answer)") )
+  (fn _ => () )
+  (fn _ => () )
+*}
+
 end
 
 
