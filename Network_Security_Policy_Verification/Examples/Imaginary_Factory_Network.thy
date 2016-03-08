@@ -261,7 +261,48 @@ definition make_policy_efficient :: "('a SecurityInvariant) list \<Rightarrow> '
 
 
 
+text{*
+The diff to the maximum policy.
+Since we excluded @{const NonInterference_m}, it should be the maximum.
+*}
 value[code] "make_policy invariants (nodesL policy)" (*15s without NonInterference*)
+lemma "make_policy invariants (nodesL policy) = 
+   \<lparr>nodesL =
+    [V ''Statistics'', V ''SensorSink'', V ''PresenceSensor'', V ''Webcam'', V ''TempSensor'',
+     V ''FireSensor'', V ''MissionControl1'', V ''MissionControl2'', V ''Watchdog'', V ''Bot1'',
+     V ''Bot2'', V ''AdminPc'', V ''INET''],
+    edgesL =
+      [(V ''Statistics'', V ''Statistics''), (V ''SensorSink'', V ''Statistics''),
+       (V ''SensorSink'', V ''SensorSink''), (V ''SensorSink'', V ''Webcam''),
+       (V ''PresenceSensor'', V ''SensorSink''), (V ''PresenceSensor'', V ''PresenceSensor''),
+       (V ''Webcam'', V ''SensorSink''), (V ''Webcam'', V ''Webcam''),
+       (V ''TempSensor'', V ''SensorSink''), (V ''TempSensor'', V ''TempSensor''),
+       (V ''TempSensor'', V ''INET''), (V ''FireSensor'', V ''SensorSink''),
+       (V ''FireSensor'', V ''FireSensor''), (V ''FireSensor'', V ''INET''),
+       (V ''MissionControl1'', V ''MissionControl1''),
+       (V ''MissionControl1'', V ''MissionControl2''), (V ''MissionControl1'', V ''Bot1''),
+       (V ''MissionControl1'', V ''Bot2''), (V ''MissionControl2'', V ''MissionControl2''),
+       (V ''MissionControl2'', V ''Bot2''), (V ''Watchdog'', V ''MissionControl1''),
+       (V ''Watchdog'', V ''MissionControl2''), (V ''Watchdog'', V ''Watchdog''),
+       (V ''Watchdog'', V ''Bot1''), (V ''Watchdog'', V ''Bot2''), (V ''Watchdog'', V ''INET''),
+       (V ''Bot1'', V ''Bot1''), (V ''Bot2'', V ''Bot2''), (V ''AdminPc'', V ''MissionControl1''),
+       (V ''AdminPc'', V ''MissionControl2''), (V ''AdminPc'', V ''Watchdog''),
+       (V ''AdminPc'', V ''Bot1''), (V ''AdminPc'', V ''AdminPc''), (V ''AdminPc'', V ''INET''),
+       (V ''INET'', V ''INET'')]\<rparr>" by eval
+
+text{*Additional flows which would be allowed but which are not in the policy*}
+lemma  "set [e \<leftarrow> edgesL (make_policy invariants (nodesL policy)). e \<notin> set (edgesL policy)] = 
+        set [(v,v). v \<leftarrow> (nodesL policy)] \<union>
+        set [(V ''SensorSink'', V ''Webcam''),
+             (V ''TempSensor'', V ''INET''),
+             (V ''FireSensor'', V ''INET''),
+             (V ''MissionControl1'', V ''MissionControl2''),
+             (V ''Watchdog'', V ''MissionControl1''),
+             (V ''Watchdog'', V ''MissionControl2''),
+             (V ''Watchdog'', V ''INET''),
+             (V ''AdminPc'', V ''Watchdog''),
+             (V ''AdminPc'', V ''Bot1''),
+             (V ''AdminPc'', V ''INET'')]" by eval
 ML_val{*
 visualize_edges @{context} @{term "edgesL policy"} 
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
@@ -272,7 +313,10 @@ visualize_edges @{context} @{term "edgesL policy"}
 text{* without @{const NonInterference_m} *}
 lemma "all_security_requirements_fulfilled invariants (make_policy invariants (nodesL policy))" by eval
 
-text{*what if we exclude subnets? it is deprecated and strange anyway ;-)*}
+
+
+
+text{*Side note: what if we exclude subnets?*}
 ML_val{*
 visualize_edges @{context} @{term "edgesL (make_policy invariants (nodesL policy))"} 
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
@@ -289,7 +333,7 @@ value[code] "make_policy_efficient (NonInterference_m#invariants) (nodesL policy
 
 
 lemma "make_policy_efficient (invariants@[NonInterference_m]) (nodesL policy) = 
-      make_policy_efficient (NonInterference_m#invariants) (nodesL policy)" by eval
+       make_policy_efficient (NonInterference_m#invariants) (nodesL policy)" by eval
 
 text{*But @{const NonInterference_m} insists on removing something, which would not be necessary.*}
 lemma "make_policy invariants (nodesL policy) \<noteq> make_policy_efficient (NonInterference_m#invariants) (nodesL policy)" by eval
@@ -299,8 +343,16 @@ lemma "set (edgesL (make_policy_efficient (NonInterference_m#invariants) (nodesL
        set (edgesL (make_policy invariants (nodesL policy)))" by eval
 
 text{*This is what it wants to be gone.*} (*may take some minutes*)
-value[code] "[e \<leftarrow> edgesL (make_policy invariants (nodesL policy)).
-                e \<notin> set (edgesL (make_policy_efficient (NonInterference_m#invariants) (nodesL policy)))]"
+lemma "[e \<leftarrow> edgesL (make_policy invariants (nodesL policy)).
+                e \<notin> set (edgesL (make_policy_efficient (NonInterference_m#invariants) (nodesL policy)))] =
+       [(V ''AdminPc'', V ''MissionControl1''), (V ''AdminPc'', V ''MissionControl2''),
+        (V ''AdminPc'', V ''Watchdog''), (V ''AdminPc'', V ''Bot1''), (V ''AdminPc'', V ''INET'')]"
+  by eval
+
+lemma "[e \<leftarrow> edgesL (make_policy invariants (nodesL policy)).
+               e \<notin> set (edgesL (make_policy_efficient (NonInterference_m#invariants) (nodesL policy)))] =
+       [e \<leftarrow> edgesL (make_policy invariants (nodesL policy)). fst e = V ''AdminPc'' \<and> snd e \<noteq> V ''AdminPc'']"
+  by eval
 ML_val{*
 visualize_edges @{context} @{term "edgesL policy"} 
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
@@ -309,21 +361,17 @@ visualize_edges @{context} @{term "edgesL policy"}
 *}
 
 
-text{*
-The diff to the maximum policy.
-Since we excluded @{const NonInterference_m}, it should be the maximum.
-*}
-ML_val{*
-visualize_edges @{context} @{term "edgesL policy"}
-    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
-     @{term "[e \<leftarrow> edgesL (make_policy invariants (nodesL policy)). e \<notin> set (edgesL policy)]"})] ""; 
-*}
 
 
 
 subsection{*stateful implementation*}
 definition "stateful_policy = generate_valid_stateful_policy_IFSACS policy invariants"
-value "stateful_policy"
+lemma "stateful_policy =
+ \<lparr>hostsL = nodesL policy,
+    flows_fixL = edgesL policy,
+    flows_stateL =
+      [(V ''Webcam'', V ''SensorSink''),
+       (V ''SensorSink'', V ''Statistics'')]\<rparr>" by eval
 
 ML_val{*
 visualize_edges @{context} @{term "flows_fixL stateful_policy"} 
@@ -335,12 +383,28 @@ text{*Because @{const BLP_tradesecrets_m} and @{const SinkRobots_m} restrict inf
      @{term "''Watchdog''"} cannot establish a stateful connection to the bots.
      The invariants clearly state that the bots must not leak information, and Watchdog
      was never given permission to get any information back.*}
-value[code] "generate_valid_stateful_policy_IFSACS policy [BLP_privacy_m,  BLP_employee_export_m,
-                          ACL_bot2_m, Control_hierarchy_m, 
-                          SecurityGateway_m,  Subnets_m, SubnetsInGW_m]"
+
 
 text{*Without those two invariants, also AdminPc can set up stateful connections to the machines
-      it is inteneded to administer.*}
+      it is intended to administer.*}
+
+lemma "generate_valid_stateful_policy_IFSACS policy
+      [BLP_privacy_m, BLP_employee_export_m,
+       ACL_bot2_m, Control_hierarchy_m, 
+       SecurityGateway_m,  Subnets_m, SubnetsInGW_m] =
+ \<lparr>hostsL = nodesL policy,
+    flows_fixL = edgesL policy,
+    flows_stateL =
+      [(V ''Webcam'', V ''SensorSink''),
+       (V ''SensorSink'', V ''Statistics''),
+       (V ''MissionControl1'', V ''Bot1''),
+       (V ''MissionControl1'', V ''Bot2''),
+       (V ''MissionControl2'', V ''Bot2''),
+       (V ''AdminPc'', V ''MissionControl2''),
+       (V ''AdminPc'', V ''MissionControl1''),
+       (V ''Watchdog'', V ''Bot1''),
+       (V ''Watchdog'', V ''Bot2'')]\<rparr>" by eval
+
 
 ML_val{*
 visualize_edges @{context} @{term "flows_fixL (generate_valid_stateful_policy_IFSACS policy [BLP_privacy_m,  BLP_employee_export_m,
@@ -352,52 +416,73 @@ visualize_edges @{context} @{term "flows_fixL (generate_valid_stateful_policy_IF
                           SecurityGateway_m,  Subnets_m, SubnetsInGW_m])"})] ""; 
 *}
 
-(*TODO: show how to tune the invariants*)
 
-text{*Bot1 and Bot2 have different security clearances. If Watchdog wants to get information from both,
-      it needs to be trusted.*}
+text{*Bot1 and Bot2 have different security clearances.
+      If Watchdog wants to get information from both, it needs to be trusted.
+      Also, Watchdog needs to be included into the SinkPool to set up a stateful connection to the Bots. 
+      The bots must be lifted from Sinks to the SinkPool, otherwise, it would be impossible 
+      to get any information flow back from them.
 
-lemma "all_security_requirements_fulfilled [BLP_privacy_m,  BLP_employee_export_m,
-                          ACL_bot2_m, Control_hierarchy_m, 
-                          SecurityGateway_m,  Subnets_m, SubnetsInGW_m,
-      new_configured_list_SecurityInvariant
-                                  SINVAR_LIB_Sink
-                                    \<lparr> node_properties = [V ''MissionControl1'' \<mapsto> SinkPool,
-                 V ''MissionControl2'' \<mapsto> SinkPool,
-                 V ''Bot1'' \<mapsto> SinkPool,
-                 V ''Bot2'' \<mapsto> SinkPool,
-                 V ''Watchdog'' \<mapsto> SinkPool
-                 ] \<rparr>,
-       new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr> 
-        node_properties = [V ''MissionControl1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
-                           V ''MissionControl2'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
-                           V ''Bot1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
-                           V ''Bot2'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
-                           V ''Watchdog'' \<mapsto> \<lparr> privacy_level = 1, trusted = True \<rparr>
-                                (*trust because bot2 must send to it. privacy_level 1 to interact with bot 1*)
-                           ] \<rparr>
-                 ]
+      Same for AdminPC.*}
+
+lemma "all_security_requirements_fulfilled [BLP_privacy_m, BLP_employee_export_m,
+               ACL_bot2_m, Control_hierarchy_m, 
+               SecurityGateway_m, Subnets_m, SubnetsInGW_m,
+               new_configured_list_SecurityInvariant SINVAR_LIB_Sink
+                 \<lparr> node_properties = [V ''MissionControl1'' \<mapsto> SinkPool,
+                                      V ''MissionControl2'' \<mapsto> SinkPool,
+                                      V ''Bot1'' \<mapsto> SinkPool,
+                                      V ''Bot2'' \<mapsto> SinkPool,
+                                      V ''Watchdog'' \<mapsto> SinkPool,
+                                      V ''AdminPc'' \<mapsto> SinkPool
+                                      ] \<rparr>,
+               new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted
+                 \<lparr> node_properties = [V ''MissionControl1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
+                                      V ''MissionControl2'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
+                                      V ''Bot1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
+                                      V ''Bot2'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
+                                      V ''Watchdog'' \<mapsto> \<lparr> privacy_level = 1, trusted = True \<rparr>,
+                                        (*trust because bot2 must send to it. privacy_level 1 to interact with bot 1*)
+                                      V ''AdminPc'' \<mapsto> \<lparr> privacy_level = 1, trusted = True \<rparr>
+                                      ] \<rparr>
+              ]
        policy" by eval
 
-value[code] "generate_valid_stateful_policy_IFSACS policy [BLP_privacy_m,  BLP_employee_export_m,
-                          ACL_bot2_m, Control_hierarchy_m, 
-                          SecurityGateway_m,  Subnets_m, SubnetsInGW_m,
-      new_configured_list_SecurityInvariant
-                                  SINVAR_LIB_Sink
-                                    \<lparr> node_properties = [V ''MissionControl1'' \<mapsto> SinkPool,
-                 V ''MissionControl2'' \<mapsto> SinkPool,
-                 V ''Bot1'' \<mapsto> SinkPool,
-                 V ''Bot2'' \<mapsto> SinkPool,
-                 V ''Watchdog'' \<mapsto> SinkPool
-                 ] \<rparr>,
-       new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr> 
-        node_properties = [V ''MissionControl1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
-                           V ''MissionControl2'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
-                           V ''Bot1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
-                           V ''Bot2'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
-                           V ''Watchdog'' \<mapsto> \<lparr> privacy_level = 1, trusted = True \<rparr>
-                           ] \<rparr>
-                 ]"
+lemma "generate_valid_stateful_policy_IFSACS policy
+              [BLP_privacy_m, BLP_employee_export_m,
+               ACL_bot2_m, Control_hierarchy_m, 
+               SecurityGateway_m, Subnets_m, SubnetsInGW_m,
+               new_configured_list_SecurityInvariant SINVAR_LIB_Sink
+                 \<lparr> node_properties = [V ''MissionControl1'' \<mapsto> SinkPool,
+                                      V ''MissionControl2'' \<mapsto> SinkPool,
+                                      V ''Bot1'' \<mapsto> SinkPool,
+                                      V ''Bot2'' \<mapsto> SinkPool,
+                                      V ''Watchdog'' \<mapsto> SinkPool,
+                                      V ''AdminPc'' \<mapsto> SinkPool
+                                      ] \<rparr>,
+               new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted
+                 \<lparr> node_properties = [V ''MissionControl1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
+                                      V ''MissionControl2'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
+                                      V ''Bot1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
+                                      V ''Bot2'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
+                                      V ''Watchdog'' \<mapsto> \<lparr> privacy_level = 1, trusted = True \<rparr>,
+                                        (*trust because bot2 must send to it. privacy_level 1 to interact with bot 1*)
+                                      V ''AdminPc'' \<mapsto> \<lparr> privacy_level = 1, trusted = True \<rparr>
+                                      ] \<rparr>
+              ]
+ =
+ \<lparr>hostsL = nodesL policy,
+    flows_fixL = edgesL policy,
+    flows_stateL =
+      [(V ''Webcam'', V ''SensorSink''),
+       (V ''SensorSink'', V ''Statistics''),
+       (V ''MissionControl1'', V ''Bot1''),
+       (V ''MissionControl2'', V ''Bot2''),
+       (V ''AdminPc'', V ''MissionControl2''),
+       (V ''AdminPc'', V ''MissionControl1''),
+       (V ''Watchdog'', V ''Bot1''),
+       (V ''Watchdog'', V ''Bot2'')]\<rparr>" by eval
+
 end
 
 
