@@ -13,8 +13,8 @@ fun sinvar :: "'v graph \<Rightarrow> ('v \<Rightarrow> privacy_level) \<Rightar
   "sinvar G nP = (\<forall> (e1,e2) \<in> edges G. (nP e1) \<le> (nP e2))"
 
 text{* What we call a @{typ privacy_level} is often referred to as security clearance in the literature. 
-The lowest security clearance is @{term "0::nat"}, which can be understood as unclassified}.
-Consequently, 1 = confidential, 2 = secret, 3 = topSecret}, .... 
+The lowest security clearance is @{term "0::nat"}, which can be understood as unclassified.
+Consequently, 1 = confidential, 2 = secret, 3 = topSecret, .... 
 The total order of the security clearances corresponds to the total order of the natural numbers @{text \<le>}. 
 It is important that there is smallest security clearance (i.e. @{const default_node_properties}), 
 otherwise, a unique and secure default parameter could not exist. 
