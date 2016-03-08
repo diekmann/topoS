@@ -30,3 +30,6 @@ session "Network_Security_Policy_Verification_Examples" = "Network_Security_Poli
     "Examples/Impl_List_Playground_ChairNetwork_statefulpolicy_example"
     "Examples/Imaginary_Factory_Network"
     "SINVAR_Examples"
+  document_files
+    "root.bib"
+    "root.tex"

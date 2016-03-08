@@ -833,8 +833,8 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
 
 
   text{*Notation:
-    generate_valid_topology_SOME: non-deterministic choice
-    generate_valid_topology_some: executable which selects always the same
+    @{const generate_valid_topology_SOME}: non-deterministic choice
+    @{text generate_valid_topology_some}: executable which selects always the same
     *}
   fun generate_valid_topology_some :: "'v SecurityInvariant_configured list \<Rightarrow> ('v\<times>'v) list \<Rightarrow> 'v graph \<Rightarrow> 'v graph" where
     "generate_valid_topology_some [] _ G = G" |

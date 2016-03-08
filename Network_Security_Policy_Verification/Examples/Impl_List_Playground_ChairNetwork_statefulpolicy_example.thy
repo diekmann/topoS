@@ -130,7 +130,7 @@ visualize_edges @{context} @{term "flows_fixL ChairNetwork_stateful_v2"}
 (*The sink requirements imposes the restriction that the printer cannot answer*)
 definition "ChairNetwork_stateful_v3 = generate_valid_stateful_policy_IFSACS ChairNetwork [PrintingSink]"
 ML_val{*
-visualize_edges @{context} @{term "flows_fixL ChairNetwork_stateful_v3"} 
+visualize_edges @{context} @{term "flows_fixL ChairNetwork_stateful_v3"}
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "flows_stateL ChairNetwork_stateful_v3"})] ""; 
 *}
 
