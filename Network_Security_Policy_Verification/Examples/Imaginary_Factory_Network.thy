@@ -209,7 +209,20 @@ end
 (*TODO: dependability*)
 
 
-text{*Hierarchy of fab robots*}
+text{*Hierarchy of fab robots:
+  The production line is designed according to a strict command hierarchy. 
+	On top of the hierarchy are control terminals which allow a human operator to intervene and supervise the production process. 
+	On the level below, one distinguishes between supervision devices and control devices. 
+	The watchdog is a typical supervision device whereas the mission control devices are control devices. 
+	Directly below the control devices are the robots. 
+	This is the structure that is necessary for the example. 
+	However, the company defined a few more sub-departments for future use. 
+	The full domain hierarchy tree is visualized below. 
+*}
+text{*
+  Apart from the watchdog, only the following linear part of the tree is used: 
+  @{text "''Robots'' \<sqsubseteq> ''ControlDevices'' \<sqsubseteq> ''ControlTerminal''"}.
+	Because the watchdog is in a different domain, it needs a trust level of $1$ to access the robots it is monitoring. *}
 context begin
   private definition "DomainHierarchy_host_attributes \<equiv>
                 [(V ''MissionControl1'',
@@ -248,9 +261,91 @@ context begin
                                     \<lparr> node_properties = map_of DomainHierarchy_host_attributes \<rparr>"
 end
 
-text{*NonInterference of something (for the sake of example)
-Whatever happens, Admin must not interfere with the fire sensor.
-Because the company that sold the fire sensor wrote it in their contract or something.*}
+
+text{*Sensor Gateway: 
+  The sensors should not communicate among each other; all accesses must be mediated by the sensor sink. *}
+context begin
+  private definition "SecurityGateway_host_attributes \<equiv>
+                [V ''SensorSink'' \<mapsto> SecurityGateway,
+                 V ''PresenceSensor'' \<mapsto> DomainMember,
+                 V ''Webcam'' \<mapsto> DomainMember,
+                 V ''TempSensor'' \<mapsto> DomainMember,
+                 V ''FireSensor'' \<mapsto> DomainMember
+                 ]"
+  private lemma "dom SecurityGateway_host_attributes \<subseteq> set (nodesL policy)"
+    by(simp add: SecurityGateway_host_attributes_def policy_def)
+  definition "SecurityGateway_m \<equiv> new_configured_list_SecurityInvariant
+                                  SINVAR_LIB_SecurityGatewayExtended
+                                    \<lparr> node_properties = SecurityGateway_host_attributes \<rparr>"
+end
+
+
+text{*Production Robots are an information sink:
+  The actual control program of the robots is a corporate trade secret. 
+	The control commands must not leave the robots. 
+	Therefore, they are declared information sinks. 
+	In addition, the control command must not leave the mission control devices. 
+	However, the two devices could possibly interact to synchronize and they must send their commands to the robots. 
+	Therefore, they are labeled as sink pools. *}
+context begin
+  private definition "SinkRobots_host_attributes \<equiv>
+                [V ''MissionControl1'' \<mapsto> SinkPool,
+                 V ''MissionControl2'' \<mapsto> SinkPool,
+                 V ''Bot1'' \<mapsto> Sink,
+                 V ''Bot2'' \<mapsto> Sink
+                 ]"
+  private lemma "dom SinkRobots_host_attributes \<subseteq> set (nodesL policy)"
+    by(simp add: SinkRobots_host_attributes_def policy_def)
+  definition "SinkRobots_m \<equiv> new_configured_list_SecurityInvariant
+                                  SINVAR_LIB_Sink
+                                    \<lparr> node_properties = SinkRobots_host_attributes \<rparr>"
+end
+
+text{*Subnet of the fab:
+  The sensors, including their sink and statistics server are located in their own subnet and must 
+  not be accessible from elsewhere. 
+	Also, the administrator's PC is in its own subnet. 
+	The production units (mission control and robots) are already isolated by the DomainHierarchy 
+  and are not added to a subnet explicitly. *}
+context begin
+  private definition "Subnets_host_attributes \<equiv>
+                [V ''Statistics'' \<mapsto> Subnet 1,
+                 V ''SensorSink'' \<mapsto> Subnet 1,
+                 V ''PresenceSensor'' \<mapsto> Subnet 1,
+                 V ''Webcam'' \<mapsto> Subnet 1,
+                 V ''TempSensor'' \<mapsto> Subnet 1,
+                 V ''FireSensor'' \<mapsto> Subnet 1,
+                 V ''AdminPc'' \<mapsto> Subnet 4
+                 ]"
+  private lemma "dom Subnets_host_attributes \<subseteq> set (nodesL policy)"
+    by(simp add: Subnets_host_attributes_def policy_def)
+  definition "Subnets_m \<equiv> new_configured_list_SecurityInvariant
+                                  SINVAR_LIB_Subnets
+                                    \<lparr> node_properties = Subnets_host_attributes \<rparr>"
+end
+
+
+text{* Access Gateway for the Statistics server:
+  The statistics server is further protected from external accesses. 
+	Another, smaller subnet is defined with the only member being the statistics server. 
+	The only way it may be accessed is via that sensor sink. *}
+context begin
+  private definition "SubnetsInGW_host_attributes \<equiv>
+                [V ''Statistics'' \<mapsto> Member,
+                 V ''SensorSink'' \<mapsto> InboundGateway
+                 ]"
+  private lemma "dom SubnetsInGW_host_attributes \<subseteq> set (nodesL policy)"
+    by(simp add: SubnetsInGW_host_attributes_def policy_def)
+  definition "SubnetsInGW_m \<equiv> new_configured_list_SecurityInvariant
+                                  SINVAR_LIB_SubnetsInGW
+                                    \<lparr> node_properties = SubnetsInGW_host_attributes \<rparr>"
+end
+
+
+text{*NonInterference (for the sake of example):
+	The fire sensor is managed by an external company and has a built-in GSM module to call the fire fighters in case of an emergency. 
+	This additional, out-of-band connectivity is not modeled. 
+	However, the contract defines that the company's administrator must not interfere in any way with the fire sensor. *}
 context begin
   private definition "NonInterference_host_attributes \<equiv>
                 [V ''Statistics'' \<mapsto> Unrelated,
@@ -273,70 +368,6 @@ context begin
                                     \<lparr> node_properties = NonInterference_host_attributes \<rparr>"
 end
 
-
-
-text{*Sensor Gateway*}
-context begin
-  private definition "SecurityGateway_host_attributes \<equiv>
-                [V ''SensorSink'' \<mapsto> SecurityGateway,
-                 V ''PresenceSensor'' \<mapsto> DomainMember,
-                 V ''Webcam'' \<mapsto> DomainMember,
-                 V ''TempSensor'' \<mapsto> DomainMember,
-                 V ''FireSensor'' \<mapsto> DomainMember
-                 ]"
-  private lemma "dom SecurityGateway_host_attributes \<subseteq> set (nodesL policy)"
-    by(simp add: SecurityGateway_host_attributes_def policy_def)
-  definition "SecurityGateway_m \<equiv> new_configured_list_SecurityInvariant
-                                  SINVAR_LIB_SecurityGatewayExtended
-                                    \<lparr> node_properties = SecurityGateway_host_attributes \<rparr>"
-end
-
-
-text{*Production Robots are an information sink*}
-context begin
-  private definition "SinkRobots_host_attributes \<equiv>
-                [V ''MissionControl1'' \<mapsto> SinkPool,
-                 V ''MissionControl2'' \<mapsto> SinkPool,
-                 V ''Bot1'' \<mapsto> Sink,
-                 V ''Bot2'' \<mapsto> Sink
-                 ]"
-  private lemma "dom SinkRobots_host_attributes \<subseteq> set (nodesL policy)"
-    by(simp add: SinkRobots_host_attributes_def policy_def)
-  definition "SinkRobots_m \<equiv> new_configured_list_SecurityInvariant
-                                  SINVAR_LIB_Sink
-                                    \<lparr> node_properties = SinkRobots_host_attributes \<rparr>"
-end
-
-text{*Subnet of the fab*}
-context begin
-  private definition "Subnets_host_attributes \<equiv>
-                [V ''Statistics'' \<mapsto> Subnet 1,
-                 V ''SensorSink'' \<mapsto> Subnet 1,
-                 V ''PresenceSensor'' \<mapsto> Subnet 1,
-                 V ''Webcam'' \<mapsto> Subnet 1,
-                 V ''TempSensor'' \<mapsto> Subnet 1,
-                 V ''FireSensor'' \<mapsto> Subnet 1,
-                 V ''AdminPc'' \<mapsto> Subnet 4
-                 ]"
-  private lemma "dom Subnets_host_attributes \<subseteq> set (nodesL policy)"
-    by(simp add: Subnets_host_attributes_def policy_def)
-  definition "Subnets_m \<equiv> new_configured_list_SecurityInvariant
-                                  SINVAR_LIB_Subnets
-                                    \<lparr> node_properties = Subnets_host_attributes \<rparr>"
-end
-
-
-context begin
-  private definition "SubnetsInGW_host_attributes \<equiv>
-                [V ''Statistics'' \<mapsto> Member,
-                 V ''SensorSink'' \<mapsto> InboundGateway
-                 ]"
-  private lemma "dom SubnetsInGW_host_attributes \<subseteq> set (nodesL policy)"
-    by(simp add: SubnetsInGW_host_attributes_def policy_def)
-  definition "SubnetsInGW_m \<equiv> new_configured_list_SecurityInvariant
-                                  SINVAR_LIB_SubnetsInGW
-                                    \<lparr> node_properties = SubnetsInGW_host_attributes \<rparr>"
-end
 
 
 definition "invariants \<equiv> [BLP_privacy_m, BLP_tradesecrets_m, BLP_employee_export_m,
