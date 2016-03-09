@@ -36,7 +36,7 @@ The network consists of the following hosts which are responsible to monitor the
 
 The following hosts are responsible for the production line. 
 
-  \<^item> [MissionControl1: An automation device which drives and controls the robots. 
+  \<^item> MissionControl1: An automation device which drives and controls the robots. 
   \<^item> MissionControl2: An automation device which drives and controls the robots. 
                      It contains the logic for a secret production step, carried out only by Bot2.
   \<^item> Watchdog: Regularly checks the health and technical readings of the robots. 
@@ -44,7 +44,7 @@ The following hosts are responsible for the production line.
   \<^item> Bot2: Production robot unit 2. Does a secret production step. 
   \<^item> AdminPc: A human administrator can log into this machine to supervise or troubleshoot the production. 
 
-We model one addition, special host. 
+We model one additional special host. 
 
   \<^item> INET: A symbolic host which represents all hosts which are not part of this network.
 
