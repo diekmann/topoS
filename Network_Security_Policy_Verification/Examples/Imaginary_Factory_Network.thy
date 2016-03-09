@@ -441,11 +441,13 @@ ML_val{*
 visualize_edges @{context} @{term "edgesL policy"} 
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
      @{term "[e \<leftarrow> edgesL (make_policy invariants (nodesL policy)).
-                e \<notin> set (edgesL policy)]"})] ""; 
+                e \<notin> set (edgesL policy)]"})] "";
 *}
 
 text{* without @{const NonInterference_m} *}
 lemma "all_security_requirements_fulfilled invariants (make_policy invariants (nodesL policy))" by eval
+
+lemma "\<not> all_security_requirements_fulfilled (NonInterference_m#invariants) (make_policy invariants (nodesL policy))" by eval
 
 
 
