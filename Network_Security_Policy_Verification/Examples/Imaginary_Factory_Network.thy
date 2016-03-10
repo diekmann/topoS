@@ -467,6 +467,11 @@ text{*The more efficient algorithm does not need to construct the complete set o
 value[code] "make_policy_efficient (invariants@[NonInterference_m]) (nodesL policy)"
 value[code] "make_policy_efficient (NonInterference_m#invariants) (nodesL policy)"
 
+(* only try this if you have more than 128GB ram. Let me know if you can finish the computation ;-)
+   I could not do more than 5 nodes on 128gb machine.
+value[code] "make_policy (NonInterference_m#invariants) (nodesL policy)"
+  (* NonInterference_m produces exponentially many offending flows*)
+*)
 
 lemma "make_policy_efficient (invariants@[NonInterference_m]) (nodesL policy) = 
        make_policy_efficient (NonInterference_m#invariants) (nodesL policy)" by eval
