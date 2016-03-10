@@ -549,7 +549,7 @@ visualize_edges @{context} @{term "flows_fixL (generate_valid_stateful_policy_IF
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
       @{term "flows_stateL (generate_valid_stateful_policy_IFSACS policy [BLP_privacy_m,  BLP_employee_export_m,
                           ACL_bot2_m, Control_hierarchy_m, 
-                          SecurityGateway_m,  Subnets_m, SubnetsInGW_m])"})] ""; 
+                          SecurityGateway_m,  Subnets_m, SubnetsInGW_m])"})] "";
 *}
 
 
@@ -561,31 +561,8 @@ text{*Bot1 and Bot2 have different security clearances.
 
       Same for AdminPC.*}
 
-lemma "all_security_requirements_fulfilled [BLP_privacy_m, BLP_employee_export_m,
-               ACL_bot2_m, Control_hierarchy_m, 
-               SecurityGateway_m, Subnets_m, SubnetsInGW_m,
-               new_configured_list_SecurityInvariant SINVAR_LIB_Sink
-                 \<lparr> node_properties = [V ''MissionControl1'' \<mapsto> SinkPool,
-                                      V ''MissionControl2'' \<mapsto> SinkPool,
-                                      V ''Bot1'' \<mapsto> SinkPool,
-                                      V ''Bot2'' \<mapsto> SinkPool,
-                                      V ''Watchdog'' \<mapsto> SinkPool,
-                                      V ''AdminPc'' \<mapsto> SinkPool
-                                      ] \<rparr>,
-               new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted
-                 \<lparr> node_properties = [V ''MissionControl1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
-                                      V ''MissionControl2'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
-                                      V ''Bot1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
-                                      V ''Bot2'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
-                                      V ''Watchdog'' \<mapsto> \<lparr> privacy_level = 1, trusted = True \<rparr>,
-                                        (*trust because bot2 must send to it. privacy_level 1 to interact with bot 1*)
-                                      V ''AdminPc'' \<mapsto> \<lparr> privacy_level = 1, trusted = True \<rparr>
-                                      ] \<rparr>
-              ]
-       policy" by eval
 
-lemma "generate_valid_stateful_policy_IFSACS policy
-              [BLP_privacy_m, BLP_employee_export_m,
+definition "invariants_tuned \<equiv> [BLP_privacy_m, BLP_employee_export_m,
                ACL_bot2_m, Control_hierarchy_m, 
                SecurityGateway_m, Subnets_m, SubnetsInGW_m,
                new_configured_list_SecurityInvariant SINVAR_LIB_Sink
@@ -605,7 +582,14 @@ lemma "generate_valid_stateful_policy_IFSACS policy
                                         (*trust because bot2 must send to it. privacy_level 1 to interact with bot 1*)
                                       V ''AdminPc'' \<mapsto> \<lparr> privacy_level = 1, trusted = True \<rparr>
                                       ] \<rparr>
-              ]
+              ]"
+
+lemma "all_security_requirements_fulfilled invariants_tuned policy" by eval
+
+
+definition "stateful_policy_tuned = generate_valid_stateful_policy_IFSACS policy invariants_tuned"
+
+lemma "stateful_policy_tuned
  =
  \<lparr>hostsL = nodesL policy,
     flows_fixL = edgesL policy,
@@ -625,21 +609,33 @@ text{*firewall -- classical use case*}
 ML_val{*
 
 (*header*)
-writeln ("echo 1 > /proc/sys/net/ipv4/ip_forward"^"\n"^
+writeln (*("echo 1 > /proc/sys/net/ipv4/ip_forward"^"\n"^
          "# flush all rules"^"\n"^
          "iptables -F"^"\n"^
          "#default policy for FORWARD chain:"^"\n"^
-         "iptables -P FORWARD DROP");
+         "iptables -P FORWARD DROP");*)
+         ("*filter\n"^
+          ":INPUT ACCEPT [0:0]\n"^
+          ":FORWARD ACCEPT [0:0]\n"^
+          ":OUTPUT ACCEPT [0:0]");
 
-iterate_edges_ML @{context}  @{term "flows_fixL stateful_policy"}
-  (fn (v1,v2) => writeln ("iptables -A FORWARD -i $"^v1^"_iface -s $"^v1^"_ipv4 -o $"^v2^"_iface -d $"^v2^"_ipv4 -j ACCEPT"^" # "^v1^" -> "^v2) )
+iterate_edges_ML @{context}  @{term "flows_fixL stateful_policy_tuned"}
+  (fn (v1,v2) => writeln ("-A FORWARD -i $"^v1^"_iface -s $"^v1^"_ipv4 -o $"^v2^"_iface -d $"^v2^"_ipv4 -j ACCEPT") )
+                         (*("iptables -A FORWARD -i $\\$\\mathit{"^v1^"\\_iface}$ -s $\\$\\mathit{"^
+                          v1^"\\_ipv4}$ -o $\\$\\mathit{"^v2^"\\_iface}$ -d $\\$\\mathit{"^v2^"\\_ipv4}$ -j ACCEPT") )*)
   (fn _ => () )
   (fn _ => () );
 
-iterate_edges_ML @{context} @{term "flows_stateL stateful_policy"}
-  (fn (v1,v2) => writeln ("iptables -I FORWARD -m state --state ESTABLISHED -i $"^v2^"_iface -s $"^v2^"_ipv4 -o $"^v1^"_iface -d $"^v1^"_ipv4 # "^v2^" -> "^v1^" (answer)") )
+iterate_edges_ML @{context} @{term "flows_stateL stateful_policy_tuned"}
+  (fn (v1,v2) => writeln ("-I FORWARD -m state --state ESTABLISHED -i $"^v2^"_iface -s $"^
+                          v2^"_ipv4 -o $"^v1^"_iface -d $"^v1^"_ipv4 -j ACCEPT") )
+                          (*("iptables -I FORWARD -m state --state ESTABLISHED -i $\\$\\mathit{"^
+                           v2^"\\_iface}$ -s $\\$\\mathit{"^v2^"\\_ipv4}$ -o $\\$\\mathit{"^
+                           v1^"\\_iface}$ -d $\\$\\mathit{"^v1^"_ipv4}$ -j ACCEPT # "^v2^" -> "^v1^" (answer)") )*)
   (fn _ => () )
-  (fn _ => () )
+  (fn _ => () );
+
+writeln "COMMIT";
 *}
 
 end
