@@ -468,9 +468,9 @@ value[code] "make_policy_efficient (invariants@[NonInterference_m]) (nodesL poli
 value[code] "make_policy_efficient (NonInterference_m#invariants) (nodesL policy)"
 
 (* only try this if you have more than 128GB ram. Let me know if you can finish the computation ;-)
-   I could not do more than 5 nodes on 128gb machine.
+   I could not do more than 5 nodes on a 128gb machine.
 value[code] "make_policy (NonInterference_m#invariants) (nodesL policy)"
-  (* NonInterference_m produces exponentially many offending flows*)
+   NonInterference_m produces exponentially many offending flows
 *)
 
 lemma "make_policy_efficient (invariants@[NonInterference_m]) (nodesL policy) = 
@@ -495,7 +495,7 @@ lemma "[e \<leftarrow> edgesL (make_policy invariants (nodesL policy)).
        [e \<leftarrow> edgesL (make_policy invariants (nodesL policy)). fst e = V ''AdminPc'' \<and> snd e \<noteq> V ''AdminPc'']"
   by eval
 ML_val{*
-visualize_edges @{context} @{term "edgesL policy"} 
+visualize_edges @{context} @{term "edgesL policy"}
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
      @{term "[e \<leftarrow> edgesL (make_policy invariants (nodesL policy)).
                 e \<notin> set (edgesL (make_policy_efficient (NonInterference_m#invariants) (nodesL policy)))]"})] ""; 
@@ -525,7 +525,6 @@ text{*Because @{const BLP_tradesecrets_m} and @{const SinkRobots_m} restrict inf
      The invariants clearly state that the bots must not leak information, and Watchdog
      was never given permission to get any information back.*}
 
-
 text{*Without those two invariants, also AdminPc can set up stateful connections to the machines
       it is intended to administer.*}
 
@@ -545,6 +544,29 @@ lemma "generate_valid_stateful_policy_IFSACS policy
        (V ''AdminPc'', V ''MissionControl1''),
        (V ''Watchdog'', V ''Bot1''),
        (V ''Watchdog'', V ''Bot2'')]\<rparr>" by eval
+
+text{*Without the two invariants, the security goals are way too permissive!*}
+lemma "set [e \<leftarrow> edgesL (make_policy [BLP_privacy_m, BLP_employee_export_m,
+       ACL_bot2_m, Control_hierarchy_m, 
+       SecurityGateway_m,  Subnets_m, SubnetsInGW_m] (nodesL policy)). e \<notin> set (edgesL policy)] =
+        set [(v,v). v \<leftarrow> (nodesL policy)] \<union>
+        set [(V ''SensorSink'', V ''Webcam''),
+             (V ''TempSensor'', V ''INET''),
+             (V ''FireSensor'', V ''INET''),
+             (V ''MissionControl1'', V ''MissionControl2''),
+             (V ''Watchdog'', V ''MissionControl1''),
+             (V ''Watchdog'', V ''MissionControl2''),
+             (V ''Watchdog'', V ''INET''),
+             (V ''AdminPc'', V ''Watchdog''),
+             (V ''AdminPc'', V ''Bot1''),
+             (V ''AdminPc'', V ''INET'')] \<union>
+        set [(V ''MissionControl1'', V ''INET''),
+             (V ''MissionControl2'', V ''MissionControl1''),
+             (V ''MissionControl2'', V ''Bot1''),
+             (V ''MissionControl2'', V ''INET''),
+             (V ''Bot1'', V ''INET''),
+             (V ''Bot2'', V ''Bot1''),
+             (V ''Bot2'', V ''INET'')]" by eval
 
 
 ML_val{*
@@ -608,6 +630,19 @@ lemma "stateful_policy_tuned
        (V ''Watchdog'', V ''Bot1''),
        (V ''Watchdog'', V ''Bot2'')]\<rparr>" by eval
 
+text{*We even get a better (i.e. stricter) maximum policy*}
+lemma "set (edgesL (make_policy invariants_tuned (nodesL policy))) \<subset>
+       set (edgesL (make_policy invariants (nodesL policy)))" by eval
+lemma "set [e \<leftarrow> edgesL (make_policy invariants_tuned (nodesL policy)). e \<notin> set (edgesL policy)] =
+        set [(v,v). v \<leftarrow> (nodesL policy)] \<union>
+        set [(V ''SensorSink'', V ''Webcam''),
+             (V ''TempSensor'', V ''INET''),
+             (V ''FireSensor'', V ''INET''),
+             (V ''MissionControl1'', V ''MissionControl2''),
+             (V ''Watchdog'', V ''MissionControl1''),
+             (V ''Watchdog'', V ''MissionControl2''),
+             (V ''AdminPc'', V ''Watchdog''),
+             (V ''AdminPc'', V ''Bot1'')]" by eval
 
 
 text{*firewall -- classical use case*}
