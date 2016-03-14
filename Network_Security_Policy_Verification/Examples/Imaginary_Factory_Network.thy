@@ -7,8 +7,8 @@ abbreviation "V\<equiv>TopoS_Vertices.V"
 
 text{*
 In this theory, we give an an example of an imaginary factory network. 
-The example was chosen to show the interplay of several security invariants. 
-Many security invariants are specified to demonstrate their configuration effort. 
+The example was chosen to show the interplay of several security invariants 
+and to demonstrate their configuration effort.
 
 The specified security invariants deliberately include some minor specification problems. 
 These problems will be used to demonstrate the inner workings of the algorithms and to visualize why 
@@ -20,10 +20,10 @@ The described scenario is an imaginary factory network.
 It consists of sensors and actuators in a cyber-physical system. 
 The on-site production units of the factory are completely automated and there are no humans in the production area. 
 Sensors are monitoring the building.
-As production units, we will assume that there are two robots (abbreviated bots) which manufacture the actual goods. 
-The robots are controlled by control systems. 
+The production units are two robots (abbreviated bots) which manufacture the actual goods.
+The robots are controlled by two control systems.
 
-The network consists of the following hosts which are responsible to monitor the building. 
+The network consists of the following hosts which are responsible for monitoring the building.
 
   \<^item> Statistics: A server which collects, processes, and stores all data from the sensors. 
   \<^item> SensorSink: A device which receives the data from the PresenceSensor, Webcam, TempSensor, and FireSensor.
@@ -87,6 +87,21 @@ ML_val{*
 visualize_graph @{context} @{term "[]::vString SecurityInvariant list"} @{term "policy"};
 *}
 
+text{*The idea behind the policy is the following.
+The sensors on the left can all send their readings in an unidirectional fashion to the sensor sink, 
+which forwards the data to the statistics server.
+In the production line, on the right, all devices will set up stateful connections. 
+This means, once a connection is established, packet exchange can be bidirectional. 
+This makes sure that the watchdog will receive the health information from the robots, 
+the mission control machines will receive the current state of the robots, and the administrator can actually log into the mission control machines. 
+The policy should only specify who is allowed to set up the connections. 
+We will elaborate on the stateful implementation in @{file "../TopoS_Stateful_Policy.thy"} 
+and @{file "../TopoS_Stateful_Policy_Algorithm.thy"}. *}
+
+
+subsection{*Specification of Security Invariants*}
+
+
 text{*Several security invariants are specified.*}
 
 text{*Privacy for employees.
@@ -123,6 +138,14 @@ context begin
   definition "BLP_tradesecrets_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_BLPbasic \<lparr> 
         node_properties = BLP_tradesecrets_host_attributes \<rparr>"
 end
+text{*Note that Invariant 1 and Invariant 2 are two distinct specifications. 
+	They specify individual security goals independent of each other. 
+	For example, in Invariant 1,@{term "V ''MissionControl2''"} has the security clearance 
+	@{term \<bottom>} and in Invariant 2, @{term "V ''PresenceSensor''"} has security clearance @{term \<bottom>}. 
+	Consequently, both cannot interact.
+*}
+
+
 
 
 text{*Privacy for employees, exporting aggregated data:
@@ -176,7 +199,7 @@ context begin
   Note that Bot1 is in the access list of Bot2 but it does not have the @{const Care} attribute. 
 	This means, Bot1 can never access Bot2. 
 	A tool could automatically detect such inconsistencies and emit a warning. 
-	However, a tool should only emit a warning because this setting can be desirable. 
+	However, a tool should only emit a warning (not an error) because this setting can be desirable. 
 	
 	In our factory, this setting is currently desirable: 
 	Three months ago, Bot1 had an irreparable hardware error and needed to be removed from the production line. 
@@ -367,6 +390,10 @@ context begin
   definition "NonInterference_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_NonInterference
                                     \<lparr> node_properties = NonInterference_host_attributes \<rparr>"
 end
+text{*As discussed, this invariant is very strict and rather theoretical. 
+    It is not ENF-structured and may produce an exponential number of offending flows. 
+    Therefore, we exclude it by default from our algorithms. *}
+
 
 
 
@@ -375,8 +402,11 @@ definition "invariants \<equiv> [BLP_privacy_m, BLP_tradesecrets_m, BLP_employee
                           SecurityGateway_m, SinkRobots_m, Subnets_m, SubnetsInGW_m]"
 text{*We have excluded @{const NonInterference_m} because of its infeasible runtime.*}
 
-
 lemma "length invariants = 9" by eval
+
+
+
+subsection{*Policy Verification*}
 
 
 text{*All security requirements (including @{const NonInterference_m}) are fulfilled.*}
