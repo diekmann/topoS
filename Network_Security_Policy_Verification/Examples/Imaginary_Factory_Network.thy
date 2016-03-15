@@ -409,7 +409,10 @@ lemma "length invariants = 9" by eval
 subsection{*Policy Verification*}
 
 
-text{*All security requirements (including @{const NonInterference_m}) are fulfilled.*}
+text{*
+The given policy fulfills all the specified security invariants.
+Also with @{const NonInterference_m}, the policy fulfills all security invariants.
+*}
 lemma "all_security_requirements_fulfilled (NonInterference_m#invariants) policy" by eval
 ML{*
 visualize_graph @{context} @{term "invariants"} @{term "policy"};
@@ -424,10 +427,18 @@ definition make_policy_efficient :: "('a SecurityInvariant) list \<Rightarrow> '
   "make_policy_efficient sinvars Vs \<equiv> generate_valid_topology_some sinvars \<lparr>nodesL = Vs, edgesL = List.product Vs Vs \<rparr>"
 
 
-
 text{*
-The diff to the maximum policy.
-Since we excluded @{const NonInterference_m}, it should be the maximum.
+The question, ``how good are the specified security invariants?'' remains. 
+Therefore, we use the algorithm from @{const make_policy} to generate a policy. 
+Then, we will compare our policy with the automatically generated one. 
+If we exclude the NonInterference invariant from the policy construction, we know that the resulting 
+policy must be maximal. 
+Therefore, the computed policy reflects the view of the specified security invariants. 
+By maximality of the computed policy and monotonicity, we know that our manually specified policy 
+must be a subset of the computed policy. 
+This allows to compare the manually-specified policy to the policy implied by the security invariants: 
+If there are too many flows which are allowed according to the computed policy but which are not in 
+our manually-specified policy, we can conclude that our security invariants are not strict enough. 
 *}
 value[code] "make_policy invariants (nodesL policy)" (*15s without NonInterference*)
 lemma "make_policy invariants (nodesL policy) = 
@@ -467,6 +478,10 @@ lemma  "set [e \<leftarrow> edgesL (make_policy invariants (nodesL policy)). e \
              (V ''AdminPc'', V ''Watchdog''),
              (V ''AdminPc'', V ''Bot1''),
              (V ''AdminPc'', V ''INET'')]" by eval
+text{*
+We visualize this comparison below. 
+The solid edges correspond to the manually-specified policy. 
+The dotted edges correspond to the flow which would be additionally permitted by the computed policy. *}
 ML_val{*
 visualize_edges @{context} @{term "edgesL policy"} 
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
@@ -474,10 +489,47 @@ visualize_edges @{context} @{term "edgesL policy"}
                 e \<notin> set (edgesL policy)]"})] "";
 *}
 
+text{*
+The comparison reveals that the following flows would be additionally permitted. 
+We will discuss whether this is acceptable or if the additional permission indicates that 
+we probably forgot to specify an additional security goal. 
+
+
+  \<^item> All reflexive flows, i.e. all host can communicate with themselves. 
+    Since each host in the policy corresponds to one physical entity, there is no need to explicitly 
+    prohibit or allow in-host communication. 
+  \<^item> The @{term "V ''SensorSink''"} may access the @{term "V ''Webcam''"}. 
+    Both share the same security clearance, there is no problem with this possible information flow. 
+    Technically, a bi-directional connection may even be desirable, since this allows the sensor 
+    sink to influence the video stream, e.g. request a lower bit rate if it is overloaded. 
+  \<^item> Both the @{term "V ''TempSensor''"} and the @{term "V ''FireSensor''"} may access the Internet. 
+    No security clearances or other privacy concerns are specified for them. 
+    This may raise the question whether this data is indeed public. 
+    It is up to the company to decide that this data should also be considered confidential. 
+  \<^item> @{term "V ''MissionControl1''"} can send to @{term "V ''MissionControl2''"}. 
+    This may be desirable since it was stated anyway that the two may need to cooperate. 
+    Note that the opposite direction is definitely prohibited since the critical and secret 
+    production step only known to @{term "V ''MissionControl2''"} must not leak. 
+  \<^item> The @{term "V ''Watchdog''"} may access @{term "V ''MissionControl1''"}, 
+    @{term "V ''MissionControl2''"}, and the @{term "V ''INET''"}. 
+    While it may be acceptable that the watchdog which monitors the robots may also access the control devices, 
+    it should raise a concern that the watchdog may freely send data to the Internet. 
+    Indeed, the watchdog can access devices which have corporate trade secrets stored but it was 
+    never specified that the watchdog should be treated confidentially. 
+    Note that in the current setting, the trade secrets will never leave the robots. 
+    This is because the policy only specifies a unidirectional information flow from the watchdog 
+    to the robots; the robots will not leak any information back to the watchdog. 
+    This also means that the watchdog cannot actually monitor the robots. 
+    Later, when implementing the scenario, we will see that the simple, hand-waving argument 
+    ``the watchdog connects to the robots and the robots send back their data over the established connection'' 
+    will not work because of this possible information leak. 
+  \<^item> The @{term "V ''AdminPc''"} is allowed to access the @{term "V ''Watchdog''"}, 
+    @{term "V ''Bot1''"}, and the @{term "V ''INET''"}. 
+    Since this machine is trusted anyway, the company does not see a problem with this. 
+*}
+
 text{* without @{const NonInterference_m} *}
 lemma "all_security_requirements_fulfilled invariants (make_policy invariants (nodesL policy))" by eval
-
-lemma "\<not> all_security_requirements_fulfilled (NonInterference_m#invariants) (make_policy invariants (nodesL policy))" by eval
 
 
 
@@ -492,6 +544,39 @@ visualize_edges @{context} @{term "edgesL (make_policy invariants (nodesL policy
                 e \<notin> set (edgesL (make_policy invariants (nodesL policy)))]"})] ""; 
 *}
 
+
+subsection{*About NonInterference*}
+text{*
+The NonInterference template was deliberately selected for our scenario as one of the 
+`problematic' and rather theoretical invariants. 
+Our framework allows to specify almost arbitrary invariant templates. 
+We concluded that all non-ENF-structured invariants which may produce an exponential 
+number of offending flows are problematic for practical use. 
+This includes ``Comm. With'' (@{file "../Security_Invariants/SINVAR_ACLcommunicateWith.thy"}), 
+``Not Comm. With'' (@{file "../Security_Invariants/SINVAR_ACLnotCommunicateWith.thy"}), 
+Dependability (@{file "../Security_Invariants/SINVAR_Dependability.thy"}), 
+and NonInterference (@{file "../Security_Invariants/SINVAR_NonInterference.thy"}).
+In this section, we discuss the consequences of the NonInterference invariant for automated policy construction. 
+We will conclude that, though we can solve all technical challenges, said invariants are 
+---due to their inherent ambiguity--- not very well suited for automated policy construction. *}
+
+
+text{*
+The computed maximum policy does not fulfill invariant 10 (NonInterference). 
+This is because the fire sensor and the administrator's PC may be indirectly connected over the Internet. 
+*}
+lemma "\<not> all_security_requirements_fulfilled (NonInterference_m#invariants) (make_policy invariants (nodesL policy))" by eval
+
+
+text{*
+Since the NonInterference template may produce an exponential number of offending flows, 
+it is infeasible to try our automated policy construction algorithm with it. 
+We have tried to do so on a machine with 128GB of memory but after a few minutes, the computation ran out of memory. 
+On said machine, we were unable to run our policy construction algorithm with the NonInterference invariant for more that five hosts. 
+
+Algorithm @{const make_policy_efficient} improves the policy construction algorithm. 
+The new algorithm instantly returns a solution for this scenario with a very small memory footprint. 
+*}
 
 text{*The more efficient algorithm does not need to construct the complete set of offending flows*}
 value[code] "make_policy_efficient (invariants@[NonInterference_m]) (nodesL policy)"
@@ -531,11 +616,46 @@ visualize_edges @{context} @{term "edgesL policy"}
                 e \<notin> set (edgesL (make_policy_efficient (NonInterference_m#invariants) (nodesL policy)))]"})] ""; 
 *}
 
+text{*
+However, it is an inherent property of the NonInterferance template (and similar templates), 
+that the set of offending flows is not uniquely defined. 
+Consequently, since several solutions are possible, even our new algorithm may not be able to compute one maximum solution. 
+It would be possible to construct some maximal solution, however, this would require to 
+enumerate all offending flows, which is infeasible. 
+Therefore, our algorithm can only return some (valid but probably not maximal) solution for non-END-structured invariants. 
+
+As a human, we know the scenario and the intention behind the policy. 
+Probably, the best solution for policy construction with the NonInterferance property would be to 
+restrict outgoing edges from the fire sensor. 
+If we consider the policy above which was constructed without NonInterference, if we cut off 
+the fire sensor from the Internet, we get a valid policy for the NonInterference property. 
+Unfortunately, an algorithm does not have the information of which flows we would like to cut first 
+and the algorithm needs to make some choice. 
+In this example, the algorithm decides to isolate the administrator's PC from the rest of the world. 
+This is also a valid solution. 
+We could change the order of the elements to tell the algorithm which edges we would rather sacrifice than others. 
+This may help but requires some additional input. 
+The author personally prefers to construct only maximum policies with $\Phi$-structured invariants 
+and afterwards fix the policy manually for the remaining non-$\Phi$-structured invariants. 
+Though our new algorithm gives better results and returns instantly, the very nature of invariant 
+templates with an exponential number of offending flows tells that these invariants are problematic 
+for automated policy construction. 
+*}
 
 
 
+subsection{*Stateful Implementation*}
+text{*
+In this section, we will implement the policy and deploy it in a network. 
+As the scenario description stated, all devices in the production line should establish 
+stateful connections which allows -- once the connection is established -- packets to travel in both directions. 
+This is necessary for the watchdog, the mission control devices, and the administrator's PC to actually perform their task. 
 
-subsection{*stateful implementation*}
+We compute a stateful implementation. 
+Below, the stateful implementation is visualized. 
+It consists of the policy as visualized above. 
+In addition, dotted edges visualize where answer packets are permitted. 
+*}
 definition "stateful_policy = generate_valid_stateful_policy_IFSACS policy invariants"
 lemma "stateful_policy =
  \<lparr>hostsL = nodesL policy,
@@ -549,14 +669,16 @@ visualize_edges @{context} @{term "flows_fixL stateful_policy"}
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "flows_stateL stateful_policy"})] ""; 
 *}
 
-
-text{*Because @{const BLP_tradesecrets_m} and @{const SinkRobots_m} restrict information leakage,
-     @{term "''Watchdog''"} cannot establish a stateful connection to the bots.
-     The invariants clearly state that the bots must not leak information, and Watchdog
-     was never given permission to get any information back.*}
-
-text{*Without those two invariants, also AdminPc can set up stateful connections to the machines
-      it is intended to administer.*}
+text{*As can be seen, only the flows @{term "(V ''Webcam'', V ''SensorSink'')"} 
+and @{term "(V ''SensorSink'', V ''Statistics'')"} are allowed to be stateful. 
+This setup cannot be practically deployed because the watchdog, the mission control devices, 
+and the administrator's PC also need to set up stateful connections. 
+Previous section's discussion already hinted at this problem. 
+The reason why the desired stateful connections are not permitted is due to information leakage. 
+In detail: @{const BLP_tradesecrets_m} and @{const SinkRobots_m} are responsible. 
+Both invariants prevent that any data leaves the robots and the mission control devices. 
+To verify this suspicion, the two invariants are removed and the stateful flows are computed again. 
+The result visualized is below. *}
 
 lemma "generate_valid_stateful_policy_IFSACS policy
       [BLP_privacy_m, BLP_employee_export_m,
@@ -574,6 +696,14 @@ lemma "generate_valid_stateful_policy_IFSACS policy
        (V ''AdminPc'', V ''MissionControl1''),
        (V ''Watchdog'', V ''Bot1''),
        (V ''Watchdog'', V ''Bot2'')]\<rparr>" by eval
+
+text{*This stateful policy could be transformed into a fully functional implementation. 
+However, there would be no security invariants specified which protect the trade secrets. 
+Without those two invariants, the invariant specification is too permissive. 
+For example, if we recompute the maximum policy, we can see that the robots and mission control can leak any data to the Internet. 
+Even without the maximum policy, in the stateful policy above, it can be seen that 
+MissionControl1 can exfiltrate information from robot 2, once it establishes a stateful connection. *}
+
 
 text{*Without the two invariants, the security goals are way too permissive!*}
 lemma "set [e \<leftarrow> edgesL (make_policy [BLP_privacy_m, BLP_employee_export_m,
@@ -610,13 +740,34 @@ visualize_edges @{context} @{term "flows_fixL (generate_valid_stateful_policy_IF
 *}
 
 
-text{*Bot1 and Bot2 have different security clearances.
-      If Watchdog wants to get information from both, it needs to be trusted.
-      Also, Watchdog needs to be included into the SinkPool to set up a stateful connection to the Bots. 
-      The bots must be lifted from Sinks to the SinkPool, otherwise, it would be impossible 
-      to get any information flow back from them.
 
-      Same for AdminPC.*}
+text{*
+Therefore, the two invariants are not removed but repaired. 
+The goal is to allow the watchdog, administrator's pc, and the mission control devices to set up stateful connections without leaking corporate trade secrets to the outside. 
+
+First, we repair @{const BLP_tradesecrets_m}.
+On the one hand, the watchdog should be able to send packets both @{term "V ''Bot1''"} and @{term "V ''Bot2''"}. 
+@{term "V ''Bot1''"} has a security clearance of @{term "1::privacy_level"} and 
+@{term "V ''Bot2''"} has a security clearance of @{term "2::privacy_level"}. 
+Consequently, in order to be allowed to send packets to both, @{term "V ''Watchdog''"} must 
+have a security clearance not higher than @{term "1::privacy_level"}. 
+On the other hand, the @{term "V ''Watchdog''"} should be able to receive packets from both. 
+By the same argument, it must have a security clearance of at least @{term "2::privacy_level"}. 
+Consequently, it is impossible to express the desired meaning in the BLP basic template. 
+There are only two solutions to the problem: Either the company installs one watchdog 
+for each security clearance, or the watchdog must be trusted. 
+We decide for the latter option and upgrade the template to the Bell LaPadula model with trust. 
+We define the watchdog as trusted with a security clearance of @{term "1::privacy_level"}. 
+This means, it can receive packets from and send packets to both robots but it cannot leak information to the outside world. 
+We do the same for the @{term "V ''AdminPc''"}.
+
+Then, we repair @{const SinkRobots_m}. 
+We realize that the following set set of hosts forms one big pool of devices which must all 
+somehow interact but where information must not leave the pool: 
+The administrator's PC, the mission control devices, the robots, and the watchdog. 
+Therefore, all those devices are configured to be in the same @{const SinkPool}. 
+*}
+
 
 
 definition "invariants_tuned \<equiv> [BLP_privacy_m, BLP_employee_export_m,
@@ -646,6 +797,9 @@ lemma "all_security_requirements_fulfilled invariants_tuned policy" by eval
 
 definition "stateful_policy_tuned = generate_valid_stateful_policy_IFSACS policy invariants_tuned"
 
+text{*
+The computed stateful policy is visualized below.
+*}
 lemma "stateful_policy_tuned
  =
  \<lparr>hostsL = nodesL policy,
@@ -674,6 +828,15 @@ lemma "set [e \<leftarrow> edgesL (make_policy invariants_tuned (nodesL policy))
              (V ''AdminPc'', V ''Watchdog''),
              (V ''AdminPc'', V ''Bot1'')]" by eval
 
+text{*
+It can be seen that all connections which should be stateful are now indeed stateful. 
+In addition, it can be seen that MissionControl1 cannot set up a stateful connection to Bot2. 
+This is because MissionControl1 was never declared a trusted device and the confidential information 
+in MissionControl2 and Bot2 must not leak. 
+
+The improved invariant definition even produces a better (i.e. stricter) maximum policy. *}
+
+subsection{*Iptables Implementation*}
 
 text{*firewall -- classical use case*}
 ML_val{*
