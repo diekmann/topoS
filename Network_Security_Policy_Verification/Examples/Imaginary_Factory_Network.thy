@@ -871,6 +871,8 @@ iterate_edges_ML @{context} @{term "flows_stateL stateful_policy_tuned"}
 writeln "COMMIT";
 *}
 
+text{*Using, @{url "https://github.com/diekmann/Iptables_Semantics"}, the iptables ruleset is indeed correct.*}
+
 end
 
 
