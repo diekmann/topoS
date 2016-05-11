@@ -10,6 +10,7 @@ session "Network_Security_Policy_Verification" = HOL +
     "~~/src/HOL/Lattice/CompleteLattice"
   theories
     "Security_Invariants/SINVAR_Subnets2"
+    "Security_Invariants/Analysis_Tainting"
     Network_Security_Policy_Verification
     TopoS_generateCode
   theories [document = false]

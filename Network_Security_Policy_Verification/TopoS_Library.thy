@@ -10,6 +10,7 @@ imports String
   "Security_Invariants/SINVAR_SubnetsInGW_impl"
   "Security_Invariants/SINVAR_CommunicationPartners_impl"
   "Security_Invariants/SINVAR_NoRefl_impl"
+  "Security_Invariants/SINVAR_Tainting_impl"
   (*invariants you probably don't want to use because of exponential runtime*)
   "Security_Invariants/SINVAR_Dependability_impl"
   "Security_Invariants/SINVAR_NonInterference_impl"
