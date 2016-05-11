@@ -7,7 +7,10 @@ subsection {* SecurityInvariant Tainting for IFS  *}
 context
 begin
 
-  private type_synonym taints = "string set"
+  qualified type_synonym taints = "string set"
+
+  text{*Warning: an infinite set has cardinality 0*}
+  lemma "card (UNIV::taints) = 0" by (simp add: infinite_UNIV_listI) 
   
   qualified definition default_node_properties :: "taints"
     where  "default_node_properties \<equiv> {}"
