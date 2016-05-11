@@ -2,12 +2,16 @@ theory SINVAR_TaintingTrusted
 imports "../TopoS_Helper" (*SINVAR_BLPtrusted*)
 begin
 
-subsection {* SecurityInvariant Tainting with Untainting-Feature for IFS  *}
+subsection {* SecurityInvariant Tainting with Untainting-Feature for IFS *}
 
 context
 begin
   qualified datatype taints_raw = TaintsUntaints_Raw (taints_raw: "string set") (untaints_raw: "string set")
 
+  text{*The @{const untaints_raw} set must be a subset of @{const taints_raw}.
+        Otherwise, there can be entries in the untaints set, which do not affect anything.
+        This is certainly undesirable.
+        In addition, a unique default parameter cannot exist if we allow such dead entries.*}
   typedef taints = "{ts::taints_raw. untaints_raw ts \<subseteq> taints_raw ts}"
     morphisms raw_of_taints Abs_taints
   proof
@@ -45,13 +49,18 @@ begin
 
   text{*The things in the first set are tainted, those in the second set are untainted.
     For example, a machine produces @{term "''foo''"}:
-      @{term "TaintsUntaints_Raw {''foo''} {}"}
+      @{term "TaintsUntaints {''foo''} {}"}
 
     For example, a machine consumes @{term "''foo''"} and @{term "''bar''"}, combines them in a 
     way that they are no longer critical and outputs @{term "''baz''"}:
-      @{term "TaintsUntaints_Raw {''foo'', ''bar'', ''baz''} {''foo'', ''bar''}"}
+      @{term "TaintsUntaints {''foo'', ''bar'', ''baz''} {''foo'', ''bar''}"}
       abbreviated: @{term "TaintsUntaints {''baz''} {''foo'', ''bar''}"}
       *}
+  lemma "TaintsUntaints {''foo'', ''bar'', ''baz''} {''foo'', ''bar''} = 
+         TaintsUntaints {''baz''} {''foo'', ''bar''}"
+    apply(simp add: taints_eq_iff raw_of_taints_TaintsUntaints)
+    by blast
+  
 
   qualified definition default_node_properties :: "taints"
     where  "default_node_properties \<equiv> TaintsUntaints {} {}"
