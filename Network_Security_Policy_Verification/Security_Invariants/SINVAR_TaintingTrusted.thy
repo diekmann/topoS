@@ -1,5 +1,5 @@
 theory SINVAR_TaintingTrusted
-imports "../TopoS_Helper" (*SINVAR_BLPtrusted*)
+imports "../TopoS_Helper"
 begin
 
 subsection {* SecurityInvariant Tainting with Untainting-Feature for IFS *}
@@ -12,7 +12,7 @@ begin
         Otherwise, there can be entries in the untaints set, which do not affect anything.
         This is certainly undesirable.
         In addition, a unique default parameter cannot exist if we allow such dead entries.*}
-  typedef taints = "{ts::taints_raw. untaints_raw ts \<subseteq> taints_raw ts}"
+  qualified typedef taints = "{ts::taints_raw. untaints_raw ts \<subseteq> taints_raw ts}"
     morphisms raw_of_taints Abs_taints
   proof
     show "TaintsUntaints_Raw {} {} \<in> {ts. untaints_raw ts \<subseteq> taints_raw ts}" by simp
@@ -42,9 +42,9 @@ begin
     "raw_of_taints (TaintsUntaints ts uts) = (TaintsUntaints_Raw (ts \<union> uts) uts)"
     by (simp add: TaintsUntaints_def Abs_taints_inverse)
 
-  lemma taints_TaintsUntaints: "taints (TaintsUntaints ts uts) = ts \<union> uts"
+  lemma taints_TaintsUntaints[code]: "taints (TaintsUntaints ts uts) = ts \<union> uts"
     by(simp add: taints_def raw_of_taints_TaintsUntaints)
-  lemma untaints_TaintsUntaints: "untaints (TaintsUntaints ts uts) = uts"
+  lemma untaints_TaintsUntaints[code]: "untaints (TaintsUntaints ts uts) = uts"
     by(simp add: untaints_def raw_of_taints_TaintsUntaints)
 
   text{*The things in the first set are tainted, those in the second set are untainted.
@@ -184,9 +184,16 @@ begin
      qed
   
   
-    lemma TopoS_Tainting: "SecurityInvariant sinvar default_node_properties receiver_violation"
+    lemma TopoS_TaintingTrusted: "SecurityInvariant sinvar default_node_properties receiver_violation"
     unfolding receiver_violation_def by unfold_locales
 
 end
+
+
+code_datatype TaintsUntaints
+
+value[code] "TaintsUntaints {''foo''} {''bar''}"
+
+value[code] "taints (TaintsUntaints {''foo''} {''bar''})"
 
 end

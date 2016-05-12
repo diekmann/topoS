@@ -96,8 +96,8 @@ begin
   lemma "wf_list_graph tainting_example" by eval
 
 
-  private definition taintin_example_props :: "vString \<Rightarrow> SINVAR_Tainting.taints" where
-    "taintin_example_props \<equiv> (\<lambda> n. SINVAR_Tainting.default_node_properties)
+  private definition tainting_example_props :: "vString \<Rightarrow> SINVAR_Tainting.taints" where
+    "tainting_example_props \<equiv> (\<lambda> n. SINVAR_Tainting.default_node_properties)
                           (TopoS_Vertices.V ''produce 1'' := {''1''},
                            TopoS_Vertices.V ''produce 2'' := {''2''},
                            TopoS_Vertices.V ''produce 3'' := {''3''},
@@ -105,7 +105,7 @@ begin
                            TopoS_Vertices.V ''read 3'' := {''3''},
                            TopoS_Vertices.V ''consume 1 2 3'' := {''1'',''2'',''3''},
                            TopoS_Vertices.V ''consume 3'' := {''3''})"
-  private lemma "sinvar tainting_example taintin_example_props" by eval
+  private lemma "sinvar tainting_example tainting_example_props" by eval
 end
 
 export_code SINVAR_LIB_Tainting in Scala
