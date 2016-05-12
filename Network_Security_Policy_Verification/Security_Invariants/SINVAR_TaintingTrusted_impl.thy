@@ -119,12 +119,12 @@ begin
                           (TopoS_Vertices.V ''produce 1'' := TaintsUntaints {''1''} {},
                            TopoS_Vertices.V ''produce 2'' := TaintsUntaints {''2''} {},
                            TopoS_Vertices.V ''produce 3'' := TaintsUntaints {''3''} {},
-                           TopoS_Vertices.V ''read 1 2'' := TaintsUntaints {''3''} {''1'',''2''},
+                           TopoS_Vertices.V ''read 1 2'' := TaintsUntaints {''3'',''foo''} {''1'',''2''},
                            TopoS_Vertices.V ''read 3'' := TaintsUntaints {''3''} {},
-                           TopoS_Vertices.V ''consume 1 2 3'' := TaintsUntaints {'''3''} {},
+                           TopoS_Vertices.V ''consume 1 2 3'' := TaintsUntaints {''foo'',''3''} {},
                            TopoS_Vertices.V ''consume 3'' := TaintsUntaints {''3''} {})"
 
-  (*Damn, broken!*)
+  value "tainting_example_props (TopoS_Vertices.V ''consume 1 2 3'')"
   value[code] "TaintingTrusted_offending_list tainting_example tainting_example_props"
   private lemma "sinvar tainting_example tainting_example_props" by eval
 end
