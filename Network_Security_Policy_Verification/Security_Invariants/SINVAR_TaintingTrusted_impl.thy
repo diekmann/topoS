@@ -1,11 +1,7 @@
 theory SINVAR_TaintingTrusted_impl
 imports SINVAR_TaintingTrusted "../TopoS_Interface_impl"
-  "Dlist" (*just testing*)
 begin
 
-(*damn, stuff is not executable!*)
-code_datatype Dlist
-value "Dlist [1::nat, 2, 3]"
 
 subsubsection {* SecurityInvariant Tainting with Trust List Implementation *}
 
