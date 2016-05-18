@@ -66,18 +66,16 @@ definition policy :: "vString list_graph" where
               (V ''A_decrypt'',     V ''A''),
               (V ''B_decrypt'',     V ''B''),
               (V ''C_decrypt'',     V ''C''),
-              (V ''C_low_decrypt'', V ''C_low''),
-              (V ''P4S_DB'', V ''Adversary''),
-              (V ''Adversary'', V ''P4S_DB'')
+              (V ''C_low_decrypt'', V ''C_low'')
               ] \<rparr>"
 
 context begin
   private definition "tainiting_host_attributes \<equiv> [
                            V ''Sensor_Controller'' \<mapsto> TaintsUntaints {''A'',''B'',''C'',''D''} {},
                            V ''P4S_in'' \<mapsto> TaintsUntaints {''A'',''B'',''C'',''D''} {},
-                           V ''P4S_filter_A'' \<mapsto> TaintsUntaints {''A''} {''A'',''B'',''C'',''D''},
-                           V ''P4S_filter_B'' \<mapsto> TaintsUntaints {''B''} {''A'',''B'',''C'',''D''},
-                           V ''P4S_filter_C'' \<mapsto> TaintsUntaints {''C''} {''A'',''B'',''C'',''D''},
+                           V ''P4S_filter_A'' \<mapsto> TaintsUntaints {''A''} {''B'',''C'',''D''},
+                           V ''P4S_filter_B'' \<mapsto> TaintsUntaints {''B''} {''A'',''C'',''D''},
+                           V ''P4S_filter_C'' \<mapsto> TaintsUntaints {''C''} {''A'',''B'',''D''},
                            V ''P4S_aggregator_C'' \<mapsto> TaintsUntaints {''C_low''} {''C''},
                            V ''P4S_encrypt_A'' \<mapsto> TaintsUntaints {} {''A''},
                            V ''P4S_encrypt_B'' \<mapsto> TaintsUntaints {} {''B''},
@@ -140,8 +138,8 @@ value[code] "make_policy invariants (nodesL policy)"
 ML_val{*
 visualize_edges @{context} @{term "edgesL policy"}
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
-     @{term "[e \<leftarrow> edgesL (make_policy invariants (nodesL policy)).
-                e \<notin> set (edgesL policy)]"})] "";
+     @{term "[(e1,e2) \<leftarrow> edgesL (make_policy invariants (nodesL policy)).
+                ((e1,e2) \<notin> set (edgesL policy)) \<and> (e2 = V ''Adversary'') \<and> (e1 \<noteq> V ''Adversary'')]"})] "";
 *}
 
 
