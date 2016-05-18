@@ -23,26 +23,22 @@ definition policy :: "vString list_graph" where
               (V ''A'', V ''A_encrypter''), (V ''A_encrypter'', V ''A_channel''), (V ''A_channel'', V ''CryptoDB''),
               (V ''B'', V ''B_encrypter''), (V ''B_encrypter'', V ''B_channel''), (V ''B_channel'', V ''CryptoDB''),
               (V ''C'', V ''C_encrypter''), (V ''C_encrypter'', V ''C_channel_out''), (V ''C_channel_out'', V ''CryptoDB''),
-              (V ''CryptoDB'', V ''C_channel_in''), (V ''C_channel_in'', V ''C_decrypter''), (V ''C_decrypter'', V ''C''),
-              (V ''CryptoDB'', V ''Adversary''),
-              (V ''Adversary'', V ''CryptoDB'')
+              (V ''CryptoDB'', V ''C_channel_in''), (V ''C_channel_in'', V ''C_decrypter''), (V ''C_decrypter'', V ''C'')
               ] \<rparr>"
 
 context begin
   private definition "tainiting_host_attributes \<equiv> [
                            V ''A'' \<mapsto> TaintsUntaints {''A'', ''A_local''} {},
                            V ''A_encrypter'' \<mapsto> TaintsUntaints {''A_local''} {''A''},
-                           V ''A_channel'' \<mapsto> TaintsUntaints {''A_remote''} {''A_local'', ''gibberish''},
+                           V ''A_channel'' \<mapsto> TaintsUntaints {} {''A_local''},
                            V ''B'' \<mapsto> TaintsUntaints {''B'', ''B_local''} {},
                            V ''B_encrypter'' \<mapsto> TaintsUntaints {''B_local''} {''B''},
-                           V ''B_channel'' \<mapsto> TaintsUntaints {''B_remote''} {''B_local'', ''gibberish''},
+                           V ''B_channel'' \<mapsto> TaintsUntaints {} {''B_local''},
                            V ''C'' \<mapsto> TaintsUntaints {''C'', ''C_local''} {},
                            V ''C_encrypter'' \<mapsto> TaintsUntaints {''C_local''} {''C''},
                            V ''C_decrypter'' \<mapsto> TaintsUntaints {''C'', ''C_local''} {},
-                           V ''C_channel_out'' \<mapsto> TaintsUntaints {''C_remote''} {''C_local''},
-                           V ''C_channel_in'' \<mapsto> TaintsUntaints {''C_local''} {''C_remote'', ''gibberish''},
-                           V ''CryptoDB'' \<mapsto> TaintsUntaints {''gibberish''} {''A_remote'', ''B_remote'', ''C_remote''},
-                           V ''Adversary'' \<mapsto> TaintsUntaints {''gibberish''} {}
+                           V ''C_channel_out'' \<mapsto> TaintsUntaints {} {''C_local''},
+                           V ''C_channel_in'' \<mapsto> TaintsUntaints {''C_local''} {''C_remote''}
                            ]"
   private lemma "dom (tainiting_host_attributes) \<subseteq> set (nodesL policy)" by(simp add: tainiting_host_attributes_def policy_def)
   definition "Tainting_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_TaintingTrusted \<lparr>
@@ -88,8 +84,8 @@ value[code] "make_policy invariants (nodesL policy)"
 ML_val{*
 visualize_edges @{context} @{term "edgesL policy"}
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
-     @{term "[e \<leftarrow> edgesL (make_policy invariants (nodesL policy)).
-                e \<notin> set (edgesL policy)]"})] "";
+     @{term "[(e1,e2) \<leftarrow> edgesL (make_policy invariants (nodesL policy)).
+                ((e1,e2) \<notin> set (edgesL policy)) \<and> (e2 = V ''Adversary'') \<and> (e1 \<noteq> V ''Adversary'')]"})] "";
 *}
 
 
