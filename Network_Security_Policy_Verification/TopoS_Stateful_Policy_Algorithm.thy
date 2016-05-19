@@ -638,13 +638,12 @@ subsection {* Sketch for generating a stateful policy from a simple directed pol
     "generate_valid_stateful_policy_IFSACS G M edgesList \<equiv> (let filterIFS = filter_IFS_no_violations G M edgesList in
         (let filterACS = filter_compliant_stateful_ACS G M filterIFS in \<lparr> hosts = nodes G, flows_fix = edges G, flows_state = set filterACS \<rparr>))"
 
-
-  lemma generate_valid_stateful_policy_IFSACS_valid_stateful_policy: assumes wfG: "wf_graph G"
+  lemma generate_valid_stateful_policy_IFSACS_wf_stateful_policy: assumes wfG: "wf_graph G"
           and     edgesList: "(set edgesList) = edges G"
-          shows "valid_stateful_policy (generate_valid_stateful_policy_IFSACS G M edgesList)"
+          shows "wf_stateful_policy (generate_valid_stateful_policy_IFSACS G M edgesList)"
    proof -
     from  wfG show ?thesis
-     apply(simp add: generate_valid_stateful_policy_IFSACS_def valid_stateful_policy_def)
+     apply(simp add: generate_valid_stateful_policy_IFSACS_def wf_stateful_policy_def)
      apply(auto simp add: wf_graph_def)
      using edgesList filter_IFS_no_violations_subseteq_input filter_compliant_stateful_ACS_subseteq_input by (metis set_rev_mp)
    qed
@@ -713,11 +712,11 @@ subsection {* Sketch for generating a stateful policy from a simple directed pol
         and     Tau: "\<T> = generate_valid_stateful_policy_IFSACS G M edgesList"
     shows "stateful_policy_compliance \<T> G M"
     proof -
-      have 1: "valid_stateful_policy \<T>"
+      have 1: "wf_stateful_policy \<T>"
         apply(simp add: Tau)
-        by(simp add: generate_valid_stateful_policy_IFSACS_valid_stateful_policy[OF wfG edgesList])
-      have 2: "valid_stateful_policy (generate_valid_stateful_policy_IFSACS G M edgesList)"
-        by(simp add: generate_valid_stateful_policy_IFSACS_valid_stateful_policy[OF wfG edgesList])
+        by(simp add: generate_valid_stateful_policy_IFSACS_wf_stateful_policy[OF wfG edgesList])
+      have 2: "wf_stateful_policy (generate_valid_stateful_policy_IFSACS G M edgesList)"
+        by(simp add: generate_valid_stateful_policy_IFSACS_wf_stateful_policy[OF wfG edgesList])
       have 3: "hosts \<T> = nodes G"
         apply(simp add: Tau)
         by(simp add: generate_valid_stateful_policy_IFSACS_select_simps(1))
@@ -745,12 +744,12 @@ subsection {* Sketch for generating a stateful policy from a simple directed pol
     \<lparr> hosts = nodes G, flows_fix = edges G, flows_state = set (filter_IFS_no_violations G M edgesList) \<inter> set (filter_compliant_stateful_ACS G M edgesList) \<rparr>"
 
 
-  lemma generate_valid_stateful_policy_IFSACS_2_valid_stateful_policy: assumes wfG: "wf_graph G"
+  lemma generate_valid_stateful_policy_IFSACS_2_wf_stateful_policy: assumes wfG: "wf_graph G"
           and     edgesList: "(set edgesList) = edges G"
-          shows "valid_stateful_policy (generate_valid_stateful_policy_IFSACS_2 G M edgesList)"
+          shows "wf_stateful_policy (generate_valid_stateful_policy_IFSACS_2 G M edgesList)"
    proof -
     from  wfG show ?thesis
-     apply(simp add: generate_valid_stateful_policy_IFSACS_2_def valid_stateful_policy_def)
+     apply(simp add: generate_valid_stateful_policy_IFSACS_2_def wf_stateful_policy_def)
      apply(auto simp add: wf_graph_def)
      using edgesList filter_IFS_no_violations_subseteq_input by (metis set_rev_mp)
    qed
@@ -878,11 +877,11 @@ subsection {* Sketch for generating a stateful policy from a simple directed pol
         and     Tau: "\<T> = generate_valid_stateful_policy_IFSACS_2 G M edgesList"
     shows "stateful_policy_compliance \<T> G M"
     proof -
-      have 1: "valid_stateful_policy \<T>"
+      have 1: "wf_stateful_policy \<T>"
         apply(simp add: Tau)
-        by(simp add: generate_valid_stateful_policy_IFSACS_2_valid_stateful_policy[OF wfG edgesList])
-      have 2: "valid_stateful_policy (generate_valid_stateful_policy_IFSACS G M edgesList)"
-        by(simp add: generate_valid_stateful_policy_IFSACS_valid_stateful_policy[OF wfG edgesList])
+        by(simp add: generate_valid_stateful_policy_IFSACS_2_wf_stateful_policy[OF wfG edgesList])
+      have 2: "wf_stateful_policy (generate_valid_stateful_policy_IFSACS G M edgesList)"
+        by(simp add: generate_valid_stateful_policy_IFSACS_wf_stateful_policy[OF wfG edgesList])
       have 3: "hosts \<T> = nodes G"
         apply(simp add: Tau)
         by(simp add: generate_valid_stateful_policy_IFSACS_2_select_simps(1))
@@ -997,7 +996,7 @@ text{* In the following, we see failed attempts which try to prove that under co
   case (Cons e Es)
     from all_security_requirements_fulfilled_ACS_D Cons.prems have all_fulfilled_ACS: "all_security_requirements_fulfilled (get_ACS M) G" by simp
     from all_security_requirements_fulfilled_IFS_D Cons.prems have all_fulfilled_IFS: "all_security_requirements_fulfilled (get_IFS M) G" by simp
-    have validStateful: "\<And>e. e \<in> set Es \<Longrightarrow> valid_stateful_policy \<lparr>hosts = nodes G, flows_fix = edges G, flows_state = insert e (flows_state (generate_valid_stateful_policy_IFSACS_2 G M Es))\<rparr>" sorry
+    have validStateful: "\<And>e. e \<in> set Es \<Longrightarrow> wf_stateful_policy \<lparr>hosts = nodes G, flows_fix = edges G, flows_state = insert e (flows_state (generate_valid_stateful_policy_IFSACS_2 G M Es))\<rparr>" sorry
     
 
     from Cons.prems(4) have "set Es \<subseteq> edges G" by simp
