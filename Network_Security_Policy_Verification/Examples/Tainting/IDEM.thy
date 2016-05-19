@@ -138,8 +138,8 @@ value[code] "make_policy invariants (nodesL policy)"
 ML_val{*
 visualize_edges @{context} @{term "edgesL policy"}
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
-     @{term "[(e1,e2) \<leftarrow> edgesL (make_policy invariants (nodesL policy)).
-                ((e1,e2) \<notin> set (edgesL policy)) \<and> (e2 = V ''Adversary'') \<and> (e1 \<noteq> V ''Adversary'')]"})] "";
+     @{term "[(e1, e2) \<leftarrow>  List.product  (nodesL policy) (nodesL policy).
+     ((e1,e2) \<notin> set (edgesL policy)) \<and> ((e1,e2) \<notin> set( edgesL (make_policy invariants (nodesL policy)))) \<and> (e2 = V ''Adversary'') \<and> (e1 \<noteq> V ''Adversary'')]"})] "";
 *}
 
 

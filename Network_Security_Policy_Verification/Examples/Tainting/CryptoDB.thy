@@ -38,7 +38,8 @@ context begin
                            V ''C_encrypter'' \<mapsto> TaintsUntaints {''C_local''} {''C''},
                            V ''C_decrypter'' \<mapsto> TaintsUntaints {''C'', ''C_local''} {},
                            V ''C_channel_out'' \<mapsto> TaintsUntaints {} {''C_local''},
-                           V ''C_channel_in'' \<mapsto> TaintsUntaints {''C_local''} {''C_remote''}
+                           V ''C_channel_in'' \<mapsto> TaintsUntaints {''C_local''} {''C_remote''},
+                           V ''Adversary'' \<mapsto> TaintsUntaints {''C_local'', ''A_local'', ''B_local''} {}
                            ]"
   private lemma "dom (tainiting_host_attributes) \<subseteq> set (nodesL policy)" by(simp add: tainiting_host_attributes_def policy_def)
   definition "Tainting_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_TaintingTrusted \<lparr>
@@ -84,8 +85,8 @@ value[code] "make_policy invariants (nodesL policy)"
 ML_val{*
 visualize_edges @{context} @{term "edgesL policy"}
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
-     @{term "[(e1,e2) \<leftarrow> edgesL (make_policy invariants (nodesL policy)).
-                ((e1,e2) \<notin> set (edgesL policy)) \<and> (e2 = V ''Adversary'') \<and> (e1 \<noteq> V ''Adversary'')]"})] "";
+     @{term "[(e1, e2) \<leftarrow>  List.product  (nodesL policy) (nodesL policy).
+     ((e1,e2) \<notin> set (edgesL policy)) \<and> ((e1,e2) \<notin> set( edgesL (make_policy invariants (nodesL policy)))) \<and> (e2 = V ''Adversary'') \<and> (e1 \<noteq> V ''Adversary'')]"})] "";
 *}
 
 
