@@ -85,7 +85,7 @@ proof
 qed
 
 
-
+(*TODO: can we have same as above: iff?*)
 text{*
   Translated to the Bell LaPadula model with trust:
   security clearance is the number of tainted minus the untainted things
