@@ -85,7 +85,6 @@ proof
 qed
 
 
-(*TODO: can we have same as above: iff?*)
 text{*
   Translated to the Bell LaPadula model with trust:
   security clearance is the number of tainted minus the untainted things
@@ -102,5 +101,34 @@ apply(subgoal_tac "finite (taints (nP a) - untaints (nP a))")
  prefer 2 subgoal by blast
 apply(rule card_mono)
  by blast+
+
+lemma tainting_iff_blp_trusted:
+  fixes a::string
+  defines "project \<equiv> \<lambda>a ts. \<lparr>
+      privacy_level =
+        if
+          a \<in> (taints ts - untaints ts)
+        then
+          1::privacy_level
+        else
+          0::privacy_level
+      , trusted = a \<in> untaints ts\<rparr>"
+  shows "SINVAR_TaintingTrusted.sinvar G nP \<longleftrightarrow> (\<forall>a. SINVAR_BLPtrusted.sinvar G (project a \<circ> nP))"
+unfolding project_def
+apply(rule iffI)
+ subgoal
+ apply(simp add: SINVAR_TaintingTrusted.sinvar_def)
+ apply(clarify, rename_tac a b)
+ apply(erule_tac x="(a,b)" in ballE)
+  apply(simp_all)
+ by blast
+apply(simp)
+apply(simp add: SINVAR_TaintingTrusted.sinvar_def)
+apply(clarify, rename_tac a b taintlabel)
+apply(erule_tac x=taintlabel in allE)
+apply(erule_tac x="(a,b)" in ballE)
+ apply(simp_all)
+apply(simp split: split_if_asm)
+using taints_wellformedness by blast
 
 end
