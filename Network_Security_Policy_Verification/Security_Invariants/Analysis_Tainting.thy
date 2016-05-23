@@ -84,12 +84,45 @@ proof
 qed
 
 
+text\<open>If the labels are finite, the above can be generalized to arbitrary subsets of tainting labels.\<close>
+lemma
+  defines "extract \<equiv> \<lambda>A ts. card (A \<inter> ts)"
+  assumes finite: "\<forall>ts v. nP v = ts \<longrightarrow> finite ts"
+  shows "SINVAR_Tainting.sinvar G nP \<longleftrightarrow> (\<forall>A. SINVAR_BLPbasic.sinvar G (extract A \<circ> nP))"
+proof
+  show "SINVAR_Tainting.sinvar G nP \<Longrightarrow> \<forall>A. SINVAR_BLPbasic.sinvar G (extract A \<circ> nP)"
+    apply(simp add: extract_def)
+    apply(safe)
+    apply(simp add: SINVAR_Tainting.sinvar_def)
+    apply(rename_tac A a b)
+    apply(subgoal_tac "finite (A \<inter> nP a)")
+     prefer 2 subgoal using finite by blast
+    apply(rule card_mono)
+     apply(simp add: finite; fail)
+    by blast
+  next
+    assume blp: "\<forall>A. SINVAR_BLPbasic.sinvar G (extract A \<circ> nP)"
+    { fix v1 v2
+      assume *: "(v1,v2)\<in>edges G"
+      { fix A
+        from blp * have "card (A \<inter> nP v1) \<le> card (A \<inter> nP v2)"
+          unfolding extract_def
+          apply(clarsimp)
+          apply(erule_tac x=A in allE)
+          apply(erule_tac x="(v1, v2)" in ballE)
+           by(simp_all)
+      }
+      from this finite card_seteq have "nP v1 \<subseteq> nP v2" by (metis Int_absorb Int_lower1 inf.orderI) 
+    }
+    thus "SINVAR_Tainting.sinvar G nP" unfolding SINVAR_Tainting.sinvar_def by blast
+qed
 
-text{*
+
+text\<open>
   Translated to the Bell LaPadula model with trust:
   security clearance is the number of tainted minus the untainted things
   We set the Trusted flag if a machine untaints things.
-*}
+\<close>
 lemma "\<forall>ts v. nP v = ts \<longrightarrow> finite (taints ts) \<Longrightarrow>
   SINVAR_TaintingTrusted.sinvar G nP \<Longrightarrow>
     SINVAR_BLPtrusted.sinvar G ((\<lambda> ts. \<lparr>privacy_level = card (taints ts - untaints ts), trusted = (untaints ts \<noteq> {})\<rparr> ) \<circ> nP)"
@@ -129,5 +162,38 @@ apply(erule_tac x="(a,b)" in ballE)
  apply(simp_all)
 apply(simp split: split_if_asm)
 using taints_wellformedness by blast
+
+
+
+
+text\<open>If the labels are finite, the above can be generalized to arbitrary subsets of tainting labels.\<close>
+lemma
+  defines "project \<equiv> \<lambda>A ts.
+      \<lparr>
+          privacy_level = card (A \<inter> (taints ts - untaints ts))
+        , trusted = (A \<inter> untaints ts) \<noteq> {}
+      \<rparr>"
+  assumes finite: "\<forall>ts v. nP v = ts \<longrightarrow> finite (taints ts)"
+  shows "SINVAR_TaintingTrusted.sinvar G nP \<longleftrightarrow> (\<forall>A. SINVAR_BLPtrusted.sinvar G (project A \<circ> nP))"
+unfolding project_def
+apply(rule iffI)
+ subgoal
+ apply(simp add: SINVAR_TaintingTrusted.sinvar_def)
+ apply(clarify, rename_tac a b)
+ apply(erule_tac x="(a,b)" in ballE)
+  apply(simp_all)
+ apply(rule card_mono)
+  using finite apply blast
+ by blast
+apply(simp)
+apply(simp add: SINVAR_TaintingTrusted.sinvar_def)
+apply(clarify, rename_tac a b taintlabel)
+apply(erule_tac x="{taintlabel}" in allE)
+apply(erule_tac x="(a,b)" in ballE)
+ apply(simp_all)
+apply(simp split: split_if_asm)
+ using taints_wellformedness apply blast
+using Diff_insert_absorb by fastforce
+
 
 end
