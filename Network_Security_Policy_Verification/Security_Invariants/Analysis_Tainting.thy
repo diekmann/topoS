@@ -54,7 +54,6 @@ done
 text\<open>One tainting invariant is equal to many BLP invariants. 
      The BLP invariants are the projection of the tainting mapping for exactly one label\<close>
 lemma tainting_iff_blp:
-  fixes a::string
   defines "extract \<equiv> \<lambda>a ts. if a \<in> ts then 1::privacy_level else 0::privacy_level"
   shows "SINVAR_Tainting.sinvar G nP \<longleftrightarrow> (\<forall>a. SINVAR_BLPbasic.sinvar G (extract a \<circ> nP))"
 proof
@@ -85,6 +84,7 @@ proof
 qed
 
 
+
 text{*
   Translated to the Bell LaPadula model with trust:
   security clearance is the number of tainted minus the untainted things
@@ -103,7 +103,6 @@ apply(rule card_mono)
  by blast+
 
 lemma tainting_iff_blp_trusted:
-  fixes a::string
   defines "project \<equiv> \<lambda>a ts. \<lparr>
       privacy_level =
         if
