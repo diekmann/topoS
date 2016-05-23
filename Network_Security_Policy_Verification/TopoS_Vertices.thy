@@ -52,6 +52,14 @@ instance proof qed(simp add: vertex_1_nat_def vertex_2_nat_def vertex_3_nat_def)
 end
 value "vertex_1::nat"
 
+instantiation int::vertex
+begin
+  definition "vertex_1_int" ::int where "vertex_1 \<equiv> (1::int)"
+  definition "vertex_2_int" ::int where "vertex_2 \<equiv> (2::int)"
+  definition "vertex_3_int" ::int where "vertex_3 \<equiv> (3::int)"
+instance proof qed(simp add: vertex_1_int_def vertex_2_int_def vertex_3_int_def)
+end
+
 instantiation char::vertex
 begin
   definition "vertex_1_char" ::char where "vertex_1 \<equiv> CHR ''A''"
@@ -61,6 +69,7 @@ instance proof(intro_classes) qed(simp add: vertex_1_char_def  vertex_2_char_def
 end
 value "vertex_1::char"
 
+(*TODO: legavy stuff, remove*)
 datatype vString = V string
 value "V ''AA''"
 instantiation vString::vertex
@@ -73,6 +82,15 @@ end
 
 definition string_of_vString :: "vString \<Rightarrow> string" where
   "string_of_vString v = (case v of V s \<Rightarrow> s)"
+
+
+instantiation list :: ("vertex") vertex
+begin
+  definition "vertex_1_list" where "vertex_1 \<equiv> []"
+  definition "vertex_2_list" where "vertex_2 \<equiv> [vertex_1]"
+  definition "vertex_3_list" where "vertex_3 \<equiv> [vertex_1, vertex_1]"
+instance proof qed(simp add: vertex_1_list_def vertex_2_list_def vertex_3_list_def)
+end
 
 
 instantiation vString::linorder
@@ -107,6 +125,15 @@ fun tune_Vstring_format (t: term) (s: string) : string =
       else let val _ = writeln ("no tune_Vstring_format for \""^s^"\"") in s end
     else s
     handle Subscript => let val _ = writeln ("tune_Vstring_format Subscript excpetion") in s end;
+
+
+fun tune_string_vertex_format (t: term) (s: string) : string = 
+    if fastype_of t = @{typ string} then
+      if String.isPrefix "''" s then
+        String.substring (s, (size "''"), (size s - (size "''''")))
+      else let val _ = writeln ("no tune_string_vertex_format for \""^s^"\"") in s end
+    else s
+    handle Subscript => let val _ = writeln ("tune_string_vertex_format Subscript excpetion") in s end;
 *}
 
 

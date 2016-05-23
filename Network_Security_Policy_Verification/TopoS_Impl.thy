@@ -105,6 +105,9 @@ local
     if (fastype_of edges) = @{typ "(TopoS_Vertices.vString \<times> TopoS_Vertices.vString) list"}
     then
       tune_Vstring_format
+    else if (fastype_of edges) = @{typ "(string \<times> string) list"}
+    then
+      tune_string_vertex_format
     else
       Graphviz.default_tune_node_format;
 

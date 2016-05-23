@@ -39,16 +39,6 @@ definition new_meta_system_boundary :: "('v::vertex \<times> system_components) 
       ]"
 
 
-(*TODO: move*)
-instantiation int::vertex
-begin
-  definition "vertex_1_int" ::int where "vertex_1 \<equiv> (1::int)"
-  definition "vertex_2_int" ::int where "vertex_2 \<equiv> (2::int)"
-  definition "vertex_3_int" ::int where "vertex_3 \<equiv> (3::int)"
-instance proof qed(simp add: vertex_1_int_def vertex_2_int_def vertex_3_int_def)
-end
-
-
 value[code] "let nodes = [1,2,3,4,8,9,10];
            sinvars = new_meta_system_boundary
               [(1::int, SystemBoundaryInput),
@@ -57,7 +47,6 @@ value[code] "let nodes = [1,2,3,4,8,9,10];
                (4, SystemBoundaryInputOutput)
                ]
        in generate_valid_topology sinvars \<lparr>nodesL = nodes, edgesL = List.product nodes nodes \<rparr>"
-
 
 ML_val{*
 visualize_graph @{context} @{term "new_meta_system_boundary
