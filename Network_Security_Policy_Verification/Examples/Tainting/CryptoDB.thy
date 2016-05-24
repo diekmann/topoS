@@ -28,18 +28,18 @@ definition policy :: "vString list_graph" where
 
 context begin
   private definition "tainiting_host_attributes \<equiv> [
-                           V ''A'' \<mapsto> TaintsUntaints {''A'', ''A_local''} {},
-                           V ''A_encrypter'' \<mapsto> TaintsUntaints {''A_local''} {''A''},
-                           V ''A_channel'' \<mapsto> TaintsUntaints {} {''A_local''},
-                           V ''B'' \<mapsto> TaintsUntaints {''B'', ''B_local''} {},
-                           V ''B_encrypter'' \<mapsto> TaintsUntaints {''B_local''} {''B''},
-                           V ''B_channel'' \<mapsto> TaintsUntaints {} {''B_local''},
-                           V ''C'' \<mapsto> TaintsUntaints {''C'', ''C_local''} {},
-                           V ''C_encrypter'' \<mapsto> TaintsUntaints {''C_local''} {''C''},
-                           V ''C_decrypter'' \<mapsto> TaintsUntaints {''C'', ''C_local''} {},
-                           V ''C_channel_out'' \<mapsto> TaintsUntaints {} {''C_local''},
-                           V ''C_channel_in'' \<mapsto> TaintsUntaints {''C_local''} {''C_remote''},
-                           V ''Adversary'' \<mapsto> TaintsUntaints {''C_local'', ''A_local'', ''B_local''} {}
+                           V ''A'' \<mapsto> TaintsUntaints {''A''} {},
+                           V ''A_encrypter'' \<mapsto> TaintsUntaints {} {''A''},
+                           V ''A_channel'' \<mapsto> TaintsUntaints {} {},
+                           V ''B'' \<mapsto> TaintsUntaints {''B''} {},
+                           V ''B_encrypter'' \<mapsto> TaintsUntaints {} {''B''},
+                           V ''B_channel'' \<mapsto> TaintsUntaints {} {},
+                           V ''C'' \<mapsto> TaintsUntaints {''C''} {},
+                           V ''C_encrypter'' \<mapsto> TaintsUntaints {} {''C''},
+                           V ''C_decrypter'' \<mapsto> TaintsUntaints {''C''} {},
+                           V ''C_channel_out'' \<mapsto> TaintsUntaints {} {},
+                           V ''C_channel_in'' \<mapsto> TaintsUntaints {} {},
+                           V ''Adversary'' \<mapsto> TaintsUntaints {} {}
                            ]"
   private lemma "dom (tainiting_host_attributes) \<subseteq> set (nodesL policy)" by(simp add: tainiting_host_attributes_def policy_def)
   definition "Tainting_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_TaintingTrusted \<lparr>
@@ -53,16 +53,49 @@ visualize_graph @{context} @{term "[]::vString SecurityInvariant list"} @{term "
 
 
 context begin
-  private definition "BLP_host_attributes \<equiv>
-                          [''CryptoDB'' \<mapsto> \<lparr> privacy_level = 3, trusted = False \<rparr>
-                           ]"
-  private lemma "dom (BLP_host_attributes) \<subseteq> set (nodesL policy)"
-    by(simp add: BLP_host_attributes_def policy_def)
-  definition "BLP_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr>
-        node_properties = BLP_host_attributes \<rparr>"
+  private definition "A_host_attributes \<equiv>
+                [V ''A'' \<mapsto> Member,
+                 V ''A_encrypter'' \<mapsto> Member,
+                 V ''A_channel'' \<mapsto> Member
+                 ]"
+  private lemma "dom A_host_attributes \<subseteq> set (nodesL policy)"
+    by(simp add: A_host_attributes_def policy_def)
+  definition "SystemA_m \<equiv> new_configured_list_SecurityInvariant
+                                  SINVAR_LIB_SubnetsInGW
+                                    \<lparr> node_properties = A_host_attributes \<rparr>"
 end
 
-definition "invariants \<equiv> [Tainting_m]"
+context begin
+  private definition "B_host_attributes \<equiv>
+                [V ''B'' \<mapsto> Member,
+                 V ''B_encrypter'' \<mapsto> Member,
+                 V ''B_channel'' \<mapsto> Member
+                 ]"
+  private lemma "dom B_host_attributes \<subseteq> set (nodesL policy)"
+    by(simp add: B_host_attributes_def policy_def)
+  definition "SystemB_m \<equiv> new_configured_list_SecurityInvariant
+                                  SINVAR_LIB_SubnetsInGW
+                                    \<lparr> node_properties = B_host_attributes \<rparr>"
+end
+
+
+
+context begin
+  private definition "C_host_attributes \<equiv>
+                [V ''C_channel_in'' \<mapsto> InboundGateway,
+                 V ''C_decrypter'' \<mapsto> Member,
+                 V ''C'' \<mapsto> Member,
+                 V ''C_encrypter'' \<mapsto> Member,
+                 V ''C_channel_out'' \<mapsto> Member
+                 ]"
+  private lemma "dom C_host_attributes \<subseteq> set (nodesL policy)"
+    by(simp add: C_host_attributes_def policy_def)
+  definition "SystemC_m \<equiv> new_configured_list_SecurityInvariant
+                                  SINVAR_LIB_SubnetsInGW
+                                    \<lparr> node_properties = C_host_attributes \<rparr>"
+end
+
+definition "invariants \<equiv> [Tainting_m, SystemA_m, SystemB_m, SystemC_m]"
 
 lemma "all_security_requirements_fulfilled invariants policy" by eval
 ML{*
@@ -87,6 +120,14 @@ visualize_edges @{context} @{term "edgesL policy"}
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
      @{term "[(e1, e2) \<leftarrow>  List.product  (nodesL policy) (nodesL policy).
      ((e1,e2) \<notin> set (edgesL policy)) \<and> ((e1,e2) \<notin> set( edgesL (make_policy invariants (nodesL policy)))) \<and> (e2 = V ''Adversary'') \<and> (e1 \<noteq> V ''Adversary'')]"})] "";
+*}
+
+
+ML_val{*
+visualize_edges @{context} @{term "edgesL policy"}
+    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
+     @{term "[e \<leftarrow> edgesL (make_policy invariants (nodesL policy)).
+                e \<notin> set (edgesL policy)]"})] "";
 *}
 
 
