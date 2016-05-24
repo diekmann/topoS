@@ -52,6 +52,7 @@ lemma system_components_to_blp:
        c = SystemBoundaryOutput \<or> c = SystemBoundaryInputOutput"
 by(cases c)(simp_all add: SINVAR_BLPtrusted.default_node_properties_def)
 
+
 lemma "all_security_requirements_fulfilled (new_meta_system_boundary C) G \<longleftrightarrow>
        (\<forall>(v\<^sub>1, v\<^sub>2) \<in> set (edgesL G). case ((map_of C) v\<^sub>1, (map_of C) v\<^sub>2)
           of 
@@ -61,16 +62,21 @@ lemma "all_security_requirements_fulfilled (new_meta_system_boundary C) G \<long
           (*no restrictions inside the component*)
           |  (Some c1, Some c2) \<Rightarrow> True
 
+          (*System Boundaries Input*)
           |  (None, Some SystemBoundaryInputOutput) \<Rightarrow> True
           |  (None, Some SystemBoundaryInput) \<Rightarrow> True
+
+          (*System Boundaries Output*)
           |  (Some SystemBoundaryOutput, None) \<Rightarrow> True
           |  (Some SystemBoundaryInputOutput, None) \<Rightarrow> True
 
+          (*everything else is prohibited*)
           |  _ \<Rightarrow> False
        )"
 apply(simp)
 apply(simp add: new_meta_system_boundary_def)
 apply(simp add: all_security_requirements_fulfilled_def)
+apply(simp add: Let_def)
 apply(simp add: SINVAR_LIB_SubnetsInGW_def SINVAR_LIB_BLPtrusted_def)
 apply(simp add: SINVAR_SubnetsInGW_impl.NetModel_node_props_def SINVAR_BLPtrusted_impl.NetModel_node_props_def)
 apply(rule iffI)
@@ -107,8 +113,8 @@ apply(erule_tac x="(a,b)" in ballE)+
  apply(simp_all)
 apply(simp add: map_of_map)
 apply(simp split: option.split_asm system_components.split_asm)
-apply(simp_all add: SINVAR_BLPtrusted.default_node_properties_def)
- apply (metis One_nat_def eq_iff node_config.iffs node_config.surjective system_components_to_blp.elims)+
+  apply(simp add: SINVAR_BLPtrusted.default_node_properties_def; fail)
+ apply(rename_tac x, case_tac x, simp_all)+
 done
 done
 
