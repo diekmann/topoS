@@ -160,7 +160,7 @@ in
   val _ = Pretty.writeln (Syntax.pretty_term (Config.put show_types true @{context}) uniflows);
 end;
 
-val t = fastype_of @{term "[(TopoS_Vertices.V ''x'', 2::nat)]"};
+val t = fastype_of @{term "[(''x'', 2::nat)]"};
 
 *}
 ML_val{*(*

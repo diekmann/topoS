@@ -28,26 +28,23 @@ definition make_policy :: "('a SecurityInvariant) list \<Rightarrow> 'a list \<R
   "make_policy sinvars V \<equiv> generate_valid_topology sinvars \<lparr>nodesL = V, edgesL = List.product V V \<rparr>"
 
 
-abbreviation "V\<equiv>TopoS_Vertices.V"
-
-
 
 context begin
   private definition "SINK_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_Sink \<lparr> 
-          node_properties = [V ''Bot1'' \<mapsto> Sink,
-                             V ''Bot2'' \<mapsto> Sink,
-                             V ''MissionControl1'' \<mapsto> SinkPool,
-                             V ''MissionControl2'' \<mapsto> SinkPool
+          node_properties = [''Bot1'' \<mapsto> Sink,
+                             ''Bot2'' \<mapsto> Sink,
+                             ''MissionControl1'' \<mapsto> SinkPool,
+                             ''MissionControl2'' \<mapsto> SinkPool
                              ]
           \<rparr>"
-  value[code] "make_policy [SINK_m] [V ''INET'', V ''Supervisor'', V ''Bot1'', V ''Bot2'', V ''MissionControl1'', V ''MissionControl2'']"
+  value[code] "make_policy [SINK_m] [''INET'', ''Supervisor'', ''Bot1'', ''Bot2'', ''MissionControl1'', ''MissionControl2'']"
   ML_val{*
   visualize_graph_header @{context} @{term "[SINK_m]"}
-    @{term "make_policy [SINK_m] [V ''INET'', V ''Supervisor'', V ''Bot1'', V ''Bot2'', V ''MissionControl1'', V ''MissionControl2'']"}
-    @{term "[V ''Bot1'' \<mapsto> Sink,
-             V ''Bot2'' \<mapsto> Sink,
-             V ''MissionControl1'' \<mapsto> SinkPool,
-             V ''MissionControl2'' \<mapsto> SinkPool
+    @{term "make_policy [SINK_m] [''INET'', ''Supervisor'', ''Bot1'', ''Bot2'', ''MissionControl1'', ''MissionControl2'']"}
+    @{term "[''Bot1'' \<mapsto> Sink,
+             ''Bot2'' \<mapsto> Sink,
+             ''MissionControl1'' \<mapsto> SinkPool,
+             ''MissionControl2'' \<mapsto> SinkPool
              ]"};
   *}
 end
@@ -59,20 +56,20 @@ end
 
 context begin
   private definition "ACL_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
-          node_properties = [V ''db1'' \<mapsto> Master [V ''h1'', V ''h2''],
-                             V ''db2'' \<mapsto> Master [V ''db1''],
-                             V ''h1'' \<mapsto> Care,
-                             V ''h2'' \<mapsto> Care
+          node_properties = [''db1'' \<mapsto> Master [''h1'', ''h2''],
+                             ''db2'' \<mapsto> Master [''db1''],
+                             ''h1'' \<mapsto> Care,
+                             ''h2'' \<mapsto> Care
                              ]
           \<rparr>" 
-  value[code] "make_policy [ACL_m] [V ''db1'', V ''db2'', V ''h1'', V ''h2'', V ''h3'']"
+  value[code] "make_policy [ACL_m] [''db1'', ''db2'', ''h1'', ''h2'', ''h3'']"
   ML_val{*
   visualize_graph_header @{context} @{term "[ACL_m]"}
-    @{term "make_policy [ACL_m] [V ''db1'', V ''db2'', V ''h1'', V ''h2'', V ''h3'']"}
-    @{term "[V ''db1'' \<mapsto> Master [V ''h1'', V ''h2''],
-             V ''db2'' \<mapsto> Master [V ''db1''],
-             V ''h1'' \<mapsto> Care,
-             V ''h2'' \<mapsto> Care
+    @{term "make_policy [ACL_m] [''db1'', ''db2'', ''h1'', ''h2'', ''h3'']"}
+    @{term "[''db1'' \<mapsto> Master [''h1'', ''h2''],
+             ''db2'' \<mapsto> Master [''db1''],
+             ''h1'' \<mapsto> Care,
+             ''h2'' \<mapsto> Care
              ]"};
   *}
 end
@@ -238,22 +235,22 @@ end
 
 context begin
   private definition "subnets_host_attributes \<equiv> [
-                             V ''v11'' \<mapsto> Subnet 1,
-                             V ''v12'' \<mapsto> Subnet 1,
-                             V ''v13'' \<mapsto> Subnet 1,
-                             V ''v1b'' \<mapsto> BorderRouter 1,
-                             V ''v21'' \<mapsto> Subnet 2,
-                             V ''v22'' \<mapsto> Subnet 2,
-                             V ''v23'' \<mapsto> Subnet 2,
-                             V ''v2b'' \<mapsto> BorderRouter 2,
-                             V ''v3b'' \<mapsto> BorderRouter 3
+                             ''v11'' \<mapsto> Subnet 1,
+                             ''v12'' \<mapsto> Subnet 1,
+                             ''v13'' \<mapsto> Subnet 1,
+                             ''v1b'' \<mapsto> BorderRouter 1,
+                             ''v21'' \<mapsto> Subnet 2,
+                             ''v22'' \<mapsto> Subnet 2,
+                             ''v23'' \<mapsto> Subnet 2,
+                             ''v2b'' \<mapsto> BorderRouter 2,
+                             ''v3b'' \<mapsto> BorderRouter 3
                              ]"
   private definition "Subnets_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_Subnets \<lparr> 
           node_properties = subnets_host_attributes
           \<rparr>"
-  private definition "subnet_hosts \<equiv> [V ''v11'', V ''v12'', V ''v13'', V ''v1b'',
-                                      V ''v21'', V ''v22'', V ''v23'', V ''v2b'',
-                                      V ''v3b'', V ''vo'']"
+  private definition "subnet_hosts \<equiv> [''v11'', ''v12'', ''v13'', ''v1b'',
+                                      ''v21'', ''v22'', ''v23'', ''v2b'',
+                                      ''v3b'', ''vo'']"
 
   private lemma "dom (subnets_host_attributes) \<subseteq> set (subnet_hosts)"
     by(simp add: subnet_hosts_def subnets_host_attributes_def)
@@ -267,42 +264,42 @@ context begin
 
   text{*Emulating the same but with accessible members with SubnetsInGW and ACLs*}
   private definition "SubnetsInGW_ACL_ms \<equiv> [new_configured_list_SecurityInvariant SINVAR_LIB_SubnetsInGW \<lparr> 
-          node_properties = [V ''v11'' \<mapsto> Member, V ''v12'' \<mapsto> Member, V ''v13'' \<mapsto> Member, V ''v1b'' \<mapsto> InboundGateway]
+          node_properties = [''v11'' \<mapsto> Member, ''v12'' \<mapsto> Member, ''v13'' \<mapsto> Member, ''v1b'' \<mapsto> InboundGateway]
           \<rparr>,
           new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
-          node_properties = [V ''v1b'' \<mapsto> Master [V ''v11'', V ''v12'', V ''v13'', V ''v2b'', V ''v3b''],
-                             V ''v11'' \<mapsto> Care,
-                             V ''v12'' \<mapsto> Care,
-                             V ''v13'' \<mapsto> Care,
-                             V ''v2b'' \<mapsto> Care,
-                             V ''v3b'' \<mapsto> Care
+          node_properties = [''v1b'' \<mapsto> Master [''v11'', ''v12'', ''v13'', ''v2b'', ''v3b''],
+                             ''v11'' \<mapsto> Care,
+                             ''v12'' \<mapsto> Care,
+                             ''v13'' \<mapsto> Care,
+                             ''v2b'' \<mapsto> Care,
+                             ''v3b'' \<mapsto> Care
                              ]
           \<rparr>,
           new_configured_list_SecurityInvariant SINVAR_LIB_SubnetsInGW \<lparr> 
-          node_properties = [V ''v21'' \<mapsto> Member, V ''v22'' \<mapsto> Member, V ''v23'' \<mapsto> Member, V ''v2b'' \<mapsto> InboundGateway]
+          node_properties = [''v21'' \<mapsto> Member, ''v22'' \<mapsto> Member, ''v23'' \<mapsto> Member, ''v2b'' \<mapsto> InboundGateway]
           \<rparr>,
           new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
-          node_properties = [V ''v2b'' \<mapsto> Master [V ''v21'', V ''v22'', V ''v23'', V ''v1b'', V ''v3b''],
-                             V ''v21'' \<mapsto> Care,
-                             V ''v22'' \<mapsto> Care,
-                             V ''v23'' \<mapsto> Care,
-                             V ''v1b'' \<mapsto> Care,
-                             V ''v3b'' \<mapsto> Care
+          node_properties = [''v2b'' \<mapsto> Master [''v21'', ''v22'', ''v23'', ''v1b'', ''v3b''],
+                             ''v21'' \<mapsto> Care,
+                             ''v22'' \<mapsto> Care,
+                             ''v23'' \<mapsto> Care,
+                             ''v1b'' \<mapsto> Care,
+                             ''v3b'' \<mapsto> Care
                              ]
           \<rparr>,
           (*new_configured_list_SecurityInvariant SINVAR_LIB_SubnetsInGW \<lparr> 
-          node_properties = [V ''v3b'' \<mapsto> InboundGateway]
+          node_properties = [''v3b'' \<mapsto> InboundGateway]
           \<rparr>,*)
           new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
-          node_properties = [V ''v3b'' \<mapsto> Master [V ''v1b'', V ''v2b''],
-                             V ''v1b'' \<mapsto> Care,
-                             V ''v2b'' \<mapsto> Care
+          node_properties = [''v3b'' \<mapsto> Master [''v1b'', ''v2b''],
+                             ''v1b'' \<mapsto> Care,
+                             ''v2b'' \<mapsto> Care
                              ]
           \<rparr>]"
   value[code] "make_policy SubnetsInGW_ACL_ms subnet_hosts"
   lemma "set (edgesL (make_policy [Subnets_m] subnet_hosts)) \<subseteq> set (edgesL (make_policy SubnetsInGW_ACL_ms subnet_hosts))" by eval
   lemma "[e <- edgesL (make_policy SubnetsInGW_ACL_ms subnet_hosts). e \<notin> set (edgesL (make_policy [Subnets_m] subnet_hosts))] =
-   [(V ''v1b'', V ''v11''), (V ''v1b'', V ''v12''), (V ''v1b'', V ''v13''), (V ''v2b'', V ''v21''), (V ''v2b'', V ''v22''), (V ''v2b'', V ''v23'')]" by eval
+   [(''v1b'', ''v11''), (''v1b'', ''v12''), (''v1b'', ''v13''), (''v2b'', ''v21''), (''v2b'', ''v22''), (''v2b'', ''v23'')]" by eval
   ML_val{*
   visualize_graph @{context} @{term "SubnetsInGW_ACL_ms"}
     @{term "make_policy SubnetsInGW_ACL_ms subnet_hosts"};
@@ -314,18 +311,18 @@ end
 
 context begin
   private definition "secgwext_host_attributes \<equiv> [
-                             V ''hypervisor'' \<mapsto> SecurityGateway,
-                             V ''securevm1'' \<mapsto> DomainMember,
-                             V ''securevm2'' \<mapsto> DomainMember,
-                             V ''publicvm1'' \<mapsto> AccessibleMember,
-                             V ''publicvm2'' \<mapsto> AccessibleMember
+                             ''hypervisor'' \<mapsto> SecurityGateway,
+                             ''securevm1'' \<mapsto> DomainMember,
+                             ''securevm2'' \<mapsto> DomainMember,
+                             ''publicvm1'' \<mapsto> AccessibleMember,
+                             ''publicvm2'' \<mapsto> AccessibleMember
                              ]"
   private definition "SecGwExt_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_SecurityGatewayExtended \<lparr> 
           node_properties = secgwext_host_attributes
           \<rparr>"
-  private definition "secgwext_hosts \<equiv> [V ''hypervisor'', V ''securevm1'', V ''securevm2'',
-                                      V ''publicvm1'', V ''publicvm2'',
-                                      V ''INET'']"
+  private definition "secgwext_hosts \<equiv> [''hypervisor'', ''securevm1'', ''securevm2'',
+                                      ''publicvm1'', ''publicvm2'',
+                                      ''INET'']"
 
   private lemma "dom (secgwext_host_attributes) \<subseteq> set (secgwext_hosts)"
     by(simp add: secgwext_hosts_def secgwext_host_attributes_def)
@@ -338,14 +335,14 @@ context begin
 
   ML_val{*
   visualize_graph_header @{context} @{term "[SecGwExt_m, new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr> 
-        node_properties = [V ''hypervisor'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>,
-                           V ''securevm1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
-                           V ''securevm2'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>
+        node_properties = [''hypervisor'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>,
+                           ''securevm1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
+                           ''securevm2'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>
                            ] \<rparr>]"}
     @{term "make_policy [SecGwExt_m, new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr> 
-        node_properties = [V ''hypervisor'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>,
-                           V ''securevm1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
-                           V ''securevm2'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>
+        node_properties = [''hypervisor'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>,
+                           ''securevm1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
+                           ''securevm2'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>
                            ] \<rparr>] secgwext_hosts"}
     @{term "secgwext_host_attributes"};
   *}

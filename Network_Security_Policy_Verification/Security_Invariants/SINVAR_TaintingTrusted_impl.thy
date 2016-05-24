@@ -93,34 +93,34 @@ subsubsection {* TaintingTrusted packing *}
 subsubsection{* Example *}
 context
 begin
-  private definition tainting_example :: "vString list_graph" where
-  "tainting_example \<equiv> \<lparr> nodesL = [TopoS_Vertices.V ''produce 1'',
-                                  TopoS_Vertices.V ''produce 2'',
-                                  TopoS_Vertices.V ''produce 3'',
-                                  TopoS_Vertices.V ''read 1 2'',
-                                  TopoS_Vertices.V ''read 3'',
-                                  TopoS_Vertices.V ''consume 1 2 3'',
-                                  TopoS_Vertices.V ''consume 3''], 
-              edgesL =[(TopoS_Vertices.V ''produce 1'', TopoS_Vertices.V ''read 1 2''),
-                       (TopoS_Vertices.V ''produce 2'', TopoS_Vertices.V ''read 1 2''),
-                       (TopoS_Vertices.V ''produce 3'', TopoS_Vertices.V ''read 3''), 
-                       (TopoS_Vertices.V ''read 3'', TopoS_Vertices.V ''read 1 2''),
-                       (TopoS_Vertices.V ''read 1 2'', TopoS_Vertices.V ''consume 1 2 3''),
-                       (TopoS_Vertices.V ''read 3'', TopoS_Vertices.V ''consume 3'')] \<rparr>"
+  private definition tainting_example :: "string list_graph" where
+  "tainting_example \<equiv> \<lparr> nodesL = [''produce 1'',
+                                  ''produce 2'',
+                                  ''produce 3'',
+                                  ''read 1 2'',
+                                  ''read 3'',
+                                  ''consume 1 2 3'',
+                                  ''consume 3''], 
+              edgesL =[(''produce 1'', ''read 1 2''),
+                       (''produce 2'', ''read 1 2''),
+                       (''produce 3'', ''read 3''), 
+                       (''read 3'', ''read 1 2''),
+                       (''read 1 2'', ''consume 1 2 3''),
+                       (''read 3'', ''consume 3'')] \<rparr>"
   lemma "wf_list_graph tainting_example" by eval
 
 
-  private definition tainting_example_props :: "vString \<Rightarrow> SINVAR_TaintingTrusted.taints" where
+  private definition tainting_example_props :: "string \<Rightarrow> SINVAR_TaintingTrusted.taints" where
     "tainting_example_props \<equiv> (\<lambda> n. SINVAR_TaintingTrusted.default_node_properties)
-                          (TopoS_Vertices.V ''produce 1'' := TaintsUntaints {''1''} {},
-                           TopoS_Vertices.V ''produce 2'' := TaintsUntaints {''2''} {},
-                           TopoS_Vertices.V ''produce 3'' := TaintsUntaints {''3''} {},
-                           TopoS_Vertices.V ''read 1 2'' := TaintsUntaints {''3'',''foo''} {''1'',''2''},
-                           TopoS_Vertices.V ''read 3'' := TaintsUntaints {''3''} {},
-                           TopoS_Vertices.V ''consume 1 2 3'' := TaintsUntaints {''foo'',''3''} {},
-                           TopoS_Vertices.V ''consume 3'' := TaintsUntaints {''3''} {})"
+                          (''produce 1'' := TaintsUntaints {''1''} {},
+                           ''produce 2'' := TaintsUntaints {''2''} {},
+                           ''produce 3'' := TaintsUntaints {''3''} {},
+                           ''read 1 2'' := TaintsUntaints {''3'',''foo''} {''1'',''2''},
+                           ''read 3'' := TaintsUntaints {''3''} {},
+                           ''consume 1 2 3'' := TaintsUntaints {''foo'',''3''} {},
+                           ''consume 3'' := TaintsUntaints {''3''} {})"
 
-  value "tainting_example_props (TopoS_Vertices.V ''consume 1 2 3'')"
+  value "tainting_example_props (''consume 1 2 3'')"
   value[code] "TaintingTrusted_offending_list tainting_example tainting_example_props"
   private lemma "sinvar tainting_example tainting_example_props" by eval
 end

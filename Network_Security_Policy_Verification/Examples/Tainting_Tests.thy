@@ -2,9 +2,6 @@ theory Tainting_Tests
 imports "../TopoS_Impl"
 begin
 
-abbreviation "V\<equiv>TopoS_Vertices.V"
-
-
 
 (*Instead of opening a lot of pdfs now, ask whether to open them first.
   If not clicked yes/no, it will wait 3 seconds until it continues.
@@ -21,25 +18,25 @@ case !Graphviz.open_viewer of
 
 
 
-definition policy :: "vString list_graph" where
-  "policy \<equiv> \<lparr> nodesL = [V ''A'',
-                        V ''B'',
-                        V ''C'',
-                        V ''CryptoDB''],
-              edgesL = [(V ''A'', V ''CryptoDB'')] \<rparr>"
+definition policy :: "string list_graph" where
+  "policy \<equiv> \<lparr> nodesL = [''A'',
+                        ''B'',
+                        ''C'',
+                        ''CryptoDB''],
+              edgesL = [(''A'', ''CryptoDB'')] \<rparr>"
 
 lemma "wf_list_graph policy" by eval
 
 ML_val{*
-visualize_graph @{context} @{term "[]::vString SecurityInvariant list"} @{term "policy"};
+visualize_graph @{context} @{term "[]::string SecurityInvariant list"} @{term "policy"};
 *}
 
 
 context begin
-  private definition "tainiting_host_attributes \<equiv> [V ''A'' \<mapsto> TaintsUntaints {''A''} {},
-                           V ''B'' \<mapsto> TaintsUntaints {''B''} {},
-                           V ''C'' \<mapsto> TaintsUntaints {''C''} {},
-                           V ''CryptoDB'' \<mapsto> TaintsUntaints {} {''A'', ''B'', ''C''}
+  private definition "tainiting_host_attributes \<equiv> [''A'' \<mapsto> TaintsUntaints {''A''} {},
+                           ''B'' \<mapsto> TaintsUntaints {''B''} {},
+                           ''C'' \<mapsto> TaintsUntaints {''C''} {},
+                           ''CryptoDB'' \<mapsto> TaintsUntaints {} {''A'', ''B'', ''C''}
                            ]"
   private lemma "dom (tainiting_host_attributes) \<subseteq> set (nodesL policy)"
     by(simp add: tainiting_host_attributes_def policy_def)
@@ -50,7 +47,7 @@ end
 
 context begin
   private definition "BLP_host_attributes \<equiv>
-                          [V ''CryptoDB'' \<mapsto> \<lparr> privacy_level = 3, trusted = False \<rparr>
+                          [''CryptoDB'' \<mapsto> \<lparr> privacy_level = 3, trusted = False \<rparr>
                            ]"
   private lemma "dom (BLP_host_attributes) \<subseteq> set (nodesL policy)"
     by(simp add: BLP_host_attributes_def policy_def)
@@ -70,9 +67,9 @@ visualize_graph @{context} @{term "invariants"} @{term "policy"};
 
 
 
-value[code] "implc_get_offending_flows invariants (policy\<lparr> edgesL := (V ''B'', V ''C'')#edgesL policy\<rparr>)"
+value[code] "implc_get_offending_flows invariants (policy\<lparr> edgesL := (''B'', ''C'')#edgesL policy\<rparr>)"
 ML{*
-visualize_graph @{context} @{term "invariants"} @{term "(policy\<lparr> edgesL := (V ''B'', V ''C'')#edgesL policy\<rparr>)"};
+visualize_graph @{context} @{term "invariants"} @{term "(policy\<lparr> edgesL := (''B'', ''C'')#edgesL policy\<rparr>)"};
 *}
 
 
