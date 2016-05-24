@@ -48,7 +48,8 @@ definition policy :: "vString list_graph" where
               (V ''Encryption_C'', V ''Client_C_out''),
               (V ''Client_C_out'', V ''UploadDroid''),
 
-              (V ''UploadDroid'', V ''C3PO_in''),
+              (*(V ''UploadDroid'', V ''C3PO_in''),*)
+              (V ''C3PO_in'', V ''UploadDroid''),
 
               (V ''C3PO_in'', V ''C3PO_Dec_A''),
               (V ''C3PO_in'', V ''C3PO_Dec_B''),
@@ -123,6 +124,7 @@ definition make_policy :: "('a SecurityInvariant) list \<Rightarrow> 'a list \<R
 value[code] "make_policy invariants (nodesL policy)"
 
 
+lemma "set (edgesL policy) \<subseteq> set (edgesL (make_policy invariants (nodesL policy)))" by eval
 ML_val{*
 visualize_edges @{context} @{term "edgesL policy"}
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
@@ -130,5 +132,11 @@ visualize_edges @{context} @{term "edgesL policy"}
      ((e1,e2) \<notin> set (edgesL policy)) \<and> ((e1,e2) \<notin> set( edgesL (make_policy invariants (nodesL policy)))) \<and> (e2 = V ''Adversary'') \<and> (e1 \<noteq> V ''Adversary'')]"})] "";
 *}
 
+
+definition "stateful_policy = generate_valid_stateful_policy_IFSACS policy invariants"
+ML_val{*
+visualize_edges @{context} @{term "flows_fixL stateful_policy"}
+    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "flows_stateL stateful_policy"})] ""; 
+*}
 
 end
