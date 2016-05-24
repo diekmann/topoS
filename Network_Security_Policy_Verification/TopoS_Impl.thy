@@ -1,5 +1,8 @@
 theory TopoS_Impl
 imports TopoS_Library TopoS_Composition_Theory_impl
+    (*Mehr Meta wagen!*)
+    "Security_Invariants/METASINVAR_SystemBoundary"
+    (*stuff*)
     "Lib/ML_GraphViz"
     TopoS_Stateful_Policy_impl
 begin

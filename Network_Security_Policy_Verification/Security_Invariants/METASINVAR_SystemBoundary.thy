@@ -2,7 +2,6 @@ theory METASINVAR_SystemBoundary
 imports SINVAR_BLPtrusted_impl
         SINVAR_SubnetsInGW_impl
         "../TopoS_Composition_Theory_impl"
-        "../TopoS_Impl" (*TODO: delete, only for visualization*)
 begin
 
 
@@ -39,6 +38,81 @@ definition new_meta_system_boundary :: "('v::vertex \<times> system_components) 
       ]"
 
 
+lemma system_components_to_subnets:
+      "SINVAR_SubnetsInGW.allowed_subnet_flow
+        SINVAR_SubnetsInGW.default_node_properties
+        (system_components_to_subnets c) \<longleftrightarrow>
+       c = SystemBoundaryInput \<or> c = SystemBoundaryInputOutput"
+by(cases c)(simp_all add: SINVAR_SubnetsInGW.default_node_properties_def)
+
+lemma system_components_to_blp:
+      "(\<not> trusted SINVAR_BLPtrusted.default_node_properties \<longrightarrow>
+       privacy_level (system_components_to_blp c) \<le> privacy_level SINVAR_BLPtrusted.default_node_properties)
+       \<longleftrightarrow>
+       c = SystemBoundaryOutput \<or> c = SystemBoundaryInputOutput"
+by(cases c)(simp_all add: SINVAR_BLPtrusted.default_node_properties_def)
+
+lemma "all_security_requirements_fulfilled (new_meta_system_boundary C) G \<longleftrightarrow>
+       (\<forall>(v\<^sub>1, v\<^sub>2) \<in> set (edgesL G). case ((map_of C) v\<^sub>1, (map_of C) v\<^sub>2)
+          of 
+          (*No restrictions outside of the component*)
+             (None, None) \<Rightarrow> True
+
+          (*no restrictions inside the component*)
+          |  (Some c1, Some c2) \<Rightarrow> True
+
+          |  (None, Some SystemBoundaryInputOutput) \<Rightarrow> True
+          |  (None, Some SystemBoundaryInput) \<Rightarrow> True
+          |  (Some SystemBoundaryOutput, None) \<Rightarrow> True
+          |  (Some SystemBoundaryInputOutput, None) \<Rightarrow> True
+
+          |  _ \<Rightarrow> False
+       )"
+apply(simp)
+apply(simp add: new_meta_system_boundary_def)
+apply(simp add: all_security_requirements_fulfilled_def)
+apply(simp add: SINVAR_LIB_SubnetsInGW_def SINVAR_LIB_BLPtrusted_def)
+apply(simp add: SINVAR_SubnetsInGW_impl.NetModel_node_props_def SINVAR_BLPtrusted_impl.NetModel_node_props_def)
+apply(rule iffI)
+ apply(clarsimp)
+ subgoal for a b
+ apply(erule_tac x="(a,b)" in ballE)+
+  apply(simp_all)
+ apply(case_tac "map_of C a")
+  apply(case_tac "map_of C b")
+   apply(simp_all)
+  apply(simp add: map_of_map)
+  apply(simp split: system_components.split)
+  apply(simp add: system_components_to_subnets)
+  apply blast
+ apply(case_tac "map_of C b")
+  apply(simp add: map_of_map)
+  apply(simp split: system_components.split)
+  apply(simp add: system_components_to_blp)
+  apply blast
+ apply(simp add: map_of_map)
+ apply(simp split: system_components.split; fail)
+ done
+apply(intro conjI)
+ apply(simp add: map_of_map)
+ apply(clarsimp)
+ subgoal for a b
+ apply(erule_tac x="(a,b)" in ballE)+
+  apply(simp_all)
+ apply(simp split: option.split_asm system_components.split_asm)
+    by(simp_all add: SINVAR_SubnetsInGW.default_node_properties_def)
+apply(clarsimp)
+subgoal for a b
+apply(erule_tac x="(a,b)" in ballE)+
+ apply(simp_all)
+apply(simp add: map_of_map)
+apply(simp split: option.split_asm system_components.split_asm)
+apply(simp_all add: SINVAR_BLPtrusted.default_node_properties_def)
+ apply (metis One_nat_def eq_iff node_config.iffs node_config.surjective system_components_to_blp.elims)+
+done
+done
+
+
 value[code] "let nodes = [1,2,3,4,8,9,10];
            sinvars = new_meta_system_boundary
               [(1::int, SystemBoundaryInput),
@@ -48,21 +122,5 @@ value[code] "let nodes = [1,2,3,4,8,9,10];
                ]
        in generate_valid_topology sinvars \<lparr>nodesL = nodes, edgesL = List.product nodes nodes \<rparr>"
 
-ML_val{*
-visualize_graph @{context} @{term "new_meta_system_boundary
-              [(1::int, SystemBoundaryInput),
-               (2, SystemComponent),
-               (3, SystemBoundaryOutput),
-               (4, SystemBoundaryInputOutput)
-               ]"}
-      @{term "let nodes = [1,2,3,4,8,9,10];
-           sinvars = new_meta_system_boundary
-              [(1::int, SystemBoundaryInput),
-               (2, SystemComponent),
-               (3, SystemBoundaryOutput),
-               (4, SystemBoundaryInputOutput)
-               ]
-       in generate_valid_topology sinvars \<lparr>nodesL = nodes, edgesL = List.product nodes nodes \<rparr>"};
-*}
 
 end
