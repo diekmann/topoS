@@ -36,7 +36,7 @@ context begin
                              ''MissionControl1'' \<mapsto> SinkPool,
                              ''MissionControl2'' \<mapsto> SinkPool
                              ]
-          \<rparr>"
+          \<rparr> ''bots and control are infromation sink''"
   value[code] "make_policy [SINK_m] [''INET'', ''Supervisor'', ''Bot1'', ''Bot2'', ''MissionControl1'', ''MissionControl2'']"
   ML_val{*
   visualize_graph_header @{context} @{term "[SINK_m]"}
@@ -61,7 +61,7 @@ context begin
                              ''h1'' \<mapsto> Care,
                              ''h2'' \<mapsto> Care
                              ]
-          \<rparr>" 
+          \<rparr> ''ACL for databases''" 
   value[code] "make_policy [ACL_m] [''db1'', ''db2'', ''h1'', ''h2'', ''h3'']"
   ML_val{*
   visualize_graph_header @{context} @{term "[ACL_m]"}
@@ -82,7 +82,7 @@ definition CommWith_m::"(nat SecurityInvariant)" where
           node_properties = [
                   1 \<mapsto> [2,3],
                   2 \<mapsto> [3]]
-          \<rparr>"
+          \<rparr> ''One can only talk to 2,3''"
 
 
 text{*Experimental: the config (only one) can be added to the end.*}
@@ -107,7 +107,7 @@ visualize_graph @{context} @{term "[ new_configured_list_SecurityInvariant SINVA
                   2 \<mapsto> [1,2,3,4],
                   3 \<mapsto> [1,2,3,4],
                   4 \<mapsto> [1,2,3,4]]
-          \<rparr>]"} @{term "\<lparr>nodesL = [1::nat,2,3,4], edgesL = [(1,2), (1,3), (2,3), (3, 4)] \<rparr>"};
+          \<rparr> ''usefull description here'']"} @{term "\<lparr>nodesL = [1::nat,2,3,4], edgesL = [(1,2), (1,3), (2,3), (3, 4)] \<rparr>"};
 *}
 
 
@@ -117,7 +117,7 @@ lemma "implc_offending_flows (new_configured_list_SecurityInvariant SINVAR_LIB_A
                   2 \<mapsto> [1,2,3,4],
                   3 \<mapsto> [1,2,3,4],
                   4 \<mapsto> [1,2,3,4]]
-          \<rparr>) \<lparr>nodesL = [1::nat,2,3,4], edgesL = [(1,2), (1,3), (2,3), (3, 4)] \<rparr> =
+          \<rparr> ''usefull description here'') \<lparr>nodesL = [1::nat,2,3,4], edgesL = [(1,2), (1,3), (2,3), (3, 4)] \<rparr> =
         [[(1, 2), (1, 3)], [(1, 3), (2, 3)], [(3, 4)]]" by eval
 
 
@@ -130,7 +130,7 @@ context begin
 
   private definition "DEP_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_Dependability \<lparr> 
           node_properties = Some \<circ> dependability_fix_nP G_dep (\<lambda>_. 0)
-          \<rparr>"
+          \<rparr> ''automatically computed dependability invariant''"
   ML_val{* 
   visualize_graph_header @{context} @{term "[DEP_m]"}
     @{term "G_dep"}
@@ -147,13 +147,13 @@ context begin
   ML_val{*
   visualize_graph_header @{context} @{term "[new_configured_list_SecurityInvariant SINVAR_LIB_Dependability \<lparr> 
           node_properties = Some \<circ> ((dependability_fix_nP G_dep (\<lambda>_. 0))(3 := 2))
-          \<rparr>]"}
+          \<rparr> ''changed deps'']"}
     @{term "G_dep\<lparr>edgesL := (3,4)#edgesL G_dep\<rparr>"}
     @{term "Some \<circ> ((dependability_fix_nP G_dep (\<lambda>_. 0))(3 := 2))"};
   *}
   lemma "implc_offending_flows (new_configured_list_SecurityInvariant SINVAR_LIB_Dependability \<lparr> 
                           node_properties = Some \<circ> ((dependability_fix_nP G_dep (\<lambda>_. 0))(3 := 2))
-                          \<rparr>)
+                          \<rparr> ''changed deps'')
              (G_dep\<lparr>edgesL := (3,4)#edgesL G_dep\<rparr>) = 
            [[(3, 4)], [(1, 2), (2, 1), (5, 6)], [(1, 2), (4, 5)], [(2, 1), (4, 5)], [(2, 3), (4, 5)], [(2, 3), (5, 6)]]"
            by eval
@@ -165,7 +165,7 @@ context begin
   ML_val{*
   visualize_graph_header @{context} @{term "[new_configured_list_SecurityInvariant SINVAR_LIB_Dependability \<lparr> 
           node_properties = Some \<circ> dependability_fix_nP (G_dep\<lparr>edgesL := (3,4)#edgesL G_dep\<rparr>) (\<lambda>_. 0)
-          \<rparr>]"}
+          \<rparr> ''changed deps'']"}
     @{term "G_dep\<lparr>edgesL := (3,4)#edgesL G_dep\<rparr>"}
     @{term "Some \<circ> dependability_fix_nP (G_dep\<lparr>edgesL := (3,4)#edgesL G_dep\<rparr>) (\<lambda>_. 0)"};
   *}
@@ -174,14 +174,14 @@ context begin
   ML_val{*
   visualize_graph_header @{context} @{term "[new_configured_list_SecurityInvariant SINVAR_LIB_Dependability \<lparr> 
           node_properties = Some \<circ> dependability_fix_nP \<lparr>nodesL = [1::nat], edgesL = [(1,1)] \<rparr> (\<lambda>_. 0)
-          \<rparr>]"}
+          \<rparr> ''changed deps'']"}
     @{term "\<lparr>nodesL = [1::nat], edgesL = [(1,1)] \<rparr>"}
     @{term "Some \<circ> dependability_fix_nP \<lparr>nodesL = [1::nat], edgesL = [(1,1)] \<rparr> (\<lambda>_. 0)"};
   *}
   ML_val{*
   visualize_graph_header @{context} @{term "[new_configured_list_SecurityInvariant SINVAR_LIB_Dependability_norefl \<lparr> 
           node_properties = (\<lambda>_::nat. Some 0)
-          \<rparr>]"}
+          \<rparr> ''changed deps'']"}
     @{term "\<lparr>nodesL = [1::nat], edgesL = [(1,1)] \<rparr>"}
     @{term "(\<lambda>_::nat. Some (0::nat))"};
   *}
@@ -201,7 +201,7 @@ context begin
                   2 \<mapsto> Unrelated, 
                   3 \<mapsto> Unrelated, 
                   4 \<mapsto> Interfering]
-          \<rparr>"
+          \<rparr> ''One and Four interfere''"
   ML_val{*
   visualize_graph @{context} @{term "[ NonI_m ]"} @{term "G_noninter"};
   *}
@@ -228,7 +228,7 @@ context begin
                   2 \<mapsto> [1,2,3,4],
                   3 \<mapsto> [1,2,3,4],
                   4 \<mapsto> [1,2,3,4]]
-          \<rparr>) \<lparr>nodesL = [1::nat,2,3,4], edgesL = [(1,2), (1,3), (2,3), (4, 3)] \<rparr> = []" by eval
+          \<rparr> ''One must not access Four'') \<lparr>nodesL = [1::nat,2,3,4], edgesL = [(1,2), (1,3), (2,3), (4, 3)] \<rparr> = []" by eval
 end
 
 
@@ -247,7 +247,7 @@ context begin
                              ]"
   private definition "Subnets_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_Subnets \<lparr> 
           node_properties = subnets_host_attributes
-          \<rparr>"
+          \<rparr> ''Collaborating hosts''"
   private definition "subnet_hosts \<equiv> [''v11'', ''v12'', ''v13'', ''v1b'',
                                       ''v21'', ''v22'', ''v23'', ''v2b'',
                                       ''v3b'', ''vo'']"
@@ -265,7 +265,7 @@ context begin
   text{*Emulating the same but with accessible members with SubnetsInGW and ACLs*}
   private definition "SubnetsInGW_ACL_ms \<equiv> [new_configured_list_SecurityInvariant SINVAR_LIB_SubnetsInGW \<lparr> 
           node_properties = [''v11'' \<mapsto> Member, ''v12'' \<mapsto> Member, ''v13'' \<mapsto> Member, ''v1b'' \<mapsto> InboundGateway]
-          \<rparr>,
+          \<rparr> ''v1 subnet'',
           new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
           node_properties = [''v1b'' \<mapsto> Master [''v11'', ''v12'', ''v13'', ''v2b'', ''v3b''],
                              ''v11'' \<mapsto> Care,
@@ -274,10 +274,10 @@ context begin
                              ''v2b'' \<mapsto> Care,
                              ''v3b'' \<mapsto> Care
                              ]
-          \<rparr>,
+          \<rparr> ''v1b ACL'',
           new_configured_list_SecurityInvariant SINVAR_LIB_SubnetsInGW \<lparr> 
           node_properties = [''v21'' \<mapsto> Member, ''v22'' \<mapsto> Member, ''v23'' \<mapsto> Member, ''v2b'' \<mapsto> InboundGateway]
-          \<rparr>,
+          \<rparr> ''v2 subnet'',
           new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
           node_properties = [''v2b'' \<mapsto> Master [''v21'', ''v22'', ''v23'', ''v1b'', ''v3b''],
                              ''v21'' \<mapsto> Care,
@@ -286,16 +286,16 @@ context begin
                              ''v1b'' \<mapsto> Care,
                              ''v3b'' \<mapsto> Care
                              ]
-          \<rparr>,
+          \<rparr> ''v2b ACL'',
           (*new_configured_list_SecurityInvariant SINVAR_LIB_SubnetsInGW \<lparr> 
           node_properties = [''v3b'' \<mapsto> InboundGateway]
-          \<rparr>,*)
+          \<rparr> ''v3b'',*)
           new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
           node_properties = [''v3b'' \<mapsto> Master [''v1b'', ''v2b''],
                              ''v1b'' \<mapsto> Care,
                              ''v2b'' \<mapsto> Care
                              ]
-          \<rparr>]"
+          \<rparr> ''v3b ACL'']"
   value[code] "make_policy SubnetsInGW_ACL_ms subnet_hosts"
   lemma "set (edgesL (make_policy [Subnets_m] subnet_hosts)) \<subseteq> set (edgesL (make_policy SubnetsInGW_ACL_ms subnet_hosts))" by eval
   lemma "[e <- edgesL (make_policy SubnetsInGW_ACL_ms subnet_hosts). e \<notin> set (edgesL (make_policy [Subnets_m] subnet_hosts))] =
@@ -319,7 +319,7 @@ context begin
                              ]"
   private definition "SecGwExt_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_SecurityGatewayExtended \<lparr> 
           node_properties = secgwext_host_attributes
-          \<rparr>"
+          \<rparr> ''secure hypervisor mediates accesses between secure VMs''"
   private definition "secgwext_hosts \<equiv> [''hypervisor'', ''securevm1'', ''securevm2'',
                                       ''publicvm1'', ''publicvm2'',
                                       ''INET'']"
@@ -338,12 +338,12 @@ context begin
         node_properties = [''hypervisor'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>,
                            ''securevm1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
                            ''securevm2'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>
-                           ] \<rparr>]"}
+                           ] \<rparr> ''secure vms are confidential'']"}
     @{term "make_policy [SecGwExt_m, new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr> 
         node_properties = [''hypervisor'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>,
                            ''securevm1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
                            ''securevm2'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>
-                           ] \<rparr>] secgwext_hosts"}
+                           ] \<rparr> ''secure vms are confidential''] secgwext_hosts"}
     @{term "secgwext_host_attributes"};
   *}
 end

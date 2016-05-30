@@ -22,7 +22,7 @@ subsection{*Our security requirements*}
       "ConfidentialChairData \<equiv> new_configured_list_SecurityInvariant SINVAR_BLPtrusted_impl.SINVAR_LIB_BLPtrusted \<lparr> 
           node_properties = [''FilesSrv'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
                              ''Employees'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>]
-          \<rparr>"
+          \<rparr> ''confidential data''"
 
 
   subsubsection{* accessibly by employees and students*}
@@ -30,29 +30,29 @@ subsection{*Our security requirements*}
           node_properties = [''Printer'' \<mapsto> Master [''Employees'', ''Students''],
                              ''Employees'' \<mapsto> Care,
                              ''Students'' \<mapsto> Care]
-          \<rparr>"
+          \<rparr> ''printing acl''"
 
   subsubsection{* Printers are information sinks *}
     definition "PrintingSink \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_Sink \<lparr> 
           node_properties = [''Printer'' \<mapsto> Sink]
-          \<rparr>"
+          \<rparr> ''printing sink''"
 
 
 
   subsubsection{*Students and Employees may access each other but are not accessible from the outside*}
     definition "InternalSubnet \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_SubnetsInGW \<lparr> 
           node_properties = [''Students'' \<mapsto> Member, ''Employees'' \<mapsto> Member]
-          \<rparr>"
+          \<rparr> ''internal subnet''"
 
 
   subsubsection{* The files server is only accessibly by employees*}
-    definition "FilesSrcACL \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
+    definition "FilesSrvACL \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners \<lparr> 
           node_properties = [''FilesSrv'' \<mapsto> Master [''Employees''],
                              ''Employees'' \<mapsto> Care]
-          \<rparr>"
+          \<rparr> ''file srv acl''"
 
 
-definition "ChairSecurityRequirements = [ConfidentialChairData, PrintingACL, PrintingSink, InternalSubnet, FilesSrcACL]"
+definition "ChairSecurityRequirements = [ConfidentialChairData, PrintingACL, PrintingSink, InternalSubnet, FilesSrvACL]"
 
 lemma "\<forall>m \<in> set ChairSecurityRequirements. implc_sinvar m ChairNetwork_empty" by eval
 
@@ -118,7 +118,7 @@ visualize_edges @{context} @{term "flows_fixL ChairNetwork_stateful"}
 
 (*these requirements impose no restrictoins on the stateful flows*)
 definition "ChairNetwork_stateful_v2 = generate_valid_stateful_policy_IFSACS ChairNetwork
-    [ConfidentialChairData, PrintingACL,  InternalSubnet, FilesSrcACL]"
+    [ConfidentialChairData, PrintingACL,  InternalSubnet, FilesSrvACL]"
 ML_val{*
 visualize_edges @{context} @{term "flows_fixL ChairNetwork_stateful_v2"} 
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
@@ -139,7 +139,7 @@ subsection{*An example of bad side-effects in access control policies*}
         node_properties = [''A'' \<mapsto> {''C''},
                            ''B'' \<mapsto> {},
                            ''C'' \<mapsto> {}]
-        \<rparr>"
+        \<rparr> ''example: a must not reach C''"
 
   definition simple_network :: "string list_graph" where
     "simple_network \<equiv> \<lparr> nodesL = [''A'', ''B'', ''C''],

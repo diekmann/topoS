@@ -41,7 +41,7 @@ context begin
   private lemma "dom (tainiting_host_attributes) \<subseteq> set (nodesL policy)"
     by(simp add: tainiting_host_attributes_def policy_def)
   definition "Tainting_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_TaintingTrusted \<lparr> 
-        node_properties = tainiting_host_attributes \<rparr>"
+        node_properties = tainiting_host_attributes \<rparr> ''A tained''"
 end
 
 
@@ -52,7 +52,7 @@ context begin
   private lemma "dom (BLP_host_attributes) \<subseteq> set (nodesL policy)"
     by(simp add: BLP_host_attributes_def policy_def)
   definition "BLP_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr> 
-        node_properties = BLP_host_attributes \<rparr>"
+        node_properties = BLP_host_attributes \<rparr> ''some usefull descriprion''"
 end
 
 

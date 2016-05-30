@@ -34,7 +34,7 @@ definition DomainHierarchy_m::"(string SecurityInvariant)" where
             ''P1'' \<mapsto> DN (''aircraft''--''entertain''--''POD''--Leaf, 0),
             ''P2'' \<mapsto> DN (''aircraft''--''entertain''--''POD''--Leaf, 0)
           ]
-          \<rparr>"
+          \<rparr> ''Device Hierarchy''"
   text{*sanity check that the host attributes correspond to the desired hierarchy*}
   lemma "DomainHierarchyNG_sanity_check_config
     (map snd [
@@ -62,7 +62,7 @@ definition SecurityGateway_m::"(string SecurityInvariant)" where
           node_properties = [''IFEsrv'' \<mapsto> SINVAR_SecGwExt.SecurityGatewayIN,
                              ''IFE1'' \<mapsto> SINVAR_SecGwExt.DomainMember,
                              ''IFE2'' \<mapsto> SINVAR_SecGwExt.DomainMember]
-          \<rparr>"
+          \<rparr> ''IFEsrc mediates access of its thin clients''"
 
 
 (*
@@ -79,7 +79,7 @@ definition BLP_m::"(string SecurityInvariant)" where
                              ''IFE1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
                              ''IFE2'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
                              ''IFEsrv'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>]
-          \<rparr>"
+          \<rparr> ''Confidential data''"
 
 definition "security_invariants = [ DomainHierarchy_m, SecurityGateway_m, BLP_m]"
 

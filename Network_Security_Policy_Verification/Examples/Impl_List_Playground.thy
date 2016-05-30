@@ -17,14 +17,14 @@ definition req1 ::"(string SecurityInvariant)" where
       node_properties = [''Master'' \<mapsto> SecurityGateway,
                          ''Slave1'' \<mapsto> DomainMember,
                          ''Slave2'' \<mapsto> DomainMember]
-      \<rparr>"
+      \<rparr> ''req1''"
 
 
 definition "req2 \<equiv> new_configured_list_SecurityInvariant SINVAR_NoRefl_impl.SINVAR_LIB_NoRefl \<lparr> 
       node_properties = [''Master'' \<mapsto> Refl,
                          ''other1'' \<mapsto> Refl,
                          ''other2'' \<mapsto> Refl]
-      \<rparr>"
+      \<rparr> ''req2''"
 
 definition "reqs = [req1, req2]"
 

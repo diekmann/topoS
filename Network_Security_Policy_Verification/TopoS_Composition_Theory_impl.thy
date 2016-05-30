@@ -17,6 +17,7 @@ subsection{*Generating instantiated (configured) network security invariants*}
   (*very minimal version, no eval, ...*)
   record ('v) SecurityInvariant =
     implc_type :: string
+    implc_description :: string
     implc_sinvar ::"('v) list_graph \<Rightarrow> bool"
     implc_offending_flows ::"('v) list_graph \<Rightarrow> ('v \<times> 'v) list list"
     implc_isIFS :: "bool"
@@ -31,12 +32,13 @@ subsection{*Generating instantiated (configured) network security invariants*}
     
 
   fun new_configured_list_SecurityInvariant :: 
-    "('v::vertex, 'a) TopoS_packed \<Rightarrow> ('v::vertex, 'a) TopoS_Params \<Rightarrow> 
+    "('v::vertex, 'a) TopoS_packed \<Rightarrow> ('v::vertex, 'a) TopoS_Params \<Rightarrow> string \<Rightarrow>
         ('v SecurityInvariant)" where 
-      "new_configured_list_SecurityInvariant m C = 
+      "new_configured_list_SecurityInvariant m C description = 
         (let nP = nm_node_props m C in
          \<lparr> 
             implc_type = nm_name m,
+            implc_description = description,
             implc_sinvar = (\<lambda>G. (nm_sinvar m) G nP),
             implc_offending_flows = (\<lambda>G. (nm_offending_flows m) G nP),
             implc_isIFS = nm_receiver_violation m
@@ -73,7 +75,7 @@ subsection{*Generating instantiated (configured) network security invariants*}
     assumes NetModelLib: "TopoS_modelLibrary m sinvar_spec"
     and     nPdef:       "nP = nm_node_props m C"
     and formalSpec:      "Spec = new_configured_SecurityInvariant (sinvar_spec, nm_default m, nm_receiver_violation m, nP)"
-    and implSpec:        "Impl = new_configured_list_SecurityInvariant m C"
+    and implSpec:        "Impl = new_configured_list_SecurityInvariant m C description"
     shows "SecurityInvariant_complies_formal_def Impl (the Spec)"
     proof -
       from TopoS_modelLibrary_yields_new_configured_SecurityInvariant[OF NetModelLib nPdef]
@@ -93,7 +95,7 @@ subsection{*Generating instantiated (configured) network security invariants*}
 
   corollary new_configured_list_SecurityInvariant_complies':
     "\<lbrakk> TopoS_modelLibrary m sinvar_spec \<rbrakk> \<Longrightarrow> 
-    SecurityInvariant_complies_formal_def (new_configured_list_SecurityInvariant m C)
+    SecurityInvariant_complies_formal_def (new_configured_list_SecurityInvariant m C description)
       (the (new_configured_SecurityInvariant (sinvar_spec, nm_default m, nm_receiver_violation m, nm_node_props m C)))"
     by(blast dest: new_configured_list_SecurityInvariant_complies)
 

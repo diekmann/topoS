@@ -116,7 +116,7 @@ context begin
   private lemma "dom (BLP_privacy_host_attributes) \<subseteq> set (nodesL policy)"
     by(simp add: BLP_privacy_host_attributes_def policy_def)
   definition "BLP_privacy_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_BLPbasic \<lparr> 
-        node_properties = BLP_privacy_host_attributes \<rparr>"
+        node_properties = BLP_privacy_host_attributes \<rparr> ''confidential sensor data''"
 end
 
 
@@ -134,7 +134,7 @@ context begin
   private lemma "dom (BLP_tradesecrets_host_attributes) \<subseteq> set (nodesL policy)"
     by(simp add: BLP_tradesecrets_host_attributes_def policy_def)
   definition "BLP_tradesecrets_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_BLPbasic \<lparr> 
-        node_properties = BLP_tradesecrets_host_attributes \<rparr>"
+        node_properties = BLP_tradesecrets_host_attributes \<rparr> ''trade secrets''"
 end
 text{*Note that Invariant 1 and Invariant 2 are two distinct specifications. 
 	They specify individual security goals independent of each other. 
@@ -169,7 +169,7 @@ context begin
   private lemma "dom (BLP_employee_export_host_attributes) \<subseteq> set (nodesL policy)"
     by(simp add: BLP_employee_export_host_attributes_def policy_def)
   definition "BLP_employee_export_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr> 
-        node_properties = BLP_employee_export_host_attributes \<rparr>"
+        node_properties = BLP_employee_export_host_attributes \<rparr> ''employee data (privacy)''"
   (*TODO: what if Sensor sink were not trusted or had lower or higher clearance?*)
 end
 
@@ -192,7 +192,7 @@ context begin
   private lemma "dom (ACL_bot2_host_attributues) \<subseteq> set (nodesL policy)"
     by(simp add: ACL_bot2_host_attributues_def policy_def)
   definition "ACL_bot2_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_CommunicationPartners
-                             \<lparr>node_properties = ACL_bot2_host_attributues \<rparr>"
+                             \<lparr>node_properties = ACL_bot2_host_attributues \<rparr> ''Bot2 ACL''"
   text{*
   Note that Bot1 is in the access list of Bot2 but it does not have the @{const Care} attribute. 
 	This means, Bot1 can never access Bot2. 
@@ -279,7 +279,8 @@ context begin
 
   definition "Control_hierarchy_m \<equiv> new_configured_list_SecurityInvariant
                                     SINVAR_LIB_DomainHierarchyNG
-                                    \<lparr> node_properties = map_of DomainHierarchy_host_attributes \<rparr>"
+                                    \<lparr> node_properties = map_of DomainHierarchy_host_attributes \<rparr>
+                                    ''Production device hierarchy''"
 end
 
 
@@ -297,7 +298,8 @@ context begin
     by(simp add: SecurityGateway_host_attributes_def policy_def)
   definition "SecurityGateway_m \<equiv> new_configured_list_SecurityInvariant
                                   SINVAR_LIB_SecurityGatewayExtended
-                                    \<lparr> node_properties = SecurityGateway_host_attributes \<rparr>"
+                                    \<lparr> node_properties = SecurityGateway_host_attributes \<rparr>
+                                  ''sensor slaves''"
 end
 
 
@@ -319,7 +321,8 @@ context begin
     by(simp add: SinkRobots_host_attributes_def policy_def)
   definition "SinkRobots_m \<equiv> new_configured_list_SecurityInvariant
                                   SINVAR_LIB_Sink
-                                    \<lparr> node_properties = SinkRobots_host_attributes \<rparr>"
+                                    \<lparr> node_properties = SinkRobots_host_attributes \<rparr>
+                              ''non-leaking production units''"
 end
 
 text{*Subnet of the fab:
@@ -342,7 +345,8 @@ context begin
     by(simp add: Subnets_host_attributes_def policy_def)
   definition "Subnets_m \<equiv> new_configured_list_SecurityInvariant
                                   SINVAR_LIB_Subnets
-                                    \<lparr> node_properties = Subnets_host_attributes \<rparr>"
+                                    \<lparr> node_properties = Subnets_host_attributes \<rparr>
+                           ''network segmentation''"
 end
 
 
@@ -359,7 +363,8 @@ context begin
     by(simp add: SubnetsInGW_host_attributes_def policy_def)
   definition "SubnetsInGW_m \<equiv> new_configured_list_SecurityInvariant
                                   SINVAR_LIB_SubnetsInGW
-                                    \<lparr> node_properties = SubnetsInGW_host_attributes \<rparr>"
+                                    \<lparr> node_properties = SubnetsInGW_host_attributes \<rparr>
+                               ''Protectting statistics srv''"
 end
 
 
@@ -386,7 +391,8 @@ context begin
   private lemma "dom NonInterference_host_attributes \<subseteq> set (nodesL policy)"
     by(simp add: NonInterference_host_attributes_def policy_def)
   definition "NonInterference_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_NonInterference
-                                    \<lparr> node_properties = NonInterference_host_attributes \<rparr>"
+                                    \<lparr> node_properties = NonInterference_host_attributes \<rparr>
+                                   ''for the sake of an acdemic example!''"
 end
 text{*As discussed, this invariant is very strict and rather theoretical. 
     It is not ENF-structured and may produce an exponential number of offending flows. 
@@ -778,7 +784,8 @@ definition "invariants_tuned \<equiv> [BLP_privacy_m, BLP_employee_export_m,
                                       ''Bot2'' \<mapsto> SinkPool,
                                       ''Watchdog'' \<mapsto> SinkPool,
                                       ''AdminPc'' \<mapsto> SinkPool
-                                      ] \<rparr>,
+                                      ] \<rparr>
+                 ''non-leaking production units'',
                new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted
                  \<lparr> node_properties = [''MissionControl1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
                                       ''MissionControl2'' \<mapsto> \<lparr> privacy_level = 2, trusted = False \<rparr>,
@@ -788,6 +795,7 @@ definition "invariants_tuned \<equiv> [BLP_privacy_m, BLP_employee_export_m,
                                         (*trust because bot2 must send to it. privacy_level 1 to interact with bot 1*)
                                       ''AdminPc'' \<mapsto> \<lparr> privacy_level = 1, trusted = True \<rparr>
                                       ] \<rparr>
+                 ''trade secrets''
               ]"
 
 lemma "all_security_requirements_fulfilled invariants_tuned policy" by eval

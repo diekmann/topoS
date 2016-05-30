@@ -12,7 +12,11 @@ section {* ML Visualization Interface *}
 
 definition print_offending_flows_debug ::
   "'v  SecurityInvariant list \<Rightarrow> 'v list_graph \<Rightarrow> (string \<times> ('v \<times> 'v) list list) list" where
-  "print_offending_flows_debug M G = map (\<lambda>m. (implc_type m, implc_offending_flows m G)) M"
+  "print_offending_flows_debug M G = map
+    (\<lambda>m.
+         (implc_description m @ '' ('' @ implc_type m @ '')''
+         , implc_offending_flows m G)
+    ) M"
 
 (*TODO: move and tune*)
 ML{*
@@ -203,6 +207,9 @@ local
      val tune_node_format = if (fastype_of node) = @{typ "TopoS_Vertices.vString"}
       then
         tune_Vstring_format
+      else if (fastype_of node) = @{typ "string"}
+      then
+        tune_string_vertex_format
       else
         Graphviz.default_tune_node_format;
      val node_str = Graphviz.node_to_string ctxt tune_node_format node;

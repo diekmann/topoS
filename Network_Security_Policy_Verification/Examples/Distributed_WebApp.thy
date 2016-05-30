@@ -22,7 +22,7 @@ text{*Defining the security invariants*}
 definition LogSink_m::"(string SecurityInvariant)" where
   "LogSink_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_Sink \<lparr> 
           node_properties = [''Log'' \<mapsto> Sink]
-          \<rparr>"
+          \<rparr> ''No information mus leave the logging server''"
 
 text{*
 0 - unclassified
@@ -35,7 +35,7 @@ definition BLP_m::"(string SecurityInvariant)" where
                              ''Log'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
                              ''WebApp'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr> 
                              ]
-          \<rparr>"
+          \<rparr> ''The database and the logging server have confidential information''"
 
 definition Subnet_m::"(string SecurityInvariant)" where
     "Subnet_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_SubnetsInGW \<lparr> 
@@ -44,7 +44,7 @@ definition Subnet_m::"(string SecurityInvariant)" where
                              ''WebApp'' \<mapsto> Member,
                              ''WebFrnt'' \<mapsto> InboundGateway (*DMZ*)
                              ]
-          \<rparr>"
+          \<rparr> ''internal/DMZ structure''"
 
 
 definition DBACL_m::"(string SecurityInvariant)" where
@@ -52,7 +52,7 @@ definition DBACL_m::"(string SecurityInvariant)" where
           node_properties = [''DB'' \<mapsto> Master [''WebApp''],
                              ''WebApp'' \<mapsto> Care
                              ]
-          \<rparr>"
+          \<rparr> ''ACL of db''"
 
 text{*The list of security invariants*}
 definition "security_invariants = [Subnet_m, BLP_m, LogSink_m, DBACL_m]"

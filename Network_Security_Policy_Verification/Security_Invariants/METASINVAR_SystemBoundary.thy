@@ -26,15 +26,15 @@ fun system_components_to_blp :: "system_components \<Rightarrow> SINVAR_BLPtrust
   "system_components_to_blp SystemBoundaryOutput = \<lparr> privacy_level = 0, trusted = True \<rparr>" |
   "system_components_to_blp SystemBoundaryInputOutput = \<lparr> privacy_level = 0, trusted = True \<rparr>"
 
-definition new_meta_system_boundary :: "('v::vertex \<times> system_components) list \<Rightarrow> ('v SecurityInvariant) list" where 
-  "new_meta_system_boundary C = [
+definition new_meta_system_boundary :: "('v::vertex \<times> system_components) list \<Rightarrow> string \<Rightarrow> ('v SecurityInvariant) list" where 
+  "new_meta_system_boundary C description = [
       new_configured_list_SecurityInvariant SINVAR_LIB_SubnetsInGW \<lparr> 
           node_properties = map_of (map (\<lambda>(v,c). (v, system_components_to_subnets c)) C)
-          \<rparr>
+          \<rparr> (description @ '' (ACS)'')
       ,
       new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr> 
           node_properties = map_of (map (\<lambda>(v,c). (v, system_components_to_blp c)) C)
-          \<rparr>
+          \<rparr> (description @ '' (IFS)'')
       ]"
 
 
@@ -53,7 +53,7 @@ lemma system_components_to_blp:
 by(cases c)(simp_all add: SINVAR_BLPtrusted.default_node_properties_def)
 
 
-lemma "all_security_requirements_fulfilled (new_meta_system_boundary C) G \<longleftrightarrow>
+lemma "all_security_requirements_fulfilled (new_meta_system_boundary C description) G \<longleftrightarrow>
        (\<forall>(v\<^sub>1, v\<^sub>2) \<in> set (edgesL G). case ((map_of C) v\<^sub>1, (map_of C) v\<^sub>2)
           of 
           (*No restrictions outside of the component*)
@@ -125,7 +125,7 @@ value[code] "let nodes = [1,2,3,4,8,9,10];
                (2, SystemComponent),
                (3, SystemBoundaryOutput),
                (4, SystemBoundaryInputOutput)
-               ]
+               ] ''foobar''
        in generate_valid_topology sinvars \<lparr>nodesL = nodes, edgesL = List.product nodes nodes \<rparr>"
 
 

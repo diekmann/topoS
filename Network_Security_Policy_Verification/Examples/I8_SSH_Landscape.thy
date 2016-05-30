@@ -68,7 +68,7 @@ definition Confidentiality1::"(nat SecurityInvariant)" where
          21 \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
          22 \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
          23 \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>]
-          \<rparr>"
+          \<rparr> ''some confidentiality lables''"
 
 definition "Subnet1 \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_SubnetsInGW \<lparr> 
           node_properties = [0 \<mapsto> Unassigned,
@@ -95,14 +95,14 @@ definition "Subnet1 \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_Su
          21 \<mapsto> InboundGateway,
          22 \<mapsto> InboundGateway,
          23 \<mapsto> Member]
-          \<rparr>"
+          \<rparr> ''some subnet things''"
 
 
     definition "PrintingSink \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_Sink \<lparr> 
           node_properties = [3 \<mapsto> Sink]
-          \<rparr>"
+          \<rparr> ''information must not leave printer''"
 
-definition "I8Requirements = [ Confidentiality1, Subnet1]"
+definition "I8Requirements = [ Confidentiality1, Subnet1 ]"
 
 value "implc_get_offending_flows I8Requirements I8SSHgraph"
 
