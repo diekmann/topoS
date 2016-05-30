@@ -43,7 +43,7 @@ definition BLP_security_clearances :: "nat \<rightharpoonup> SINVAR_BLPtrusted.n
 definition BLP_m::"(nat SecurityInvariant)" where
     "BLP_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr> 
           node_properties = BLP_security_clearances
-          \<rparr>"
+          \<rparr> ''Two has confidential information''"
 
 
   text{*Interlude: @{const BLP_m} is a valid implementation of a SecurityInvariant*}
