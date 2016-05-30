@@ -10,6 +10,21 @@ begin
 
 section {* ML Visualization Interface *}
 
+definition print_offending_flows_debug ::
+  "'v  SecurityInvariant list \<Rightarrow> 'v list_graph \<Rightarrow> (string \<times> ('v \<times> 'v) list list) list" where
+  "print_offending_flows_debug M G = map (\<lambda>m. (implc_type m, implc_offending_flows m G)) M"
+
+(*TODO: move and tune*)
+ML{*
+fun pretty_assoclist ctxt header t = let
+    val ls : (term * term) list = t |> HOLogic.dest_list |> map HOLogic.dest_prod;
+    val pretty = fn t => Pretty.string_of (Syntax.pretty_term ctxt t);
+    in ls
+       |> map (fn (x, y) => "  "^pretty x^": "^pretty y)
+       |> space_implode "\n"
+       |> (fn s => header^s)
+       |> writeln end
+*}
 
 subsection{*Utility Functions*}
 
@@ -171,6 +186,7 @@ visualize_edges @{context}  @{term "[(1::int, 1::int), (1,2), (2, 1), (1,3)]"} [
 *}
 
 
+
 definition internal_get_invariant_types_list:: "'a SecurityInvariant list \<Rightarrow> string list" where
   "internal_get_invariant_types_list M \<equiv> map implc_type M"
 
@@ -221,9 +237,11 @@ fun visualize_graph_header ctxt (M: term) (G: term) (Config: term): unit =
       (let
         val offending = apply_function ctxt @{const_name "implc_get_offending_flows"} [M, G];
         val offending_flat = apply_function ctxt @{const_name "List.remdups"} [apply_function ctxt @{const_name "List.concat"} [offending]];
+        val offending_debug = apply_function ctxt @{const_name print_offending_flows_debug} [M, G];
       in
        writeln("offending flows:");
        Pretty.writeln (Syntax.pretty_term ctxt offending);
+       pretty_assoclist ctxt "Offending flows per invariant:\n" offending_debug;
        visualize_edges ctxt edges [("edge [dir=\"arrow\", style=dashed, color=\"#FF0000\", constraint=false]", offending_flat)] header; 
       () end)
     else if all_fulfilled <> @{term "True"} then raise ERROR "all_fulfilled neither False nor True" else (
