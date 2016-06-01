@@ -2,7 +2,6 @@ theory MeasrDroid
 imports "../../TopoS_Impl"
 begin
 
-abbreviation "V\<equiv>TopoS_Vertices.V"
 
 
 ML{*
@@ -12,98 +11,128 @@ case !Graphviz.open_viewer of
   | DoNothing => ()
 *}
 
-definition policy :: "vString list_graph" where
+definition policy :: "string list_graph" where
   "policy \<equiv> \<lparr> nodesL = [
-                        V ''Sensors_A'',
-                        V ''Encryption_A'',
-                        V ''Client_A_out'',
+                         ''Sensors_A'',
+                         ''Encryption_A'',
+                         ''Client_A_out'',
+                         ''Sensors_B'',
+                         ''Encryption_B'',
+                         ''Client_B_out'',
 
-                        V ''Sensors_B'',
-                        V ''Encryption_B'',
-                        V ''Client_B_out'',
+                         ''Sensors_C'',
+                         ''Encryption_C'',
+                         ''Client_C_out'',
+                         ''UploadDroid'',
+                         ''C3PO_in'',
+                         ''C3PO_Dec_A'',
+                         ''C3PO_Dec_B'',
+                         ''C3PO_Dec_C'',
 
-                        V ''Sensors_C'',
-                        V ''Encryption_C'',
-                        V ''Client_C_out'',
+                         ''C3PO_Storage'',
 
-                        V ''UploadDroid'',
-                        V ''C3PO_in'',
-                        V ''C3PO_Dec_A'',
-                        V ''C3PO_Dec_B'',
-                        V ''C3PO_Dec_C'',
-
-                        V ''C3PO_Storage'',
-
-                        V ''Adversary''],
+                         ''Adversary''],
               edgesL = [
-              (V ''Sensors_A'',    V ''Encryption_A''),
-              (V ''Encryption_A'', V ''Client_A_out''),
-              (V ''Client_A_out'', V ''UploadDroid''),
+              (''Sensors_A'',    ''Encryption_A''),
+              (''Encryption_A'', ''Client_A_out''),
+              (''Client_A_out'', ''UploadDroid''),
 
-              (V ''Sensors_B'',    V ''Encryption_B''),
-              (V ''Encryption_B'', V ''Client_B_out''),
-              (V ''Client_B_out'', V ''UploadDroid''),
+              (''Sensors_B'',    ''Encryption_B''),
+              (''Encryption_B'', ''Client_B_out''),
+              (''Client_B_out'', ''UploadDroid''),
 
-              (V ''Sensors_C'',    V ''Encryption_C''),
-              (V ''Encryption_C'', V ''Client_C_out''),
-              (V ''Client_C_out'', V ''UploadDroid''),
+              (''Sensors_C'',    ''Encryption_C''),
+              (''Encryption_C'', ''Client_C_out''),
+              (''Client_C_out'', ''UploadDroid''),
 
-              (*(V ''UploadDroid'', V ''C3PO_in''),*)
-              (V ''C3PO_in'', V ''UploadDroid''),
+              (*(''UploadDroid'', ''C3PO_in''),*)
+              (''C3PO_in'', ''UploadDroid''),
 
-              (V ''C3PO_in'', V ''C3PO_Dec_A''),
-              (V ''C3PO_in'', V ''C3PO_Dec_B''),
-              (V ''C3PO_in'', V ''C3PO_Dec_C''),
+              (''C3PO_in'', ''C3PO_Dec_A''),
+              (''C3PO_in'', ''C3PO_Dec_B''),
+              (''C3PO_in'', ''C3PO_Dec_C''),
 
-              (V ''C3PO_Dec_A'', V ''C3PO_Storage''),
-              (V ''C3PO_Dec_B'', V ''C3PO_Storage''),
-              (V ''C3PO_Dec_C'', V ''C3PO_Storage'')
+              (''C3PO_Dec_A'', ''C3PO_Storage''),
+              (''C3PO_Dec_B'', ''C3PO_Storage''),
+              (''C3PO_Dec_C'', ''C3PO_Storage'')
 
               ] \<rparr>"
 
 context begin
   private definition "tainiting_host_attributes \<equiv> [
-                           V ''Sensors_A'' \<mapsto> TaintsUntaints {''A''} {},
-                           V ''Sensors_B'' \<mapsto> TaintsUntaints {''B''} {},
-                           V ''Sensors_C'' \<mapsto> TaintsUntaints {''C''} {},
+                           ''Sensors_A'' \<mapsto> TaintsUntaints {''A''} {},
+                           ''Sensors_B'' \<mapsto> TaintsUntaints {''B''} {},
+                           ''Sensors_C'' \<mapsto> TaintsUntaints {''C''} {},
 
-                           V ''Encryption_A'' \<mapsto> TaintsUntaints {} {''A''} ,
-                           V ''Encryption_B'' \<mapsto> TaintsUntaints {} {''B''} ,
-                           V ''Encryption_C'' \<mapsto> TaintsUntaints {} {''C''} ,
+                           ''Encryption_A'' \<mapsto> TaintsUntaints {} {''A''} ,
+                           ''Encryption_B'' \<mapsto> TaintsUntaints {} {''B''} ,
+                           ''Encryption_C'' \<mapsto> TaintsUntaints {} {''C''} ,
 
-                           V ''C3PO_Dec_A'' \<mapsto> TaintsUntaints {''A''} {},
-                           V ''C3PO_Dec_B'' \<mapsto> TaintsUntaints {''B''} {},
-                           V ''C3PO_Dec_C'' \<mapsto> TaintsUntaints {''C''} {} ,
+                           ''C3PO_Dec_A'' \<mapsto> TaintsUntaints {''A''} {},
+                           ''C3PO_Dec_B'' \<mapsto> TaintsUntaints {''B''} {},
+                           ''C3PO_Dec_C'' \<mapsto> TaintsUntaints {''C''} {} ,
 
-                           V ''C3PO_Storage'' \<mapsto> TaintsUntaints {''A'',''B'',''C''} {}
+                           ''C3PO_Storage'' \<mapsto> TaintsUntaints {''A'',''B'',''C''} {}
 
                            ]"
   private lemma "dom (tainiting_host_attributes) \<subseteq> set (nodesL policy)" by(simp add: tainiting_host_attributes_def policy_def)
   definition "Tainting_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_TaintingTrusted \<lparr>
-        node_properties = tainiting_host_attributes \<rparr>"
+        node_properties = tainiting_host_attributes \<rparr> ''dd''"
 end
 lemma "wf_list_graph policy" by eval
 
 ML_val{*
-visualize_graph @{context} @{term "[]::vString SecurityInvariant list"} @{term "policy"};
+visualize_graph @{context} @{term "[]::string SecurityInvariant list"} @{term "policy"};
 *}
-
-(*
-
 
 
 context begin
-  private definition "BLP_host_attributes \<equiv>
-                          [V ''CryptoDB'' \<mapsto> \<lparr> privacy_level = 3, trusted = False \<rparr>
-                           ]"
-  private lemma "dom (BLP_host_attributes) \<subseteq> set (nodesL policy)"
-    by(simp add: BLP_host_attributes_def policy_def)
-  definition "BLP_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr>
-        node_properties = BLP_host_attributes \<rparr>"
+  private definition "A_host_attributes \<equiv>
+                [(''Client_A_out'' ,  SystemBoundaryOutput),
+                 (''Sensors_A'' ,  SystemComponent),
+                 (''Encryption_A'' ,  SystemComponent)
+                 ]"
+  private lemma "dom(map_of A_host_attributes) \<subseteq> set (nodesL policy)"
+    by(simp add: A_host_attributes_def policy_def)
+  definition "SystemA_m \<equiv> new_meta_system_boundary A_host_attributes ''hh''"
 end
-*)
 
-definition "invariants \<equiv> [Tainting_m]"
+context begin
+  private definition "B_host_attributes \<equiv>
+                [(''Client_B_out'' ,  SystemBoundaryOutput),
+                 (''Sensors_B'' ,  SystemComponent),
+                 (''Encryption_B'' ,  SystemComponent)
+                 ]"
+  private lemma "dom(map_of B_host_attributes) \<subseteq> set (nodesL policy)"
+    by(simp add: B_host_attributes_def policy_def)
+  definition "SystemB_m \<equiv> new_meta_system_boundary B_host_attributes ''kk''"
+end
+
+context begin
+  private definition "C_host_attributes \<equiv>
+                [(''Client_C_out'' ,  SystemBoundaryOutput),
+                 (''Sensors_C'' ,  SystemComponent),
+                 (''Encryption_C'' ,  SystemComponent)
+                 ]"
+  private lemma "dom(map_of C_host_attributes) \<subseteq> set (nodesL policy)"
+    by(simp add: C_host_attributes_def policy_def)
+  definition "SystemC_m \<equiv> new_meta_system_boundary C_host_attributes ''uu''"
+end
+
+context begin
+  private definition "M_host_attributes \<equiv>
+                [(''C3PO_in'' ,  SystemBoundaryOutput),
+                 (''C3PO_Dec_A'' ,  SystemComponent),
+                 (''C3PO_Dec_C'' ,  SystemComponent),
+                 (''C3PO_Storage'' ,  SystemComponent),
+                 (''C3PO_Dec_B'' ,  SystemComponent)
+                 ]"
+  private lemma "dom(map_of M_host_attributes) \<subseteq> set (nodesL policy)"
+    by(simp add: M_host_attributes_def policy_def)
+  definition "SystemM_m \<equiv> new_meta_system_boundary M_host_attributes ''rr''"
+end
+
+definition "invariants \<equiv> [Tainting_m] @ SystemA_m @ SystemB_m @ SystemC_m @ SystemM_m"
 
 lemma "all_security_requirements_fulfilled invariants policy" by eval
 ML{*
@@ -113,7 +142,7 @@ visualize_graph @{context} @{term "invariants"} @{term "policy"};
 
 value[code] "implc_get_offending_flows invariants (policy\<lparr> edgesL := edgesL policy\<rparr>)"
 ML{*
-visualize_graph @{context} @{term "invariants"} @{term "(policy\<lparr> edgesL := edgesL policy\<rparr>)"};
+visualize_graph @{context} @{term "invariants"} @{term "(policy\<lparr> edgesL := (''Adversary'', ''C3PO_Storage'')#edgesL policy\<rparr>)"};
 *}
 
 
@@ -129,14 +158,14 @@ ML_val{*
 visualize_edges @{context} @{term "edgesL policy"}
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
      @{term "[(e1, e2) \<leftarrow>  List.product  (nodesL policy) (nodesL policy).
-     ((e1,e2) \<notin> set (edgesL policy)) \<and> ((e1,e2) \<notin> set( edgesL (make_policy invariants (nodesL policy)))) \<and> (e2 = V ''Adversary'') \<and> (e1 \<noteq> V ''Adversary'')]"})] "";
+     ((e1,e2) \<notin> set (edgesL policy)) \<and> ((e1,e2) \<notin> set( edgesL (make_policy [Tainting_m] (nodesL policy)))) \<and> (e2 = ''Adversary'') \<and> (e1 \<noteq> ''Adversary'')]"})] "";
 *}
 
 
 definition "stateful_policy = generate_valid_stateful_policy_IFSACS policy invariants"
 ML_val{*
 visualize_edges @{context} @{term "flows_fixL stateful_policy"}
-    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "flows_stateL stateful_policy"})] ""; 
+    [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "flows_stateL stateful_policy"})] "";
 *}
 
 end
