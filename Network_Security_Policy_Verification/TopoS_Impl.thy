@@ -201,7 +201,7 @@ local
    let
      val (node, config) = HOLogic.dest_prod node_config;
      (*TODO: tune node format? There must be a better way ...*)
-     if (fastype_of node) = @{typ "string"}
+     val tune_node_format = if (fastype_of node) = @{typ "string"}
       then
         tune_string_vertex_format
       else
