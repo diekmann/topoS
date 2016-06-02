@@ -69,20 +69,6 @@ instance proof(intro_classes) qed(simp add: vertex_1_char_def  vertex_2_char_def
 end
 value "vertex_1::char"
 
-(*TODO: legavy stuff, remove*)
-datatype vString = V string
-value "V ''AA''"
-instantiation vString::vertex
-begin
-  definition "vertex_1_vString" ::vString where "vertex_1 \<equiv> V ''A''"
-  definition "vertex_2_vString" ::vString where "vertex_2 \<equiv> V ''B''"
-  definition "vertex_3_vString" ::vString where "vertex_3 \<equiv> V ''C''"
-instance proof(intro_classes) qed(simp add: vertex_1_vString_def vertex_2_vString_def vertex_3_vString_def)
-end
-
-definition string_of_vString :: "vString \<Rightarrow> string" where
-  "string_of_vString v = (case v of V s \<Rightarrow> s)"
-
 
 instantiation list :: ("vertex") vertex
 begin
@@ -92,41 +78,8 @@ begin
 instance proof qed(simp add: vertex_1_list_def vertex_2_list_def vertex_3_list_def)
 end
 
-
-instantiation vString::linorder
-begin
-  definition "less_eq_vString" where "less_eq a b \<equiv> ((string_of_vString a) \<le> (string_of_vString b))"
-  definition "less_vString" where "less a b \<equiv> (string_of_vString a) < (string_of_vString b)"
-instance
- apply(intro_classes)
-      apply(simp_all add: less_eq_vString_def less_vString_def string_of_vString_def)
-    apply(case_tac x, simp_all, case_tac y, simp_all)
-    apply force
-   apply(case_tac x, simp_all, case_tac y, simp_all)
- apply(case_tac x, simp_all, case_tac y, simp_all)
- apply(force)
-done
-end
-
-
-
 --"for the ML graphviz visualizer"
 ML {*
-fun tune_Vstring_format (t: term) (s: string) : string = 
-    (*TODO fails for different pretty printer settings
-     Syntax.string_of_typ @{context} @{typ vString}  *)
-    if fastype_of t = @{typ vString} then
-      if String.isPrefix "TopoS_Vertices.vString.V" s then
-        String.substring (s, (size "TopoS_Vertices.vString.V.  "), (size s - (size "TopoS_Vertices.vString.V.    ")))
-      else if String.isPrefix "vString.V " s then
-        String.substring (s, (size "vString.V.  "), (size s - (size "vString.V.    ")))
-      else if String.isPrefix "V " s then
-        String.substring (s, (size "V.  "), (size s - (size "V.    ")))
-      else let val _ = writeln ("no tune_Vstring_format for \""^s^"\"") in s end
-    else s
-    handle Subscript => let val _ = writeln ("tune_Vstring_format Subscript excpetion") in s end;
-
-
 fun tune_string_vertex_format (t: term) (s: string) : string = 
     if fastype_of t = @{typ string} then
       if String.isPrefix "''" s then
@@ -136,8 +89,6 @@ fun tune_string_vertex_format (t: term) (s: string) : string =
     handle Subscript => let val _ = writeln ("tune_string_vertex_format Subscript excpetion") in s end;
 *}
 
-
-hide_const(open) V
 
   
 end

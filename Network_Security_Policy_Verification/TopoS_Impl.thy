@@ -124,10 +124,7 @@ fun partition_by_biflows ctxt (t: term) : (term * term) =
 
 local
   fun get_tune_node_format (edges: term) : term -> string -> string =
-    if (fastype_of edges) = @{typ "(TopoS_Vertices.vString \<times> TopoS_Vertices.vString) list"}
-    then
-      tune_Vstring_format
-    else if (fastype_of edges) = @{typ "(string \<times> string) list"}
+    if (fastype_of edges) = @{typ "(string \<times> string) list"}
     then
       tune_string_vertex_format
     else
@@ -204,10 +201,7 @@ local
    let
      val (node, config) = HOLogic.dest_prod node_config;
      (*TODO: tune node format? There must be a better way ...*)
-     val tune_node_format = if (fastype_of node) = @{typ "TopoS_Vertices.vString"}
-      then
-        tune_Vstring_format
-      else if (fastype_of node) = @{typ "string"}
+     if (fastype_of node) = @{typ "string"}
       then
         tune_string_vertex_format
       else

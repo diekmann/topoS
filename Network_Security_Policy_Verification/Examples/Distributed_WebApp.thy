@@ -22,7 +22,7 @@ text{*Defining the security invariants*}
 definition LogSink_m::"(string SecurityInvariant)" where
   "LogSink_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_Sink \<lparr> 
           node_properties = [''Log'' \<mapsto> Sink]
-          \<rparr> ''No information mus leave the logging server''"
+          \<rparr> ''No information must leave the logging server''"
 
 text{*
 0 - unclassified
