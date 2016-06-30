@@ -161,7 +161,7 @@ iterate_edges_ML @{context}  @{term "flows_fixL stateful_policy"}
   (fn _ => () );
 
 iterate_edges_ML @{context} @{term "flows_stateL stateful_policy"}
-  (fn (v1,v2) => writeln ("iptables -I FORWARD -m state --state ESTABLISHED -i $"^v2^"_iface -s $"^v2^"_ipv4 -o $"^v1^"_iface -d $"^v1^"_ipv4 # "^v2^" -> "^v1^" (answer)") )
+  (fn (v1,v2) => writeln ("iptables -I FORWARD -m state --state ESTABLISHED -i $"^v2^"_iface -s $"^v2^"_ipv4 -o $"^v1^"_iface -d $"^v1^"_ipv4 -j ACCEPT # "^v2^" -> "^v1^" (answer)") )
   (fn _ => () )
   (fn _ => () )
 *}
