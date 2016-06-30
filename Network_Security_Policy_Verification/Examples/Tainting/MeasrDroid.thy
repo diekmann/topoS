@@ -59,7 +59,7 @@ definition policy :: "string list_graph" where
               ] \<rparr>"
 
 context begin
-  private definition "tainiting_host_attributes \<equiv> [
+  definition "tainiting_host_attributes \<equiv> [
                            ''Sensors_A'' \<mapsto> TaintsUntaints {''A''} {},
                            ''Sensors_B'' \<mapsto> TaintsUntaints {''B''} {},
                            ''Sensors_C'' \<mapsto> TaintsUntaints {''C''} {},
@@ -141,9 +141,13 @@ visualize_graph @{context} @{term "invariants"} @{term "policy"};
 
 
 value[code] "implc_get_offending_flows invariants (policy\<lparr> edgesL := edgesL policy\<rparr>)"
-ML{*
+(*ML{*
 visualize_graph @{context} @{term "invariants"} @{term "(policy\<lparr> edgesL := (''Adversary'', ''C3PO_Storage'')#edgesL policy\<rparr>)"};
+*}*)
+ML{*
+visualize_graph_header @{context} @{term "invariants"} @{term "policy"} @{term tainiting_host_attributes};
 *}
+
 
 
 definition make_policy :: "('a SecurityInvariant) list \<Rightarrow> 'a list \<Rightarrow> 'a list_graph" where
@@ -162,10 +166,52 @@ visualize_edges @{context} @{term "edgesL policy"}
 *}
 
 
+
 definition "stateful_policy = generate_valid_stateful_policy_IFSACS policy invariants"
 ML_val{*
 visualize_edges @{context} @{term "flows_fixL stateful_policy"}
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]", @{term "flows_stateL stateful_policy"})] "";
+*}
+
+
+
+
+section{*A stateful implementation*}
+value[code] "stateful_policy"
+
+
+
+text{*firewall -- classical use case*}
+ML_val{*
+
+(*header*)
+writeln ("# flush all rules"^"\n"^
+         "iptables -F"^"\n"^
+         "#default policy for FORWARD chain:"^"\n"^
+         "iptables -P INPUT DROP"^"\n"^
+         "iptables -P OUTPUT DROP"^"\n"^
+         "iptables -P FORWARD DROP");
+
+
+writeln ("# INPUT"^"\n");
+iterate_edges_ML @{context}  @{term "[(s,r) \<leftarrow> flows_fixL stateful_policy. r = ''C3PO_in'']"}
+  (fn (v1,v2) => writeln ("iptables -A INPUT -i $"^v1^"_iface -s $"^v1^"_ipv4 -o $"^v2^"_iface -d $"^v2^"_ipv4 -j ACCEPT"^" # "^v1^" -> "^v2) )
+  (fn _ => () )
+  (fn _ => () );
+iterate_edges_ML @{context} @{term "[(s,r) \<leftarrow> flows_stateL stateful_policy. s = ''C3PO_in'']"}
+  (fn (v1,v2) => writeln ("iptables -I INPUT -m state --state ESTABLISHED -i $"^v2^"_iface -s $"^v2^"_ipv4 -o $"^v1^"_iface -d $"^v1^"_ipv4 # "^v2^" -> "^v1^" (answer)") )
+  (fn _ => () )
+  (fn _ => () );
+
+writeln ("# OUTPUT"^"\n");
+iterate_edges_ML @{context}  @{term "[(s,r) \<leftarrow> flows_fixL stateful_policy. s = ''C3PO_in'']"}
+  (fn (v1,v2) => writeln ("iptables -A OUTPUT -i $"^v1^"_iface -s $"^v1^"_ipv4 -o $"^v2^"_iface -d $"^v2^"_ipv4 -j ACCEPT"^" # "^v1^" -> "^v2) )
+  (fn _ => () )
+  (fn _ => () );
+iterate_edges_ML @{context} @{term "[(s,r) \<leftarrow> flows_stateL stateful_policy. r = ''C3PO_in'']"}
+  (fn (v1,v2) => writeln ("iptables -I OUTPUT -m state --state ESTABLISHED -i $"^v2^"_iface -s $"^v2^"_ipv4 -o $"^v1^"_iface -d $"^v1^"_ipv4 # "^v2^" -> "^v1^" (answer)") )
+  (fn _ => () )
+  (fn _ => () );
 *}
 
 end

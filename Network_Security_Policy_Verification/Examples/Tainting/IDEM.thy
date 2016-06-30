@@ -12,92 +12,91 @@ case !Graphviz.open_viewer of
   | DoNothing => ()
 *}
 
-definition policy :: "vString list_graph" where
+definition policy :: "string list_graph" where
   "policy \<equiv> \<lparr> nodesL = [
-                        V ''Sensor_Controller'',
-                        V ''P4S_in'',
-                        V ''P4S_filter_A'',
-                        V ''P4S_filter_B'',
-                        V ''P4S_filter_C'',
-                        V ''P4S_aggregator_C'',
-                        V ''P4S_encrypt_A'',
-                        V ''P4S_encrypt_B'',
-                        V ''P4S_encrypt_C'',
-                        V ''P4S_encrypt_C_low'',
-                        V ''P4S_DB'',
-                        V ''P4S_out_A'',
-                        V ''P4S_out_B'',
-                        V ''P4S_out_C'',
-                        V ''P4S_out_C_low'',
-                        V ''A_decrypt'',
-                        V ''B_decrypt'',
-                        V ''C_decrypt'',
-                        V ''C_low_decrypt'',
-                        V ''A'',
-                        V ''B'',
-                        V ''C'',
-                        V ''C_low'',
-                        V ''Adversary''],
+                        ''Sensor_Controller'',
+                        ''P4S_in'',
+                        ''P4S_filter_A'',
+                        ''P4S_filter_B'',
+                        ''P4S_filter_C'',
+                        ''P4S_aggregator_C'',
+                        ''P4S_encrypt_A'',
+                        ''P4S_encrypt_B'',
+                        ''P4S_encrypt_C'',
+                        ''P4S_encrypt_C_low'',
+                        ''P4S_DB'',
+                        ''P4S_out_A'',
+                        ''P4S_out_B'',
+                        ''P4S_out_C'',
+                        ''P4S_out_C_low'',
+                        ''A_decrypt'',
+                        ''B_decrypt'',
+                        ''C_decrypt'',
+                        ''C_low_decrypt'',
+                        ''A'',
+                        ''B'',
+                        ''C'',
+                        ''C_low''],
               edgesL = [
-              (V ''Sensor_Controller'', V ''P4S_in''),
-              (V ''P4S_in'',       V ''P4S_filter_A''),
-              (V ''P4S_in'',       V ''P4S_filter_B''),
-              (V ''P4S_in'',       V ''P4S_filter_C''),
+              (''Sensor_Controller'', ''P4S_in''),
+              (''P4S_in'',       ''P4S_filter_A''),
+              (''P4S_in'',       ''P4S_filter_B''),
+              (''P4S_in'',       ''P4S_filter_C''),
 
-              (V ''P4S_filter_A''    , V ''P4S_encrypt_A''),
-              (V ''P4S_filter_B''    , V ''P4S_encrypt_B''),
-              (V ''P4S_filter_C''    , V ''P4S_encrypt_C''),
-              (V ''P4S_filter_C''    , V ''P4S_aggregator_C''),
-              (V ''P4S_aggregator_C'', V ''P4S_encrypt_C_low''),
+              (''P4S_filter_A''    , ''P4S_encrypt_A''),
+              (''P4S_filter_B''    , ''P4S_encrypt_B''),
+              (''P4S_filter_C''    , ''P4S_encrypt_C''),
+              (''P4S_filter_C''    , ''P4S_aggregator_C''),
+              (''P4S_aggregator_C'', ''P4S_encrypt_C_low''),
 
-              (V ''P4S_encrypt_A''    , V ''P4S_DB''),
-              (V ''P4S_encrypt_B''    , V ''P4S_DB''),
-              (V ''P4S_encrypt_C''    , V ''P4S_DB''),
-              (V ''P4S_encrypt_C_low''    , V ''P4S_DB''),
+              (''P4S_encrypt_A''    , ''P4S_DB''),
+              (''P4S_encrypt_B''    , ''P4S_DB''),
+              (''P4S_encrypt_C''    , ''P4S_DB''),
+              (''P4S_encrypt_C_low''    , ''P4S_DB''),
 
-              (V ''P4S_DB'', V ''P4S_out_A''),
-              (V ''P4S_DB'', V ''P4S_out_B''),
-              (V ''P4S_DB'', V ''P4S_out_C''),
-              (V ''P4S_DB'', V ''P4S_out_C_low''),
-              (V ''P4S_out_A'', V ''A_decrypt''),
-              (V ''P4S_out_B'', V ''B_decrypt''),
-              (V ''P4S_out_C'', V ''C_decrypt''),
-              (V ''P4S_out_C_low'', V ''C_low_decrypt''),
-              (V ''A_decrypt'',     V ''A''),
-              (V ''B_decrypt'',     V ''B''),
-              (V ''C_decrypt'',     V ''C''),
-              (V ''C_low_decrypt'', V ''C_low'')
+              (''P4S_DB'', ''P4S_out_A''),
+              (''P4S_DB'', ''P4S_out_B''),
+              (''P4S_DB'', ''P4S_out_C''),
+              (''P4S_DB'', ''P4S_out_C_low''),
+              (''P4S_out_A'', ''A_decrypt''),
+              (''P4S_out_B'', ''B_decrypt''),
+              (''P4S_out_C'', ''C_decrypt''),
+              (''P4S_out_C_low'', ''C_low_decrypt''),
+              (''A_decrypt'',     ''A''),
+              (''B_decrypt'',     ''B''),
+              (''C_decrypt'',     ''C''),
+              (''C_low_decrypt'', ''C_low'')
               ] \<rparr>"
 
 context begin
-  private definition "tainiting_host_attributes \<equiv> [
-                           V ''Sensor_Controller'' \<mapsto> TaintsUntaints {''A'',''B'',''C'',''D''} {},
-                           V ''P4S_in'' \<mapsto> TaintsUntaints {''A'',''B'',''C'',''D''} {},
-                           V ''P4S_filter_A'' \<mapsto> TaintsUntaints {''A''} {''B'',''C'',''D''},
-                           V ''P4S_filter_B'' \<mapsto> TaintsUntaints {''B''} {''A'',''C'',''D''},
-                           V ''P4S_filter_C'' \<mapsto> TaintsUntaints {''C''} {''A'',''B'',''D''},
-                           V ''P4S_aggregator_C'' \<mapsto> TaintsUntaints {''C_low''} {''C''},
-                           V ''P4S_encrypt_A'' \<mapsto> TaintsUntaints {} {''A''},
-                           V ''P4S_encrypt_B'' \<mapsto> TaintsUntaints {} {''B''},
-                           V ''P4S_encrypt_C'' \<mapsto> TaintsUntaints {} {''C''},
-                           V ''P4S_encrypt_C_low'' \<mapsto> TaintsUntaints {}{''C_low''},
-                           V ''A_decrypt'' \<mapsto> TaintsUntaints {''A''}{},
-                           V ''B_decrypt'' \<mapsto> TaintsUntaints {''B''}{},
-                           V ''C_decrypt'' \<mapsto> TaintsUntaints {''C''}{},
-                           V ''C_low_decrypt'' \<mapsto> TaintsUntaints {''C_low''}{},
-                           V ''A'' \<mapsto> TaintsUntaints {''A''}{},
-                           V ''B'' \<mapsto> TaintsUntaints {''B''}{},
-                           V ''C'' \<mapsto> TaintsUntaints {''C''}{},
-                           V ''C_low'' \<mapsto> TaintsUntaints {''C_low''}{}
+  definition "tainiting_host_attributes \<equiv> [
+                           ''Sensor_Controller'' \<mapsto> TaintsUntaints {''A'',''B'',''C'',''D''} {},
+                           ''P4S_in'' \<mapsto> TaintsUntaints {''A'',''B'',''C'',''D''} {},
+                           ''P4S_filter_A'' \<mapsto> TaintsUntaints {''A''} {''B'',''C'',''D''},
+                           ''P4S_filter_B'' \<mapsto> TaintsUntaints {''B''} {''A'',''C'',''D''},
+                           ''P4S_filter_C'' \<mapsto> TaintsUntaints {''C''} {''A'',''B'',''D''},
+                           ''P4S_aggregator_C'' \<mapsto> TaintsUntaints {''C_low''} {''C''},
+                           ''P4S_encrypt_A'' \<mapsto> TaintsUntaints {} {''A''},
+                           ''P4S_encrypt_B'' \<mapsto> TaintsUntaints {} {''B''},
+                           ''P4S_encrypt_C'' \<mapsto> TaintsUntaints {} {''C''},
+                           ''P4S_encrypt_C_low'' \<mapsto> TaintsUntaints {}{''C_low''},
+                           ''A_decrypt'' \<mapsto> TaintsUntaints {''A''}{},
+                           ''B_decrypt'' \<mapsto> TaintsUntaints {''B''}{},
+                           ''C_decrypt'' \<mapsto> TaintsUntaints {''C''}{},
+                           ''C_low_decrypt'' \<mapsto> TaintsUntaints {''C_low''}{},
+                           ''A'' \<mapsto> TaintsUntaints {''A''}{},
+                           ''B'' \<mapsto> TaintsUntaints {''B''}{},
+                           ''C'' \<mapsto> TaintsUntaints {''C''}{},
+                           ''C_low'' \<mapsto> TaintsUntaints {''C_low''}{}
                            ]"
   private lemma "dom (tainiting_host_attributes) \<subseteq> set (nodesL policy)" by(simp add: tainiting_host_attributes_def policy_def)
   definition "Tainting_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_TaintingTrusted \<lparr>
-        node_properties = tainiting_host_attributes \<rparr>"
+        node_properties = tainiting_host_attributes \<rparr> ''String'' "
 end
 lemma "wf_list_graph policy" by eval
 
 ML_val{*
-visualize_graph @{context} @{term "[]::vString SecurityInvariant list"} @{term "policy"};
+visualize_graph @{context} @{term "[]::string SecurityInvariant list"} @{term "policy"};
 *}
 
 (*
@@ -106,7 +105,7 @@ visualize_graph @{context} @{term "[]::vString SecurityInvariant list"} @{term "
 
 context begin
   private definition "BLP_host_attributes \<equiv>
-                          [V ''CryptoDB'' \<mapsto> \<lparr> privacy_level = 3, trusted = False \<rparr>
+                          [''CryptoDB'' \<mapsto> \<lparr> privacy_level = 3, trusted = False \<rparr>
                            ]"
   private lemma "dom (BLP_host_attributes) \<subseteq> set (nodesL policy)"
     by(simp add: BLP_host_attributes_def policy_def)
@@ -124,8 +123,11 @@ visualize_graph @{context} @{term "invariants"} @{term "policy"};
 
 
 value[code] "implc_get_offending_flows invariants (policy\<lparr> edgesL := edgesL policy\<rparr>)"
-ML{*
+(*ML{*
 visualize_graph @{context} @{term "invariants"} @{term "(policy\<lparr> edgesL := edgesL policy\<rparr>)"};
+*}*)
+ML{*
+visualize_graph_header @{context} @{term "invariants"} @{term "policy"} @{term tainiting_host_attributes};
 *}
 
 
@@ -139,7 +141,7 @@ ML_val{*
 visualize_edges @{context} @{term "edgesL policy"}
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
      @{term "[(e1, e2) \<leftarrow>  List.product  (nodesL policy) (nodesL policy).
-     ((e1,e2) \<notin> set (edgesL policy)) \<and> ((e1,e2) \<notin> set( edgesL (make_policy invariants (nodesL policy)))) \<and> (e2 = V ''Adversary'') \<and> (e1 \<noteq> V ''Adversary'')]"})] "";
+     ((e1,e2) \<notin> set (edgesL policy)) \<and> ((e1,e2) \<notin> set( edgesL (make_policy invariants (nodesL policy)))) \<and> (e2 = ''Adversary'') \<and> (e1 \<noteq> ''Adversary'')]"})] "";
 *}
 
 
