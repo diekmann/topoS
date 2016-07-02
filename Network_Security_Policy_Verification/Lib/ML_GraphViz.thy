@@ -66,20 +66,20 @@ val sanitize_string =
   String.map (fn c => if is_valid_char c then c else #"_")
 
 
-fun term_to_string (ctxt: Proof.context) (t: term) : string = 
-  (*n |> Syntax.pretty_term ctxt |> Pretty.string_of |> ATP_Util.unyxml*)
+fun term_to_string ctxt t =
   let
     val ctxt' = Config.put show_markup false ctxt;
   in Print_Mode.setmp [] (Syntax.string_of_term ctxt') t
   end;
 
 
-fun term_to_string_safe ctxt (n: term) : string = 
+fun term_to_string_safe ctxt t = 
   let
-    val str = term_to_string ctxt n
+    val str = term_to_string ctxt t
   in
-    if sanitize_string str <> str then (warning ("String  "^str^" contains invalid characters!"); sanitize_string str)
-     else str end;
+    if sanitize_string str <> str
+    then (warning ("String  "^str^" contains invalid characters!"); sanitize_string str)
+    else str end;
 
 local
   val sanitize_string_html =
@@ -91,13 +91,16 @@ in
     let
       val str = term_to_string ctxt n
     in
-      if sanitize_string_html str <> str then (warning ("String  "^str^" contains invalid characters!"); sanitize_string_html str)
-       else str end
+      if sanitize_string_html str <> str
+      then (warning ("String  "^str^" contains invalid characters!"); sanitize_string_html str)
+      else str end
 end;
 
 fun node_to_string ctxt (tune_node_format: term -> string -> string) (n: term) : string = 
   n |> term_to_string ctxt |> tune_node_format n
-  handle Subscript => error ("Subscript Exception in node_to_string for string "^( Pretty.string_of (Syntax.pretty_term ctxt n)));
+  handle Subscript =>
+    error ("Subscript Exception in node_to_string for string " ^
+           (Pretty.string_of (Syntax.pretty_term ctxt n)));
 
 local
 
@@ -142,7 +145,7 @@ local
   fun apply_dot_header header edges =
     "digraph graphname {\n#header\n" ^ header ^"\n#edges\n\n"^ implode edges ^ "}"
 in
-  fun visualize_graph_pretty ctxt tune_node_format Es (header:string): int =
+  fun visualize_graph_pretty ctxt tune_node_format Es (header: string): int =
     let 
       val evaluated_edges = map (fn (str, t) => (str, evaluate_term ctxt t)) Es;
       val edge_to_string = HOLogic.dest_list #> map HOLogic.dest_prod #> format_dot_edges ctxt tune_node_format #> implode;
