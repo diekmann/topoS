@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=Isabelle
-Comment=with AFP Collections
-Exec=/home/diekmann/git/topoS/start_isabelle
-Icon=/home/diekmann/bin/Isabelle2013-2/lib/logo/isabelle.gif
-Terminal=false
-Type=Application
-Categories=Utility;Application;
