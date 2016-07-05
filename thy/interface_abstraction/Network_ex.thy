@@ -36,7 +36,7 @@ definition "example_network = \<lparr> interfaces = {\<lparr> entity = NetworkBo
           (\<lparr> entity = NetworkBox ''threePortSwitch'', port = Port 3 \<rparr>, \<lparr> entity = Host ''Carl'', port = Port 1 \<rparr>)
           }\<rparr>"
 
-interpretation example!: wellformed_network example_network
+interpretation example: wellformed_network example_network
   by(unfold_locales, auto simp add: example_network_def)
 lemma wellformed_network_example_network: "wellformed_network example_network" by(unfold_locales)
 
@@ -203,7 +203,7 @@ section{*Another example*}
           (\<lparr> entity = NetworkBox ''sw2'', port = Port 2 \<rparr>, \<lparr> entity = Host ''Carl'', port = Port 1 \<rparr>)
           }\<rparr>"
 
-  interpretation example2!: wellformed_network example_network2
+  interpretation example2: wellformed_network example_network2
   by(unfold_locales, auto simp add: example_network2_def)
   lemma "wellformed_network example_network2" by(unfold_locales)
 

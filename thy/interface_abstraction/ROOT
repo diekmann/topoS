@@ -1,0 +1,10 @@
+chapter InterfaceAbstraction
+
+session Interface_Abstraction = HOL +
+  theories [document = false]
+    Entity
+    Network
+    Network_View
+    Network_ex
+    Spoofing
+    VLANs
