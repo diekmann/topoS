@@ -8,7 +8,7 @@ http://isabelle.in.tum.de/
 
 The Network_Security_Policy_Verification is maintained in the AFP.
 Get the latest stable version here:
-http://afp.sourceforge.net/entries/Network_Security_Policy_Verification.shtml
+https://www.isa-afp.org/entries/Network_Security_Policy_Verification.shtml
 
 
 
@@ -20,18 +20,18 @@ find Network_Security_Policy_Verification/ -iname '*.thy' | xargs grep 'offendin
 
 ## Repo Overview
 
-* Network_Security_Policy_Verification 
+* thy/Network_Security_Policy_Verification 
     
     Theory for reasoning about logical access control abstraction (security policy, who can communicate with whom?).
     All the the formal theory files for Isabelle/HOL.
 
 
-* interface_abstraction
+* thy/interface_abstraction
     
     A model of networks.
 
 
-* isabelle_afp
+* thy/everything-else
     
     A snapshot of some afp entries to use this repository without external dependencies.
 

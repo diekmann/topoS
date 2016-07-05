@@ -1,7 +1,7 @@
 theory FiniteListGraph_Impl
 imports 
   FiniteListGraph
-  "$AFP/Collections/ICF/impl/RBTSetImpl" (*red black trees*)
+  "../../Collections/ICF/impl/RBTSetImpl" (*red black trees*)
   (*maybe import the following only at the end*)
   "Efficient_Distinct"
   "~~/src/HOL/Library/Code_Char"
