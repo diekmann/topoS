@@ -199,7 +199,7 @@ iterate_edges_ML @{context}  @{term "[(s,r) \<leftarrow> flows_fixL stateful_pol
   (fn _ => () )
   (fn _ => () );
 iterate_edges_ML @{context} @{term "[(s,r) \<leftarrow> flows_stateL stateful_policy. s = ''C3PO_in'']"}
-  (fn (v1,v2) => writeln ("iptables -I INPUT -m state --state ESTABLISHED -i $"^v2^"_iface -s $"^v2^"_ipv4 -o $"^v1^"_iface -d $"^v1^"_ipv4 # "^v2^" -> "^v1^" (answer)") )
+  (fn (v1,v2) => writeln ("iptables -I INPUT -m state --state ESTABLISHED -i $"^v2^"_iface -s $"^v2^"_ipv4 -o $"^v1^"_iface -d $"^v1^"_ipv4 -j ACCEPT # "^v2^" -> "^v1^" (answer)") )
   (fn _ => () )
   (fn _ => () );
 
@@ -209,7 +209,7 @@ iterate_edges_ML @{context}  @{term "[(s,r) \<leftarrow> flows_fixL stateful_pol
   (fn _ => () )
   (fn _ => () );
 iterate_edges_ML @{context} @{term "[(s,r) \<leftarrow> flows_stateL stateful_policy. r = ''C3PO_in'']"}
-  (fn (v1,v2) => writeln ("iptables -I OUTPUT -m state --state ESTABLISHED -i $"^v2^"_iface -s $"^v2^"_ipv4 -o $"^v1^"_iface -d $"^v1^"_ipv4 # "^v2^" -> "^v1^" (answer)") )
+  (fn (v1,v2) => writeln ("iptables -I OUTPUT -m state --state ESTABLISHED -i $"^v2^"_iface -s $"^v2^"_ipv4 -o $"^v1^"_iface -d $"^v1^"_ipv4 -j ACCEPT # "^v2^" -> "^v1^" (answer)") )
   (fn _ => () )
   (fn _ => () );
 *}
