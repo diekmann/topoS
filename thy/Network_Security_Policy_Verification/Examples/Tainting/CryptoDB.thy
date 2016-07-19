@@ -1,9 +1,7 @@
+section\<open>CryptoDB\<close>
 theory CryptoDB
 imports "../../TopoS_Impl"
 begin
-
-abbreviation "V\<equiv>TopoS_Vertices.V"
-
 
 ML{*
 case !Graphviz.open_viewer of
@@ -41,9 +39,10 @@ context begin
                            ''C_channel_in'' \<mapsto> TaintsUntaints {} {},
                            ''Adversary'' \<mapsto> TaintsUntaints {} {}
                            ]"
-  private lemma "dom (tainiting_host_attributes) \<subseteq> set (nodesL policy)" by(simp add: tainiting_host_attributes_def policy_def)
+  private lemma "dom (tainiting_host_attributes) \<subseteq> set (nodesL policy)"
+    by(simp add: tainiting_host_attributes_def policy_def)
   definition "Tainting_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_TaintingTrusted \<lparr>
-        node_properties = tainiting_host_attributes \<rparr>"
+        node_properties = tainiting_host_attributes \<rparr> ''user-data''"
 end
 lemma "wf_list_graph policy" by eval
 
@@ -62,7 +61,7 @@ context begin
     by(simp add: A_host_attributes_def policy_def)
   definition "SystemA_m \<equiv> new_configured_list_SecurityInvariant
                                   SINVAR_LIB_SubnetsInGW
-                                    \<lparr> node_properties = A_host_attributes \<rparr>"
+                                    \<lparr> node_properties = A_host_attributes \<rparr> ''sys-A''"
 end
 
 context begin
@@ -75,27 +74,25 @@ context begin
     by(simp add: B_host_attributes_def policy_def)
   definition "SystemB_m \<equiv> new_configured_list_SecurityInvariant
                                   SINVAR_LIB_SubnetsInGW
-                                    \<lparr> node_properties = B_host_attributes \<rparr>"
+                                    \<lparr> node_properties = B_host_attributes \<rparr> ''sys-B''"
 end
 
 
 
 context begin
   private definition "C_host_attributes \<equiv>
-                [''C_channel_in'' \<mapsto> InboundGateway,
-                 ''C_decrypter'' \<mapsto> Member,
-                 ''C'' \<mapsto> Member,
-                 ''C_encrypter'' \<mapsto> Member,
-                 ''C_channel_out'' \<mapsto> Member
+                [(''C_channel_in'', SystemBoundaryInput),
+                 (''C_decrypter'', SystemComponent),
+                 (''C'', SystemComponent),
+                 (''C_encrypter'', SystemComponent),
+                 (''C_channel_out'', SystemBoundaryOutput)
                  ]"
-  private lemma "dom C_host_attributes \<subseteq> set (nodesL policy)"
+  private lemma "dom (map_of C_host_attributes) \<subseteq> set (nodesL policy)"
     by(simp add: C_host_attributes_def policy_def)
-  definition "SystemC_m \<equiv> new_configured_list_SecurityInvariant
-                                  METASINVAR_SystemBoundary
-                                    \<lparr> node_properties = C_host_attributes \<rparr>"
+  definition "SystemC_m \<equiv> new_meta_system_boundary C_host_attributes ''sys-C''"
 end
 
-definition "invariants \<equiv> [Tainting_m, SystemA_m, SystemB_m, SystemC_m]"
+definition "invariants \<equiv> [Tainting_m, SystemA_m, SystemB_m] @ SystemC_m"
 
 lemma "all_security_requirements_fulfilled invariants policy" by eval
 ML{*
@@ -115,11 +112,12 @@ definition make_policy :: "('a SecurityInvariant) list \<Rightarrow> 'a list \<R
 
 value[code] "make_policy invariants (nodesL policy)"
 
+text\<open>visualizing all flows which may not end at the adversary. I.e. things which are prohibited.\<close>
 ML_val{*
 visualize_edges @{context} @{term "edgesL policy"}
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
      @{term "[(e1, e2) \<leftarrow>  List.product  (nodesL policy) (nodesL policy).
-     ((e1,e2) \<notin> set (edgesL policy)) \<and> ((e1,e2) \<notin> set( edgesL (make_policy invariants (nodesL policy)))) \<and> (e2 = ''Adversary'') \<and> (e1 \<noteq> ''Adversary'')]"})] "";
+     ((e1,e2) \<notin> set (edgesL policy)) \<and> ((e1,e2) \<notin> set (edgesL (make_policy invariants (nodesL policy)))) \<and> (e2 = ''Adversary'') \<and> (e1 \<noteq> ''Adversary'')]"})] "";
 *}
 
 

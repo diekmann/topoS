@@ -1,9 +1,7 @@
+section\<open>IDEM\<close>
 theory IDEM
 imports "../../TopoS_Impl"
 begin
-
-abbreviation "V\<equiv>TopoS_Vertices.V"
-
 
 ML{*
 case !Graphviz.open_viewer of

@@ -1,7 +1,7 @@
+section\<open>Measr Droid\<close>
 theory MeasrDroid
 imports "../../TopoS_Impl"
 begin
-
 
 
 ML{*
@@ -92,7 +92,7 @@ context begin
                  (''Sensors_A'' ,  SystemComponent),
                  (''Encryption_A'' ,  SystemComponent)
                  ]"
-  private lemma "dom(map_of A_host_attributes) \<subseteq> set (nodesL policy)"
+  private lemma "dom (map_of A_host_attributes) \<subseteq> set (nodesL policy)"
     by(simp add: A_host_attributes_def policy_def)
   definition "SystemA_m \<equiv> new_meta_system_boundary A_host_attributes ''hh''"
 end
