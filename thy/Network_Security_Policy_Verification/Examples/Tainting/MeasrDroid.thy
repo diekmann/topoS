@@ -67,6 +67,7 @@ definition policy :: "string list_graph" where
 
 subsection\<open>Specification of Security Requirements\<close>
 
+
 context begin
   definition "taint_labels \<equiv> [
                            ''Sensors_A'' \<mapsto> TaintsUntaints {''A''} {},
@@ -87,6 +88,34 @@ context begin
   private lemma "dom (taint_labels) \<subseteq> set (nodesL policy)" by(simp add: taint_labels_def policy_def)
   definition "Tainting_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_TaintingTrusted \<lparr>
         node_properties = taint_labels \<rparr> ''taint labels''"
+
+
+  text\<open>A convenient way to specify encryption and decryption pairs\<close>
+  private definition mk_Enc_Dec_pair
+    :: "string set \<Rightarrow> (SINVAR_TaintingTrusted.taints \<times> SINVAR_TaintingTrusted.taints)"
+  where
+  "mk_Enc_Dec_pair taints_to_be_encrypted \<equiv> (TaintsUntaints {} taints_to_be_encrypted,
+                                             TaintsUntaints taints_to_be_encrypted {})"
+
+  lemma "taint_labels = (let (Enc_A, Dec_A) = mk_Enc_Dec_pair {''A''};
+                             (Enc_B, Dec_B) = mk_Enc_Dec_pair {''B''};
+                             (Enc_C, Dec_C) = mk_Enc_Dec_pair {''C''}
+                       in [
+                           ''Sensors_A'' \<mapsto> TaintsUntaints {''A''} {},
+                           ''Sensors_B'' \<mapsto> TaintsUntaints {''B''} {},
+                           ''Sensors_C'' \<mapsto> TaintsUntaints {''C''} {},
+
+                           ''Encryption_A'' \<mapsto> Enc_A,
+                           ''Encryption_B'' \<mapsto> Enc_B,
+                           ''Encryption_C'' \<mapsto> Enc_C,
+
+                           ''C3PO_Dec_A'' \<mapsto> Dec_A,
+                           ''C3PO_Dec_B'' \<mapsto> Dec_B,
+                           ''C3PO_Dec_C'' \<mapsto> Dec_C,
+
+                           ''C3PO_Storage'' \<mapsto> TaintsUntaints {''A'',''B'',''C''} {}
+                           ])"
+    by(simp add: taint_labels_def mk_Enc_Dec_pair_def)
 end
 lemma "wf_list_graph policy" by eval
 
