@@ -11,7 +11,7 @@ case !Graphviz.open_viewer of
 *}
 
 definition policy :: "string list_graph" where
-  "policy \<equiv> \<lparr> nodesL = [
+  "policy \<equiv> \<lparr> nodesL = [''Logger'',
                         ''Sensor_Controller'',
                         ''P4S_in'',
                         ''P4S_filter_A'',
@@ -22,20 +22,12 @@ definition policy :: "string list_graph" where
                         ''P4S_encrypt_B'',
                         ''P4S_encrypt_C'',
                         ''P4S_encrypt_C_low'',
+                        ''P4S_out'',
                         ''P4S_DB'',
-                        ''P4S_out_A'',
-                        ''P4S_out_B'',
-                        ''P4S_out_C'',
-                        ''P4S_out_C_low'',
-                        ''A_decrypt'',
-                        ''B_decrypt'',
-                        ''C_decrypt'',
-                        ''C_low_decrypt'',
-                        ''A'',
-                        ''B'',
-                        ''C'',
-                        ''C_low''],
+
+                        ''Adversary''],
               edgesL = [
+              (''Logger'', ''Sensor_Controller''),
               (''Sensor_Controller'', ''P4S_in''),
               (''P4S_in'',       ''P4S_filter_A''),
               (''P4S_in'',       ''P4S_filter_B''),
@@ -47,27 +39,19 @@ definition policy :: "string list_graph" where
               (''P4S_filter_C''    , ''P4S_aggregator_C''),
               (''P4S_aggregator_C'', ''P4S_encrypt_C_low''),
 
-              (''P4S_encrypt_A''    , ''P4S_DB''),
-              (''P4S_encrypt_B''    , ''P4S_DB''),
-              (''P4S_encrypt_C''    , ''P4S_DB''),
-              (''P4S_encrypt_C_low''    , ''P4S_DB''),
+              (''P4S_encrypt_A''      , ''P4S_out''),
+              (''P4S_encrypt_B''      , ''P4S_out''),
+              (''P4S_encrypt_C''      , ''P4S_out''),
+              (''P4S_encrypt_C_low''  , ''P4S_out''),
 
-              (''P4S_DB'', ''P4S_out_A''),
-              (''P4S_DB'', ''P4S_out_B''),
-              (''P4S_DB'', ''P4S_out_C''),
-              (''P4S_DB'', ''P4S_out_C_low''),
-              (''P4S_out_A'', ''A_decrypt''),
-              (''P4S_out_B'', ''B_decrypt''),
-              (''P4S_out_C'', ''C_decrypt''),
-              (''P4S_out_C_low'', ''C_low_decrypt''),
-              (''A_decrypt'',     ''A''),
-              (''B_decrypt'',     ''B''),
-              (''C_decrypt'',     ''C''),
-              (''C_low_decrypt'', ''C_low'')
+              (''P4S_out'', ''P4S_DB'')
               ] \<rparr>"
+
+lemma "wf_list_graph policy" by eval
 
 context begin
   definition "tainiting_host_attributes \<equiv> [
+                           ''Logger'' \<mapsto> TaintsUntaints {''A'',''B'',''C'',''D''} {},
                            ''Sensor_Controller'' \<mapsto> TaintsUntaints {''A'',''B'',''C'',''D''} {},
                            ''P4S_in'' \<mapsto> TaintsUntaints {''A'',''B'',''C'',''D''} {},
                            ''P4S_filter_A'' \<mapsto> TaintsUntaints {''A''} {''B'',''C'',''D''},
@@ -77,42 +61,55 @@ context begin
                            ''P4S_encrypt_A'' \<mapsto> TaintsUntaints {} {''A''},
                            ''P4S_encrypt_B'' \<mapsto> TaintsUntaints {} {''B''},
                            ''P4S_encrypt_C'' \<mapsto> TaintsUntaints {} {''C''},
-                           ''P4S_encrypt_C_low'' \<mapsto> TaintsUntaints {}{''C_low''},
-                           ''A_decrypt'' \<mapsto> TaintsUntaints {''A''}{},
-                           ''B_decrypt'' \<mapsto> TaintsUntaints {''B''}{},
-                           ''C_decrypt'' \<mapsto> TaintsUntaints {''C''}{},
-                           ''C_low_decrypt'' \<mapsto> TaintsUntaints {''C_low''}{},
-                           ''A'' \<mapsto> TaintsUntaints {''A''}{},
-                           ''B'' \<mapsto> TaintsUntaints {''B''}{},
-                           ''C'' \<mapsto> TaintsUntaints {''C''}{},
-                           ''C_low'' \<mapsto> TaintsUntaints {''C_low''}{}
+                           ''P4S_encrypt_C_low'' \<mapsto> TaintsUntaints {}{''C_low''}
                            ]"
-  private lemma "dom (tainiting_host_attributes) \<subseteq> set (nodesL policy)" by(simp add: tainiting_host_attributes_def policy_def)
+  private lemma "dom (tainiting_host_attributes) \<subseteq> set (nodesL policy)"
+    by(simp add: tainiting_host_attributes_def policy_def)
   definition "Tainting_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_TaintingTrusted \<lparr>
-        node_properties = tainiting_host_attributes \<rparr> ''String'' "
+        node_properties = tainiting_host_attributes \<rparr> ''critical energy data'' "
 end
-lemma "wf_list_graph policy" by eval
 
-ML_val{*
-visualize_graph @{context} @{term "[]::string SecurityInvariant list"} @{term "policy"};
-*}
+context begin
+  private definition "system_EMS \<equiv>
+                [(''Logger'',  SystemComponent),
+                 (''Sensor_Controller'',  SystemBoundaryOutput)
+                 ]"
+  private lemma "dom(map_of system_EMS) \<subseteq> set (nodesL policy)"
+    by(simp add: system_EMS_def policy_def)
+  definition "system_EMS_m \<equiv> new_meta_system_boundary system_EMS ''EMS''"
+end
 
-(*
+context begin
+  private definition "system_P4S \<equiv>
+                [(''P4S_in'',  SystemBoundaryInput),
+                 (''P4S_filter_A'',  SystemComponent),
+                 (''P4S_filter_B'',  SystemComponent),
+                 (''P4S_filter_C'',  SystemComponent),
+                 (''P4S_aggregator_C'',  SystemComponent),
+                 (''P4S_encrypt_A'',  SystemComponent),
+                 (''P4S_encrypt_B'',  SystemComponent),
+                 (''P4S_encrypt_C'',  SystemComponent),
+                 (''P4S_encrypt_C_low'',  SystemComponent),
+                 (''P4S_out'',  SystemBoundaryOutput)
+                 ]"
+  private lemma "dom(map_of system_P4S) \<subseteq> set (nodesL policy)"
+    by(simp add: system_P4S_def policy_def)
+  definition "system_P4S_m \<equiv> new_meta_system_boundary system_P4S ''P4S''"
+end
 
 
 
 context begin
-  private definition "BLP_host_attributes \<equiv>
-                          [''CryptoDB'' \<mapsto> \<lparr> privacy_level = 3, trusted = False \<rparr>
-                           ]"
-  private lemma "dom (BLP_host_attributes) \<subseteq> set (nodesL policy)"
-    by(simp add: BLP_host_attributes_def policy_def)
-  definition "BLP_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr>
-        node_properties = BLP_host_attributes \<rparr>"
+  private definition "system_P4Sstorage \<equiv>
+                [(''P4S_DB'',  SystemBoundaryInput)
+                 ]"
+  private lemma "dom(map_of system_P4Sstorage) \<subseteq> set (nodesL policy)"
+    by(simp add: system_P4Sstorage_def policy_def)
+  definition "system_P4Sstorage_m \<equiv> new_meta_system_boundary system_P4Sstorage ''P4S storage''"
 end
-*)
 
-definition "invariants \<equiv> [Tainting_m]"
+
+definition "invariants \<equiv> [Tainting_m] @ system_EMS_m @ system_P4S_m @system_P4Sstorage_m"
 
 lemma "all_security_requirements_fulfilled invariants policy" by eval
 ML{*
@@ -139,7 +136,7 @@ ML_val{*
 visualize_edges @{context} @{term "edgesL policy"}
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
      @{term "[(e1, e2) \<leftarrow>  List.product  (nodesL policy) (nodesL policy).
-     ((e1,e2) \<notin> set (edgesL policy)) \<and> ((e1,e2) \<notin> set( edgesL (make_policy invariants (nodesL policy)))) \<and> (e2 = ''Adversary'') \<and> (e1 \<noteq> ''Adversary'')]"})] "";
+     (e1,e2) \<notin> set (edgesL (make_policy invariants (nodesL policy))) \<and> (e2 = ''Adversary'') \<and> (e1 \<noteq> ''Adversary'')]"})] "";
 *}
 
 
