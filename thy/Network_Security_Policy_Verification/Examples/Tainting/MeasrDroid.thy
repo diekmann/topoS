@@ -11,24 +11,31 @@ case !Graphviz.open_viewer of
   | DoNothing => ()
 *}
 
+subsection\<open>Architecture Definition\<close>
+
 definition policy :: "string list_graph" where
-  "policy \<equiv> \<lparr> nodesL = [
+  "policy \<equiv> \<lparr> nodesL = [ (*SmartPhone A:*)
                          ''Sensors_A'',
                          ''Encryption_A'',
                          ''Client_A_out'',
+
+                         (*SmartPhone B:*)
                          ''Sensors_B'',
                          ''Encryption_B'',
                          ''Client_B_out'',
 
+                         (*SmartPhone C:*)
                          ''Sensors_C'',
                          ''Encryption_C'',
                          ''Client_C_out'',
+
                          ''UploadDroid'',
+
+                         (*CollectDroid:*)
                          ''C3PO_in'',
                          ''C3PO_Dec_A'',
                          ''C3PO_Dec_B'',
                          ''C3PO_Dec_C'',
-
                          ''C3PO_Storage'',
 
                          ''Adversary''],
@@ -45,7 +52,7 @@ definition policy :: "string list_graph" where
               (''Encryption_C'', ''Client_C_out''),
               (''Client_C_out'', ''UploadDroid''),
 
-              (*(''UploadDroid'', ''C3PO_in''),*)
+              (*(''UploadDroid'', ''C3PO_in''), C3PO pulls!*)
               (''C3PO_in'', ''UploadDroid''),
 
               (''C3PO_in'', ''C3PO_Dec_A''),
@@ -58,8 +65,10 @@ definition policy :: "string list_graph" where
 
               ] \<rparr>"
 
+subsection\<open>Specification of Security Requirements\<close>
+
 context begin
-  definition "tainiting_host_attributes \<equiv> [
+  definition "taint_labels \<equiv> [
                            ''Sensors_A'' \<mapsto> TaintsUntaints {''A''} {},
                            ''Sensors_B'' \<mapsto> TaintsUntaints {''B''} {},
                            ''Sensors_C'' \<mapsto> TaintsUntaints {''C''} {},
@@ -75,9 +84,9 @@ context begin
                            ''C3PO_Storage'' \<mapsto> TaintsUntaints {''A'',''B'',''C''} {}
 
                            ]"
-  private lemma "dom (tainiting_host_attributes) \<subseteq> set (nodesL policy)" by(simp add: tainiting_host_attributes_def policy_def)
+  private lemma "dom (taint_labels) \<subseteq> set (nodesL policy)" by(simp add: taint_labels_def policy_def)
   definition "Tainting_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_TaintingTrusted \<lparr>
-        node_properties = tainiting_host_attributes \<rparr> ''dd''"
+        node_properties = taint_labels \<rparr> ''taint labels''"
 end
 lemma "wf_list_graph policy" by eval
 
@@ -87,52 +96,67 @@ visualize_graph @{context} @{term "[]::string SecurityInvariant list"} @{term "p
 
 
 context begin
-  private definition "A_host_attributes \<equiv>
+  private definition "smartphone_system_A \<equiv>
                 [(''Client_A_out'' ,  SystemBoundaryOutput),
                  (''Sensors_A'' ,  SystemComponent),
                  (''Encryption_A'' ,  SystemComponent)
                  ]"
-  private lemma "dom (map_of A_host_attributes) \<subseteq> set (nodesL policy)"
-    by(simp add: A_host_attributes_def policy_def)
-  definition "SystemA_m \<equiv> new_meta_system_boundary A_host_attributes ''hh''"
+  private lemma "dom (map_of smartphone_system_A) \<subseteq> set (nodesL policy)"
+    by(simp add: smartphone_system_A_def policy_def)
+  definition "SystemA_m \<equiv> new_meta_system_boundary smartphone_system_A ''smartphone A''"
 end
 
 context begin
-  private definition "B_host_attributes \<equiv>
+  private definition "smartphone_system_B \<equiv>
                 [(''Client_B_out'' ,  SystemBoundaryOutput),
                  (''Sensors_B'' ,  SystemComponent),
                  (''Encryption_B'' ,  SystemComponent)
                  ]"
-  private lemma "dom(map_of B_host_attributes) \<subseteq> set (nodesL policy)"
-    by(simp add: B_host_attributes_def policy_def)
-  definition "SystemB_m \<equiv> new_meta_system_boundary B_host_attributes ''kk''"
+  private lemma "dom(map_of smartphone_system_B) \<subseteq> set (nodesL policy)"
+    by(simp add: smartphone_system_B_def policy_def)
+  definition "SystemB_m \<equiv> new_meta_system_boundary smartphone_system_B ''smartphone B''"
 end
 
 context begin
-  private definition "C_host_attributes \<equiv>
+  private definition "smartphone_system_C \<equiv>
                 [(''Client_C_out'' ,  SystemBoundaryOutput),
                  (''Sensors_C'' ,  SystemComponent),
                  (''Encryption_C'' ,  SystemComponent)
                  ]"
-  private lemma "dom(map_of C_host_attributes) \<subseteq> set (nodesL policy)"
-    by(simp add: C_host_attributes_def policy_def)
-  definition "SystemC_m \<equiv> new_meta_system_boundary C_host_attributes ''uu''"
+  private lemma "dom(map_of smartphone_system_C) \<subseteq> set (nodesL policy)"
+    by(simp add: smartphone_system_C_def policy_def)
+  definition "SystemC_m \<equiv> new_meta_system_boundary smartphone_system_C ''smartphone C''"
 end
 
 context begin
-  private definition "M_host_attributes \<equiv>
+  private definition "system_C3PO \<equiv>
                 [(''C3PO_in'' ,  SystemBoundaryOutput),
                  (''C3PO_Dec_A'' ,  SystemComponent),
                  (''C3PO_Dec_C'' ,  SystemComponent),
-                 (''C3PO_Storage'' ,  SystemComponent),
-                 (''C3PO_Dec_B'' ,  SystemComponent)
+                 (''C3PO_Dec_B'' ,  SystemComponent),
+                 (''C3PO_Storage'' ,  SystemComponent)
                  ]"
-  private lemma "dom(map_of M_host_attributes) \<subseteq> set (nodesL policy)"
-    by(simp add: M_host_attributes_def policy_def)
-  definition "SystemM_m \<equiv> new_meta_system_boundary M_host_attributes ''rr''"
+  private lemma "dom(map_of system_C3PO) \<subseteq> set (nodesL policy)"
+    by(simp add: system_C3PO_def policy_def)
+  definition "SystemC3PO_m \<equiv> new_meta_system_boundary system_C3PO ''C3PO''"
 end
 
-definition "invariants \<equiv> [Tainting_m] @ SystemA_m @ SystemB_m @ SystemC_m @ SystemM_m"
+context begin
+  text\<open>Technically, the following definition does not impose any restrictions.
+       Upload Droid must be reachable from anywhere, therefore it is an @{const SystemBoundaryInput}.
+       In addition, Upload Droid will maintain stateful connections with other entities.
+       Therefore, we want to allow Upload Droid to send out any data, which also makes it an
+       @{const SystemBoundaryOutput}.
+       \<close>
+  private definition "system_UploadDroid \<equiv>
+                [(''UploadDroid'',  SystemBoundaryInputOutput)
+                 ]"
+  private lemma "dom(map_of system_UploadDroid) \<subseteq> set (nodesL policy)"
+    by(simp add: system_UploadDroid_def policy_def)
+  definition "SystemUploadDroid_m \<equiv> new_meta_system_boundary system_UploadDroid ''UploadDroid''"
+end
+
+definition "invariants \<equiv> [Tainting_m] @ SystemA_m @ SystemB_m @ SystemC_m @ SystemC3PO_m @ SystemUploadDroid_m"
 
 lemma "all_security_requirements_fulfilled invariants policy" by eval
 ML{*
@@ -145,10 +169,10 @@ value[code] "implc_get_offending_flows invariants (policy\<lparr> edgesL := edge
 visualize_graph @{context} @{term "invariants"} @{term "(policy\<lparr> edgesL := (''Adversary'', ''C3PO_Storage'')#edgesL policy\<rparr>)"};
 *}*)
 ML{*
-visualize_graph_header @{context} @{term "invariants"} @{term "policy"} @{term tainiting_host_attributes};
+visualize_graph_header @{context} @{term "invariants"} @{term "policy"} @{term taint_labels};
 *}
 
-
+subsection\<open>Analyzing the Policy\<close>
 
 definition make_policy :: "('a SecurityInvariant) list \<Rightarrow> 'a list \<Rightarrow> 'a list_graph" where
   "make_policy sinvars Vs \<equiv> generate_valid_topology sinvars \<lparr>nodesL = Vs, edgesL = List.product Vs Vs \<rparr>"
@@ -156,15 +180,77 @@ definition make_policy :: "('a SecurityInvariant) list \<Rightarrow> 'a list \<R
 
 value[code] "make_policy invariants (nodesL policy)"
 
-
 lemma "set (edgesL policy) \<subseteq> set (edgesL (make_policy invariants (nodesL policy)))" by eval
+
+text\<open>
+We analyze the specification of our security invariants. The model includes a node @{term "''Adversary''"}
+and we will analyze which interaction with an adversary are not prohibited by the requirements. 
+Therefore, we generate a policy only from the security invariants and compare it to our manually designed policy.
+
+We find the following flows which are allowed but which we did not consider in our policy 
+ \<^item> All reflexive flows, i.e. every component can interact with itself. This is fine.
+ \<^item> Within each smartphone, internally, arbitrary communication is possible. We cannot prevent this at a user's smartphone
+ \<^item> Every smartphone could send data to the adversary.
+   It is important that this is generally allowed since we don't to put any restrictions on the
+   Internet connectivity of a smarthone. 
+   For example, this allows the smartphone user to surf facebook, which is not a trusted component in our system.
+   The collected data is encrypted once it leaves the smartphone (via MeasrDroid), therefore, sensor data is not leaked.
+ \<^item> @{term "''C3PO_in''"} could send data to the adversary. At this point, the data is still encrypted.
+   It would be possible to add an additional security invariant to make sure that @{term "''C3PO_in''"}
+   only connects to @{term "''UploadDroid''"}.
+ \<^item> An adversary could send data to UploadDroid.
+   Since the system shall be accessible to any smartphone connected to the Internet, without authentication,
+   we cannot prevent that a malicious user might send fake data.
+ \<^item> The Upload Droid could send data to the adversary.
+   This does not undermine the security concept because upload droid only stores encrypted data. 
+   In fact, the security assumptions were from the very beginning that Upload Droid can get compromised.
+ \<^item> C3PO could directly save and data in its database without decrypting.
+   This is fine and might potentially used in a future version for backups.
+\<close>
+lemma "set [e \<leftarrow> edgesL (make_policy invariants (nodesL policy)). e \<notin> set (edgesL policy)] =
+ set [(v,v). v \<leftarrow> (nodesL policy)] \<union>
+ {(''Encryption_A'', ''Sensors_A''), (''Client_A_out'', ''Sensors_A''), (''Client_A_out'', ''Encryption_A'')} \<union>
+
+ {(''Encryption_B'', ''Sensors_B''), (''Client_B_out'', ''Sensors_B''), (''Client_B_out'', ''Encryption_B'')} \<union>
+
+ {(''Encryption_C'', ''Sensors_C''), (''Client_C_out'', ''Sensors_C''),  (''Client_C_out'', ''Encryption_C'')} \<union>
+ 
+ {(''Client_C_out'', ''Adversary''),
+  (''Client_B_out'', ''Adversary''),
+  (''Client_A_out'', ''Adversary'')} \<union>
+
+ {(''C3PO_in'', ''Adversary'')} \<union>
+
+ {(''Adversary'', ''UploadDroid'')} \<union>
+
+ {(''UploadDroid'', ''Adversary'')} \<union>
+
+ {(''C3PO_in'', ''C3PO_Storage'')}" by eval
+
+text\<open>visualization\<close>
+ML_val{*
+visualize_edges @{context} @{term "edgesL policy"} 
+    [("edge [dir=\"arrow\", style=dashed, color=\"#3399FF\", constraint=false]",
+     @{term "[e \<leftarrow> edgesL (make_policy invariants (nodesL policy)). e \<notin> set (edgesL policy)]"})] ""; 
+*}
+
+text\<open>A visualization which shows all flows to the adversary which must NEVER happen
+      (only considering taint labels, i.e. system boundaries are not considered).\<close>
 ML_val{*
 visualize_edges @{context} @{term "edgesL policy"}
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
      @{term "[(e1, e2) \<leftarrow>  List.product  (nodesL policy) (nodesL policy).
-     ((e1,e2) \<notin> set (edgesL policy)) \<and> ((e1,e2) \<notin> set( edgesL (make_policy [Tainting_m] (nodesL policy)))) \<and> (e2 = ''Adversary'') \<and> (e1 \<noteq> ''Adversary'')]"})] "";
+     (e1,e2) \<notin> set (edgesL (make_policy [Tainting_m] (nodesL policy))) \<and> (e2 = ''Adversary'') \<and> (e1 \<noteq> ''Adversary'')]"})] "";
 *}
 
+text\<open>We conclude that the security invariants adequately reflect all aspects of the system we wanted to specify.\<close>
+
+
+
+
+
+
+subsection{*A stateful implementation*}
 
 
 definition "stateful_policy = generate_valid_stateful_policy_IFSACS policy invariants"
@@ -174,14 +260,29 @@ visualize_edges @{context} @{term "flows_fixL stateful_policy"}
 *}
 
 
+lemma "stateful_policy =
+\<lparr>hostsL =
+    [''Sensors_A'', ''Encryption_A'', ''Client_A_out'', ''Sensors_B'', ''Encryption_B'', ''Client_B_out'', ''Sensors_C'',
+     ''Encryption_C'', ''Client_C_out'', ''UploadDroid'', ''C3PO_in'', ''C3PO_Dec_A'', ''C3PO_Dec_B'', ''C3PO_Dec_C'',
+     ''C3PO_Storage'', ''Adversary''],
+    flows_fixL =
+      [(''Sensors_A'', ''Encryption_A''), (''Encryption_A'', ''Client_A_out''), (''Client_A_out'', ''UploadDroid''),
+       (''Sensors_B'', ''Encryption_B''), (''Encryption_B'', ''Client_B_out''), (''Client_B_out'', ''UploadDroid''),
+       (''Sensors_C'', ''Encryption_C''), (''Encryption_C'', ''Client_C_out''), (''Client_C_out'', ''UploadDroid''),
+       (''C3PO_in'', ''UploadDroid''), (''C3PO_in'', ''C3PO_Dec_A''), (''C3PO_in'', ''C3PO_Dec_B''),
+       (''C3PO_in'', ''C3PO_Dec_C''), (''C3PO_Dec_A'', ''C3PO_Storage''), (''C3PO_Dec_B'', ''C3PO_Storage''),
+       (''C3PO_Dec_C'', ''C3PO_Storage'')],
+    flows_stateL =
+      [(''Sensors_A'', ''Encryption_A''), (''Encryption_A'', ''Client_A_out''), (''Client_A_out'', ''UploadDroid''),
+       (''Sensors_B'', ''Encryption_B''), (''Encryption_B'', ''Client_B_out''), (''Client_B_out'', ''UploadDroid''),
+       (''Sensors_C'', ''Encryption_C''), (''Encryption_C'', ''Client_C_out''), (''Client_C_out'', ''UploadDroid''),
+       (''C3PO_in'', ''UploadDroid'')]\<rparr>"
+by eval
 
 
-section{*A stateful implementation*}
-value[code] "stateful_policy"
 
-
-
-text{*firewall -- classical use case*}
+subsection\<open>A firewall for Collect Droid\<close>
+text\<open>The firewall is installed at @{term "''C3PO_in''"}, this we only filter for the rules which affect this component.\<close>
 ML_val{*
 
 (*header*)
