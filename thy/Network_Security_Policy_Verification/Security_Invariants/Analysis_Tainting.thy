@@ -167,7 +167,7 @@ using taints_wellformedness by blast
 
 
 text\<open>If the labels are finite, the above can be generalized to arbitrary subsets of tainting labels.\<close>
-lemma
+lemma tainting_iff_blp_trusted_extended:
   defines "project \<equiv> \<lambda>A ts.
       \<lparr>
           privacy_level = card (A \<inter> (taints ts - untaints ts))
