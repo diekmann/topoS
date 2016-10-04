@@ -85,7 +85,7 @@ qed
 
 
 text\<open>If the labels are finite, the above can be generalized to arbitrary subsets of tainting labels.\<close>
-lemma
+lemma tainting_iff_blp_extended:
   defines "extract \<equiv> \<lambda>A ts. card (A \<inter> ts)"
   assumes finite: "\<forall>ts v. nP v = ts \<longrightarrow> finite ts"
   shows "SINVAR_Tainting.sinvar G nP \<longleftrightarrow> (\<forall>A. SINVAR_BLPbasic.sinvar G (extract A \<circ> nP))"
