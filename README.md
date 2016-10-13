@@ -46,6 +46,7 @@ find Network_Security_Policy_Verification/ -iname '*.thy' | xargs grep 'offendin
 
 ### Academic Publications
 
+  * Marcel von Maltitz, Cornelius Diekmann, Georg Carle. Taint Analysis for System-Wide Privacy Audits: A Framework and Real-World Case Studies [[preprint]](https://arxiv.org/abs/1608.04671)
   * Cornelius Diekmann, Andreas Korsten, and Georg Carle. Demonstrating topoS: Theorem-prover-based synthesis of secure network configurations. In 2nd International Workshop on Management of SDN and NFV Systems, manSDN/NFV, Barcelona, Spain, November 2015. [[preprint]](http://www.net.in.tum.de/fileadmin/bibtex/publications/papers/diekmann2015mansdnnfv.pdf)
   * Cornelius Diekmann, Stephan-A. Posselt, Heiko Niedermayer, Holger Kinkelin, Oliver Hanka, and Georg Carle. Verifying Security Policies using Host Attributes. In FORTE - 34th IFIP International Conference on Formal Techniques for Distributed Objects, Components and Systems, volume 8461, pages 133-148, Berlin, Germany, June 2014. Springer. [[preprint]](http://www.net.in.tum.de/fileadmin/bibtex/publications/papers/forte14_verifying_security_policies_using_host_attributes.pdf)
   * Cornelius Diekmann, Lars Hupel, and Georg Carle. Directed Security Policies: A Stateful Network Implementation. In Jun Pang and Yang Liu, editors, Engineering Safety and Security Systems, volume 150 of Electronic Proceedings in Theoretical Computer Science, pages 20-34, Singapore, May 2014. Open Publishing Association. [[paper]](http://rvg.web.cse.unsw.edu.au/eptcs/paper.cgi?ESSS2014.3)
