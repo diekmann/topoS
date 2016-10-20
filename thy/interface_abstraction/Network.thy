@@ -79,8 +79,8 @@ section{*A network consisting of entities*}
         apply(simp add: entity_name_def)
         done
       lemma "card (entity ` interfaces N) = card (entity_name ` entity ` interfaces N)"
-        thm Set_Interval.BIJ
-        apply(subst Set_Interval.BIJ[OF finite_entity_interfaces finite_entity_name_entity_interfaces, symmetric])
+        thm Set_Interval.bij_betw_iff_card
+        apply(subst Set_Interval.bij_betw_iff_card[OF finite_entity_interfaces finite_entity_name_entity_interfaces, symmetric])
         apply(rule_tac x="entity_name" in exI)
         apply(simp add: bij_betw_def inj_on_def)
         apply(fact names_disjunct_2)
