@@ -147,7 +147,7 @@ local
   fun apply_dot_header header edges =
     "digraph graphname {\n#header\n" ^ header ^"\n#edges\n\n"^ implode edges ^ "}"
 in
-  fun visualize_graph_pretty ctxt tune_node_format Es (header: string): int =
+  fun visualize_graph_pretty ctxt tune_node_format Es (header: string) =
     let 
       val evaluated_edges = map (fn (str, t) => (str, evaluate_term ctxt t)) Es;
       val edge_to_string = HOLogic.dest_list #> map HOLogic.dest_prod #> format_dot_edges ctxt tune_node_format #> implode;
@@ -157,19 +157,19 @@ in
           |> paint_graph Graphviz_Platform_Config.executable_pdf_viewer Graphviz_Platform_Config.executable_dot;
     in
       case !open_viewer of
-          DoNothing => (writeln "visualization disabled (Graphviz.open_viewer)"; 0)
+          DoNothing => writeln "visualization disabled (Graphviz.open_viewer)"
         | OpenImmediately => execute_command ()
         | AskTimeouted wait_seconds => let val (text, promise) = Active.dialog_text ();
             val _ = writeln ("Run Grpahviz and display pdf? " ^ text "yes" ^ "/" ^ text "no" ^ " (execution paused)")
             in
-              TimeLimit.timeLimit (seconds wait_seconds) (fn _ => 
+              Timeout.apply (seconds wait_seconds) (fn _ => 
                 let val m = (Future.join promise) in
-                (if m = "yes" then execute_command () else (writeln "no"; 0))
+                (if m = "yes" then execute_command () else (writeln "no"))
                 end
               ) ()
-             end handle TimeLimit.TimeOut =>
+             end handle Timeout.TIMEOUT _ =>
                   (writeln ("Timeouted. You did not klick yes/no. Killed to continue. " ^
-                            "If you want to see the pdf, just re-run this and klick yes."); 255)
+                            "If you want to see the pdf, just re-run this and klick yes."))
     end
   end
 
