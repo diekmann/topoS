@@ -2,6 +2,7 @@ theory Efficient_Distinct
 imports 
   "../../Automatic_Refinement/Lib/Misc" (*mergesort*)
   "~~/src/HOL/Library/List_lexord"
+  "~~/src/HOL/Library/Product_Lexorder"
   "~~/src/HOL/Library/Code_Char"
   TopoS_Util
 begin
