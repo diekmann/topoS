@@ -820,15 +820,32 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
     lemma generate_valid_topology_SOME_superset:
       "\<lbrakk> valid_reqs M; wf_graph G \<rbrakk> \<Longrightarrow> 
       edges (generate_valid_topology M G) \<subseteq> edges (generate_valid_topology_SOME M G)"
+    proof -
+      have isabelle2016_1_helper:
+        "x \<in> (\<Union>m\<in>set M. if c_sinvar m G then {} else SOME F. F \<in> c_offending_flows m G) \<longleftrightarrow>
+          (\<exists>m\<in>set M. \<not> c_sinvar m G \<and> (c_sinvar m G \<or> x \<in> (SOME F. F \<in> c_offending_flows m G)))"
+        for x by auto
+      have 1: "m\<in>set M \<Longrightarrow> \<not> c_sinvar m G \<and> (c_sinvar m G \<or> x \<in> (SOME F. F \<in> c_offending_flows m G)) \<Longrightarrow>
+            c_offending_flows m G \<noteq> {} \<Longrightarrow>
+            x \<in> \<Union>(\<Union>m\<in>set M. c_offending_flows m G)"
+      for x m
+      apply(simp)
+      apply(rule_tac x=m in bexI)
+      apply(simp_all)
+       using some_in_eq by blast
+     
+      show "valid_reqs M \<Longrightarrow> wf_graph G \<Longrightarrow> ?thesis"
       unfolding generate_valid_topology_SOME_def_alt generate_valid_topology_def_alt
+      apply(rule delete_edges_edges_mono)
       apply(simp add: delete_edges_simp2 get_offending_flows_def)
       apply(rule)
-      apply(simp)
-      apply(elim conjE, intro ballI impI allI, rename_tac x m)
+      apply(subst(asm) isabelle2016_1_helper)
+      apply(erule bexE, rename_tac m)
       apply(subgoal_tac "c_offending_flows m G \<noteq> {}")
-       using some_in_eq apply auto[1]
+       using 1 apply blast
       by (simp add: configured_SecurityInvariant.defined_offending' valid_reqs_def)
-      
+    qed
+
 
 
 
