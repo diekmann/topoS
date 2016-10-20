@@ -74,9 +74,9 @@ proof
           apply(erule_tac x=a in allE)
           apply(erule_tac x="(v1, v2)" in ballE)
            apply(simp_all)
-          apply(simp split: split_if_asm)
+          apply(simp split: if_split_asm)
           done
-        hence "a \<in> nP v1 \<Longrightarrow> a \<in> nP v2" by(simp split: split_if_asm)
+        hence "a \<in> nP v1 \<Longrightarrow> a \<in> nP v2" by(simp split: if_split_asm)
       }
       from this have "nP v1 \<subseteq> nP v2" by auto
     }
@@ -160,7 +160,7 @@ apply(clarify, rename_tac a b taintlabel)
 apply(erule_tac x=taintlabel in allE)
 apply(erule_tac x="(a,b)" in ballE)
  apply(simp_all)
-apply(simp split: split_if_asm)
+apply(simp split: if_split_asm)
 using taints_wellformedness by blast
 
 
@@ -191,7 +191,7 @@ apply(clarify, rename_tac a b taintlabel)
 apply(erule_tac x="{taintlabel}" in allE)
 apply(erule_tac x="(a,b)" in ballE)
  apply(simp_all)
-apply(simp split: split_if_asm)
+apply(simp split: if_split_asm)
  using taints_wellformedness apply blast
 using Diff_insert_absorb by fastforce
 

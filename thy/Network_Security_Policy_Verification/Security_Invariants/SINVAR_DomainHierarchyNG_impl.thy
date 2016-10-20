@@ -28,7 +28,7 @@ fun verify_globals :: "'v list_graph \<Rightarrow> ('v \<Rightarrow> domainNameT
 lemma "DomainHierarchyNG_sanity_check_config c tree \<Longrightarrow>
     {x. \<exists>v. nP v = x} = set c \<Longrightarrow>
     verify_globals G nP tree"
-  apply(simp add: DomainHierarchyNG_sanity_check_config_def split: split_if_asm)
+  apply(simp add: DomainHierarchyNG_sanity_check_config_def split: if_split_asm)
   apply(clarify)
   apply(case_tac "nP v")
    apply(simp_all)
