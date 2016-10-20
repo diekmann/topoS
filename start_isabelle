@@ -13,5 +13,5 @@ fi
 $ISABELLE build -d ./thy/Automatic_Refinement -v -b Automatic_Refinement
 # Building Collections may require some RAM (sometimes, my 8GB RAM are not enough)
 # using "-o threads=1" to limit memory during build
-$ISABELLE build -o threads=1 -d ./thy/ -v -b Collections
-$ISABELLE jedit -d ./thy/ -l Collections
+#$ISABELLE build -o threads=1 -d ./thy/ -v -b Collections
+$ISABELLE jedit -d ./thy/ -l Automatic_Refinement
