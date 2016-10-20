@@ -3,10 +3,10 @@
 
 ISABELLE="isabelle"
 
-if sh -c "$ISABELLE version" | grep '^Isabelle2016:'; then
-    echo "Isabelle 2016"
+if sh -c "$ISABELLE version" | grep '^Isabelle2016-1:'; then
+    echo "Isabelle 2016-1"
 else
-    echo "Isabelle 2016 is required"
+    echo "Isabelle 2016-1 is required"
     exit -1
 fi
 
