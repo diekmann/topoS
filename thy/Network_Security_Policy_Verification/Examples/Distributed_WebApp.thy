@@ -327,8 +327,8 @@ writeln ("{"^"\n"^
 
 fun mkdfwfwrule filter v1 v2 = "{"^"\n"^
              "  \"network\": \"mynet\","^"\n"^
-             "  \"src_container\": \"Name =~ ^"^ String.map Char.toLower v1 ^"$\","^"\n"^
-             "  \"dst_container\": \"Name =~ ^"^ String.map Char.toLower v2 ^"$\","^"\n"^
+             "  \"src_container\": \"Name =~ ^"^ String.map Char.toLower v1 ^"-?\\\\d*$\","^"\n"^
+             "  \"dst_container\": \"Name =~ ^"^ String.map Char.toLower v2 ^"-?\\\\d*$\","^"\n"^
              "  \"filter\": \""^filter^"\","^"\n"^
              "  \"action\": \"ACCEPT\""^"\n"^
           "},";
