@@ -127,7 +127,7 @@ begin
       unfolding SecurityInvariant_withOffendingFlows.sinvar_all_edges_normal_form_def sinvar_def
       by simp
     private lemma Taints_ENF_refl: "SecurityInvariant_withOffendingFlows.ENF_refl sinvar (op \<subseteq>)"
-      unfolding SecurityInvariant_withOffendingFlows.ENF_refl_def sinvar_def
+      unfolding SecurityInvariant_withOffendingFlows.ENF_refl_def
        by(auto simp add: Taints_ENF)
   
     qualified definition Taints_offending_set:: "'v graph \<Rightarrow> ('v \<Rightarrow> taints) \<Rightarrow> ('v \<times> 'v) set set" where

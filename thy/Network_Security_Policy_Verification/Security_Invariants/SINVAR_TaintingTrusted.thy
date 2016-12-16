@@ -145,7 +145,7 @@ begin
       by blast
     private lemma Taints_ENF_refl: "SecurityInvariant_withOffendingFlows.ENF_refl
         sinvar (\<lambda>c1 c2. taints c1 - untaints c1 \<subseteq> taints c2)"
-      unfolding SecurityInvariant_withOffendingFlows.ENF_refl_def sinvar_def
+      unfolding SecurityInvariant_withOffendingFlows.ENF_refl_def
       apply(intro conjI)
        subgoal using Taints_ENF by simp
       by auto

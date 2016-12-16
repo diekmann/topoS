@@ -183,13 +183,13 @@ text{*
     proof -
       assume a: "new_configured_SecurityInvariant (sinvar, defbot, receiver_violation, nP) = Some m"
       hence NetModel: "SecurityInvariant sinvar defbot receiver_violation"
-        by(simp add: new_configured_SecurityInvariant.simps split: split_if_asm)
+        by(simp add: new_configured_SecurityInvariant.simps split: if_split_asm)
       hence NetModel_p: "SecurityInvariant_preliminaries sinvar" by(simp add: SecurityInvariant_def)
 
       from a have c_eval: "c_sinvar m = (\<lambda>G. sinvar G nP)"
          and c_offending: "c_offending_flows m = (\<lambda>G. SecurityInvariant_withOffendingFlows.set_offending_flows sinvar G nP)"
          and "c_isIFS m = receiver_violation"
-        by(auto simp add: new_configured_SecurityInvariant.simps NetModel split: split_if_asm)
+        by(auto simp add: new_configured_SecurityInvariant.simps NetModel split: if_split_asm)
 
       have monoI: "SecurityInvariant_withOffendingFlows.sinvar_mono sinvar"
         apply(simp add: SecurityInvariant_withOffendingFlows.sinvar_mono_def, clarify)
@@ -511,7 +511,7 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
          from enf_offending_flows[OF `configured_SecurityInvariant m` `\<forall>G. c_sinvar m G = (\<forall>e\<in>edges G. P e)`] have
           offending: "\<And>G. c_offending_flows m G = (if c_sinvar m G then {} else {{e \<in> edges G. \<not> P e}})" by simp
          from `F \<in> c_offending_flows m ?G` `F \<noteq> {}` have "F = {e \<in> edges ?G. \<not> P e}"
-           by(simp split: split_if_asm add: offending)
+           by(simp split: if_split_asm add: offending)
          from this `(v1, v2) \<in> F`  have "\<not> P (v1, v2)" by simp
 
          from this enf_m have "\<not> c_sinvar m \<lparr>nodes = V, edges = insert (v1, v2) E\<rparr>" by(simp)
@@ -622,7 +622,7 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
       apply(frule valid_reqs2, drule valid_reqs1)
       apply(drule(2) configured_SecurityInvariant.offending_flows_union_mono)
       apply(simp add: get_offending_flows_def)
-      by blast
+      by auto
 
     thm configured_SecurityInvariant.Un_set_offending_flows_bound_minus_subseteq'
     lemma Un_set_offending_flows_bound_minus_subseteq':"\<lbrakk>valid_reqs M; 
@@ -820,15 +820,32 @@ definition valid_reqs :: "('v::vertex) SecurityInvariant_configured list \<Right
     lemma generate_valid_topology_SOME_superset:
       "\<lbrakk> valid_reqs M; wf_graph G \<rbrakk> \<Longrightarrow> 
       edges (generate_valid_topology M G) \<subseteq> edges (generate_valid_topology_SOME M G)"
+    proof -
+      have isabelle2016_1_helper:
+        "x \<in> (\<Union>m\<in>set M. if c_sinvar m G then {} else SOME F. F \<in> c_offending_flows m G) \<longleftrightarrow>
+          (\<exists>m\<in>set M. \<not> c_sinvar m G \<and> (c_sinvar m G \<or> x \<in> (SOME F. F \<in> c_offending_flows m G)))"
+        for x by auto
+      have 1: "m\<in>set M \<Longrightarrow> \<not> c_sinvar m G \<and> (c_sinvar m G \<or> x \<in> (SOME F. F \<in> c_offending_flows m G)) \<Longrightarrow>
+            c_offending_flows m G \<noteq> {} \<Longrightarrow>
+            x \<in> \<Union>(\<Union>m\<in>set M. c_offending_flows m G)"
+      for x m
+      apply(simp)
+      apply(rule_tac x=m in bexI)
+      apply(simp_all)
+       using some_in_eq by blast
+     
+      show "valid_reqs M \<Longrightarrow> wf_graph G \<Longrightarrow> ?thesis"
       unfolding generate_valid_topology_SOME_def_alt generate_valid_topology_def_alt
+      apply(rule delete_edges_edges_mono)
       apply(simp add: delete_edges_simp2 get_offending_flows_def)
       apply(rule)
-      apply(simp)
-      apply(elim conjE, intro ballI impI allI, rename_tac x m)
+      apply(subst(asm) isabelle2016_1_helper)
+      apply(erule bexE, rename_tac m)
       apply(subgoal_tac "c_offending_flows m G \<noteq> {}")
-       using some_in_eq apply auto[1]
+       using 1 apply blast
       by (simp add: configured_SecurityInvariant.defined_offending' valid_reqs_def)
-      
+    qed
+
 
 
 

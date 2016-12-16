@@ -2,7 +2,7 @@
 Verified synthesis and verification of network security policies.
 
 
-Get Isabelle/HOL 2016 at
+Get Isabelle/HOL 2016-1 at
 http://isabelle.in.tum.de/
 
 
