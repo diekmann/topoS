@@ -139,13 +139,13 @@ subsection {* Sets *}
     by auto
 
 
-  (* TODO: Groups_Big.comm_monoid_add_class.setsum.subset_diff*)
-  lemma setsum_subset_split: assumes P: "finite A" "B\<subseteq>A" shows T: "setsum f A = setsum f (A-B) + setsum f B" proof -
+  (* TODO: Groups_Big.comm_monoid_add_class.sum.subset_diff*)
+  lemma sum_subset_split: assumes P: "finite A" "B\<subseteq>A" shows T: "sum f A = sum f (A-B) + sum f B" proof -
     from P have 1: "A = (A-B) \<union> B" by auto
     have 2: "(A-B) \<inter> B = {}" by auto
     from P have 3: "finite B" by (blast intro: finite_subset)
     from P have 4: "finite (A-B)" by simp
-    from 2 3 4 setsum.union_disjoint have "setsum f ((A-B) \<union> B) = setsum f (A-B) + setsum f B" by blast
+    from 2 3 4 sum.union_disjoint have "sum f ((A-B) \<union> B) = sum f (A-B) + sum f B" by blast
     with 1 show ?thesis by simp
   qed
 
@@ -483,23 +483,23 @@ subsubsection {* Count *}
 subsubsection {* Union, difference and intersection *}
 
   lemma size_diff_se: "t \<in># S \<Longrightarrow> size S = size (S - {#t#}) + 1" proof (unfold size_multiset_overloaded_eq)
-                let ?SIZE = "setsum (count S) (set_mset S)"
+                let ?SIZE = "sum (count S) (set_mset S)"
                 assume A: "t \<in># S"
                 from A have SPLITPRE: "finite (set_mset S) & {t}\<subseteq>(set_mset S)" by auto
-                hence "?SIZE = setsum (count S) (set_mset S - {t}) + setsum (count S) {t}" by (blast dest: setsum_subset_split)
-                hence "?SIZE = setsum (count S) (set_mset S - {t}) + count (S) t" by auto
+                hence "?SIZE = sum (count S) (set_mset S - {t}) + sum (count S) {t}" by (blast dest: sum_subset_split)
+                hence "?SIZE = sum (count S) (set_mset S - {t}) + count (S) t" by auto
                 moreover with A have "count S t = count (S-{#t#}) t + 1" by auto
-                ultimately have D: "?SIZE = setsum (count S) (set_mset S - {t}) + count (S-{#t#}) t + 1" by (arith)
-                moreover have "setsum (count S) (set_mset S - {t}) = setsum (count (S-{#t#})) (set_mset S - {t})" proof -
+                ultimately have D: "?SIZE = sum (count S) (set_mset S - {t}) + count (S-{#t#}) t + 1" by (arith)
+                moreover have "sum (count S) (set_mset S - {t}) = sum (count (S-{#t#})) (set_mset S - {t})" proof -
                         have "ALL x:(set_mset S - {t}) . count S x = count (S-{#t#}) x" by (auto iff add: count_ne_remove)
                         thus ?thesis by simp
                 qed
-                ultimately have D: "?SIZE = setsum (count (S-{#t#})) (set_mset S - {t}) + count (S-{#t#}) t + 1" by (simp)
+                ultimately have D: "?SIZE = sum (count (S-{#t#})) (set_mset S - {t}) + count (S-{#t#}) t + 1" by (simp)
                 moreover
                 { assume CASE: "t \<notin># S - {#t#}"
                         from CASE have "set_mset S - {t} = set_mset (S - {#t#})"
                           by (auto simp add: in_diff_count split: if_splits)
-                        with CASE D have "?SIZE = setsum (count (S-{#t#})) (set_mset (S - {#t#})) + 1"
+                        with CASE D have "?SIZE = sum (count (S-{#t#})) (set_mset (S - {#t#})) + 1"
                           by (simp add: not_in_iff)
                 }
                 moreover
@@ -507,11 +507,11 @@ subsubsection {* Union, difference and intersection *}
                         from CASE have "t \<in># S" by (rule in_diffD)
                         with CASE have 1: "set_mset S = set_mset (S-{#t#})"
                           by (auto simp add: in_diff_count split: if_splits)
-                        moreover from D have "?SIZE = setsum (count (S-{#t#})) (set_mset S - {t}) + setsum (count (S-{#t#})) {t} + 1" by simp
-                        moreover from SPLITPRE setsum_subset_split have "setsum (count (S-{#t#})) (set_mset S) = setsum (count (S-{#t#})) (set_mset S - {t}) + setsum (count (S-{#t#})) {t}" by (blast)
-                        ultimately have "?SIZE = setsum (count (S-{#t#})) (set_mset (S-{#t#})) + 1" by simp
+                        moreover from D have "?SIZE = sum (count (S-{#t#})) (set_mset S - {t}) + sum (count (S-{#t#})) {t} + 1" by simp
+                        moreover from SPLITPRE sum_subset_split have "sum (count (S-{#t#})) (set_mset S) = sum (count (S-{#t#})) (set_mset S - {t}) + sum (count (S-{#t#})) {t}" by (blast)
+                        ultimately have "?SIZE = sum (count (S-{#t#})) (set_mset (S-{#t#})) + 1" by simp
                 }
-                ultimately show "?SIZE = setsum (count (S-{#t#})) (set_mset (S - {#t#})) + 1" by blast
+                ultimately show "?SIZE = sum (count (S-{#t#})) (set_mset (S - {#t#})) + 1" by blast
         qed
 
   (* TODO: Check whether this proof can be done simpler *)
@@ -733,8 +733,8 @@ subsubsection {* Pointwise ordering *}
     mset_le_add_mset_decr_left2
 
   lemma mset_le_subtract: "A\<le>#B \<Longrightarrow> A-C \<le># B-(C::'a multiset)"
-    apply (unfold subseteq_mset_def)
-    apply auto
+    apply (unfold subseteq_mset_def count_diff)
+    apply clarify
     apply (subgoal_tac "count A a \<le> count B a")
     apply arith
     apply simp
@@ -794,11 +794,6 @@ subsubsection {* Pointwise ordering *}
 
   (* TODO: Check which of these lemmas are already introduced by order-classes ! *)
 
-  lemma mset_le_single_conv1[simp]: "(add_mset a M \<le># {#b#}) = (M={#} \<and> a=b)"
-  proof (auto)
-    assume A: "add_mset a M \<le># {#b#}" thus "a=b" by (auto dest: mset_le_add_mset_decr_left2)
-    with A show "M={#}" by simp
-  qed
 
   lemma mset_le_single_cases[consumes 1, case_names empty singleton]: "\<lbrakk>M\<le>#{#a#}; M={#} \<Longrightarrow> P; M={#a#} \<Longrightarrow> P\<rbrakk> \<Longrightarrow> P"
     by (induct M) auto
@@ -820,10 +815,7 @@ subsubsection {* Image under function *}
 notation image_mset (infixr "`#" 90)
 
 lemma mset_map_split_orig: "!!M1 M2. \<lbrakk>f `# P = M1+M2; !!P1 P2. \<lbrakk>P=P1+P2; f `# P1 = M1; f `# P2 = M2\<rbrakk> \<Longrightarrow> Q \<rbrakk> \<Longrightarrow> Q"
-  apply (induct P)
-  apply fastforce
-  apply (force elim!: mset_un_single_un_cases simp add: union_ac) (* TODO: This proof need's quite long. Try to write a faster one. *)
-  done
+  by (induct P) (force elim!: mset_un_single_un_cases)+
 
 lemma mset_map_id: "\<lbrakk>!!x. f (g x) = x\<rbrakk> \<Longrightarrow> f `# g `# X = X"
   by (induct X) auto
@@ -2008,7 +2000,7 @@ where
 by auto
 termination
 by (relation "measure (\<lambda>(_, xs). length xs)")
-  (simp_all add: mergesort_by_rel_split_length not_less mod_div_equality')
+  (simp_all add: mergesort_by_rel_split_length not_less minus_div_mult_eq_mod [symmetric])
 
 declare mergesort_by_rel.simps [simp del]
 
