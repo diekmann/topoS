@@ -560,6 +560,81 @@ qed
       unfolding max_topo_def by presburger
   qed
 
+  lemma enf_all_valid_policy_subset_of_max:
+     "\<lbrakk> valid_reqs M; wf_graph G;
+        \<forall>m \<in> set M. \<exists>P. \<forall>G. c_sinvar m G = (\<forall>e \<in> edges G. P e);
+        nodes G' = nodes G;
+        wf_graph G';
+        all_security_requirements_fulfilled M G'\<rbrakk> \<Longrightarrow> 
+        edges G' \<subseteq> edges (generate_valid_topology M (fully_connected G))"
+    apply(cases "generate_valid_topology M (fully_connected G)", rename_tac V E, simp)
+    apply(cases "G'", rename_tac V' E')
+    apply(simp)
+    apply(subgoal_tac "nodes G = V")
+     prefer 2
+     apply (metis fully_connected_def generate_valid_topology_nodes graph.select_convs(1))
+    apply(simp)
+  proof(rule ccontr)
+    fix V E V' E'
+    assume a1: "valid_reqs M" and
+         a2: "wf_graph G" and
+         a3: "\<forall>m\<in>set M. \<exists>P. \<forall>G. c_sinvar m G = (\<forall>e\<in>edges G. P e)" and
+         a4: "V' = V" and
+         a5: "all_security_requirements_fulfilled M \<lparr>nodes = V, edges = E'\<rparr>" and
+         a6: "generate_valid_topology M (fully_connected G) = \<lparr>nodes = V, edges = E\<rparr>" and
+         a7: "G' = \<lparr>nodes = V, edges = E'\<rparr>" and
+         a8: "nodes G = V" and
+         a9: "\<not> E' \<subseteq> E" and
+         a10: "wf_graph \<lparr>nodes = V, edges = E'\<rparr>"
+    
+    from a2 a6 have wfG: "wf_graph \<lparr>nodes = V, edges = E\<rparr>"
+      by (metis fully_connected_wf wf_graph_generate_valid_topology)
+    
+    from generate_valid_topology_max_topo[OF a1 a2 a3]
+      have m1: "all_security_requirements_fulfilled M \<lparr>nodes = V, edges = E\<rparr>" and
+          m2: "(\<forall>x\<in>V \<times> V - E. case x of (v1, v2) \<Rightarrow> \<not> all_security_requirements_fulfilled M (add_edge v1 v2 \<lparr>nodes = V, edges = E\<rparr>))"
+       by(simp add: max_topo_def a6)+
+    
+    from wfG a10 have EE'subsets: "fst ` E \<subseteq> V \<and> snd ` E \<subseteq> V \<and> fst ` E' \<subseteq> V \<and> snd ` E' \<subseteq> V"
+      by(simp add: wf_graph_def)
+    hence EE'subsets': "E \<subseteq> V \<times> V \<and> E' \<subseteq> V \<times> V" by auto
+        
+    from m2 have m2': "\<forall>x\<in>V \<times> V - E. \<not> all_security_requirements_fulfilled M \<lparr>nodes = V, edges = insert x E\<rparr>"
+      apply(simp add: add_edge_def)
+      apply(rule ballI, rename_tac x)
+      apply(erule_tac x=x in ballE, simp_all)
+      apply(case_tac x, simp)
+      by (simp add: insert_absorb)
+    
+     show False
+       proof(cases "V = {}")
+         case True
+         with EE'subsets a10 have "E = {}" and "E' = {}"
+           by(simp add: wf_graph_def)+
+         with True a9 show ?thesis by simp
+       next
+         case False
+         with EE'subsets' a9 obtain x where x: "x \<in> E' \<and> x \<notin> E \<and> x \<in> V \<times> V"
+           by blast
+         from m2' x have "\<not> all_security_requirements_fulfilled M \<lparr>nodes = V, edges = insert x E\<rparr>"
+           by (simp)
+         
+         from a6 a8 x have x_offedning: "x \<in> (\<Union>m\<in>set M. \<Union>c_offending_flows m (fully_connected G))"
+           apply(simp add: generate_valid_topology_as_set delete_edges_simp2 fully_connected_def)
+           by blast
+  
+         from enf_not_fulfilled_if_in_offending[OF a1 a2 a3] x_offedning have
+           1: "\<not> all_security_requirements_fulfilled M \<lparr>nodes = V, edges = insert x myE\<rparr>" for myE by blast
+         
+         from x have insertxE': "insert x E' = E'" by blast
+         with a5 have
+           "all_security_requirements_fulfilled M \<lparr>nodes = V, edges = insert x E'\<rparr>" by simp
+         with insertxE' all_security_requirements_fulfilled_mono[OF a1 _ a10 a5] have 
+           2: "all_security_requirements_fulfilled M \<lparr>nodes = V, edges = insert x {}\<rparr>" by blast
+         from 1 2 show ?thesis by blast
+       qed
+  qed
+    
 
 
    subsection{* More Lemmata *}
@@ -657,8 +732,6 @@ qed
       qed
 
  
-
-
 
 
  (*ENF has uniquely defined offending flows*)
@@ -965,82 +1038,6 @@ qed
         done
      qed
 
- 
-lemma enf_all_valid_policy_subset_of_max:
-   "\<lbrakk> valid_reqs M; wf_graph G;
-      \<forall>m \<in> set M. \<exists>P. \<forall>G. c_sinvar m G = (\<forall>e \<in> edges G. P e);
-      nodes G' = nodes G;
-      wf_graph G';
-      all_security_requirements_fulfilled M G'\<rbrakk> \<Longrightarrow> 
-      edges G' \<subseteq> edges (generate_valid_topology M (fully_connected G))"
-  apply(cases "generate_valid_topology M (fully_connected G)", rename_tac V E, simp)
-  apply(cases "G'", rename_tac V' E')
-  apply(simp)
-  apply(subgoal_tac "nodes G = V")
-   prefer 2
-   apply (metis fully_connected_def generate_valid_topology_nodes graph.select_convs(1))
-  apply(simp)
-proof(rule ccontr)
-  fix V E V' E'
-  assume a1: "valid_reqs M" and
-       a2: "wf_graph G" and
-       a3: "\<forall>m\<in>set M. \<exists>P. \<forall>G. c_sinvar m G = (\<forall>e\<in>edges G. P e)" and
-       a4: "V' = V" and
-       a5: "all_security_requirements_fulfilled M \<lparr>nodes = V, edges = E'\<rparr>" and
-       a6: "generate_valid_topology M (fully_connected G) = \<lparr>nodes = V, edges = E\<rparr>" and
-       a7: "G' = \<lparr>nodes = V, edges = E'\<rparr>" and
-       a8: "nodes G = V" and
-       a9: "\<not> E' \<subseteq> E" and
-       a10: "wf_graph \<lparr>nodes = V, edges = E'\<rparr>"
-  
-   from a2 a6 have wfG: "wf_graph \<lparr>nodes = V, edges = E\<rparr>"
-     by (metis fully_connected_wf wf_graph_generate_valid_topology)
-  
-   from generate_valid_topology_max_topo[OF a1 a2 a3]
-   have m1: "all_security_requirements_fulfilled M \<lparr>nodes = V, edges = E\<rparr>" and
-        m2: "(\<forall>x\<in>V \<times> V - E. case x of (v1, v2) \<Rightarrow> \<not> all_security_requirements_fulfilled M (add_edge v1 v2 \<lparr>nodes = V, edges = E\<rparr>))"
-     by(simp add: max_topo_def a6)+
-  
-  from wfG a10 have EE'subsets: "fst ` E \<subseteq> V \<and> snd ` E \<subseteq> V \<and> fst ` E' \<subseteq> V \<and> snd ` E' \<subseteq> V"
-    by(simp add: wf_graph_def)
-  hence EE'subsets': "E \<subseteq> V \<times> V \<and> E' \<subseteq> V \<times> V" by auto
-      
-   from m2 have m2': "\<forall>x\<in>V \<times> V - E. \<not> all_security_requirements_fulfilled M \<lparr>nodes = V, edges = insert x E\<rparr>"
-     apply(simp add: add_edge_def)
-     apply(rule ballI, rename_tac x)
-     apply(erule_tac x=x in ballE, simp_all)
-     apply(case_tac x, simp)
-     by (simp add: insert_absorb)
-  
-   from a9 obtain Eadd E'add where "E \<union> Eadd = E' \<union> E'add" by blast
-   show False
-     proof(cases "V = {}")
-       case True
-       with EE'subsets a10 have "E = {}" and "E' = {}"
-         by(simp add: wf_graph_def)+
-       with True a9 show ?thesis by simp
-     next
-       case False
-       with EE'subsets' a9 obtain x where x: "x \<in> E' \<and> x \<notin> E \<and> x \<in> V \<times> V"
-         by blast
-       from m2' x have "\<not> all_security_requirements_fulfilled M \<lparr>nodes = V, edges = insert x E\<rparr>"
-         by (simp)
-       
-       from a6 a8 have x_offedning: "x\<in>(\<Union>m\<in>set M. \<Union>c_offending_flows m (fully_connected G))"
-         apply(simp add: generate_valid_topology_as_set delete_edges_simp2 fully_connected_def)
-         using x by blast
 
-       from enf_not_fulfilled_if_in_offending[OF a1 a2 a3] x_offedning have
-         1: "\<not> all_security_requirements_fulfilled M \<lparr>nodes = V, edges = insert x myE\<rparr>" for myE by blast
-       
-       from x have insertxE': "insert x E' = E'" by blast
-       with a5 have
-         "all_security_requirements_fulfilled M \<lparr>nodes = V, edges = insert x E'\<rparr>" by simp
-       with insertxE' all_security_requirements_fulfilled_mono[OF a1 _ a10 a5] have 
-         2: "all_security_requirements_fulfilled M \<lparr>nodes = V, edges = insert x {}\<rparr>" by blast
-       from 1 2 show ?thesis by blast
-     qed
-    qed
-    
 
 end
