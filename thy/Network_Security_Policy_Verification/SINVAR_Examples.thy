@@ -311,13 +311,13 @@ end
 
 context begin
   private definition "secgwext_host_attributes \<equiv> [
-                             ''hypervisor'' \<mapsto> SecurityGateway,
+                             ''hypervisor'' \<mapsto> PolEnforcePoint,
                              ''securevm1'' \<mapsto> DomainMember,
                              ''securevm2'' \<mapsto> DomainMember,
                              ''publicvm1'' \<mapsto> AccessibleMember,
                              ''publicvm2'' \<mapsto> AccessibleMember
                              ]"
-  private definition "SecGwExt_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_SecurityGatewayExtended \<lparr> 
+  private definition "SecGwExt_m \<equiv> new_configured_list_SecurityInvariant SINVAR_LIB_PolEnforcePointExtended \<lparr> 
           node_properties = secgwext_host_attributes
           \<rparr> ''secure hypervisor mediates accesses between secure VMs''"
   private definition "secgwext_hosts \<equiv> [''hypervisor'', ''securevm1'', ''securevm2'',

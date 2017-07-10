@@ -287,18 +287,18 @@ end
 text{*Sensor Gateway: 
   The sensors should not communicate among each other; all accesses must be mediated by the sensor sink. *}
 context begin
-  private definition "SecurityGateway_host_attributes \<equiv>
-                [''SensorSink'' \<mapsto> SecurityGateway,
+  private definition "PolEnforcePoint_host_attributes \<equiv>
+                [''SensorSink'' \<mapsto> PolEnforcePoint,
                  ''PresenceSensor'' \<mapsto> DomainMember,
                  ''Webcam'' \<mapsto> DomainMember,
                  ''TempSensor'' \<mapsto> DomainMember,
                  ''FireSensor'' \<mapsto> DomainMember
                  ]"
-  private lemma "dom SecurityGateway_host_attributes \<subseteq> set (nodesL policy)"
-    by(simp add: SecurityGateway_host_attributes_def policy_def)
-  definition "SecurityGateway_m \<equiv> new_configured_list_SecurityInvariant
-                                  SINVAR_LIB_SecurityGatewayExtended
-                                    \<lparr> node_properties = SecurityGateway_host_attributes \<rparr>
+  private lemma "dom PolEnforcePoint_host_attributes \<subseteq> set (nodesL policy)"
+    by(simp add: PolEnforcePoint_host_attributes_def policy_def)
+  definition "PolEnforcePoint_m \<equiv> new_configured_list_SecurityInvariant
+                                  SINVAR_LIB_PolEnforcePointExtended
+                                    \<lparr> node_properties = PolEnforcePoint_host_attributes \<rparr>
                                   ''sensor slaves''"
 end
 
@@ -403,7 +403,7 @@ text{*As discussed, this invariant is very strict and rather theoretical.
 
 definition "invariants \<equiv> [BLP_privacy_m, BLP_tradesecrets_m, BLP_employee_export_m,
                           ACL_bot2_m, Control_hierarchy_m,
-                          SecurityGateway_m, SinkRobots_m, Subnets_m, SubnetsInGW_m]"
+                          PolEnforcePoint_m, SinkRobots_m, Subnets_m, SubnetsInGW_m]"
 text{*We have excluded @{const NonInterference_m} because of its infeasible runtime.*}
 
 lemma "length invariants = 9" by eval
@@ -544,7 +544,7 @@ visualize_edges @{context} @{term "edgesL (make_policy invariants (nodesL policy
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
      @{term "[e \<leftarrow> edgesL (make_policy [BLP_privacy_m, BLP_tradesecrets_m, BLP_employee_export_m,
                            ACL_bot2_m, Control_hierarchy_m,
-                           SecurityGateway_m, SinkRobots_m, (*Subnets_m, *)SubnetsInGW_m]  (nodesL policy)).
+                           PolEnforcePoint_m, SinkRobots_m, (*Subnets_m, *)SubnetsInGW_m]  (nodesL policy)).
                 e \<notin> set (edgesL (make_policy invariants (nodesL policy)))]"})] ""; 
 *}
 
@@ -687,7 +687,7 @@ The result visualized is below. *}
 lemma "generate_valid_stateful_policy_IFSACS policy
       [BLP_privacy_m, BLP_employee_export_m,
        ACL_bot2_m, Control_hierarchy_m, 
-       SecurityGateway_m,  Subnets_m, SubnetsInGW_m] =
+       PolEnforcePoint_m,  Subnets_m, SubnetsInGW_m] =
  \<lparr>hostsL = nodesL policy,
     flows_fixL = edgesL policy,
     flows_stateL =
@@ -712,7 +712,7 @@ MissionControl1 can exfiltrate information from robot 2, once it establishes a s
 text{*Without the two invariants, the security goals are way too permissive!*}
 lemma "set [e \<leftarrow> edgesL (make_policy [BLP_privacy_m, BLP_employee_export_m,
        ACL_bot2_m, Control_hierarchy_m, 
-       SecurityGateway_m,  Subnets_m, SubnetsInGW_m] (nodesL policy)). e \<notin> set (edgesL policy)] =
+       PolEnforcePoint_m,  Subnets_m, SubnetsInGW_m] (nodesL policy)). e \<notin> set (edgesL policy)] =
         set [(v,v). v \<leftarrow> (nodesL policy)] \<union>
         set [(''SensorSink'', ''Webcam''),
              (''TempSensor'', ''INET''),
@@ -736,11 +736,11 @@ lemma "set [e \<leftarrow> edgesL (make_policy [BLP_privacy_m, BLP_employee_expo
 ML_val{*
 visualize_edges @{context} @{term "flows_fixL (generate_valid_stateful_policy_IFSACS policy [BLP_privacy_m,  BLP_employee_export_m,
                           ACL_bot2_m, Control_hierarchy_m, 
-                          SecurityGateway_m,  Subnets_m, SubnetsInGW_m])"} 
+                          PolEnforcePoint_m,  Subnets_m, SubnetsInGW_m])"} 
     [("edge [dir=\"arrow\", style=dashed, color=\"#FF8822\", constraint=false]",
       @{term "flows_stateL (generate_valid_stateful_policy_IFSACS policy [BLP_privacy_m,  BLP_employee_export_m,
                           ACL_bot2_m, Control_hierarchy_m, 
-                          SecurityGateway_m,  Subnets_m, SubnetsInGW_m])"})] "";
+                          PolEnforcePoint_m,  Subnets_m, SubnetsInGW_m])"})] "";
 *}
 
 
@@ -776,7 +776,7 @@ Therefore, all those devices are configured to be in the same @{const SinkPool}.
 
 definition "invariants_tuned \<equiv> [BLP_privacy_m, BLP_employee_export_m,
                ACL_bot2_m, Control_hierarchy_m, 
-               SecurityGateway_m, Subnets_m, SubnetsInGW_m,
+               PolEnforcePoint_m, Subnets_m, SubnetsInGW_m,
                new_configured_list_SecurityInvariant SINVAR_LIB_Sink
                  \<lparr> node_properties = [''MissionControl1'' \<mapsto> SinkPool,
                                       ''MissionControl2'' \<mapsto> SinkPool,
