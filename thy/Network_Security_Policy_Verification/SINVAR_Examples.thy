@@ -335,14 +335,14 @@ context begin
 
   ML_val{*
   visualize_graph_header @{context} @{term "[SecGwExt_m, new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr> 
-        node_properties = [''hypervisor'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>,
-                           ''securevm1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
-                           ''securevm2'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>
+        node_properties = [''hypervisor'' \<mapsto> \<lparr> security_level = 0, trusted = True \<rparr>,
+                           ''securevm1'' \<mapsto> \<lparr> security_level = 1, trusted = False \<rparr>,
+                           ''securevm2'' \<mapsto> \<lparr> security_level = 1, trusted = False \<rparr>
                            ] \<rparr> ''secure vms are confidential'']"}
     @{term "make_policy [SecGwExt_m, new_configured_list_SecurityInvariant SINVAR_LIB_BLPtrusted \<lparr> 
-        node_properties = [''hypervisor'' \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>,
-                           ''securevm1'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
-                           ''securevm2'' \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>
+        node_properties = [''hypervisor'' \<mapsto> \<lparr> security_level = 0, trusted = True \<rparr>,
+                           ''securevm1'' \<mapsto> \<lparr> security_level = 1, trusted = False \<rparr>,
+                           ''securevm2'' \<mapsto> \<lparr> security_level = 1, trusted = False \<rparr>
                            ] \<rparr> ''secure vms are confidential''] secgwext_hosts"}
     @{term "secgwext_host_attributes"};
   *}

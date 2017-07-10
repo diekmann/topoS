@@ -23,10 +23,10 @@ subsection {* Network Graph and Security Requirements *}
 
 
   definition NMParams_blptrusted_1 :: "(nat, SINVAR_BLPtrusted.node_config) TopoS_Params" where
-  "NMParams_blptrusted_1 \<equiv> \<lparr> node_properties = [1 \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>, 
-                                     2 \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>, 
-                                     3 \<mapsto> \<lparr> privacy_level = 1, trusted = False \<rparr>,
-                                     8 \<mapsto> \<lparr> privacy_level = 0, trusted = True \<rparr>] \<rparr>"
+  "NMParams_blptrusted_1 \<equiv> \<lparr> node_properties = [1 \<mapsto> \<lparr> security_level = 1, trusted = False \<rparr>, 
+                                     2 \<mapsto> \<lparr> security_level = 1, trusted = False \<rparr>, 
+                                     3 \<mapsto> \<lparr> security_level = 1, trusted = False \<rparr>,
+                                     8 \<mapsto> \<lparr> security_level = 0, trusted = True \<rparr>] \<rparr>"
 
   text{*Both security requirements fulfilled?*}
   value "SecurityGateway_eval example_net_secgw NMParams_secgw_1"
